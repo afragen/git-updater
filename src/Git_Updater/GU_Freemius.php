@@ -31,13 +31,14 @@ if ( ! defined( 'WPINC' ) ) {
 class GU_Freemius {
 	use GU_Trait;
 
+	// phpcs:disable Squiz.Commenting.FunctionComment.InvalidReturnVoid
 	/**
 	 * Freemius integration.
 	 *
-	 * @return array|void
+	 * @return void
 	 */
 	public function init() {
-		if ( ! function_exists( 'gu_fs' ) ) {
+		if ( ! function_exists( '\Fragen\Git_Updater\gu_fs' ) ) {
 
 			/**
 			 * Create a helper function for easy SDK access.
@@ -114,6 +115,7 @@ class GU_Freemius {
 			define( 'FS__RESOLVE_CLONE_AS', 'long_term_duplicate' );
 		}
 	}
+	// phpcs:enable Squiz.Commenting.FunctionComment.InvalidReturnVoid
 
 	/**
 	 * Add custom plugin icon to update notice.
@@ -143,9 +145,9 @@ class GU_Freemius {
 	/**
 	 * Set extensions default to true.
 	 *
-	 * @param array $permissions Array of opt-in permissions.
+	 * @param array<int, array<string, mixed>> $permissions Array of opt-in permissions.
 	 *
-	 * @return array
+	 * @return array<int, array<string, mixed>>
 	 */
 	public function permission_list( $permissions ) {
 		foreach ( $permissions as $key => $permission ) {

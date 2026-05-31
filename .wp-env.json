@@ -1,0 +1,8 @@
+{
+	"plugins": [ ".", "./tests/fixtures/plugins/test-gu-plugin" ],
+	"themes": [ "./tests/fixtures/themes/test-gu-theme" ],
+	"phpVersion": "8.2",
+	"lifecycleScripts": {
+		"afterStart": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/git-updater sh bin/install-xdebug.sh"
+	}
+}

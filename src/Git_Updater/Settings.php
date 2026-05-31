@@ -18,7 +18,7 @@ use stdClass;
  * Exit if called directly.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	die; // @codeCoverageIgnore
 }
 
 /**
@@ -34,7 +34,7 @@ class Settings {
 	/**
 	 * Holds boolean on whether or not the repo requires authentication.
 	 *
-	 * @var array
+	 * @var array<string, bool>
 	 */
 	public static $auth_required = [
 		'github'            => true,
@@ -45,14 +45,14 @@ class Settings {
 	/**
 	 * Holds site options.
 	 *
-	 * @var array $options
+	 * @var array<string, mixed> $options
 	 */
 	private static $options;
 
 	/**
 	 * Holds git hosts.
 	 *
-	 * @var array
+	 * @var array<string, string>
 	 */
 	private static $git_hosts = [
 		'github'    => 'GitHub',
@@ -74,13 +74,15 @@ class Settings {
 
 	/**
 	 * Check for cache refresh.
+	 *
+	 * @return void
 	 */
 	protected function refresh_caches() {
 		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
 			return;
 		}
 
-		if ( isset( $_POST['gu_refresh_cache'] ) && ! ( $this instanceof Messages ) ) {
+		if ( isset( $_POST['gu_refresh_cache'] ) ) {
 			$this->delete_all_cached_data();
 			set_site_transient( 'gu_refresh_cache', true, 90 );
 		}
@@ -88,6 +90,8 @@ class Settings {
 
 	/**
 	 * Let's get going.
+	 *
+	 * @return void
 	 */
 	public function run() {
 		$this->load_hooks();
@@ -95,6 +99,8 @@ class Settings {
 
 	/**
 	 * Load relevant action/filter hooks.
+	 *
+	 * @return void
 	 */
 	protected function load_hooks() {
 		if ( ! (bool) apply_filters( 'gu_hide_settings', false ) ) {
@@ -105,7 +111,7 @@ class Settings {
 
 		add_filter(
 			is_multisite()
-			? 'network_admin_plugin_action_links_' . $this->gu_plugin_name()
+			? 'network_admin_plugin_action_links_' . $this->gu_plugin_name() // @codeCoverageIgnore
 			: 'plugin_action_links_' . $this->gu_plugin_name(),
 			[ $this, 'plugin_action_links' ]
 		);
@@ -133,7 +139,7 @@ class Settings {
 		 * Filters authentication required array.
 		 *
 		 * @since 10.0.0
-		 * @param array static::$auth_required Array of authentication requirements.
+		 * @param array<string, mixed> $auth_required Array of authentication requirements.
 		 */
 		static::$auth_required = apply_filters( 'gu_settings_auth_required', static::$auth_required );
 	}
@@ -143,7 +149,7 @@ class Settings {
 	 * By defining in a method, strings can be translated.
 	 *
 	 * @access private
-	 * @return array
+	 * @return array<string, string>
 	 */
 	private function settings_tabs() {
 		$tabs = [ 'git_updater_settings' => esc_html__( 'Settings', 'git-updater' ) ];
@@ -163,7 +169,7 @@ class Settings {
 	 * Set up the Settings Sub-tabs.
 	 *
 	 * @access private
-	 * @return array
+	 * @return array<string, string>
 	 */
 	private function settings_sub_tabs() {
 		$subtabs    = [ 'git_updater' => esc_html__( 'Git Updater', 'git-updater' ) ];
@@ -177,8 +183,6 @@ class Settings {
 		 * @since 10.0.0
 		 *
 		 * @param array $gu_subtabs Array of added subtabs.
-		 *
-		 * @return array $subtabs Array of subtabs.
 		 */
 		$gu_subtabs = apply_filters( 'gu_add_settings_subtabs', $gu_subtabs );
 
@@ -201,9 +205,9 @@ class Settings {
 	 */
 	private function load_api_subtabs() {
 		$show_tabs = [ 'github' => 'GitHub' ];
-		foreach ( array_keys( static::$git_hosts ) as $git ) {
+		foreach ( array_keys( self::$git_hosts ) as $git ) {
 			if ( is_plugin_active( "git-updater-{$git}/git-updater-{$git}.php" ) ) {
-				$show_tabs[ $git ] = static::$git_hosts[ $git ];
+				$show_tabs[ $git ] = self::$git_hosts[ $git ];
 			}
 		}
 		add_filter(
@@ -223,6 +227,8 @@ class Settings {
 
 	/**
 	 * Add options page.
+	 *
+	 * @return void
 	 */
 	public function add_plugin_page() {
 		$parent     = is_multisite() ? 'settings.php' : 'options-general.php';
@@ -245,6 +251,7 @@ class Settings {
 	 * Provides the heading for the settings page.
 	 *
 	 * @access private
+	 * @return void
 	 */
 	private function options_tabs() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -261,6 +268,7 @@ class Settings {
 	 * Render the settings sub-tabs.
 	 *
 	 * @access private
+	 * @return void
 	 */
 	private function options_sub_tabs() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -275,6 +283,8 @@ class Settings {
 
 	/**
 	 * Options page callback.
+	 *
+	 * @return void
 	 */
 	public function create_admin_page() {
 		if ( isset( $_GET['_wpnonce'] ) && ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'gu_settings' ) ) {
@@ -334,6 +344,8 @@ class Settings {
 
 	/**
 	 * Display appropriate notice for Settings page actions.
+	 *
+	 * @return void
 	 */
 	private function admin_page_notices() {
 		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'gu_settings' ) ) {
@@ -346,7 +358,7 @@ class Settings {
 			echo '<div class="updated"><p>';
 		}
 		if ( ( isset( $_GET['updated'] ) && '1' === $_GET['updated'] ) && is_multisite() ) {
-			esc_html_e( 'Settings saved.', 'git-updater' );
+			esc_html_e( 'Settings saved.', 'git-updater' ); // @codeCoverageIgnore
 		} elseif ( isset( $_GET['refresh_transients'] ) && '1' === $_GET['refresh_transients'] ) {
 			esc_html_e( 'Cache refreshed.', 'git-updater' );
 		}
@@ -358,9 +370,11 @@ class Settings {
 	/**
 	 * Register and add settings.
 	 * Check to see if it's a private repo.
+	 *
+	 * @return void
 	 */
 	public function page_init() {
-		if ( static::is_doing_ajax() ) {
+		if ( wp_doing_ajax() ) {
 			return;
 		}
 
@@ -386,7 +400,7 @@ class Settings {
 
 		add_settings_field(
 			'branch_switch',
-			null,
+			'',
 			[ $this, 'token_callback_checkbox' ],
 			'git_updater_install_settings',
 			'git_updater_settings',
@@ -398,7 +412,7 @@ class Settings {
 
 		add_settings_field(
 			'bypass_background_processing',
-			null,
+			'',
 			[ $this, 'token_callback_checkbox' ],
 			'git_updater_install_settings',
 			'git_updater_settings',
@@ -420,6 +434,8 @@ class Settings {
 
 	/**
 	 * Create and return settings fields for private repositories.
+	 *
+	 * @return void
 	 */
 	public function gu_tokens() {
 		$gu_options_keys = [];
@@ -451,9 +467,9 @@ class Settings {
 			 *
 			 * @since 10.0.0
 			 *
-			 * @param array
-			 * @param stdClass $token Repository object.
-			 * @param string $token->git Name of git host, eg. GitHub.
+			 * @param array    $settings_fields Repo settings fields.
+			 * @param stdClass $token           Repository object.
+			 * @param string   $git             Name of git host, eg. GitHub.
 			 */
 			$repo_setting_field = apply_filters( 'gu_add_repo_setting_field', [], $token, $token->git );
 
@@ -464,7 +480,7 @@ class Settings {
 			$setting_field             = array_merge( $setting_field, $repo_setting_field );
 			$setting_field['callback'] = $token->slug;
 
-			$title = 'token_callback_checkbox' !== $setting_field['callback_method'][1] ? $setting_field['title'] : null;
+			$title = 'token_callback_checkbox' !== $setting_field['callback_method'][1] ? $setting_field['title'] : '';
 
 			add_settings_field(
 				$setting_field['id'],
@@ -491,8 +507,9 @@ class Settings {
 	/**
 	 * Check current saved options and unset if repos not present.
 	 *
-	 * @param array $gu_options_keys Array of options keys.
-	 * @param array $gu_tokens       Array of Git Updater repos.
+	 * @param array<string, mixed>    $gu_options_keys Array of options keys.
+	 * @param array<string, stdClass> $gu_tokens       Array of Git Updater repos.
+	 * @return void
 	 */
 	public function unset_stale_options( $gu_options_keys, $gu_tokens ) {
 		self::$options   = $this->get_class_vars( 'Base', 'options' );
@@ -545,6 +562,8 @@ class Settings {
 
 	/**
 	 * Print the Git Updater Settings text.
+	 *
+	 * @return void
 	 */
 	public function print_section_gu_settings() {
 		$this->display_dot_org_overrides();
@@ -599,7 +618,8 @@ class Settings {
 	/**
 	 * Get the settings option array and print one of its values.
 	 *
-	 * @param array $args Callback args.
+	 * @param array<string, mixed> $args Callback args.
+	 * @return void
 	 */
 	public function token_callback_text( $args ) {
 		$options     = $this->get_class_vars( 'Base', 'options' );
@@ -616,7 +636,8 @@ class Settings {
 	/**
 	 * Get the settings option array and print one of its values.
 	 *
-	 * @param array $args Callback args.
+	 * @param array<string, mixed> $args Callback args.
+	 * @return void
 	 */
 	public function token_callback_checkbox( $args ) {
 		$checked = self::$options[ $args['id'] ] ?? null;
@@ -633,6 +654,7 @@ class Settings {
 	 *
 	 * @link http://wordpress.stackexchange.com/questions/64968/settings-api-in-multisite-missing-update-message
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
+	 * @return void
 	 */
 	public function update_settings() {
 		if ( isset( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater-options' ) ) {
@@ -682,6 +704,8 @@ class Settings {
 
 	/**
 	 * Redirect to correct Settings tab on Save.
+	 *
+	 * @return void
 	 */
 	protected function redirect_on_save() {
 		$update             = false;
@@ -726,7 +750,7 @@ class Settings {
 			);
 			$location = add_query_arg( '_wpnonce', wp_create_nonce( 'gu_settings' ), $location );
 			wp_safe_redirect( $location );
-			exit;
+			exit; // @codeCoverageIgnore
 		}
 	}
 
@@ -754,9 +778,9 @@ class Settings {
 	 *
 	 * @link http://codex.wordpress.org/Plugin_API/Filter_Reference/plugin_action_links_(plugin_file_name)
 	 *
-	 * @param array $links Array of plugin action links.
+	 * @param array<int, string> $links Array of plugin action links.
 	 *
-	 * @return array
+	 * @return array<int, string>
 	 */
 	public function plugin_action_links( $links ) {
 		$settings_page = is_multisite() ? 'settings.php' : 'options-general.php';
@@ -769,7 +793,8 @@ class Settings {
 	 * Create settings sections that are hidden.
 	 * Required to preserve subtab settings during saves.
 	 *
-	 * @param array $subtab Subtab to display.
+	 * @param array<string, string>|string $subtab Subtab to display.
+	 * @return void
 	 */
 	private function add_hidden_settings_sections( $subtab = [] ) {
 		$subtabs   = array_keys( $this->settings_sub_tabs() );
@@ -792,6 +817,7 @@ class Settings {
 	 * Places a WordPress dashicon after the repo name if it's in dot org.
 	 *
 	 * @param string $git Name of API, eg 'github'.
+	 * @return void
 	 */
 	private function display_gu_repos( $git ) {
 		$lock_title    = esc_html__( 'This is a private repository.', 'git-updater' );

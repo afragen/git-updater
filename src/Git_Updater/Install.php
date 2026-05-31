@@ -22,12 +22,13 @@ use Plugin_Installer_Skin;
 use Plugin_Upgrader;
 use Theme_Installer_Skin;
 use Theme_Upgrader;
+use WP_Upgrader_Skin;
 
 /*
  * Exit if called directly.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	die; // @codeCoverageIgnore
 }
 
 /**
@@ -42,7 +43,7 @@ class Install {
 	/**
 	 * Class options.
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	protected static $install = [];
 
@@ -105,6 +106,8 @@ class Install {
 
 	/**
 	 * Adds Install tabs to Settings page.
+	 *
+	 * @return void
 	 */
 	public function add_settings_tabs() {
 		$install_tabs = [];
@@ -134,6 +137,7 @@ class Install {
 	 * @uses 'gu_add_admin_page' action hook
 	 *
 	 * @param string $tab Name of tab.
+	 * @return void
 	 */
 	public function add_admin_page( $tab ) {
 		if ( 'git_updater_install_plugin' === $tab ) {
@@ -149,14 +153,14 @@ class Install {
 	/**
 	 * Install remote plugin or theme.
 	 *
-	 * @param string $type   plugin|theme.
-	 * @param array  $config Array of data.
+	 * @param string                    $type   plugin|theme.
+	 * @param array<string, mixed>|null $config Array of data.
 	 *
 	 * @return bool
 	 */
 	public function install( $type, $config = null ) {
 		if ( self::is_wp_cli() ) {
-			$this->set_install_post_data( $config );
+			$this->set_install_post_data( $config ); // @codeCoverageIgnore
 		}
 
 		if ( isset( $_POST['option_page'] ) && 'git_updater_install' === $_POST['option_page'] ) {
@@ -193,7 +197,7 @@ class Install {
 			 * Filter to create git host specific endpoint.
 			 *
 			 * @since 10.0.0
-			 * @param array self::$install Array of installation data.
+			 * @param array<string, mixed> $install Array of installation data.
 			 * @param array $headers Array of repo header data.
 			 */
 			self::$install = apply_filters( 'gu_install_remote_install', self::$install, $headers );
@@ -228,7 +232,7 @@ class Install {
 	/**
 	 * Save options set during installation.
 	 *
-	 * @param  array $install_options Array of options from remote install process.
+	 * @param  array<string, mixed> $install_options Array of options from remote install process.
 	 * @return void
 	 */
 	private function save_options_on_install( $install_options ) {
@@ -239,9 +243,11 @@ class Install {
 	/**
 	 * Set remote install data into $_POST.
 	 *
-	 * @param array $config Data for a remote install.
+	 * @param array<string, mixed>|null $config Data for a remote install.
+	 * @return void
 	 */
 	private function set_install_post_data( $config ) {
+		// @codeCoverageIgnoreStart
 		if ( ! isset( $config['uri'] ) ) {
 			return;
 		}
@@ -262,6 +268,7 @@ class Install {
 		if ( 'zipfile' === $config['git'] ) {
 			$_POST['zipfile_slug'] = $config['slug'];
 		}
+		// @codeCoverageIgnoreEnd
 	}
 
 	/**
@@ -280,9 +287,22 @@ class Install {
 			$plugin = self::$install['repo'];
 
 			// Create a new instance of Plugin_Upgrader.
-			$skin     = static::is_wp_cli()
-				? new CLI_Plugin_Installer_Skin()
+			$skin = static::is_wp_cli()
+				? new CLI_Plugin_Installer_Skin() // @codeCoverageIgnore
 				: new Plugin_Installer_Skin( compact( 'type', 'url', 'nonce', 'plugin' ) );
+
+			/**
+			 * Filters the upgrader skin used during a Git Updater install.
+			 *
+			 * Allows replacing the default skin with a custom implementation.
+			 * Primarily useful in test environments to suppress HTML output.
+			 *
+			 * @since 12.24.2
+			 *
+			 * @param WP_Upgrader_Skin $skin The skin instance.
+			 * @param string           $type Installer type: 'plugin' or 'theme'.
+			 */
+			$skin     = apply_filters( 'gu_get_upgrader_skin', $skin, $type );
 			$upgrader = new Plugin_Upgrader( $skin );
 		}
 
@@ -290,9 +310,12 @@ class Install {
 			$theme = self::$install['repo'];
 
 			// Create a new instance of Theme_Upgrader.
-			$skin     = static::is_wp_cli()
-				? new CLI_Theme_Installer_Skin()
+			$skin = static::is_wp_cli()
+				? new CLI_Theme_Installer_Skin() // @codeCoverageIgnore
 				: new Theme_Installer_Skin( compact( 'type', 'url', 'nonce', 'theme' ) );
+
+			/** This filter is documented in src/Git_Updater/Install.php */
+			$skin     = apply_filters( 'gu_get_upgrader_skin', $skin, $type );
 			$upgrader = new Theme_Upgrader( $skin );
 			add_filter(
 				'install_theme_complete_actions',
@@ -312,6 +335,7 @@ class Install {
 	 * Create Install Plugin or Install Theme page.
 	 *
 	 * @param string $type (plugin|theme).
+	 * @return void
 	 */
 	public function create_form( $type ) {
 		// Bail if installing.
@@ -339,6 +363,7 @@ class Install {
 	 * Add settings sections.
 	 *
 	 * @param string $type plugin|theme.
+	 * @return void
 	 */
 	public function register_settings( $type ) {
 		$repo_type = null;
@@ -361,7 +386,7 @@ class Install {
 			$type,
 			/* translators: variable is 'Plugin' or 'Theme' */
 			sprintf( esc_html__( 'Git Updater Install %s', 'git-updater' ), $repo_type ),
-			[],
+			'__return_false',
 			'git_updater_install_' . $type
 		);
 
@@ -412,6 +437,8 @@ class Install {
 
 	/**
 	 * Repo setting.
+	 *
+	 * @return void
 	 */
 	public function get_repo() {
 		?>
@@ -427,6 +454,8 @@ class Install {
 
 	/**
 	 * Branch setting.
+	 *
+	 * @return void
 	 */
 	public function branch() {
 		?>
@@ -442,6 +471,8 @@ class Install {
 
 	/**
 	 * API setting.
+	 *
+	 * @return void
 	 */
 	public function install_api() {
 		?>
@@ -462,9 +493,9 @@ class Install {
 	/**
 	 * Fix activation links after theme installation, no method to get proper theme name.
 	 *
-	 * @param array $install_actions Array of theme actions.
+	 * @param array<string, mixed> $install_actions Array of theme actions.
 	 *
-	 * @return mixed
+	 * @return array<string, mixed>
 	 */
 	public function install_theme_complete_actions( $install_actions ) {
 		if ( isset( $install_actions['preview'] ) ) {

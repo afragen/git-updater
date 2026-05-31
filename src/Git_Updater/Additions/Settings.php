@@ -17,14 +17,14 @@ class Settings {
 	/**
 	 * Holds the values for additions settings.
 	 *
-	 * @var array $option_remote
+	 * @var array<int, array<string, mixed>> $options_additions
 	 */
 	public static $options_additions;
 
 	/**
 	 * Supported types.
 	 *
-	 * @var array $addition_types
+	 * @var array<int, string> $addition_types
 	 */
 	public static $addition_types = [
 		'github_plugin',
@@ -40,6 +40,8 @@ class Settings {
 
 	/**
 	 * Load site options.
+	 *
+	 * @return void
 	 */
 	private function load_options() {
 		self::$options_additions = get_site_option( 'git_updater_additions', [] );
@@ -47,6 +49,8 @@ class Settings {
 
 	/**
 	 * Load needed action/filter hooks.
+	 *
+	 * @return void
 	 */
 	public function load_hooks() {
 		add_action(
@@ -62,7 +66,7 @@ class Settings {
 			}
 		);
 
-		add_filter(
+		add_action(
 			'gu_add_admin_page',
 			function ( $tab, $action ) {
 				$this->add_admin_page( $tab, $action );
@@ -78,7 +82,9 @@ class Settings {
 	 * @uses 'gu_update_settings' action hook
 	 * @uses 'gu_save_redirect' filter hook
 	 *
-	 * @param array $post_data $_POST data.
+	 * @param array<string, mixed> $post_data $_POST data.
+	 *
+	 * @return void
 	 */
 	public function save_settings( $post_data ) {
 		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater_additions-options' ) ) {
@@ -123,6 +129,8 @@ class Settings {
 
 	/**
 	 * Adds Additions tab to Settings page.
+	 *
+	 * @return void
 	 */
 	public function add_settings_tabs() {
 		$install_tabs = [ 'git_updater_additions' => esc_html__( 'Additions', 'git-updater' ) ];
@@ -143,6 +151,8 @@ class Settings {
 	 *
 	 * @param string $tab    Tab name.
 	 * @param string $action Form action.
+	 *
+	 * @return void
 	 */
 	public function add_admin_page( $tab, $action ) {
 		$this->additions_page_init();
@@ -171,12 +181,13 @@ class Settings {
 
 	/**
 	 * Settings for Additions.
+	 *
+	 * @return void
 	 */
 	public function additions_page_init() {
 		register_setting(
 			'git_updater_additions',
-			'git_updater_additions',
-			null
+			'git_updater_additions'
 		);
 
 		add_settings_section(
@@ -269,9 +280,9 @@ class Settings {
 	/**
 	 * Sanitize each setting field as needed.
 	 *
-	 * @param array $input Contains all settings fields as array keys.
+	 * @param array<string, mixed> $input Contains all settings fields as array keys.
 	 *
-	 * @return array
+	 * @return array<int, array<string, mixed>>
 	 */
 	public function sanitize( $input ) {
 		$new_input = [];
@@ -289,6 +300,8 @@ class Settings {
 
 	/**
 	 * Print the Remote Management text.
+	 *
+	 * @return void
 	 */
 	public function print_section_additions() {
 		echo '<p>';
@@ -299,7 +312,7 @@ class Settings {
 	/**
 	 * Field callback.
 	 *
-	 * @param array $args Data passed from add_settings_field().
+	 * @param array<string, mixed> $args Data passed from add_settings_field().
 	 *
 	 * @return void
 	 */
@@ -319,7 +332,7 @@ class Settings {
 	/**
 	 * Dropdown callback.
 	 *
-	 * @param arra $args Data passed from add_settings_field().
+	 * @param array<string, mixed> $args Data passed from add_settings_field().
 	 *
 	 * @return void
 	 */
@@ -348,7 +361,9 @@ class Settings {
 	/**
 	 * Get the settings option array and print one of its values.
 	 *
-	 * @param array $args Callback args.
+	 * @param array<string, mixed> $args Callback args.
+	 *
+	 * @return void
 	 */
 	public function callback_checkbox( $args ) {
 		$checked = self::$options_additions[ $args['id'] ] ?? null;

@@ -1,0 +1,57 @@
+=== My Awesome Plugin ===
+Contributors: jsmith, jane-doe
+Tags: widgets, api, rest
+Requires at least: 6.0
+Tested up to: 6.5
+Requires PHP: 8.1
+Stable tag: 1.2.3
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Donate link: https://example.com/donate
+
+A concise description of what this plugin does.
+
+== Description ==
+
+This plugin does amazing things with the WordPress REST API.
+
+It supports:
+
+* Feature one
+* Feature two
+* Feature three
+
+== Installation ==
+
+1. Upload the plugin files to `/wp-content/plugins/my-awesome-plugin`.
+2. Activate the plugin through the **Plugins** screen in WordPress.
+3. Configure via **Settings → My Awesome Plugin**.
+
+== Frequently Asked Questions ==
+
+= Does it work with multisite? =
+
+Yes, it is fully multisite-compatible.
+
+= What PHP version is required? =
+
+PHP 8.1 or higher is required.
+
+== Changelog ==
+
+= 1.2.3 =
+* Fixed a bug with REST API authentication.
+* Improved performance.
+
+= 1.0.0 =
+* Initial release.
+
+== Upgrade Notice ==
+
+= 1.2.3 =
+Minor bug fixes — safe to upgrade.
+
+== Screenshots ==
+
+1. The settings page.
+2. The widget in action.

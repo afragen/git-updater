@@ -14,6 +14,7 @@ use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Branch;
 use stdClass;
+use WP_Error;
 
 /*
  * Exit if called directly.
@@ -44,21 +45,21 @@ class Plugin {
 	/**
 	 * Hold config array.
 	 *
-	 * @var array
+	 * @var array<string, stdClass>
 	 */
 	private $config;
 
 	/**
 	 * Holds extra headers.
 	 *
-	 * @var array
+	 * @var array<string, string>
 	 */
 	private static $extra_headers;
 
 	/**
 	 * Holds options.
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	private static $options;
 
@@ -81,15 +82,17 @@ class Plugin {
 		// Get details of installed git sourced plugins.
 		$this->config = $this->get_plugin_meta();
 
+		// @codeCoverageIgnoreStart
 		if ( null === $this->config ) {
 			return;
 		}
+		// @codeCoverageIgnoreEnd
 	}
 
 	/**
 	 * Returns an array of configurations for the known plugins.
 	 *
-	 * @return array
+	 * @return array<string, stdClass>
 	 */
 	public function get_plugin_configs() {
 		return $this->config;
@@ -98,7 +101,7 @@ class Plugin {
 	/**
 	 * Get details of Git-sourced plugins from those that are installed.
 	 *
-	 * @return array Indexed array of associative arrays of plugin details.
+	 * @return array<string, stdClass> Indexed array of associative arrays of plugin details.
 	 */
 	protected function get_plugin_meta() {
 		// Ensure get_plugins() function is available.
@@ -106,6 +109,7 @@ class Plugin {
 
 		$plugins     = get_plugins();
 		$git_plugins = [];
+		$paths       = [];
 
 		array_map(
 			function ( $plugin ) use ( &$paths ) {
@@ -116,9 +120,9 @@ class Plugin {
 			array_keys( $plugins )
 		);
 
-		$repos_arr = [];
+		$all_headers = $this->get_headers( 'plugin' );
+		$repos_arr   = [];
 		foreach ( $paths as $slug => $path ) {
-			$all_headers        = $this->get_headers( 'plugin' );
 			$repos_arr[ $slug ] = get_file_data( $path, $all_headers, 'plugin' );
 		}
 
@@ -127,7 +131,7 @@ class Plugin {
 			function ( $repo ) {
 				foreach ( $repo as $key => $value ) {
 					if ( in_array( $key, array_keys( self::$extra_headers ), true ) && false !== stripos( $key, 'plugin' ) && ! empty( $value ) ) {
-						return $this->get_file_headers( $repo, 'plugin' );
+						return (bool) $this->get_file_headers( $repo, 'plugin' );
 					}
 				}
 			}
@@ -144,7 +148,7 @@ class Plugin {
 				array_keys( $plugin ),
 				function ( $key ) use ( $plugin ) {
 					if ( false !== stripos( $key, 'pluginuri' ) && ! empty( $plugin[ $key ] && 'PluginURI' !== $key ) ) {
-						return $key;
+						return true;
 					}
 				}
 			);
@@ -230,6 +234,8 @@ class Plugin {
 	/**
 	 * Get remote plugin meta to populate $config plugin objects.
 	 * Calls to remote APIs to get data.
+	 *
+	 * @return void
 	 */
 	public function get_remote_plugin_meta() {
 		$plugins = [];
@@ -238,7 +244,7 @@ class Plugin {
 		 * Filter repositories.
 		 *
 		 * @since 10.2.0
-		 * @param array $this->config Array of repository objects.
+		 * @param array<string, stdClass> $config Array of repository objects.
 		 */
 		$config = apply_filters( 'gu_config_pre_process', $this->config );
 
@@ -255,16 +261,21 @@ class Plugin {
 			if ( 'init' === current_filter()
 				&& ( ! is_multisite() || is_network_admin() )
 			) {
-				add_action( "after_plugin_row_{$plugin->file}", [ new Branch(), 'plugin_branch_switcher' ], 15, 1 );
+				add_action(
+					"after_plugin_row_{$plugin->file}",
+					function ( $plugin_file ) {
+						( new Branch() )->plugin_branch_switcher( $plugin_file );
+					},
+					15,
+					1
+				);
 			}
 		}
 
 		$schedule_event = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ? is_main_site() : true;
 
-		if ( $schedule_event && ! empty( $plugins ) ) {
-			if ( ! $disable_wp_cron && ! $this->is_cron_event_scheduled( 'gu_get_remote_plugin' ) ) {
-				wp_schedule_single_event( time(), 'gu_get_remote_plugin', [ $plugins ] );
-			}
+		if ( $schedule_event && ! empty( $plugins ) && ! $disable_wp_cron ) {
+			$this->merge_and_reschedule_cron_batch( 'gu_get_remote_plugin', $plugins );
 		}
 
 		if ( ! static::is_wp_cli() ) {
@@ -274,9 +285,12 @@ class Plugin {
 
 	/**
 	 * Load pre-update filters.
+	 *
+	 * @return void
 	 */
 	public function load_pre_filters() {
 		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 99, 3 );
+		add_filter( 'plugins_api_result', [ $this, 'sort_sections_in_api' ], 15, 1 );
 		add_filter( 'site_transient_update_plugins', [ $this, 'update_site_transient' ], 15, 1 );
 	}
 
@@ -335,9 +349,37 @@ class Plugin {
 	}
 
 	/**
+	 * Sort plugin modal tabs.
+	 *
+	 * Based on standard tab listing order.
+	 *
+	 * @param object|WP_Error $res Response object or WP_Error.
+	 * @return object|WP_Error
+	 */
+	public function sort_sections_in_api( $res ) {
+		$ordered_sections = [
+			'description',
+			'installation',
+			'faq',
+			'screenshots',
+			'changelog',
+			'upgrade_notice',
+			'security',
+			'other_notes',
+			'reviews',
+		];
+		if ( property_exists( $res, 'sections' ) && is_array( $res->sections ) ) {
+			$properly_ordered = array_merge( array_fill_keys( $ordered_sections, '' ), $res->sections );
+			$res->sections    = array_filter( $properly_ordered );
+		}
+
+		return $res;
+	}
+
+	/**
 	 * Hook into site_transient_update_plugins to update from GitHub.
 	 *
-	 * @param stdClass $transient Plugin update transient.
+	 * @param mixed $transient Plugin update transient.
 	 *
 	 * @return mixed
 	 */
@@ -351,7 +393,7 @@ class Plugin {
 		 * Filter repositories.
 		 *
 		 * @since 10.2.0
-		 * @param array $this->config Array of repository objects.
+		 * @param array<string, stdClass> $config Array of repository objects.
 		 */
 		$config = apply_filters( 'gu_config_pre_process', $this->config );
 

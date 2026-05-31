@@ -30,10 +30,10 @@ trait Basic_Auth_Loader {
 	 * Remove authentication headers from release assets.
 	 * Hooks into 'http_request_args' filter.
 	 *
-	 * @param array  $args HTTP GET REQUEST args.
-	 * @param string $url  URL.
+	 * @param array<string, mixed> $args HTTP GET REQUEST args.
+	 * @param string               $url  URL.
 	 *
-	 * @return array $args
+	 * @return array<string, mixed>
 	 */
 	final public function download_package( $args, $url ) {
 		if ( null !== $args['filename'] ) {
@@ -51,10 +51,10 @@ trait Basic_Auth_Loader {
 	 *
 	 * @access public
 	 *
-	 * @param array  $args Args passed to the URL.
-	 * @param string $url  The URL.
+	 * @param array<string, mixed> $args Args passed to the URL.
+	 * @param string               $url  The URL.
 	 *
-	 * @return array $args
+	 * @return array<string, mixed>
 	 */
 	final public function add_auth_header( $args, $url ) {
 		$credentials = $this->get_credentials( $url );
@@ -91,7 +91,7 @@ trait Basic_Auth_Loader {
 	 *
 	 * @param string $url The URL.
 	 *
-	 * @return array $credentials
+	 * @return array<string, mixed>
 	 */
 	private function get_credentials( $url ) {
 		$options = get_site_option( 'git_updater' );
@@ -101,12 +101,12 @@ trait Basic_Auth_Loader {
 		 * Filter hook to set an API domain for updating.
 		 *
 		 * @since 12.6.0
-		 * @param string Default is 'api.wordpress.org'.
+		 * @param string $api_domain Default is 'api.wordpress.org'.
 		 */
 		$api_domain = apply_filters( 'gu_api_domain', 'api.wordpress.org' );
 
 		$credentials = [
-			'api.wordpress' => isset( $headers['host'] ) === $api_domain ? $headers['host'] : false,
+			'api.wordpress' => isset( $headers['host'] ) && $headers['host'] === $api_domain ? $headers['host'] : false,
 			'isset'         => false,
 			'token'         => null,
 			'type'          => null,
@@ -167,20 +167,20 @@ trait Basic_Auth_Loader {
 	/**
 	 * Get $slug for authentication header credentials.
 	 *
-	 * @param array  $headers Array of headers from parse_url().
-	 * @param array  $repos   Array of repositories.
-	 * @param string $url     URL being called by API.
-	 * @param array  $options Array of site options.
+	 * @param array<string, mixed> $headers Array of headers from parse_url().
+	 * @param array<string, mixed> $repos   Array of repositories.
+	 * @param string               $url     URL being called by API.
+	 * @param array<string, mixed> $options Array of site options.
 	 *
-	 * @return bool|string $slug
+	 * @return bool|string
 	 */
 	private function get_slug_for_credentials( $headers, $repos, $url, $options ) {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$slug = isset( $_REQUEST['slug'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['slug'] ) ) : false;
-		$slug = ! $slug && isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : $slug;
-
-		// Some installers, like TGMPA, pass an array.
-		$slug = is_array( $slug ) ? array_pop( $slug ) : $slug;
+		$slug_raw = isset( $_REQUEST['slug'] ) ? wp_unslash( $_REQUEST['slug'] ) : false; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		// Some installers, like TGMPA, pass an array — check before sanitizing.
+		$slug_raw = is_array( $slug_raw ) ? array_pop( $slug_raw ) : $slug_raw;
+		$slug     = $slug_raw ? sanitize_text_field( (string) $slug_raw ) : false;
+		$slug     = ! $slug && isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : $slug;
 
 		$slug = str_contains( $slug, '/' ) ? dirname( $slug ) : $slug;
 
@@ -229,11 +229,11 @@ trait Basic_Auth_Loader {
 	/**
 	 * Get repo type for authentication header credentials.
 	 *
-	 * @param string $slug  Repository slug.
-	 * @param array  $repos Array of repositories.
-	 * @param string $url   URL being called by API.
+	 * @param string               $slug  Repository slug.
+	 * @param array<string, mixed> $repos Array of repositories.
+	 * @param string               $url   URL being called by API.
 	 *
-	 * @return string $slug
+	 * @return string
 	 */
 	private function get_type_for_credentials( $slug, $repos, $url ) {
 		$type = $this->get_class_vars( 'Base', 'caller' );
@@ -270,10 +270,10 @@ trait Basic_Auth_Loader {
 	 * @access public
 	 * @link   http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html#RESTAuthenticationQueryStringAuth
 	 *
-	 * @param array  $args The URL arguments passed.
-	 * @param string $url  The URL.
+	 * @param array<string, mixed> $args The URL arguments passed.
+	 * @param string               $url  The URL.
 	 *
-	 * @return array $args
+	 * @return array<string, mixed>
 	 */
 	final public function unset_release_asset_auth( $args, $url ) {
 		$releases            = false;
@@ -295,9 +295,9 @@ trait Basic_Auth_Loader {
 	/**
 	 * Add Accept HTTP header.
 	 *
-	 * @param array $args The URL arguments passed.
+	 * @param array<string, mixed> $args The URL arguments passed.
 	 *
-	 * @return array $args
+	 * @return array<string, mixed>
 	 */
 	final public function add_accept_header( $args ) {
 		$repo_cache = [];
@@ -306,8 +306,8 @@ trait Basic_Auth_Loader {
 		}
 		foreach ( $args['headers'] as $key => $value ) {
 			if ( in_array( $key, $this->get_running_git_servers(), true ) ) {
-				$repo_cache = $this->get_repo_cache( $value );
-				if ( 'github' === $key && isset( $repo_cache['release_asset_download'] ) ) {
+				$repo_cache = $this->get_repo_cache( $value, false );
+				if ( 'github' === $key && isset( $repo_cache['release_asset_download'] ) && ! empty( $repo_cache['release_asset_download'] ) ) {
 					$octet_stream    = [ 'Accept' => 'application/octet-stream' ];
 					$args['headers'] = array_merge( $args['headers'], $octet_stream );
 				}

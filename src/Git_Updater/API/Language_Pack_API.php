@@ -24,20 +24,20 @@ class Language_Pack_API extends API {
 	 */
 	public function __construct( $type ) {
 		parent::__construct();
-		self::$method   = 'translation';
-		$this->type     = $type;
-		$this->response = $this->get_repo_cache();
+		self::$method = 'translation';
+		$this->type   = $type;
 	}
 
 	/**
 	 * Get/process Language Packs.
 	 *
-	 * @param array $headers Array of headers of Language Pack.
+	 * @param array<string, string> $headers Array of headers of Language Pack.
 	 *
 	 * @return bool When invalid response.
 	 */
 	public function get_language_pack( $headers ) {
-		$response = ! empty( $this->response['languages'] ) ? $this->response['languages'] : false;
+		$cache    = $this->get_repo_cache( false, false );
+		$response = ! empty( $cache['languages'] ) ? $cache['languages'] : false;
 
 		if ( ! $response ) {
 			$response = $this->get_language_pack_json( $this->type->git, $headers, $response );
@@ -65,9 +65,9 @@ class Language_Pack_API extends API {
 	/**
 	 * Get language-pack.json from appropriate host.
 	 *
-	 * @param string $git      (github).
-	 * @param array  $headers  Array of headers.
-	 * @param mixed  $response API response.
+	 * @param string                $git      (github).
+	 * @param array<string, string> $headers  Array of headers.
+	 * @param mixed                 $response API response.
 	 *
 	 * @return array|bool|mixed
 	 */
@@ -84,10 +84,10 @@ class Language_Pack_API extends API {
 		 * Filter to set API specific Language Pack response.
 		 *
 		 * @since 10.0.0
-		 * @param stdClass $response Object of Language Pack API response.
-		 * @param string   $git      Name of git host.
-		 * @param array    $headers  Array of repo headers.
-		 * @param stdClass Current class object.
+		 * @param stdClass           $response Object of Language Pack API response.
+		 * @param string             $git      Name of git host.
+		 * @param array              $headers  Array of repo headers.
+		 * @param Language_Pack_API  $obj      Current class object.
 		 */
 		$response = apply_filters( 'gu_get_language_pack_json', $response, $git, $headers, $this );
 
@@ -101,9 +101,9 @@ class Language_Pack_API extends API {
 	/**
 	 * Process $package for update transient.
 	 *
-	 * @param string   $git     Name of API, eg 'github'.
-	 * @param stdClass $locale  Locale.
-	 * @param array    $headers Array of headers.
+	 * @param string                $git     Name of API, eg 'github'.
+	 * @param stdClass              $locale  Locale.
+	 * @param array<string, string> $headers Array of headers.
 	 *
 	 * @return null|string
 	 */

@@ -18,7 +18,7 @@ use WP_Error;
  * Exit if called directly.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	die; // @codeCoverageIgnore
 }
 
 /**
@@ -55,7 +55,7 @@ class Messages {
 			return false;
 		}
 
-		if ( is_admin() && ! static::is_doing_ajax() ) {
+		if ( is_admin() && ! wp_doing_ajax() ) {
 			switch ( $type ) {
 				case is_wp_error( $type ):
 					self::$error_message = $type->get_error_message();
@@ -84,20 +84,6 @@ class Messages {
 					// no break.
 				case 'git':
 				default:
-					add_action(
-						is_multisite() ? 'network_admin_notices' : 'admin_notices',
-						[
-							$this,
-							'show_ratelimit_error_message',
-						]
-					);
-					add_action(
-						is_multisite() ? 'network_admin_notices' : 'admin_notices',
-						[
-							$this,
-							'show_authentication_error_message',
-						]
-					);
 			}
 		}
 
@@ -105,82 +91,9 @@ class Messages {
 	}
 
 	/**
-	 * Create error message for 403 error.
-	 * GitHub uses 403 error as API rate limit max out.
-	 */
-	public function show_ratelimit_error_message() {
-		$_ratelimit = false;
-		$error_code = $this->get_error_codes();
-		foreach ( (array) $error_code as $repo ) {
-			if ( ( ! $_ratelimit && isset( $repo['code'], $repo['git'], $repo['wait'] ) )
-				&& in_array( $repo['code'], [ 403, 404 ], true )
-			) {
-				$_ratelimit = true;
-				$git_server = $this->get_class_vars( 'Base', 'git_servers' )[ $repo['git'] ];
-				if ( ! WP_Dismiss_Notice::is_admin_notice_active( 'ratelimit-error-1' ) ) {
-					return;
-				} ?>
-				<div data-dismissible="ratelimit-error-1" class="notice-error notice is-dismissible">
-					<p>
-						<?php
-						esc_html_e( 'Git Updater Error Code:', 'git-updater' );
-						echo ' ' . esc_attr( $repo['code'] );
-						?>
-						<br>
-						<?php
-						printf(
-							/* translators: %1$s: git server, %2$s: wait time */
-							esc_html__( '%1$s API&#8217;s rate limit will reset in %2$s minutes.', 'git-updater' ),
-							esc_attr( $git_server ),
-							esc_attr( $repo['wait'] )
-						);
-						echo '<br>';
-						printf(
-							/* translators: %1$s: git server, %2$s: GitHub personal access token URL */
-							wp_kses_post( __( 'It looks like you are running into %1$s API rate limits. Be sure and configure a <a href="%2$s">Personal Access Token</a> to avoid this issue.', 'git-updater' ) ),
-							esc_attr( $git_server ),
-							esc_url( 'https://help.github.com/articles/creating-an-access-token-for-command-line-use/' )
-						);
-						?>
-					</p>
-				</div>
-				<?php
-			}
-		}
-	}
-
-	/**
-	 * Create error message or 401 (Authentication Error) error.
-	 * Usually 401 as private repo with no token set or incorrect user/pass.
-	 * GitHub uses a 404 error as an authentication error.
-	 */
-	public function show_authentication_error_message() {
-		$_authentication = false;
-		$error_code      = $this->get_error_codes();
-		foreach ( (array) $error_code as $repo ) {
-			if ( ( ! $_authentication && isset( $repo['code'] ) ) && in_array( $repo['code'], [ 401, 404 ], true ) ) {
-				$_authentication = true;
-				if ( ! WP_Dismiss_Notice::is_admin_notice_active( 'authentication-error-1' ) ) {
-					return;
-				}
-				?>
-				<div data-dismissible="authentication-error-1" class="notice-error notice is-dismissible">
-					<p>
-						<?php
-						esc_html_e( 'Git Updater Error Code:', 'git-updater' );
-						echo ' ' . esc_attr( $repo['code'] );
-						?>
-						<br>
-						<?php esc_html_e( 'There is probably an access token or password error on the Git Updater Settings page.', 'git-updater' ); ?>
-					</p>
-				</div>
-				<?php
-			}
-		}
-	}
-
-	/**
 	 * Generate error message for WP_Error.
+	 *
+	 * @return void
 	 */
 	public function show_wp_error() {
 		?>
@@ -197,6 +110,8 @@ class Messages {
 
 	/**
 	 * Generate information message when waiting for WP-Cron to finish.
+	 *
+	 * @return void
 	 */
 	public function waiting() {
 		?>
@@ -212,6 +127,8 @@ class Messages {
 
 	/**
 	 * Generate information message to purchase.
+	 *
+	 * @return void
 	 */
 	public function get_license() {
 		if ( ( ! gu_fs()->is_not_paying() )

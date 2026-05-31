@@ -13,17 +13,31 @@
 namespace Fragen\Git_Updater\Traits;
 
 use Fragen\Singleton;
+use Fragen\Git_Updater\Base;
 use ReflectionClass;
+use ReflectionMethod;
 use ReflectionObject;
 use stdClass;
 use WP_Error;
-
-use const Fragen\Git_Updater\PLUGIN_FILE;
 
 /**
  * Trait GU_Trait
  */
 trait GU_Trait {
+
+	/**
+	 * Holds the Base class instance.
+	 *
+	 * @var Base
+	 */
+	protected $base;
+
+	/**
+	 * Holds the repo type object.
+	 *
+	 * @var stdClass
+	 */
+	public $type;
 
 	/**
 	 * Holds the plugin basename.
@@ -56,16 +70,9 @@ trait GU_Trait {
 	}
 
 	/**
-	 * Checks to see if DOING_AJAX.
-	 *
-	 * @return bool
-	 */
-	final public static function is_doing_ajax() {
-		return defined( 'DOING_AJAX' ) && \DOING_AJAX;
-	}
-
-	/**
 	 * Load site options.
+	 *
+	 * @return void
 	 */
 	final public function load_options() {
 		Singleton::get_instance( 'Fragen\Git_Updater\GU_Upgrade', $this )->convert_ghu_options_to_gu_options();
@@ -77,7 +84,7 @@ trait GU_Trait {
 	/**
 	 * Check current page.
 	 *
-	 * @param  array $pages Array of pages.
+	 * @param  string[] $pages Array of pages.
 	 * @return bool
 	 */
 	final public function is_current_page( array $pages ) {
@@ -126,14 +133,15 @@ trait GU_Trait {
 	 * @access protected
 	 *
 	 * @param string|bool $repo Repo name or false.
+	 * @param bool        $timeout false to always return cache, true to use timeout.
 	 *
-	 * @return array|bool The repo cache. False if expired.
+	 * @return array<string, mixed>|false The repo cache. False if expired.
 	 */
-	final public function get_repo_cache( $repo = false ) {
+	final public function get_repo_cache( $repo = false, $timeout = true ) {
 		$cache_key = $this->get_cache_key( $repo );
-		$cache     = get_site_option( $cache_key );
+		$cache     = get_site_option( $cache_key, [] );
 
-		if ( ! $this->is_cache_timeout_valid( $cache['timeout'] ?? 0 ) ) {
+		if ( $timeout && ! $this->is_cache_timeout_valid( $cache['timeout'] ?? 0 ) ) {
 			return false;
 		}
 
@@ -150,20 +158,18 @@ trait GU_Trait {
 	 * @param string|bool $repo     Repo name or false.
 	 * @param string|bool $timeout  Timeout for cache.
 	 *                              Default is $hours (12 hours).
-	 * @param bool        $flush    Whether to flush existing cache or merge with it.
-	 *                              Default false (merge). Set true to flush.
 	 *
 	 * @return bool
 	 */
-	final public function set_repo_cache( $id, $response, $repo = false, $timeout = false, $flush = false ) {
+	final public function set_repo_cache( $id, $response, $repo = false, $timeout = false ) {
 		if ( is_wp_error( $response ) ) {
 			return false;
 		}
-		$this->response = property_exists( $this, 'response' ) && is_array( $this->response ) ? $this->response : [];
-
-		$hours     = $this->get_class_vars( 'API\API', 'hours' );
 		$cache_key = $this->get_cache_key( $repo );
-		$timeout   = $timeout ? $timeout : '+' . $hours . ' hours';
+		$cache     = get_site_option( $cache_key, [] );
+
+		$hours   = $this->get_class_vars( 'API\API', 'hours' );
+		$timeout = $timeout ? $timeout : '+' . $hours . ' hours';
 
 		/**
 		 * Allow filtering of cache timeout for repo information.
@@ -177,24 +183,37 @@ trait GU_Trait {
 		 */
 		$timeout = apply_filters( 'gu_repo_cache_timeout', $timeout, $id, $response, $repo );
 
-		// Merge with existing cache if it exists, is an array, and not flushing.
-		// Prevents overwriting other data stored in cache when multiple requests are made before cache expires.
-		if ( ! $flush ) {
-			$existing_cache = $this->get_repo_cache( $cache_key ) ?: [];
-			if ( $this->is_cache_timeout_valid( $existing_cache['timeout'] ?? 0 ) ) {
-				$this->response = array_merge( $existing_cache, (array) $this->response );
-			}
-		}
+		$cache['timeout'] = $cache['timeout'] ?? strtotime( $timeout );
+		$cache[ $id ]     = $response;
 
-		// Set timeout for cache. Use existing timeout if valid, otherwise set new timeout.
-		$this->response['timeout'] = $this->is_cache_timeout_valid( $this->response['timeout'] ?? 0 )
-			? $this->response['timeout']
-			: strtotime( $timeout );
-		$this->response[ $id ]     = $response;
-
-		update_site_option( $cache_key, $this->response );
+		update_site_option( $cache_key, $cache );
 
 		return true;
+	}
+
+	/**
+	 * Refresh the repo cache timeout to the default `$hours` after a complete fetch cycle.
+	 *
+	 * Companion to set_repo_cache(): per-entry writes preserve an existing 'timeout'
+	 * via `??`, so without this an expired timeout from the prior cycle would linger
+	 * and force the next pass to re-fetch. No-op if 'ran' bookkeeping is incomplete.
+	 *
+	 * @param string $slug Repo slug.
+	 *
+	 * @return void
+	 */
+	final public function set_repo_cache_timeout( string $slug ): void {
+		$cache_key = $this->get_cache_key( $slug );
+		$cache     = get_site_option( $cache_key, [] );
+		$expected  = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
+
+		if ( ! isset( $cache['ran'] ) || array_diff( $expected, $cache['ran'] ) ) {
+			return;
+		}
+
+		$hours            = $this->get_class_vars( 'API\\API', 'hours' );
+		$cache['timeout'] = strtotime( apply_filters( 'gu_repo_cache_timeout', '+' . $hours . ' hours', 'ran', $cache['ran'], $slug ) );
+		update_site_option( $cache_key, $cache );
 	}
 
 	/**
@@ -206,6 +225,139 @@ trait GU_Trait {
 	 */
 	final public function is_cache_timeout_valid( int $timestamp ): bool {
 		return ! empty( $timestamp ) && time() < $timestamp;
+	}
+
+	/**
+	 * Maybe extend API cached data and set new timeout if remote version
+	 * is same as cached remote version?
+	 *
+	 * Use presence of 'ran' in cache to determine if all API calls have executed and are complete.
+	 * Each key is appended to 'ran' after its specific call returns, so a partial list indicates
+	 * interrupted execution. If not present or incomplete, do not extend or set timeout.
+	 *
+	 * @param array<string, string> $remote_headers Remote headers data array.
+	 * @param stdClass              $repo           Repo data object.
+	 * @param string                $old_version    Previously cached remote version to compare against.
+	 *
+	 * @return bool
+	 */
+	final public function maybe_extend_repo_cache( $remote_headers, $repo, string $old_version = '' ): bool {
+		$return    = false;
+		$cache_key = $this->get_cache_key( $repo->slug ?? false );
+		$cache     = get_site_option( $cache_key, [] );
+		$expected  = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
+
+		if ( isset( $cache['ran'] ) && ! array_diff( $expected, $cache['ran'] ) ) {
+			if ( version_compare( $remote_headers['Version'], $old_version, '==' ) ) {
+				if ( ! $this->is_cache_timeout_valid( $cache['timeout'] ?? 0 ) ) {
+					$cache['timeout'] = strtotime( '+6 hours' );
+					update_site_option( $cache_key, $cache );
+				}
+				$return = true;
+			}
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Populate API data from cache.
+	 *
+	 * Data now populates via cache even when API is not available.
+	 *
+	 * @param  stdClass $repo     Repository object.
+	 * @param  stdClass $repo_api Repository API object.
+	 *
+	 * @return stdClass
+	 */
+	final public function populate_api_data( $repo, $repo_api ) {
+		$cache             = $this->get_repo_cache( $repo->slug, false );
+		$validate_response = $this->get_reflection_method( $repo_api, 'validate_response' );
+		$cached_data       = [
+			'tags'           => $cache['tags'] ?? false,
+			'changes'        => $cache['changes'] ?? false,
+			'readme'         => $cache['readme'] ?? false,
+			'meta'           => $cache['meta'] ?? false,
+			'branches'       => $cache['branches'] ?? false,
+			'release_asset'  => $cache['release_asset'] ?? false,
+			'release_assets' => $cache['release_assets'] ?? false,
+		];
+		foreach ( $cached_data as $key => $value ) {
+			switch ( $key ) {
+				case 'tags':
+					if ( $validate_response->invoke( $repo_api, $value ) ) {
+						break;
+					}
+					$return_repo_type = $this->get_reflection_method( $repo_api, 'return_repo_type' );
+					$repo_type        = $return_repo_type->invoke( $repo_api );
+
+					$parse_tags = $this->get_reflection_method( $repo_api, 'parse_tags' );
+					$tags       = $parse_tags->invoke( $repo_api, $value, $repo_type );
+
+					$sort_tags = $this->get_reflection_method( $repo_api, 'sort_tags' );
+					$sort_tags->invoke( $repo_api, $tags );
+					break;
+				case 'changes':
+					if ( $validate_response->invoke( $repo_api, $value ) ) {
+						break;
+					}
+					$repo->sections['changelog'] = $value;
+					break;
+				case 'readme':
+					if ( $validate_response->invoke( $repo_api, $value ) ) {
+						break;
+					}
+					$set_readme_info = $this->get_reflection_method( $repo_api, 'set_readme_info' );
+					$set_readme_info->invoke( $repo_api, $value );
+					break;
+				case 'meta':
+					if ( $validate_response->invoke( $repo_api, $value ) ) {
+						break;
+					}
+					$repo->repo_meta      = $value;
+					$add_repo_meta_object = $this->get_reflection_method( $repo_api, 'add_meta_repo_object' );
+					$add_repo_meta_object->invoke( $repo_api );
+					break;
+				case 'branches':
+					$repo->branches = ! $value ? [] : (array) $value;
+					break;
+				case 'release_asset':
+					if ( $validate_response->invoke( $repo_api, $value ) ) {
+						break;
+					}
+					$repo->release_assets[ $repo->newest_tag ] = $value;
+					break;
+				case 'release_assets':
+					if ( $validate_response->invoke( $repo_api, $value ) ) {
+						break;
+					}
+					if ( ! array_key_exists( $repo->newest_tag, $value['assets'] ) ) {
+						$value['assets'] = array_merge( [ $repo->newest_tag => '' ], $value['assets'] );
+					}
+					$repo->release_assets     = $value['assets'] ?? $value;
+					$repo->created_at         = $value['created_at'] ?? [];
+					$repo->dev_release_assets = $value['dev_assets'] ?? [];
+					$repo->dev_created_at     = $value['dev_created_at'] ?? [];
+					break;
+			}
+		}
+
+		return $repo;
+	}
+
+	/**
+	 * Get reflection method.
+	 *
+	 * @param object|string $obj    Class object or name.
+	 * @param string|null   $method Method name.
+	 *
+	 * @return ReflectionMethod
+	 */
+	final public function get_reflection_method( $obj, $method ): ReflectionMethod {
+		$reflection_method = new ReflectionMethod( $obj, $method );
+		PHP_VERSION_ID < 80100 && $reflection_method->setAccessible( true );
+
+		return $reflection_method;
 	}
 
 	/**
@@ -223,18 +375,9 @@ trait GU_Trait {
 			return false;
 		}
 		$property = $reflection_obj->getProperty( $name );
-		( PHP_VERSION_ID < 80100 ) && $property->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $property->setAccessible( true );
 
 		return $property->getValue( $class );
-	}
-
-	/**
-	 * Returns static class variable $error_code.
-	 *
-	 * @return array self::$error_code
-	 */
-	final public function get_error_codes() {
-		return $this->get_class_vars( 'API\API', 'error_code' );
 	}
 
 	/**
@@ -293,7 +436,9 @@ trait GU_Trait {
 
 		$wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) ); // phpcs:ignore
 
-		wp_cron();
+		if ( ! is_multisite() || is_main_site() ) {
+			wp_cron();
+		}
 
 		return true;
 	}
@@ -308,11 +453,11 @@ trait GU_Trait {
 	 * @return bool
 	 */
 	final public function is_private( $repo ) {
-		if ( ! isset( $repo->remote_version ) && ! self::is_doing_ajax() ) {
+		if ( ! isset( $repo->remote_version ) && ! wp_doing_ajax() ) {
 			return true;
 		}
-		if ( isset( $repo->remote_version ) && ! self::is_doing_ajax() ) {
-			return ( '0.0.0' === $repo->remote_version ) || ! empty( self::$options[ $repo->slug ] );
+		if ( isset( $repo->remote_version ) && ! wp_doing_ajax() ) {
+			return ( '0.0.0' === $repo->remote_version ) || ! empty( Base::$options[ $repo->slug ] );
 		}
 
 		return false;
@@ -321,8 +466,8 @@ trait GU_Trait {
 	/**
 	 * Do we override dot org updates?
 	 *
-	 * @param string   $type (plugin|theme).
-	 * @param stdClass $repo Repository object.
+	 * @param string                       $type (plugin|theme).
+	 * @param array<string,mixed>|stdClass $repo Repository object.
 	 *
 	 * @return bool
 	 */
@@ -353,7 +498,7 @@ trait GU_Trait {
 		 * Filter hook to completely ignore any updates from dot org when using Git Updater.
 		 *
 		 * @since 12.6.0
-		 * @param bool Default is false. Do not ignore updates from dot org.
+		 * @param bool $return_default Default is false. Do not ignore updates from dot org.
 		 */
 		return ! $dot_org_master || $override || apply_filters( 'gu_ignore_dot_org', false );
 	}
@@ -361,9 +506,9 @@ trait GU_Trait {
 	/**
 	 * Sanitize each setting field as needed.
 	 *
-	 * @param array $input Contains all settings fields as array keys.
+	 * @param array<string, string> $input Contains all settings fields as array keys.
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
 	final public function sanitize( $input ) {
 		$new_input = [];
@@ -378,7 +523,7 @@ trait GU_Trait {
 	 * Return an array of the running git servers.
 	 *
 	 * @access public
-	 * @return array $gits
+	 * @return array<int, string>
 	 */
 	final public function get_running_git_servers() {
 		$plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
@@ -422,7 +567,7 @@ trait GU_Trait {
 				Singleton::get_instance( $git_class, $this );
 			}
 
-			$cache = isset( $repo->slug ) ? $this->get_repo_cache( $repo->slug ) : null;
+			$cache = isset( $repo->slug ) ? $this->get_repo_cache( $repo->slug, false ) : [];
 
 			// Probably not managed by Git Updater if $cache is empty.
 			return empty( $cache );
@@ -442,7 +587,7 @@ trait GU_Trait {
 		$repos = apply_filters( 'gu_config_pre_process', $repos );
 
 		foreach ( $repos as $git_repo ) {
-			$caches[ $git_repo->slug ] = $this->get_repo_cache( $git_repo->slug );
+			$caches[ $git_repo->slug ] = $this->get_repo_cache( $git_repo->slug, false );
 		}
 		$waiting = array_filter(
 			$caches,
@@ -459,7 +604,7 @@ trait GU_Trait {
 	 *
 	 * @param string $repo_header Repo URL.
 	 *
-	 * @return array $header
+	 * @return array<string, string|null>
 	 */
 	final protected function parse_header_uri( $repo_header ) {
 		$header_parts         = parse_url( $repo_header );
@@ -502,7 +647,8 @@ trait GU_Trait {
 		 * Filter repo parts from other git hosts.
 		 *
 		 * @since 10.0.0
-		 * @param array $repos Array of repo data.
+		 * @param array  $repos Array of repo data.
+		 * @param string $type  Repository type string.
 		 */
 		$repos = apply_filters( 'gu_get_repo_parts', $repos, $type );
 
@@ -523,10 +669,10 @@ trait GU_Trait {
 	 * Set array with normal repo names.
 	 * Fix name even if installed without renaming originally, eg <repo>-master
 	 *
-	 * @param string            $slug            Repo slug.
-	 * @param Base|Plugin|Theme $upgrader_object Upgrader object.
+	 * @param string                                                                        $slug            Repo slug.
+	 * @param \Fragen\Git_Updater\Base|\Fragen\Git_Updater\Plugin|\Fragen\Git_Updater\Theme $upgrader_object Upgrader object.
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
 	final protected function get_repo_slugs( string $slug, $upgrader_object = null ): array {
 		$arr = [];
@@ -568,7 +714,7 @@ trait GU_Trait {
 	 *
 	 * @param string $type plugin|theme.
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
 	final public function get_headers( $type ) {
 		$default_plugin_headers = [
@@ -606,7 +752,7 @@ trait GU_Trait {
 			'UpdateURI'   => 'Update URI',
 		];
 
-		$all_headers = array_merge( ${"default_{$type}_headers"}, self::$extra_headers );
+		$all_headers = array_merge( ${"default_{$type}_headers"}, Base::$extra_headers );
 
 		return $all_headers;
 	}
@@ -614,10 +760,10 @@ trait GU_Trait {
 	/**
 	 * Take remote file contents as string or array and parse and reduce headers.
 	 *
-	 * @param string|array $contents File contents or array of file headers.
-	 * @param string       $type     plugin|theme.
+	 * @param string|array<string, string> $contents File contents or array of file headers.
+	 * @param string                       $type     plugin|theme.
 	 *
-	 * @return array $all_headers Reduced array of all headers.
+	 * @return array<string, string>
 	 */
 	final public function get_file_headers( $contents, $type ) {
 		$all_headers = [];
@@ -650,11 +796,11 @@ trait GU_Trait {
 	/**
 	 * Parse Enterprise, Languages, Release Asset, and CI Job headers for plugins and themes.
 	 *
-	 * @param array $header       Array of repo data.
-	 * @param array $headers      Array of repo header data.
-	 * @param array $header_parts Array of header parts.
+	 * @param array<string, mixed> $header       Array of repo data.
+	 * @param array<string, mixed> $headers      Array of repo header data.
+	 * @param array<int, string>   $header_parts Array of header parts.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	final public function parse_extra_headers( $header, $headers, $header_parts ) {
 		$extra_repo_headers = $this->get_class_vars( 'Base', 'extra_repo_headers' );
@@ -697,7 +843,7 @@ trait GU_Trait {
 				}
 			}
 		}
-		$header['release_asset']  = ! $header['release_asset'] && ! empty( $headers['ReleaseAsset'] ) ? true === (bool) $headers['ReleaseAsset'] : $header['release_asset'];
+		$header['release_asset']  = ! $header['release_asset'] && ! empty( $headers['ReleaseAsset'] ) ? filter_var( $headers['ReleaseAsset'], FILTER_VALIDATE_BOOLEAN ) : $header['release_asset'];
 		$header['primary_branch'] = ! $header['primary_branch'] && ! empty( $headers['PrimaryBranch'] ) ? $headers['PrimaryBranch'] : 'master';
 
 		$header['did'] = ! empty( $headers['PluginID'] ) ? $headers['PluginID'] : '';
@@ -722,6 +868,31 @@ trait GU_Trait {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Merge any existing scheduled cron batch for $hook with $new_args, then
+	 * unschedule all existing events and schedule a single consolidated event.
+	 * This prevents duplicate events accumulating across page loads.
+	 *
+	 * @param string               $hook     Cron event hook name.
+	 * @param array<string, mixed> $new_args Keyed-by-slug repo array for this request.
+	 *
+	 * @return void
+	 */
+	final protected function merge_and_reschedule_cron_batch( string $hook, array $new_args ): void {
+		wp_cache_delete( 'cron', 'options' );
+		$cron = _get_cron_array();
+		foreach ( (array) $cron as $hooks ) {
+			if ( isset( $hooks[ $hook ] ) ) {
+				foreach ( $hooks[ $hook ] as $event ) {
+					$existing = $event['args'][0] ?? [];
+					$new_args = array_merge( $existing, $new_args );
+				}
+			}
+		}
+		wp_unschedule_hook( $hook );
+		wp_schedule_single_event( time(), $hook, [ $new_args ] );
 	}
 
 	/**
@@ -764,7 +935,7 @@ trait GU_Trait {
 		$current_master_noswitch = $this->type->primary_branch === $this->type->branch && false === $branch_switch;
 
 		$need_release_asset = $switch_master_tag || $current_master_noswitch;
-		$use_release_asset  = $this->type->release_asset && '0.0.0' !== $this->type->newest_tag
+		$use_release_asset  = ( $this->type->release_asset ?? false ) && '0.0.0' !== ( $this->type->newest_tag ?? '0.0.0' )
 			&& $need_release_asset;
 
 		return $use_release_asset;
@@ -776,8 +947,8 @@ trait GU_Trait {
 	 * Check if a filter effecting a checkbox is set elsewhere.
 	 * Adds value '-1' without saving so that checkbox is checked and disabled.
 	 *
-	 * @param  array $options Site options.
-	 * @return array
+	 * @param  array<string, mixed> $options Site options.
+	 * @return array<string, mixed>
 	 */
 	private function modify_options( $options ) {
 		// Remove any inadvertently saved options with value -1.
@@ -810,7 +981,7 @@ trait GU_Trait {
 	 *
 	 * @param stdClass $repo Repository object.
 	 *
-	 * @return array
+	 * @return array<string, string|null>
 	 */
 	final protected function get_repo_requirements( $repo ) {
 		$requires      = [
@@ -835,11 +1006,11 @@ trait GU_Trait {
 	 * @since 10.10.0
 	 * @uses `upgrader_install_package_result` filter
 	 *
-	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+	 * @global \WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @param array|WP_Error $result Result from WP_Upgrader::install_package().
-
-	 * @return bool
+	 * @param array<string, mixed>|WP_Error $result Result from WP_Upgrader::install_package().
+	 *
+	 * @return array<string, mixed>|WP_Error
 	 */
 	final public function delete_upgrade_source( $result ) {
 		global $wp_filesystem;
@@ -887,7 +1058,7 @@ trait GU_Trait {
 	 *
 	 * Display ratelimit reset time in minutes.
 	 *
-	 * @return array|WP_Error
+	 * @return array<string, mixed>|WP_Error
 	 */
 	final public function get_github_rate_limit_headers() {
 		$auth_header = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->add_auth_header( [], 'https://api.github.com/rate_limit' );

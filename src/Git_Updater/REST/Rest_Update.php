@@ -49,7 +49,7 @@ class Rest_Update {
 	/**
 	 * Holds sanitized $_REQUEST.
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	protected static $request;
 
@@ -79,6 +79,7 @@ class Rest_Update {
 	 * @param string $tag         Plugin tag/branch.
 	 *
 	 * @throws UnexpectedValueException Plugin not found or not updatable.
+	 * @return void
 	 */
 	public function update_plugin( $plugin_slug, $tag = 'master' ) {
 		$plugin           = null;
@@ -143,7 +144,7 @@ class Rest_Update {
 		$upgrader->upgrade( $plugin->file );
 
 		if ( $is_plugin_active ) {
-			$activate = is_multisite() ? activate_plugin( $plugin->file, null, true ) : activate_plugin( $plugin->file );
+			$activate = is_multisite() ? activate_plugin( $plugin->file, '', true ) : activate_plugin( $plugin->file );
 			if ( ! $activate ) {
 				$this->upgrader_skin->messages[] = 'Plugin reactivated successfully.';
 			}
@@ -157,6 +158,7 @@ class Rest_Update {
 	 * @param string $tag        Theme tag/branch.
 	 *
 	 * @throws UnexpectedValueException Theme not found or not updatable.
+	 * @return void
 	 */
 	public function update_theme( $theme_slug, $tag = 'master' ) {
 		$theme = null;
@@ -217,6 +219,8 @@ class Rest_Update {
 
 	/**
 	 * Is there an error?
+	 *
+	 * @return bool
 	 */
 	public function is_error() {
 		return $this->upgrader_skin->error;
@@ -224,6 +228,8 @@ class Rest_Update {
 
 	/**
 	 * Get messages during update.
+	 *
+	 * @return array<int, string>
 	 */
 	public function get_messages() {
 		return $this->upgrader_skin->messages;
@@ -240,12 +246,21 @@ class Rest_Update {
 	 * @param WP_REST_Request|null $request Request data from update webhook.
 	 *
 	 * @throws UnexpectedValueException Under multiple bad or missing params.
+	 * @return void
 	 */
 	public function process_request( $request = null ) {
-		$args = $this->process_request_data( $request );
-		extract( $args ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
+		$args       = $this->process_request_data( $request );
+		$key        = $args['key'] ?? false;
+		$plugin     = $args['plugin'] ?? false;
+		$theme      = $args['theme'] ?? false;
+		$tag        = $args['tag'] ?? 'master';
+		$committish = $args['committish'] ?? false;
+		$branch     = $args['branch'] ?? false;
+		$override   = $args['override'] ?? false;
+		$deprecated = $args['deprecated'] ?? '';
 
-		$start = microtime( true );
+		$start          = microtime( true );
+		$current_branch = 'master';
 		try {
 			if ( ! $key
 				|| get_site_option( 'git_updater_api_key' ) !== $key
@@ -264,6 +279,7 @@ class Rest_Update {
 			$this->get_webhook_source();
 			$tag            = $committish ? $committish : $tag;
 			$current_branch = $this->get_local_branch( $plugin, $theme );
+			$remote_branch  = null;
 
 			if ( ! ( 0 === preg_match( self::$version_number_regex, $tag ) ) ) {
 				$remote_branch = 'master';
@@ -302,7 +318,7 @@ class Rest_Update {
 			$slug      = $theme ? $theme : $slug;
 			$file      = $plugin ? $plugin . '.php' : 'style.css';
 			$options   = $this->get_class_vars( 'Base', 'options' );
-			$cache     = $this->get_repo_cache( $slug );
+			$cache     = $this->get_repo_cache( $slug, false );
 			$cache_key = 'ghu-' . md5( $slug );
 
 			$cache['current_branch'] = $current_branch;
@@ -331,17 +347,21 @@ class Rest_Update {
 	/**
 	 * Process request data from REST API or RESTful endpoint.
 	 *
-	 * @param WP_REST_Request|array $request Request data from update webhook.
+	 * @param WP_REST_Request|array<string, mixed>|null $request Request data from update webhook.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function process_request_data( $request = null ) {
 		if ( $request instanceof WP_REST_Request ) {
-			$params        = $request->get_params();
-			$slug          = $params['plugin'] ?: $params['theme'];
-			$params['tag'] = $params['tag'] ?: $this->get_primary_branch( $slug );
-			extract( $params ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
-			$override   = false === $override ? false : true;
+			$params     = $request->get_params();
+			$slug       = $params['plugin'] ?: $params['theme'];
+			$key        = $params['key'] ?? false;
+			$plugin     = $params['plugin'] ?? false;
+			$theme      = $params['theme'] ?? false;
+			$tag        = $params['tag'] ?: $this->get_primary_branch( $slug );
+			$committish = $params['committish'] ?? false;
+			$branch     = $params['branch'] ?? false;
+			$override   = ! empty( $params['override'] );
 			$deprecated = strpos( $request->get_route(), ( new REST_API() )::$namespace ) ? false : true;
 			if ( $deprecated ) {
 				$this->upgrader_skin->feedback( ( new REST_API() )->deprecated()['error'] );
@@ -396,7 +416,7 @@ class Rest_Update {
 	 * @return string
 	 */
 	private function get_primary_branch( $slug ) {
-		$cache          = $this->get_repo_cache( $slug );
+		$cache          = $this->get_repo_cache( $slug, false );
 		$primary_branch = $cache[ $slug ]['PrimaryBranch'] ?? 'master';
 
 		return $primary_branch;
@@ -404,6 +424,8 @@ class Rest_Update {
 
 	/**
 	 * Sets the source of the webhook to $_GET variable.
+	 *
+	 * @return void
 	 */
 	private function get_webhook_source() {
 		switch ( $_SERVER ) {
@@ -432,8 +454,9 @@ class Rest_Update {
 	 * 128 == JSON_PRETTY_PRINT
 	 * 64 == JSON_UNESCAPED_SLASHES
 	 *
-	 * @param array $response Response array.
-	 * @param int   $code     Response code.
+	 * @param array<string, mixed> $response Response array.
+	 * @param int                  $code     Response code.
+	 * @return void
 	 */
 	public function log_exit( $response, $code ) {
 		$json_encode_flags = 128 | 64;

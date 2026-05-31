@@ -1,0 +1,119 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  tests:
+    name: "PHP ${{ matrix.php }} / PHPUnit ${{ matrix.phpunit }}"
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: "8.0"
+            phpunit: "^9.6"
+            config: "--configuration phpunit9.xml"
+          - php: "8.1"
+            phpunit: "^10.5"
+            config: ""
+          - php: "8.2"
+            phpunit: "^11.5"
+            config: ""
+          - php: "8.3"
+            phpunit: "^11.5"
+            config: ""
+          - php: "8.4"
+            phpunit: "^11.5"
+            config: ""
+          - php: "8.5"
+            phpunit: "^13.0"
+            config: ""
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, dom, xml
+          coverage: xdebug
+          tools: composer:v2
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ matrix.php }}-phpunit-${{ matrix.phpunit }}-${{ hashFiles('composer.json') }}
+          restore-keys: |
+            ${{ runner.os }}-php-${{ matrix.php }}-phpunit-${{ matrix.phpunit }}-
+
+      - name: Pin PHPUnit version
+        run: composer require --dev "phpunit/phpunit:${{ matrix.phpunit }}" --no-update
+
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-progress --no-interaction
+
+      - name: Run tests
+        run: vendor/bin/phpunit --no-coverage ${{ matrix.config }}
+
+      - name: Run tests with coverage (PHP 8.5 only)
+        if: matrix.php == '8.5'
+        run: vendor/bin/phpunit --coverage-clover coverage.xml
+
+      - name: Upload coverage to Codecov
+        if: matrix.php == '8.5'
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+          fail_ci_if_error: false
+
+  static-analysis:
+    name: "PHPStan"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          extensions: mbstring, dom, xml
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse --no-progress
+
+  code-style:
+    name: "PHP CS Fixer"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.0"
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Check code style
+        run: vendor/bin/php-cs-fixer fix --dry-run --diff --no-interaction

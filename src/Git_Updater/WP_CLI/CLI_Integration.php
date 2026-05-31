@@ -77,18 +77,19 @@ class CLI_Integration extends WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp plugin install-git https://github.com/afragen/my-plugin
+	 *     wp plugin install-git https://github.com/afragen/my-plugin --github
 	 *
 	 *     wp plugin install-git https://github.com/afragen/my-plugin --branch=develop --github
 	 *
-	 *     wp plugin install-git https://bitbucket.org/afragen/my-private-plugin --token=username:password
+	 *     wp plugin install-git https://bitbucket.org/afragen/my-private-plugin --token=username:password --bitbucket
 	 *
-	 *     wp plugin install-git https://github.com/afragen/my-private-plugin --token=lks9823evalki
+	 *     wp plugin install-git https://github.com/afragen/my-private-plugin --token=lks9823evalki --github
 	 *
-	 * @param array $args       An array of $uri.
-	 * @param array $assoc_args Array of optional arguments.
+	 * @param array<int, string>   $args       An array of $uri.
+	 * @param array<string, mixed> $assoc_args Array of optional arguments.
 	 *
 	 * @subcommand install-git
+	 * @return void
 	 */
 	public function install_plugin( $args, $assoc_args ) {
 		list($uri)  = $args;
@@ -148,18 +149,19 @@ class CLI_Integration extends WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp theme install-git https://github.com/afragen/my-theme
+	 *     wp theme install-git https://github.com/afragen/my-theme --github
 	 *
 	 *     wp theme install-git https://bitbucket.org/afragen/my-theme --branch=develop --bitbucket
 	 *
-	 *     wp theme install-git https://bitbucket.org/afragen/my-private-theme --token=username:password
+	 *     wp theme install-git https://bitbucket.org/afragen/my-private-theme --token=username:password --bitbucket
 	 *
-	 *     wp theme install-git https://github.com/afragen/my-private-theme --token=lks9823evalki
+	 *     wp theme install-git https://github.com/afragen/my-private-theme --token=lks9823evalki --github
 	 *
-	 * @param array $args       An array of $uri.
-	 * @param array $assoc_args Array of optional arguments.
+	 * @param array<int, string>   $args       An array of $uri.
+	 * @param array<string, mixed> $assoc_args Array of optional arguments.
 	 *
 	 * @subcommand install-git
+	 * @return void
 	 */
 	public function install_theme( $args, $assoc_args ) {
 		list($uri)  = $args;
@@ -192,9 +194,10 @@ class CLI_Integration extends WP_CLI_Command {
 	 *
 	 *     wp theme branch-switch <slug> <branch>
 	 *
-	 * @param string $args       Repository slug.
+	 * @param array<int, string>|null $args Repository slug.
 	 *
 	 * @subcommand branch-switch
+	 * @return void
 	 */
 	public function branch_switch( $args = null ) {
 		list( $slug, $branch ) = $args;
@@ -235,10 +238,10 @@ class CLI_Integration extends WP_CLI_Command {
 	/**
 	 * Process WP-CLI config data.
 	 *
-	 * @param string $uri        URI to process.
-	 * @param array  $assoc_args Args to process.
+	 * @param string               $uri        URI to process.
+	 * @param array<string, mixed> $assoc_args Args to process.
 	 *
-	 * @return array $cli_config
+	 * @return array<string, mixed> $cli_config
 	 */
 	private function process_args( $uri, $assoc_args ) {
 		$token                 = $assoc_args['token'] ?? false;
@@ -269,14 +272,20 @@ class CLI_Integration extends WP_CLI_Command {
 				break;
 		}
 
+		if ( ! isset( $cli_config['git'] ) ) {
+			WP_CLI::error( 'Please specify the repository type with --github, --bitbucket, --gitlab, --gitea, --gist, or --zipfile.' );
+			exit;
+		}
+
 		return $cli_config;
 	}
 
 	/**
 	 * Process branch setting for WP-CLI.
 	 *
-	 * @param array  $cli_config Config args.
-	 * @param string $slug       Repository slug.
+	 * @param array<string, mixed> $cli_config Config args.
+	 * @param string               $slug       Repository slug.
+	 * @return void
 	 */
 	private function process_branch( $cli_config, $slug ) {
 		$branch_data['git_updater_branch'] = $cli_config['branch'];
@@ -308,7 +317,7 @@ class CLI_Plugin_Installer_Skin extends Plugin_Installer_Skin {
 	/**
 	 * Skin error.
 	 *
-	 * @param stdClass $errors Error object.
+	 * @param string|\WP_Error $errors Error object.
 	 *
 	 * @return void
 	 */
@@ -321,8 +330,8 @@ class CLI_Plugin_Installer_Skin extends Plugin_Installer_Skin {
 	/**
 	 * Skin feedback.
 	 *
-	 * @param string $message Feedback message.
-	 * @param array  ...$args Feedback args.
+	 * @param string               $message Feedback message.
+	 * @param array<string, mixed> ...$args Feedback args.
 	 *
 	 * @return void
 	 */
@@ -346,7 +355,7 @@ class CLI_Theme_Installer_Skin extends Theme_Installer_Skin {
 	/**
 	 * Skin error.
 	 *
-	 * @param \stdClass $errors Error object.
+	 * @param string|\WP_Error $errors Error object.
 	 *
 	 * @return void
 	 */
@@ -359,8 +368,8 @@ class CLI_Theme_Installer_Skin extends Theme_Installer_Skin {
 	/**
 	 * Skin feedback.
 	 *
-	 * @param string $message Feedback message.
-	 * @param array  ...$args Feedback args.
+	 * @param string               $message Feedback message.
+	 * @param array<string, mixed> ...$args Feedback args.
 	 *
 	 * @return void
 	 */

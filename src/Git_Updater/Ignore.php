@@ -20,7 +20,7 @@ class Ignore {
 	/**
 	 * Holds array of repositories to ignore.
 	 *
-	 * @var array
+	 * @var array<string, string|null>
 	 */
 	public static $repos;
 

@@ -1,5 +1,25 @@
 #### [unreleased]
 
+#### 13.0.0 / 2026-05-31 🎂
+* use `afragen/wp-readme-parser` drop-in replacement for `afragen/wordpress-plugin-readme-parser`
+* update requirements to PHP 8.0 for new parser due to testing
+* add `maybe_extend_repo_cache()` to update the timeout if the remote and cached version numbers are same, should avoid API calls for current data
+* update `(get|set)_repo_cache()`
+* fix wp-cron and multisite
+* more efficient use of cache
+* decrease data stored with API request response
+* fix `Release Asset` header to save as boolean
+* add `populate_api_data()` to populate even when API requests are skipped
+* set `error_cache` to its own cached state outside the main repo cache
+* fix Add_Ons cache to use dedicated repo key with proper timeout handling
+* fix `GitHub_API::get_remote_readme()` missing return statement
+* fix `GU_Trait::use_release_asset()` undefined property PHP 8.x warnings via null coalescing
+* fix `Basic_Auth_Loader::get_slug_for_credentials()` array slug check order — `is_array()` must precede `sanitize_text_field()` so TGMPA array slugs are not silently discarded
+* borrow function from FAIR Connect to sort plugins_api modal tabs in correct order
+* add PHPStan level 6 testing and a whole mess of phpunit tests with load of help from Claude
+* consolidate cron task to eliminate potential duplication of API requests
+* update instructions for CLI installation
+
 #### 12.24.2 / 2026-03-25
 * update freemius/wordpress-sdk
 * fix delete_all_cached_data() for multisite thanks Eileen Mack

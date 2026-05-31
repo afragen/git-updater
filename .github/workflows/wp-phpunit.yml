@@ -24,6 +24,9 @@ jobs:
       fail-fast: false
       matrix:
         php-versions: ["8.0", "8.1", "8.2", "8.3", "8.4", "8.5"]
+        include:
+          - php-versions: "8.0"
+            composer-flags: "--ignore-platform-reqs"
 
     name: PHP ${{ matrix.php-versions }} Test on ubuntu-latest
     steps:
@@ -50,7 +53,7 @@ jobs:
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Composer install
-        run: composer install --optimize-autoloader --prefer-dist
+        run: composer install --optimize-autoloader --prefer-dist ${{ matrix.composer-flags }}
 
       - name: Install SVN
         run: sudo apt-get update && sudo apt-get install -y subversion
@@ -58,7 +61,34 @@ jobs:
       - name: Install WP Tests
         run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 latest
 
-      - name: PHPUnit tests
+      - name: PHPUnit tests (single site)
         run: |
           echo "define('WP_TESTS_PHPUNIT_POLYFILLS_PATH', '$HOME/.composer/vendor/yoast/phpunit-polyfills');" >> /tmp/wordpress-tests-lib/wp-tests-config.php
           phpunit --config=phpunit.xml
+
+      - name: PHPUnit tests (multisite)
+        run: |
+          WP_MULTISITE=1 phpunit --config=phpunit.xml
+
+  phpstan:
+    runs-on: ubuntu-latest
+    name: PHPStan Static Analysis
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          coverage: none
+          tools: composer
+        env:
+          COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Composer install
+        run: composer install --optimize-autoloader --prefer-dist
+
+      - name: PHPStan
+        run: composer phpstan

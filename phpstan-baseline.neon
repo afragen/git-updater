@@ -1,0 +1,43 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Function FAIR\\Default_Repo\\get_default_repo_domain not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Git_Updater/Bootstrap.php
+
+		-
+			message: '#^Call to static method instance\(\) on an unknown class FS_Plugin_Updater\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Git_Updater/GU_Freemius.php
+
+		-
+			message: '#^Function gu_fs not found\.$#'
+			identifier: function.notFound
+			count: 2
+			path: src/Git_Updater/GU_Freemius.php
+
+		-
+			message: '#^Inner named functions are not supported by PHPStan\. Consider refactoring to an anonymous function, class method, or a top\-level\-defined function\. See issue \#165 \(https\://github\.com/phpstan/phpstan/issues/165\) for more details\.$#'
+			identifier: function.inner
+			count: 1
+			path: src/Git_Updater/GU_Freemius.php
+
+		-
+			message: '#^Parameter \$gu_fs of method Fragen\\Git_Updater\\GU_Freemius\:\:remove_fs_plugin_updater_hooks\(\) has invalid type Freemius\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Git_Updater/GU_Freemius.php
+
+		-
+			message: '#^Function gu_fs not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Git_Updater/GU_Upgrade.php
+
+		-
+			message: '#^Function gu_fs not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Git_Updater/Messages.php

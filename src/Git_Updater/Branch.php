@@ -18,7 +18,7 @@ use stdClass;
  * Exit if called directly.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	die; // @codeCoverageIgnore
 }
 
 /**
@@ -30,14 +30,14 @@ class Branch {
 	/**
 	 * Holds Git Updater options
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	protected static $options;
 
 	/**
 	 * Holds Git Updater Base class object.
 	 *
-	 * @var Fragen\Git_Updater\Base
+	 * @var \Fragen\Git_Updater\Base
 	 */
 	protected $base;
 
@@ -47,20 +47,6 @@ class Branch {
 	 * @var string|bool
 	 */
 	protected $tag;
-
-	/**
-	 * Holds current repo cache.
-	 *
-	 * @var array|bool
-	 */
-	protected $cache;
-
-	/**
-	 * Holds data to be stored.
-	 *
-	 * @var string[]
-	 */
-	protected $response;
 
 	/**
 	 * Constructor.
@@ -80,7 +66,7 @@ class Branch {
 	 * @return mixed
 	 */
 	public function get_current_branch( $repo ) {
-		$cache          = $this->get_repo_cache( $repo->slug );
+		$cache          = $this->get_repo_cache( $repo->slug, false );
 		$current_branch = ! empty( $cache['current_branch'] )
 			? $cache['current_branch']
 			: $repo->branch;
@@ -94,7 +80,7 @@ class Branch {
 	 * @param string   $type plugin|theme.
 	 * @param stdClass $repo Repo object.
 	 *
-	 * @return array $rollback Rollback transient.
+	 * @return array<string, mixed>|stdClass $rollback Rollback transient.
 	 */
 	public function set_rollback_transient( $type, $repo ) {
 		$repo_api = Singleton::get_instance( 'API\API', $this )->get_repo_api( $repo->git, $repo );
@@ -110,8 +96,8 @@ class Branch {
 		 * @since 10.0.0
 		 *
 		 * @param string    $download_link Download URL.
-		 * @param /stdClass $repo
-		 * @param string    $this->tag     Branch or tag for rollback.
+		 * @param stdClass  $repo
+		 * @param string    $tag           Branch or tag for rollback.
 		 */
 		$download_link = apply_filters( 'gu_post_construct_download_link', $download_link, $repo, $this->tag );
 
@@ -144,7 +130,7 @@ class Branch {
 	 * @return void
 	 */
 	public function set_branch_on_switch( $repo ) {
-		$this->cache = $this->get_repo_cache( $repo );
+		$cache = $this->get_repo_cache( $repo, false );
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -154,17 +140,17 @@ class Branch {
 			return;
 		}
 
-		$tag_array    = isset( $this->cache['tags'] ) && is_array( $this->cache['tags'] );
-		$in_tag_array = $tag_array && in_array( $rollback, $this->cache['tags'], true );
+		$tag_array    = isset( $cache['tags'] ) && is_array( $cache['tags'] );
+		$in_tag_array = $tag_array && in_array( $rollback, $cache['tags'], true );
 		if ( $in_tag_array ) {
-			$current_branch = $this->cache[ $repo ]['PrimaryBranch'] ?? 'master';
+			$current_branch = $cache[ $repo ]['PrimaryBranch'] ?? 'master';
 		}
 
-		if ( ! $in_tag_array && isset( $_GET['action'], $this->cache['branches'] )
+		if ( ! $in_tag_array && isset( $_GET['action'], $cache['branches'] )
 			&& in_array( $_GET['action'], [ 'upgrade-plugin', 'upgrade-theme' ], true )
 		) {
 			// phpcs:enable
-			$current_branch = array_key_exists( $rollback, $this->cache['branches'] )
+			$current_branch = array_key_exists( $rollback, $cache['branches'] )
 				? sanitize_text_field( $rollback )
 				: 'master';
 		}
@@ -180,7 +166,8 @@ class Branch {
 	 *
 	 * @access public
 	 *
-	 * @param array $install Array of install data.
+	 * @param array<string, mixed> $install Array of install data.
+	 * @return void
 	 */
 	public function set_branch_on_install( $install ) {
 		$this->set_repo_cache( 'current_branch', $install['git_updater_branch'], $install['repo'] );
@@ -218,7 +205,7 @@ class Branch {
 			$id       = $plugin['slug'] . '-id';
 			$branches = $config[ $plugin['slug'] ]->branches ?? null;
 		} else {
-			return false;
+			return false; // @codeCoverageIgnore
 		}
 
 		// Get current branch.
@@ -231,7 +218,7 @@ class Branch {
 		$branch_switch_data['id']                = $id;
 		$branch_switch_data['branch']            = $branch;
 		$branch_switch_data['branches']          = $branches;
-		$branch_switch_data['release_asset']     = $repo->release_asset;
+		$branch_switch_data['release_asset']     = filter_var( $repo->release_asset, FILTER_VALIDATE_BOOLEAN );
 		$branch_switch_data['primary_branch']    = $repo->primary_branch;
 
 		/*
@@ -278,7 +265,7 @@ class Branch {
 		$branch_switch_data['id']                = $id;
 		$branch_switch_data['branch']            = $branch;
 		$branch_switch_data['branches']          = $branches;
-		$branch_switch_data['release_asset']     = $repo->release_asset;
+		$branch_switch_data['release_asset']     = filter_var( $repo->release_asset, FILTER_VALIDATE_BOOLEAN );
 		$branch_switch_data['primary_branch']    = $repo->primary_branch;
 
 		/*
@@ -336,7 +323,7 @@ class Branch {
 				 * Filter to return the number of tagged releases (rollbacks) in branch switching.
 				 *
 				 * @since 10.0.0
-				 * @param int Number of rollbacks. Zero implies value not set.
+				 * @param int $num_rollbacks Number of rollbacks. Zero implies value not set.
 				 */
 				$num_rollbacks = absint( apply_filters( 'gu_number_rollbacks', 0 ) );
 
@@ -365,8 +352,8 @@ class Branch {
 	/**
 	 * Make branch switch row.
 	 *
-	 * @param array $data   Parameters for creating branch switching row.
-	 * @param array $config Array of repo objects.
+	 * @param array<string, mixed>    $data   Parameters for creating branch switching row.
+	 * @param array<string, stdClass> $config Array of repo objects.
 	 *
 	 * @return void
 	 */
@@ -445,7 +432,7 @@ class Branch {
 			 * Filter to return the number of tagged releases (rollbacks) in branch switching.
 			 *
 			 * @since 10.0.0
-			 * @param int Number of rollbacks. Zero implies value not set.
+			 * @param int $num_rollbacks Number of rollbacks. Zero implies value not set.
 			 */
 			$num_rollbacks = absint( apply_filters( 'gu_number_rollbacks', 0 ) );
 

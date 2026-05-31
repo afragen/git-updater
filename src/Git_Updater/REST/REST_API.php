@@ -41,14 +41,6 @@ class REST_API {
 	public static $namespace = 'git-updater/v1';
 
 	/**
-	 * Variable to hold all repository remote info.
-	 *
-	 * @access public
-	 * @var array
-	 */
-	public $response = [];
-
-	/**
 	 * Load hooks.
 	 *
 	 * @return void
@@ -261,14 +253,14 @@ class REST_API {
 				[
 					'show_in_index'       => true,
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ new REST_Update(), 'process_request' ],
+					'callback'            => [ new Rest_Update(), 'process_request' ],
 					'permission_callback' => '__return_true',
 					'args'                => $update_args,
 				],
 				[
 					'show_in_index'       => false,
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => [ new REST_Update(), 'process_request' ],
+					'callback'            => [ new Rest_Update(), 'process_request' ],
 					'permission_callback' => '__return_true',
 					'args'                => $update_args,
 				],
@@ -327,14 +319,14 @@ class REST_API {
 				[
 					'show_in_index'       => false,
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ new REST_Update(), 'process_request' ],
+					'callback'            => [ new Rest_Update(), 'process_request' ],
 					'permission_callback' => '__return_true',
 					'args'                => $update_args,
 				],
 				[
 					'show_in_index'       => false,
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => [ new REST_Update(), 'process_request' ],
+					'callback'            => [ new Rest_Update(), 'process_request' ],
 					'permission_callback' => '__return_true',
 					'args'                => $update_args,
 				],
@@ -345,7 +337,7 @@ class REST_API {
 	/**
 	 * Return deprecation notice.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function deprecated() {
 		$namespace = self::$namespace;
@@ -367,7 +359,7 @@ class REST_API {
 	/**
 	 * Return current REST namespace.
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
 	public function get_namespace() {
 		return [ 'namespace' => self::$namespace ];
@@ -378,13 +370,14 @@ class REST_API {
 	 *
 	 * @param WP_REST_Request $request REST API response.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function get_remote_repo_data( WP_REST_Request $request ) {
 		// Test for API key and exit if incorrect.
 		if ( $this->get_class_vars( 'Remote_Management', 'api_key' ) !== $request->get_param( 'key' ) ) {
 			return [ 'error' => 'Bad API key. No repo data for you.' ];
 		}
+		$slugs      = [];
 		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
 		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
 		$gu_tokens  = array_merge( $gu_plugins, $gu_themes );
@@ -439,12 +432,12 @@ class REST_API {
 	 *
 	 * @param WP_REST_Request $request REST API response.
 	 *
-	 * @return array|WP_Error
+	 * @return array<string, mixed>|WP_Error
 	 */
 	public function get_api_data( WP_REST_Request $request ) {
 		$slug = $request->get_param( 'slug' );
 		if ( ! $slug ) {
-			return (object) [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
+			return [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
 		}
 		$channel    = null !== $request->get_param( 'channel' );
 		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
@@ -458,13 +451,13 @@ class REST_API {
 
 			if ( $addition_slug === $slug ) {
 				if ( isset( $addition['private_package'] ) && true === (bool) $addition['private_package'] ) {
-					return (object) [ 'error' => 'Specified repo is not shared.' ];
+					return [ 'error' => 'Specified repo is not shared.' ];
 				}
 			}
 		}
 
 		if ( ! array_key_exists( $slug, $gu_repos ) ) {
-			return (object) [ 'error' => 'Specified repo does not exist.' ];
+			return [ 'error' => 'Specified repo does not exist.' ];
 		}
 
 		add_filter( 'gu_disable_wpcron', '__return_false' );
@@ -472,7 +465,7 @@ class REST_API {
 
 		if ( ! is_object( $repo_data ) || '0.0.0' === $repo_data->remote_version ) {
 			$rate_limit = 'github' === $repo_data->git ? $this->get_github_rate_limit_headers() : [];
-			return (object) [
+			return [
 				'error'      => 'API data response is incorrect.',
 				'rate_limit' => $rate_limit,
 			];
@@ -550,12 +543,9 @@ class REST_API {
 			'homepage'          => $repo_data->homepage,
 			'external'          => 'xxx',
 		];
-		if ( ! is_wp_error( $repo_api_data['versions'] ) ) {
-			uksort( $repo_api_data['versions'], fn ( $a, $b ) => version_compare( $b, $a ) );
-		}
+		uksort( $repo_api_data['versions'], fn ( $a, $b ) => version_compare( $b, $a ) );
 
-		$repo_cache = $this->get_repo_cache( $slug );
-		Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->response = $repo_cache;
+		$repo_cache = $this->get_repo_cache( $slug, false );
 
 		// Add HTTP headers.
 		if ( $repo_api_data['download_link'] ) {
@@ -581,6 +571,7 @@ class REST_API {
 		}
 
 		$private_or_token = $repo_api_data['is_private'] || ! empty( $this->get_class_vars( 'API\API', 'options' )[ $slug ] );
+		$private_or_token = $private_or_token && ( '/git-updater/v1/update-api' === $request->get_route() );
 		if ( ! $private_or_token && ! in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true ) ) {
 			unset( $repo_api_data['auth_header']['headers']['Authorization'] );
 		}
@@ -597,7 +588,7 @@ class REST_API {
 	 *
 	 * @param WP_REST_Request $request REST API response.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function get_additions_api_data( WP_REST_Request $request ) {
 		$api_data   = [];
@@ -626,7 +617,7 @@ class REST_API {
 	/**
 	 * Get Additions data.
 	 *
-	 * @return array
+	 * @return array<int, array<string, mixed>>
 	 */
 	public function get_additions_data() {
 		$additions = get_site_option( 'git_updater_additions', [] );
@@ -651,15 +642,16 @@ class REST_API {
 	public function flush_repo_cache( $request ) {
 		// Test for API key and exit if incorrect.
 		if ( $this->get_class_vars( 'Remote_Management', 'api_key' ) !== $request->get_param( 'key' ) ) {
-			return [ 'error' => 'Bad API key. No flush for you.' ];
+			return (object) [ 'error' => 'Bad API key. No flush for you.' ];
 		}
 
 		$slug = $request->get_param( 'slug' );
 		if ( ! $slug ) {
 			return (object) [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
 		}
-		$flush   = $this->set_repo_cache( $slug, false, $slug, false, true );
-		$message = $flush
+		$cache_key = $this->get_cache_key( $slug );
+		$flush     = delete_site_option( $cache_key );
+		$message   = $flush
 			? [
 				'success' => true,
 				$slug     => "Repository cache for $slug has been flushed.",

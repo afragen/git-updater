@@ -6,6 +6,19 @@
 	convertNoticesToExceptions="true"
 	convertWarningsToExceptions="true"
 	>
+	<coverage processUncoveredFiles="true">
+		<include>
+			<directory suffix=".php">./src/Git_Updater</directory>
+		</include>
+		<exclude>
+			<directory suffix=".php">./src/Git_Updater/WP_CLI</directory>
+			<file>./src/Git_Updater/GU_Freemius.php</file>
+		</exclude>
+		<report>
+			<html outputDirectory="coverage-html"/>
+		</report>
+	</coverage>
+
 	<testsuites>
 		<testsuite name="tests">
 			<directory prefix="test-" suffix=".php">./tests/</directory>

@@ -1,0 +1,14 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    level: 6
+    bootstrapFiles:
+        - vendor/php-stubs/wp-cli-stubs/wp-cli-stubs.php
+    paths:
+        - src
+        - git-updater.php
+    excludePaths:
+        - '*/vendor/*'
+        - '*/tests/*'

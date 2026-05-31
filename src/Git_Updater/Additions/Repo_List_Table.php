@@ -22,12 +22,12 @@ use WP_List_Table;
  * PHP version check and exit.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	die; // @codeCoverageIgnore
 }
 
 // Load base class.
 if ( ! class_exists( 'WP_List_Table' ) ) {
-	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php'; // @codeCoverageIgnore
 }
 
 /**
@@ -37,21 +37,21 @@ class Repo_List_Table extends WP_List_Table {
 	/**
 	 * Holds site options.
 	 *
-	 * @var array
+	 * @var array<int, array<string, mixed>>
 	 */
 	protected static $options = [];
 
 	/**
 	 * Holds examples.
 	 *
-	 * @var array
+	 * @var array<int, array<string, mixed>>
 	 */
 	protected static $examples = [];
 
 	/**
 	 * Constructor.
 	 *
-	 * @param array $options Array of saved options.
+	 * @param array<int, array<string, mixed>> $options Array of saved options.
 	 */
 	public function __construct( $options ) {
 		global $status, $page;
@@ -112,8 +112,8 @@ class Repo_List_Table extends WP_List_Table {
 	 * For more detailed insight into how columns are handled, take a look at
 	 * WP_List_Table::single_row_columns()
 	 *
-	 * @param  array $item        A singular item (one full row's worth of data).
-	 * @param  array $column_name The name/slug of the column to be processed.
+	 * @param  array<string, mixed> $item        A singular item (one full row's worth of data).
+	 * @param  string               $column_name The name/slug of the column to be processed.
 	 * @return string Text or HTML to be placed inside the column <td>
 	 **************************************************************************/
 	public function column_default( $item, $column_name ) {
@@ -143,7 +143,7 @@ class Repo_List_Table extends WP_List_Table {
 	 * will need to generate the URLs yourself. You could even ensure the links
 	 *
 	 * @see WP_List_Table::::single_row_columns()
-	 * @param  array $item A singular item (one full row's worth of data).
+	 * @param  array<string, mixed> $item A singular item (one full row's worth of data).
 	 * @return string Text to be placed inside the column <td> (site title only)
 	 **************************************************************************/
 	public function column_slug( $item ) {
@@ -182,7 +182,7 @@ class Repo_List_Table extends WP_List_Table {
 	 * have it's own method.
 	 *
 	 * @see WP_List_Table::::single_row_columns()
-	 * @param  array $item A singular item (one full row's worth of data).
+	 * @param  array<string, mixed> $item A singular item (one full row's worth of data).
 	 * @return string Text to be placed inside the column <td> (movie title only)
 	 **************************************************************************/
 	public function column_cb( $item ) {
@@ -206,7 +206,7 @@ class Repo_List_Table extends WP_List_Table {
 	 * bulk actions or checkboxes, simply leave the 'cb' entry out of your array.
 	 *
 	 * @see WP_List_Table::::single_row_columns()
-	 * @return array An associative array containing column information: 'slugs'=>'Visible Titles'
+	 * @return array<string, string> An associative array containing column information: 'slugs'=>'Visible Titles'
 	 **************************************************************************/
 	public function get_columns() {
 		$columns = [
@@ -234,7 +234,7 @@ class Repo_List_Table extends WP_List_Table {
 	 * the ORDERBY and ORDER querystring variables within prepare_items() and sort
 	 * your data accordingly (usually by modifying your query).
 	 *
-	 * @return array An associative array containing all the columns that should be sortable: 'slugs'=>array('data_values',bool)
+	 * @return array<string, array<int, mixed>> An associative array containing all the columns that should be sortable: 'slugs'=>array('data_values',bool)
 	 **************************************************************************/
 	public function get_sortable_columns() {
 		$sortable_columns = [
@@ -258,14 +258,14 @@ class Repo_List_Table extends WP_List_Table {
 	 * Also note that list tables are not automatically wrapped in <form> elements,
 	 * so you will need to create those manually in order for bulk actions to function.
 	 *
-	 * @return void|array An associative array containing all the bulk actions: 'slugs'=>'Visible Titles'
+	 * @return array<string, string> An associative array containing all the bulk actions: 'slugs'=>'Visible Titles'
 	 **************************************************************************/
 	public function get_bulk_actions() {
 		$actions = [
 			'delete' => esc_html__( 'Delete', 'git-updater' ),
 		];
 
-		// return $actions;
+		return $actions;
 	}
 
 	/** ************************************************************************
@@ -274,6 +274,8 @@ class Repo_List_Table extends WP_List_Table {
 	 * clean and organized.
 	 *
 	 * @see $this->prepare_items()
+	 *
+	 * @return void
 	 **************************************************************************/
 	public function process_bulk_action() {
 		// Detect when a bulk action is being triggered...
@@ -283,7 +285,7 @@ class Repo_List_Table extends WP_List_Table {
 			return;
 		}
 		$slugs = isset( $_REQUEST['slug'] ) ? sanitize_key( wp_unslash( $_REQUEST['slug'] ) ) : null;
-		$slugs = is_array( $slugs ) ? $slugs : (array) $slugs;
+		$slugs = (array) $slugs;
 		foreach ( $slugs as $slug ) {
 			foreach ( self::$options as $key => $option ) {
 				if ( in_array( $slug, $option, true ) ) {
@@ -304,13 +306,15 @@ class Repo_List_Table extends WP_List_Table {
 	 * $this->set_pagination_args(), although the following properties and methods
 	 * are frequently interacted with here...
 	 *
-	 * @global WPDB $wpdb
+	 * @global \WPDB $wpdb
 	 * @uses $this->_column_headers
 	 * @uses $this->items
 	 * @uses $this->get_columns()
 	 * @uses $this->get_sortable_columns()
 	 * @uses $this->get_pagenum()
 	 * @uses $this->set_pagination_args()
+	 *
+	 * @return void
 	 **************************************************************************/
 	public function prepare_items() {
 		global $wpdb; // This is used only if making any database queries.
@@ -406,7 +410,7 @@ class Repo_List_Table extends WP_List_Table {
 			[
 				'total_items' => $total_items,  // WE have to calculate the total number of items.
 				'per_page'    => $per_page,  // WE have to determine how many items to show on a page.
-				'total_pages' => ceil( $total_items / $per_page ), // WE have to calculate the total number of pages.
+				'total_pages' => (int) ceil( $total_items / $per_page ), // WE have to calculate the total number of pages.
 			]
 		);
 	}
@@ -419,8 +423,8 @@ class Repo_List_Table extends WP_List_Table {
 	 * to a custom query. The returned data will be pre-sorted, and this array
 	 * sorting technique would be unnecessary.
 	 *
-	 * @param array $a Array of table row data.
-	 * @param array $b Array of table row data.
+	 * @param array<string, mixed> $a Array of table row data.
+	 * @param array<string, mixed> $b Array of table row data.
 	 *
 	 * @return int Sort order, either 1 or -1.
 	 */

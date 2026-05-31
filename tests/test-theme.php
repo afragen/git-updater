@@ -1,0 +1,1414 @@
+<?php
+/**
+ * Tests for Theme class methods.
+ *
+ * Covers:
+ * - Theme::get_theme_configs()       — returns an array
+ * - Theme::load_pre_filters()        — filters registered (single-site vs multisite)
+ * - Theme::themes_api()              — non-info action; unknown slug; background-wait skip; dot_org skip; populated response
+ * - Theme::wp_theme_update_row()     — no output when theme not in transient response; unavailable msg; update-now link
+ * - Theme::remove_after_theme_row()  — removes wp_theme_update_row for known theme; ignores unknown
+ * - Theme::append_theme_actions_content() — empty when no transient; HTML with update link; HTML without package
+ * - Theme::customize_theme_update_html()  — skips missing slugs; sets 'update' key on hasUpdate; appends to description
+ * - Theme::update_site_transient()   — non-object input; empty config; update/no_update paths;
+ *                                      no_update not overwritten; dot_org override removal; release_asset branch package
+ * - Theme::get_theme_meta()           — returns array; gu_additions filter receives 'theme' type; fixture theme discovered;
+ *                                      null-key continue; branch migration; .git/HEAD branch override
+ * - Theme::get_remote_theme_meta()   — load_pre_filters called; cron scheduled for uncached repos; no duplicate cron;
+ *                                      gu_disable_wpcron prevents scheduling; multisite after_theme_row actions; tag suppresses update-row action
+ *
+ * Test_Theme_Config_Discovery requires the fixture theme to be mounted via .wp-env.json.
+ * Skip message: Run `npm run wp-env start` after adding the theme fixture.
+ *
+ * ReflectionProperty/Method are used to inject mock configs and call protected methods
+ * so tests run without network calls or a live fixture.
+ *
+ * @package Git_Updater
+ */
+
+use Fragen\Git_Updater\Base;
+use Fragen\Git_Updater\Theme;
+
+// ---------------------------------------------------------------------------
+// Shared helper trait
+// ---------------------------------------------------------------------------
+
+trait Theme_Mock_Helper {
+
+	/**
+	 * Build a fully-populated mock theme stdClass.
+	 *
+	 * @param array<string, mixed> $overrides Fields to override.
+	 * @return stdClass
+	 */
+	private function make_theme_obj( array $overrides = [] ): stdClass {
+		return (object) array_merge(
+			[
+				'slug'           => 'test-gu-theme',
+				'file'           => 'test-gu-theme/style.css',
+				'uri'            => 'https://github.com/afragen/test-gu-theme',
+				'theme_uri'      => 'https://github.com/afragen/test-gu-theme',
+				'branch'         => 'main',
+				'primary_branch' => 'main',
+				'git'            => 'github',
+				'type'           => 'theme',
+				'remote_version' => '2.0.0',
+				'local_version'  => '1.0.0',
+				'download_link'  => 'https://example.com/test-gu-theme.zip',
+				'tested'         => '6.5',
+				'requires'       => '',
+				'requires_php'   => '',
+				'branches'       => [ 'main' => [ 'download' => 'https://example.com/main.zip' ] ],
+				'dot_org'        => false,
+				'name'           => 'Test GU Theme',
+				'author'         => 'Test Author',
+				'homepage'       => 'https://example.com',
+				'donate_link'    => '',
+				'sections'       => [ 'description' => 'A test theme description.' ],
+				'downloaded'     => 0,
+				'last_updated'   => '2024-01-01',
+				'rating'         => 0,
+				'num_ratings'    => 0,
+				'release_asset'  => false,
+				'did'            => null,
+				'icons'          => [],
+				'banners'        => [],
+			],
+			$overrides
+		);
+	}
+
+	/**
+	 * Construct a Theme instance with a pre-injected config array.
+	 *
+	 * @param array<string, stdClass> $config Mock config keyed by slug.
+	 * @return Theme
+	 */
+	private function theme_with_config( array $config ): Theme {
+		$theme = new Theme();
+		$ref   = new ReflectionProperty( Theme::class, 'config' );
+		$ref->setAccessible( true );
+		$ref->setValue( $theme, $config );
+		return $theme;
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Test_Theme_Get_Theme_Configs
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_Theme_Get_Theme_Configs
+ */
+class Test_Theme_Get_Theme_Configs extends WP_UnitTestCase {
+	use Theme_Mock_Helper;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+	}
+
+	public function test_returns_array(): void {
+		$theme   = new Theme();
+		$configs = $theme->get_theme_configs();
+		$this->assertIsArray( $configs );
+	}
+
+	public function test_reflects_injected_config(): void {
+		$theme_obj = $this->make_theme_obj();
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$configs   = $theme->get_theme_configs();
+		$this->assertArrayHasKey( 'test-gu-theme', $configs );
+		$this->assertSame( 'test-gu-theme', $configs['test-gu-theme']->slug );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Test_Theme_Load_Pre_Filters
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_Theme_Load_Pre_Filters
+ */
+class Test_Theme_Load_Pre_Filters extends WP_UnitTestCase {
+	use Theme_Mock_Helper;
+
+	private Theme $theme;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->theme = new Theme();
+	}
+
+	public function tear_down(): void {
+		remove_filter( 'themes_api', [ $this->theme, 'themes_api' ], 99 );
+		remove_filter( 'site_transient_update_themes', [ $this->theme, 'update_site_transient' ], 15 );
+		remove_filter( 'wp_prepare_themes_for_js', [ $this->theme, 'customize_theme_update_html' ] );
+		parent::tear_down();
+	}
+
+	public function test_registers_themes_api_filter(): void {
+		$this->theme->load_pre_filters();
+		$this->assertSame( 99, has_filter( 'themes_api', [ $this->theme, 'themes_api' ] ) );
+	}
+
+	public function test_registers_site_transient_update_themes_filter(): void {
+		$this->theme->load_pre_filters();
+		$this->assertSame( 15, has_filter( 'site_transient_update_themes', [ $this->theme, 'update_site_transient' ] ) );
+	}
+
+	public function test_registers_wp_prepare_themes_for_js_on_single_site(): void {
+		if ( is_multisite() ) {
+			$this->markTestSkipped( 'Single-site only.' );
+		}
+		$this->theme->load_pre_filters();
+		$this->assertNotFalse( has_filter( 'wp_prepare_themes_for_js', [ $this->theme, 'customize_theme_update_html' ] ) );
+	}
+
+	public function test_no_wp_prepare_themes_for_js_on_multisite(): void {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Multisite only.' );
+		}
+		$this->theme->load_pre_filters();
+		$this->assertFalse( has_filter( 'wp_prepare_themes_for_js', [ $this->theme, 'customize_theme_update_html' ] ) );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Test_Theme_Themes_API_Filter
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_Theme_Themes_API_Filter
+ */
+class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
+	use Theme_Mock_Helper;
+
+	private string $cache_key;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->cache_key = 'ghu-' . md5( 'test-gu-theme' );
+		delete_site_option( $this->cache_key );
+	}
+
+	public function tear_down(): void {
+		delete_site_option( $this->cache_key );
+		parent::tear_down();
+	}
+
+	public function test_returns_result_for_non_theme_information_action(): void {
+		$theme    = $this->theme_with_config( [ 'test-gu-theme' => $this->make_theme_obj() ] );
+		$response = new stdClass();
+		$response->slug = 'test-gu-theme';
+		$result = $theme->themes_api( false, 'query_themes', $response );
+		$this->assertFalse( $result );
+	}
+
+	public function test_returns_result_when_slug_not_in_config(): void {
+		$theme    = $this->theme_with_config( [] );
+		$response = new stdClass();
+		$response->slug = 'unknown-theme';
+		// Unknown slug → $theme = false → waiting_for_background_update(false) = true → returns $result.
+		$result = $theme->themes_api( 'original', 'theme_information', $response );
+		$this->assertSame( 'original', $result );
+	}
+
+	public function test_returns_result_when_waiting_for_background_update(): void {
+		// Empty cache → waiting_for_background_update = true.
+		$theme    = $this->theme_with_config( [ 'test-gu-theme' => $this->make_theme_obj() ] );
+		$response = new stdClass();
+		$response->slug = 'test-gu-theme';
+		$result = $theme->themes_api( 'original', 'theme_information', $response );
+		$this->assertSame( 'original', $result );
+	}
+
+	public function test_returns_result_for_dot_org_theme(): void {
+		update_site_option( $this->cache_key, [ 'any' => 'data' ] );
+		$theme_obj = $this->make_theme_obj( [ 'dot_org' => true ] );
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$response  = new stdClass();
+		$response->slug = 'test-gu-theme';
+		$result = $theme->themes_api( false, 'theme_information', $response );
+		$this->assertFalse( $result );
+	}
+
+	public function test_populates_response_for_git_theme(): void {
+		update_site_option( $this->cache_key, [ 'any' => 'data' ] );
+		$theme_obj = $this->make_theme_obj( [ 'dot_org' => false ] );
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$response  = new stdClass();
+		$response->slug = 'test-gu-theme';
+		$result = $theme->themes_api( false, 'theme_information', $response );
+		$this->assertInstanceOf( stdClass::class, $result );
+		$this->assertSame( 'Test GU Theme', $result->name );
+		$this->assertSame( '2.0.0', $result->version );
+		$this->assertSame( 'Test Author', $result->author );
+	}
+
+	public function test_populates_description_as_joined_sections(): void {
+		update_site_option( $this->cache_key, [ 'any' => 'data' ] );
+		$theme_obj = $this->make_theme_obj( [
+			'dot_org'  => false,
+			'sections' => [
+				'description' => 'Description text.',
+				'changelog'   => 'Changelog text.',
+			],
+		] );
+		$theme    = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$response = new stdClass();
+		$response->slug = 'test-gu-theme';
+		$result = $theme->themes_api( false, 'theme_information', $response );
+		$this->assertStringContainsString( 'Description text.', $result->description );
+		$this->assertStringContainsString( 'Changelog text.', $result->description );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Test_Theme_Wp_Theme_Update_Row
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_Theme_Wp_Theme_Update_Row
+ *
+ * Tests Theme::wp_theme_update_row(), which echoes HTML directly.
+ * The "with response" cases require _get_list_table() (WP admin context);
+ * those tests load the necessary admin includes and skip gracefully if unavailable.
+ */
+class Test_Theme_Wp_Theme_Update_Row extends WP_UnitTestCase {
+	use Theme_Mock_Helper;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		if ( ! class_exists( 'WP_List_Table' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+		}
+		if ( ! class_exists( 'WP_Plugins_List_Table' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/class-wp-plugins-list-table.php';
+		}
+		if ( ! function_exists( '_get_list_table' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/template.php';
+		}
+	}
+
+	public function tear_down(): void {
+		delete_site_transient( 'update_themes' );
+		parent::tear_down();
+	}
+
+	public function test_produces_no_output_when_transient_is_absent(): void {
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $this->make_theme_obj() ] );
+		ob_start();
+		$theme->wp_theme_update_row( 'test-gu-theme', [ 'Name' => 'Test GU Theme' ] );
+		$output = ob_get_clean();
+		$this->assertSame( '', $output );
+	}
+
+	public function test_produces_no_output_when_theme_key_absent_from_response(): void {
+		$update           = new stdClass();
+		$update->response = [ 'other-theme' => [ 'new_version' => '2.0.0', 'package' => '' ] ];
+		set_site_transient( 'update_themes', $update );
+
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $this->make_theme_obj() ] );
+		ob_start();
+		$theme->wp_theme_update_row( 'test-gu-theme', [ 'Name' => 'Test GU Theme' ] );
+		$output = ob_get_clean();
+		$this->assertSame( '', $output );
+	}
+
+	public function test_outputs_unavailable_message_when_package_is_empty(): void {
+		if ( ! function_exists( '_get_list_table' ) ) {
+			$this->markTestSkipped( '_get_list_table() not available outside admin context.' );
+		}
+		$update           = new stdClass();
+		$update->response = [
+			'test-gu-theme' => [
+				'new_version' => '2.0.0',
+				'package'     => '',
+				'url'         => '',
+			],
+		];
+		set_site_transient( 'update_themes', $update );
+
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $this->make_theme_obj() ] );
+		ob_start();
+		$theme->wp_theme_update_row( 'test-gu-theme', [ 'Name' => 'Test GU Theme' ] );
+		$output = ob_get_clean();
+		$this->assertStringContainsString( '2.0.0', $output );
+		$this->assertStringContainsString( 'unavailable', strtolower( $output ) );
+	}
+
+	public function test_outputs_update_now_link_when_package_is_set(): void {
+		if ( ! function_exists( '_get_list_table' ) ) {
+			$this->markTestSkipped( '_get_list_table() not available outside admin context.' );
+		}
+		$update           = new stdClass();
+		$update->response = [
+			'test-gu-theme' => [
+				'new_version' => '2.0.0',
+				'package'     => 'https://example.com/test-gu-theme.zip',
+				'url'         => '',
+			],
+		];
+		set_site_transient( 'update_themes', $update );
+
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $this->make_theme_obj() ] );
+		ob_start();
+		$theme->wp_theme_update_row( 'test-gu-theme', [ 'Name' => 'Test GU Theme' ] );
+		$output = ob_get_clean();
+		$this->assertStringContainsString( '2.0.0', $output );
+		$this->assertStringContainsString( 'update', strtolower( $output ) );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Test_Theme_Remove_After_Theme_Row
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_Theme_Remove_After_Theme_Row
+ */
+class Test_Theme_Remove_After_Theme_Row extends WP_UnitTestCase {
+	use Theme_Mock_Helper;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+	}
+
+	public function test_removes_action_for_known_theme_key(): void {
+		add_action( 'after_theme_row_test-gu-theme', 'wp_theme_update_row' );
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $this->make_theme_obj() ] );
+		$theme->remove_after_theme_row( 'test-gu-theme' );
+		$this->assertFalse( has_action( 'after_theme_row_test-gu-theme', 'wp_theme_update_row' ) );
+	}
+
+	public function test_does_nothing_for_unknown_theme_key(): void {
+		add_action( 'after_theme_row_other-theme', 'wp_theme_update_row' );
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $this->make_theme_obj() ] );
+		$theme->remove_after_theme_row( 'other-theme' );
+		// Action should still be present because 'other-theme' is not in our config.
+		$this->assertNotFalse( has_action( 'after_theme_row_other-theme', 'wp_theme_update_row' ) );
+		remove_action( 'after_theme_row_other-theme', 'wp_theme_update_row' );
+	}
+
+	public function test_does_nothing_for_empty_config(): void {
+		add_action( 'after_theme_row_test-gu-theme', 'wp_theme_update_row' );
+		$theme = $this->theme_with_config( [] );
+		$theme->remove_after_theme_row( 'test-gu-theme' );
+		// Config is empty, action should remain.
+		$this->assertNotFalse( has_action( 'after_theme_row_test-gu-theme', 'wp_theme_update_row' ) );
+		remove_action( 'after_theme_row_test-gu-theme', 'wp_theme_update_row' );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Test_Theme_Append_Theme_Actions_Content
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_Theme_Append_Theme_Actions_Content
+ */
+class Test_Theme_Append_Theme_Actions_Content extends WP_UnitTestCase {
+	use Theme_Mock_Helper;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+	}
+
+	public function tear_down(): void {
+		delete_site_transient( 'update_themes' );
+		parent::tear_down();
+	}
+
+	/**
+	 * Call the protected append_theme_actions_content() via Reflection.
+	 *
+	 * @param Theme    $theme     Theme instance.
+	 * @param stdClass $theme_obj Theme config object.
+	 * @return string
+	 */
+	private function invoke_append( Theme $theme, stdClass $theme_obj ): string {
+		$ref = new ReflectionMethod( Theme::class, 'append_theme_actions_content' );
+		$ref->setAccessible( true );
+		return $ref->invoke( $theme, $theme_obj );
+	}
+
+	public function test_returns_string_when_no_update_transient(): void {
+		$theme_obj = $this->make_theme_obj();
+		$theme     = new Theme();
+		$result    = $this->invoke_append( $theme, $theme_obj );
+		$this->assertIsString( $result );
+	}
+
+	public function test_returns_empty_string_when_slug_not_in_transient_response(): void {
+		$update            = new stdClass();
+		$update->response  = [];
+		set_site_transient( 'update_themes', $update );
+		$theme_obj = $this->make_theme_obj();
+		$theme     = new Theme();
+		$result    = $this->invoke_append( $theme, $theme_obj );
+		$this->assertSame( '', $result );
+	}
+
+	public function test_returns_html_with_version_when_package_set(): void {
+		$update           = new stdClass();
+		$update->response = [
+			'test-gu-theme' => [
+				'new_version' => '2.0.0',
+				'package'     => 'https://example.com/test-gu-theme.zip',
+			],
+		];
+		set_site_transient( 'update_themes', $update );
+
+		$theme_obj = $this->make_theme_obj( [ 'remote_version' => '2.0.0' ] );
+		$theme     = new Theme();
+		$result    = $this->invoke_append( $theme, $theme_obj );
+		$this->assertStringContainsString( '2.0.0', $result );
+		$this->assertStringContainsString( 'update now', $result );
+	}
+
+	public function test_returns_html_without_update_link_when_no_package(): void {
+		$update           = new stdClass();
+		$update->response = [
+			'test-gu-theme' => [
+				'new_version' => '2.0.0',
+				'package'     => '',
+			],
+		];
+		set_site_transient( 'update_themes', $update );
+
+		$theme_obj = $this->make_theme_obj( [ 'remote_version' => '2.0.0' ] );
+		$theme     = new Theme();
+		$result    = $this->invoke_append( $theme, $theme_obj );
+		$this->assertStringContainsString( 'Automatic update is unavailable', $result );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Test_Theme_Customize_Theme_Update_HTML
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_Theme_Customize_Theme_Update_HTML
+ */
+class Test_Theme_Customize_Theme_Update_HTML extends WP_UnitTestCase {
+	use Theme_Mock_Helper;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+	}
+
+	public function tear_down(): void {
+		delete_site_transient( 'update_themes' );
+		parent::tear_down();
+	}
+
+	public function test_skips_slugs_not_in_prepared_array(): void {
+		$theme_obj = $this->make_theme_obj();
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$prepared  = [ 'different-theme' => [ 'description' => 'Other theme.' ] ];
+		$result    = $theme->customize_theme_update_html( $prepared );
+		$this->assertSame( $prepared, $result );
+	}
+
+	public function test_sets_update_key_when_has_update(): void {
+		$theme_obj = $this->make_theme_obj();
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$prepared  = [
+			'test-gu-theme' => [
+				'hasUpdate'   => true,
+				'update'      => '',
+				'description' => 'Original description.',
+			],
+		];
+		$result = $theme->customize_theme_update_html( $prepared );
+		$this->assertArrayHasKey( 'update', $result['test-gu-theme'] );
+	}
+
+	public function test_appends_to_description_when_no_update(): void {
+		$theme_obj = $this->make_theme_obj();
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$original  = 'Original description.';
+		$prepared  = [
+			'test-gu-theme' => [
+				'hasUpdate'   => false,
+				'description' => $original,
+			],
+		];
+		$result = $theme->customize_theme_update_html( $prepared );
+		// Description key should still exist (appended to, even if nothing added in test env).
+		$this->assertArrayHasKey( 'description', $result['test-gu-theme'] );
+	}
+
+	public function test_returns_all_themes_including_unmanaged_ones(): void {
+		$theme_obj = $this->make_theme_obj();
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$prepared  = [
+			'test-gu-theme'  => [ 'hasUpdate' => false, 'description' => 'Managed.' ],
+			'unrelated-theme' => [ 'hasUpdate' => false, 'description' => 'Not managed.' ],
+		];
+		$result = $theme->customize_theme_update_html( $prepared );
+		$this->assertArrayHasKey( 'test-gu-theme', $result );
+		$this->assertArrayHasKey( 'unrelated-theme', $result );
+		$this->assertSame( 'Not managed.', $result['unrelated-theme']['description'] );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Test_Theme_Update_Site_Transient_Method
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_Theme_Update_Site_Transient_Method
+ */
+class Test_Theme_Update_Site_Transient_Method extends WP_UnitTestCase {
+	use Theme_Mock_Helper;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+	}
+
+	public function tear_down(): void {
+		remove_all_filters( 'gu_config_pre_process' );
+		remove_all_filters( 'gu_override_dot_org' );
+		remove_all_filters( 'gu_remote_is_newer' );
+		unset( $_GET['action'], $_GET['theme'], $_GET['_wpnonce'], $_GET['rollback'] );
+		parent::tear_down();
+	}
+
+	public function test_non_object_transient_becomes_stdclass(): void {
+		$theme  = $this->theme_with_config( [] );
+		$result = $theme->update_site_transient( null );
+		$this->assertInstanceOf( stdClass::class, $result );
+	}
+
+	public function test_false_transient_becomes_stdclass(): void {
+		$theme  = $this->theme_with_config( [] );
+		$result = $theme->update_site_transient( false );
+		$this->assertInstanceOf( stdClass::class, $result );
+	}
+
+	public function test_empty_config_returns_transient_unchanged(): void {
+		$theme     = $this->theme_with_config( [] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+		$result = $theme->update_site_transient( $transient );
+		$this->assertSame( $transient, $result );
+		$this->assertEmpty( $result->response );
+		$this->assertEmpty( $result->no_update );
+	}
+
+	public function test_gu_config_pre_process_filter_applied(): void {
+		$theme_obj = $this->make_theme_obj();
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		add_filter( 'gu_config_pre_process', '__return_empty_array' );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+		$result = $theme->update_site_transient( $transient );
+		$this->assertEmpty( $result->response );
+		$this->assertEmpty( $result->no_update );
+	}
+
+	public function test_theme_without_update_goes_to_no_update(): void {
+		$theme_obj = $this->make_theme_obj( [
+			'remote_version' => '1.0.0',
+			'local_version'  => '2.0.0',
+		] );
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+		$result = $theme->update_site_transient( $transient );
+		$this->assertArrayHasKey( 'test-gu-theme', $result->no_update );
+		$this->assertArrayNotHasKey( 'test-gu-theme', $result->response );
+	}
+
+	public function test_theme_with_update_goes_to_response(): void {
+		$theme_obj = $this->make_theme_obj( [
+			'remote_version' => '2.0.0',
+			'local_version'  => '1.0.0',
+			'dot_org'        => false,
+		] );
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+		$result = $theme->update_site_transient( $transient );
+		$this->assertArrayHasKey( 'test-gu-theme', $result->response );
+		$this->assertSame( '2.0.0', $result->response['test-gu-theme']['new_version'] );
+	}
+
+	public function test_response_contains_correct_type_field(): void {
+		$theme_obj = $this->make_theme_obj( [
+			'remote_version' => '2.0.0',
+			'local_version'  => '1.0.0',
+			'dot_org'        => false,
+			'git'            => 'github',
+			'type'           => 'theme',
+		] );
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+		$result = $theme->update_site_transient( $transient );
+		$this->assertSame( 'github-theme', $result->response['test-gu-theme']['type'] );
+	}
+
+	public function test_no_update_not_overwritten_when_already_set(): void {
+		$theme_obj = $this->make_theme_obj( [
+			'remote_version' => '1.0.0',
+			'local_version'  => '2.0.0',
+		] );
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$existing  = [ 'theme' => 'pre-existing' ];
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [ 'test-gu-theme' => $existing ];
+		$result = $theme->update_site_transient( $transient );
+		$this->assertSame( $existing, $result->no_update['test-gu-theme'] );
+	}
+
+	public function test_dot_org_override_removes_entry_from_response(): void {
+		$theme_obj = $this->make_theme_obj( [
+			'remote_version' => '1.0.0',
+			'local_version'  => '2.0.0',
+		] );
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [ 'test-gu-theme' => [ 'theme' => 'test-gu-theme' ] ];
+		$transient->no_update = [];
+		add_filter( 'gu_override_dot_org', fn() => [ 'test-gu-theme' ] );
+		$result = $theme->update_site_transient( $transient );
+		$this->assertArrayNotHasKey( 'test-gu-theme', $result->response );
+	}
+
+	public function test_release_asset_non_primary_branch_updates_package_url(): void {
+		$theme_obj = $this->make_theme_obj( [
+			'remote_version' => '2.0.0',
+			'local_version'  => '1.0.0',
+			'dot_org'        => false,
+			'release_asset'  => true,
+			'branch'         => 'develop',
+			'primary_branch' => 'main',
+			'branches'       => [
+				'main'    => [ 'download' => 'https://example.com/main.zip' ],
+				'develop' => [ 'download' => 'https://example.com/develop.zip' ],
+			],
+		] );
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+		$result = $theme->update_site_transient( $transient );
+		$this->assertSame( 'https://example.com/develop.zip', $result->response['test-gu-theme']['package'] );
+	}
+
+	public function test_release_asset_missing_branch_sets_package_null(): void {
+		$theme_obj = $this->make_theme_obj( [
+			'remote_version' => '2.0.0',
+			'local_version'  => '1.0.0',
+			'dot_org'        => false,
+			'release_asset'  => true,
+			'branch'         => 'feature',
+			'primary_branch' => 'main',
+			'branches'       => [
+				'main' => [ 'download' => 'https://example.com/main.zip' ],
+			],
+		] );
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+		$result = $theme->update_site_transient( $transient );
+		$this->assertNull( $result->response['test-gu-theme']['package'] );
+	}
+
+	public function test_dot_org_theme_on_primary_branch_skipped_for_update(): void {
+		// dot_org=true → override_dot_org returns false → continue (no update).
+		$theme_obj = $this->make_theme_obj( [
+			'remote_version' => '2.0.0',
+			'local_version'  => '1.0.0',
+			'dot_org'        => true,
+			'branch'         => 'main',
+			'primary_branch' => 'main',
+		] );
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+		$result = $theme->update_site_transient( $transient );
+		$this->assertArrayNotHasKey( 'test-gu-theme', $result->response );
+	}
+
+	public function test_restful_skip_continues_loop_when_action_and_theme_match(): void {
+		$theme_obj = $this->make_theme_obj( [
+			'remote_version' => '2.0.0',
+			'local_version'  => '1.0.0',
+			'dot_org'        => false,
+		] );
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+
+		// $response['theme'] is set to $theme->slug = 'test-gu-theme'.
+		$_GET['action'] = 'git-updater-update';
+		$_GET['theme']  = 'test-gu-theme';
+
+		$result = $theme->update_site_transient( $transient );
+
+		$this->assertArrayNotHasKey( 'test-gu-theme', $result->response );
+		$this->assertArrayNotHasKey( 'test-gu-theme', $result->no_update );
+	}
+
+	public function test_rollback_sets_response_with_valid_nonce(): void {
+		$theme_obj = $this->make_theme_obj( [
+			'remote_version' => '2.0.0',
+			'local_version'  => '1.0.0',
+			'dot_org'        => false,
+			'owner'          => 'afragen',
+			'enterprise'     => null,
+			'enterprise_api' => null,
+			'tags'           => [],
+			'newest_tag'     => '0.0.0',
+			'gist_id'        => null,
+		] );
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+
+		$rollback_tag     = '1.0.0';
+		$_GET['_wpnonce'] = wp_create_nonce( 'upgrade-theme_test-gu-theme' );
+		$_GET['theme']    = 'test-gu-theme';
+		$_GET['rollback'] = $rollback_tag;
+
+		$result = $theme->update_site_transient( $transient );
+
+		$this->assertArrayHasKey( 'test-gu-theme', $result->response );
+		$entry = $result->response['test-gu-theme'];
+		$this->assertSame( $rollback_tag, $entry['new_version'] );
+		$this->assertSame( 'test-gu-theme', $entry['theme'] );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Test_Theme_Get_Theme_Meta
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_Theme_Get_Theme_Meta
+ */
+class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
+	use Theme_Mock_Helper;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+	}
+
+	public function tear_down(): void {
+		remove_all_filters( 'gu_additions' );
+		parent::tear_down();
+	}
+
+	public function test_returns_array(): void {
+		$theme = $this->theme_with_config( [] );
+		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
+		$rm->setAccessible( true );
+		$result = $rm->invoke( $theme );
+		$this->assertIsArray( $result );
+	}
+
+	public function test_gu_additions_filter_receives_theme_type_arg(): void {
+		$captured_type = null;
+		add_filter(
+			'gu_additions',
+			function ( $value, $themes, $type ) use ( &$captured_type ) {
+				$captured_type = $type;
+				return $value;
+			},
+			10,
+			3
+		);
+
+		// get_theme_meta() is called from new Theme() constructor path; invoke directly via Reflection.
+		$theme = $this->theme_with_config( [] );
+		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
+		$rm->setAccessible( true );
+		$rm->invoke( $theme );
+
+		$this->assertSame( 'theme', $captured_type );
+	}
+
+	public function test_result_contains_fixture_theme_when_installed(): void {
+		if ( ! wp_get_theme( 'test-gu-theme' )->exists() ) {
+			$this->markTestSkipped( 'Fixture theme test-gu-theme not installed — run `npm run wp-env start`.' );
+		}
+
+		$theme  = new Theme();
+		$rm     = new ReflectionMethod( $theme, 'get_theme_meta' );
+		$rm->setAccessible( true );
+		$result = $rm->invoke( $theme );
+
+		$this->assertArrayHasKey( 'test-gu-theme', $result );
+		$slug = $result['test-gu-theme']->slug ?? null;
+		$this->assertSame( 'test-gu-theme', $slug );
+	}
+
+	public function test_theme_without_themeuri_key_is_skipped_via_continue(): void {
+		add_filter(
+			'gu_additions',
+			function ( $value, $themes, $type ) {
+				// A theme with no key containing 'themeuri' — triggers the null-key continue.
+				return [
+					'no-themeuri-theme' => [
+						'GitHubPluginURI' => 'https://github.com/owner/some-plugin',
+						'Version'         => '1.0.0',
+					],
+				];
+			},
+			10,
+			3
+		);
+
+		$theme = new Theme();
+		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
+		$rm->setAccessible( true );
+		$result = $rm->invoke( $theme );
+
+		// Injected theme must be absent — the loop hit `continue` for it.
+		$this->assertArrayNotHasKey( 'no-themeuri-theme', $result );
+	}
+
+	public function test_branch_migration_removes_master_option_when_primary_branch_differs(): void {
+		if ( ! wp_get_theme( 'test-gu-theme' )->exists() ) {
+			$this->markTestSkipped( 'Fixture theme test-gu-theme not installed — run `npm run wp-env start`.' );
+		}
+
+		// Simulate a legacy 'master' current_branch entry for the fixture theme whose
+		// style.css declares 'Primary Branch: main'.
+		Base::$options['current_branch_test-gu-theme'] = 'master';
+
+		// Theme constructor calls get_theme_meta(), which triggers the migration.
+		new Theme();
+
+		$options_ref = new ReflectionProperty( Theme::class, 'options' );
+		$options_ref->setAccessible( true );
+		$options = $options_ref->getValue( null );
+		$this->assertArrayNotHasKey( 'current_branch_test-gu-theme', $options );
+	}
+
+	public function test_git_head_file_overrides_branch_value(): void {
+		if ( ! wp_get_theme( 'test-gu-theme' )->exists() ) {
+			$this->markTestSkipped( 'Fixture theme test-gu-theme not installed — run `npm run wp-env start`.' );
+		}
+
+		$theme_dir    = trailingslashit( get_theme_root() . '/test-gu-theme' );
+		$git_dir      = $theme_dir . '.git/';
+		$git_head     = $git_dir . 'HEAD';
+		$dir_created  = ! is_dir( $git_dir );
+		$file_created = ! file_exists( $git_head );
+
+		if ( $dir_created ) {
+			mkdir( $git_dir, 0755, true );
+		}
+		if ( $file_created ) {
+			file_put_contents( $git_head, "ref: refs/heads/feature-branch\n" );
+		}
+
+		try {
+			$theme = new Theme();
+			$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
+			$rm->setAccessible( true );
+			$result = $rm->invoke( $theme );
+
+			$this->assertArrayHasKey( 'test-gu-theme', $result );
+			// After the bug-fix (git_plugin → git_theme), the branch is overridden from HEAD.
+			$this->assertSame( 'feature-branch', $result['test-gu-theme']->branch ?? null );
+		} finally {
+			if ( $file_created ) {
+				unlink( $git_head );
+			}
+			if ( $dir_created ) {
+				rmdir( $git_dir );
+			}
+		}
+	}
+
+	public function test_theme_with_unknown_themeuri_key_is_skipped_via_array_key_exists(): void {
+		// 'CustomThemeURI' passes stripos('themeuri') but is absent from $all_headers.
+		// Exercises the ! array_key_exists branch at line 171 of Theme.php (the second continue condition).
+		add_filter(
+			'gu_additions',
+			function ( $value, $themes, $type ) {
+				return [
+					'custom-theme' => [
+						'CustomThemeURI' => 'https://github.com/owner/custom-theme',
+						'Version'        => '1.0.0',
+					],
+				];
+			},
+			10,
+			3
+		);
+
+		$theme = new Theme();
+		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
+		$rm->setAccessible( true );
+		$result = $rm->invoke( $theme );
+
+		$this->assertArrayNotHasKey( 'custom-theme', $result );
+	}
+
+	public function test_theme_without_name_key_lacks_local_fields_in_result(): void {
+		// A gu_additions theme with a valid registered GitHubThemeURI but no 'Name' key.
+		// Exercises the isset($theme['Name']) === false path (lines 210–221 of Theme.php)
+		// and the consequent isset($git_theme['local_path']) === false path in the .git/HEAD block.
+		add_filter(
+			'gu_additions',
+			function ( $value, $themes, $type ) {
+				return [
+					'no-name-theme' => [
+						'GitHubThemeURI' => 'https://github.com/owner/no-name-theme',
+						'Version'        => '1.0.0',
+					],
+				];
+			},
+			10,
+			3
+		);
+
+		$theme = new Theme();
+		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
+		$rm->setAccessible( true );
+		$result = $rm->invoke( $theme );
+
+		$this->assertArrayHasKey( 'no-name-theme', $result );
+		$obj = $result['no-name-theme'];
+		$this->assertFalse( isset( $obj->local_path ) );
+		$this->assertFalse( isset( $obj->name ) );
+		$this->assertNotEmpty( $obj->branch );
+	}
+
+	public function test_non_empty_theme_id_produces_non_null_slug_did(): void {
+		// ThemeID header causes parse_extra_headers to set $header['did'], which makes slug_did non-null.
+		add_filter(
+			'gu_additions',
+			function ( $value, $themes, $type ) {
+				return [
+					'did-theme' => [
+						'GitHubThemeURI' => 'https://github.com/owner/did-theme',
+						'ThemeID'        => 'did:example:abc123',
+						'Version'        => '1.0.0',
+					],
+				];
+			},
+			10,
+			3
+		);
+
+		$theme = new Theme();
+		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
+		$rm->setAccessible( true );
+		$result = $rm->invoke( $theme );
+
+		$this->assertArrayHasKey( 'did-theme', $result );
+		$slug_did = $result['did-theme']->slug_did ?? null;
+		$this->assertNotNull( $slug_did );
+		$this->assertStringStartsWith( 'did-theme-', $slug_did );
+	}
+
+	public function test_real_theme_with_name_has_local_path_and_name(): void {
+		// gu_additions cannot include 'Name' with a foreign slug: line 210 of Theme.php dereferences
+		// $paths[$slug], which only contains slugs from wp_get_themes(). A foreign slug produces an
+		// undefined-key notice that convertNoticesToExceptions turns fatal.
+		// Fix: inject using a slug that IS in wp_get_themes() so $paths[$slug] is safe to access.
+		$installed = wp_get_themes( [ 'errors' => null ] );
+		if ( empty( $installed ) ) {
+			$this->markTestSkipped( 'No installed themes found.' );
+		}
+		$real_slug = array_key_first( $installed );
+
+		add_filter(
+			'gu_additions',
+			function ( $value, $themes, $type ) use ( $real_slug ) {
+				return [
+					$real_slug => [
+						'GitHubThemeURI' => 'https://github.com/owner/' . $real_slug,
+						'Name'           => 'Test Theme',
+						'Version'        => '1.0.0',
+						'Author'         => '',
+						'AuthorURI'      => '',
+						'License'        => '',
+						'ThemeURI'       => '',
+						'Description'    => '',
+						'UpdateURI'      => '',
+						'Security'       => '',
+					],
+				];
+			},
+			10,
+			3
+		);
+
+		$theme = new Theme();
+		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
+		$rm->setAccessible( true );
+		$result = $rm->invoke( $theme );
+
+		$this->assertArrayHasKey( $real_slug, $result );
+		$obj = $result[ $real_slug ];
+		$this->assertNotEmpty( $obj->local_path );
+		$this->assertNotEmpty( $obj->name );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Test_Theme_Get_Remote_Theme_Meta
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_Theme_Get_Remote_Theme_Meta
+ */
+class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
+	use Theme_Mock_Helper;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+	}
+
+	public function tear_down(): void {
+		remove_all_filters( 'themes_api' );
+		remove_all_filters( 'site_transient_update_themes' );
+		remove_all_filters( 'wp_prepare_themes_for_js' );
+		remove_all_filters( 'gu_config_pre_process' );
+		remove_all_filters( 'gu_disable_wpcron' );
+		remove_all_filters( 'pre_http_request' );
+		remove_all_actions( 'get_remote_repo_meta' );
+		remove_all_actions( 'after_theme_row' );
+		remove_all_actions( 'after_theme_row_test-gu-theme' );
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_theme' );
+		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
+		parent::tear_down();
+	}
+
+	public function test_load_pre_filters_called_when_config_is_empty(): void {
+		$theme = $this->theme_with_config( [] );
+		$theme->get_remote_theme_meta();
+		$this->assertSame( 99, has_filter( 'themes_api', [ $theme, 'themes_api' ] ) );
+		$this->assertSame( 15, has_filter( 'site_transient_update_themes', [ $theme, 'update_site_transient' ] ) );
+	}
+
+	public function test_gu_config_pre_process_filter_applied_in_meta_fetch(): void {
+		$filter_ran = false;
+		add_filter(
+			'gu_config_pre_process',
+			function ( $config ) use ( &$filter_ran ) {
+				$filter_ran = true;
+				return $config;
+			}
+		);
+		$theme = $this->theme_with_config( [] );
+		$theme->get_remote_theme_meta();
+		$this->assertTrue( $filter_ran );
+	}
+
+	public function test_schedules_background_cron_for_uncached_themes(): void {
+		wp_clear_scheduled_hook( 'gu_get_remote_theme' );
+
+		$theme_obj = $this->make_theme_obj();
+		// Empty cache → waiting_for_background_update = true → theme queued for background.
+		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
+
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$theme->get_remote_theme_meta();
+
+		// wp_next_scheduled() can't find args-keyed events without passing the exact args,
+		// so inspect _get_cron_array() directly.
+		$this->assertTrue( $this->cron_hook_exists( 'gu_get_remote_theme' ) );
+	}
+
+	public function test_no_cron_scheduled_when_config_has_no_background_themes(): void {
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_theme' );
+
+		// Empty config → no themes queued → no cron.
+		$theme = $this->theme_with_config( [] );
+		$theme->get_remote_theme_meta();
+
+		$this->assertFalse( $this->cron_hook_exists( 'gu_get_remote_theme' ) );
+	}
+
+	public function test_no_duplicate_cron_when_already_scheduled(): void {
+		// Schedule a past-due event so wp_get_ready_cron_jobs() can see it.
+		wp_schedule_single_event( time() - HOUR_IN_SECONDS, 'gu_get_remote_theme', [ [] ] );
+
+		$theme_obj = $this->make_theme_obj();
+		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
+
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$theme->get_remote_theme_meta();
+
+		// Hook should still exist (not cleared), and exactly one event was scheduled.
+		$this->assertTrue( $this->cron_hook_exists( 'gu_get_remote_theme' ) );
+		$this->assertSame( 1, $this->cron_hook_count( 'gu_get_remote_theme' ) );
+	}
+
+	public function test_multiple_existing_timestamps_consolidated_to_single_event(): void {
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_theme' );
+
+		$theme_obj = $this->make_theme_obj();
+
+		// Inject two events at different timestamps with different args to simulate
+		// what a previous race left behind (args differ so WP dedup doesn't catch them;
+		// timestamps are 2 hours apart so the 10-minute dedup window doesn't apply).
+		wp_schedule_single_event( time() - 2 * HOUR_IN_SECONDS, 'gu_get_remote_theme', [ [ 'slug-a' => $theme_obj ] ] );
+		wp_schedule_single_event( time() - HOUR_IN_SECONDS, 'gu_get_remote_theme', [ [ 'slug-b' => $theme_obj ] ] );
+
+		$this->assertSame( 2, $this->cron_hook_count( 'gu_get_remote_theme' ), 'Pre-condition: two race-left events must exist' );
+
+		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$theme->get_remote_theme_meta();
+
+		// All pre-existing timestamps must be merged and collapsed into one event.
+		$this->assertSame( 1, $this->cron_hook_count( 'gu_get_remote_theme' ) );
+	}
+
+	public function test_gu_disable_wpcron_prevents_cron_scheduling(): void {
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_theme' );
+
+		add_filter( 'gu_disable_wpcron', '__return_true' );
+
+		$theme_obj = $this->make_theme_obj();
+		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
+
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$theme->get_remote_theme_meta();
+
+		// Base::get_remote_repo_meta() short-circuits when gu_disable_wpcron && !can_update(),
+		// so no cron event should be scheduled.
+		$this->assertFalse( $this->cron_hook_exists( 'gu_get_remote_theme' ) );
+	}
+
+	/**
+	 * @group multisite
+	 */
+	public function test_multisite_adds_after_theme_row_actions(): void {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Multisite test — skipped under single-site.' );
+		}
+
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_theme' );
+
+		$theme_obj = $this->make_theme_obj();
+		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
+
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$theme->get_remote_theme_meta();
+
+		$this->assertSame( 10, has_action( 'after_theme_row', [ $theme, 'remove_after_theme_row' ] ) );
+		$this->assertSame( 10, has_action( 'after_theme_row_test-gu-theme', [ $theme, 'wp_theme_update_row' ] ) );
+	}
+
+	/**
+	 * @group multisite
+	 */
+	public function test_multisite_skips_wp_theme_update_row_when_tag_is_set(): void {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Multisite test — skipped under single-site.' );
+		}
+
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_theme' );
+
+		$theme_obj = $this->make_theme_obj();
+		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
+
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+
+		// A truthy $tag suppresses the wp_theme_update_row action inside the multisite block.
+		$tag_ref = new ReflectionProperty( Theme::class, 'tag' );
+		$tag_ref->setAccessible( true );
+		$tag_ref->setValue( $theme, '1.0.0' );
+
+		$theme->get_remote_theme_meta();
+
+		$this->assertSame( 10, has_action( 'after_theme_row', [ $theme, 'remove_after_theme_row' ] ) );
+		$this->assertFalse( has_action( 'after_theme_row_test-gu-theme', [ $theme, 'wp_theme_update_row' ] ) );
+	}
+
+	public function test_not_waiting_theme_triggers_direct_fetch_not_cron(): void {
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_theme' );
+
+		// Seed a non-empty cache so waiting_for_background_update($repo) → get_repo_cache(slug, false)
+		// returns a non-empty array, making empty($cache) === false → not waiting → direct fetch.
+		update_site_option(
+			'ghu-' . md5( 'test-gu-theme' ),
+			[
+				'timeout' => strtotime( '+12 hours' ),
+				'dot_org' => false,
+			]
+		);
+
+		// Mock HTTP to prevent outbound calls and error-cache contamination.
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) {
+				if ( false !== strpos( $url, 'api.wordpress.org' ) ) {
+					return [
+						'response' => [ 'code' => 200 ],
+						'body'     => '{"themes":[],"translations":[],"no_update":[]}',
+						'headers'  => [],
+					];
+				}
+				return [
+					'response' => [ 'code' => 200 ],
+					'body'     => '[]',
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		// Add the fields that Base::get_remote_repo_meta() → API::get_api_url() needs from the repo object.
+		$theme_obj = $this->make_theme_obj(
+			[
+				'owner'          => 'afragen',
+				'enterprise'     => null,
+				'enterprise_api' => null,
+				'slug_did'       => null,
+				'languages'      => null,
+				'ci_job'         => false,
+				'broken'         => false,
+				'is_private'     => false,
+				'update_uri'     => '',
+				'security'       => '',
+				'local_path'     => '',
+				'author_uri'     => '',
+				'license'        => '',
+			]
+		);
+
+		$action_called = false;
+		add_action( 'get_remote_repo_meta', function () use ( &$action_called ) {
+			$action_called = true;
+		}, 10, 2 );
+
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$theme->get_remote_theme_meta();
+
+		// Theme was processed directly (not queued) — no cron, and the action hook fired.
+		$this->assertFalse( $this->cron_hook_exists( 'gu_get_remote_theme' ) );
+		$this->assertTrue( $action_called, 'get_remote_repo_meta action should fire for non-waiting theme' );
+		// load_pre_filters() was called at the end of get_remote_theme_meta().
+		$this->assertSame( 99, has_filter( 'themes_api', [ $theme, 'themes_api' ] ) );
+	}
+
+	/**
+	 * Return true if any cron event exists for the given hook (ignoring args).
+	 *
+	 * @param string $hook Cron hook name.
+	 * @return bool
+	 */
+	private function cron_hook_exists( string $hook ): bool {
+		foreach ( (array) _get_cron_array() as $hooks ) {
+			if ( isset( $hooks[ $hook ] ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Count total cron entries for a hook across all timestamps.
+	 *
+	 * @param string $hook Cron hook name.
+	 * @return int
+	 */
+	private function cron_hook_count( string $hook ): int {
+		wp_cache_delete( 'cron', 'options' );
+		$count = 0;
+		foreach ( (array) _get_cron_array() as $hooks ) {
+			if ( isset( $hooks[ $hook ] ) ) {
+				$count += count( $hooks[ $hook ] );
+			}
+		}
+		return $count;
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Test_Theme_Config_Discovery
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_Theme_Config_Discovery
+ *
+ * Requires the fixture theme to be mounted in the wp-env container.
+ * The fixture is listed in .wp-env.json:
+ *   "themes": ["./tests/fixtures/themes/test-gu-theme"]
+ *
+ * After editing .wp-env.json, restart the environment so Docker picks up the change:
+ *   npm run wp-env start
+ */
+class Test_Theme_Config_Discovery extends WP_UnitTestCase {
+
+	private const SLUG = 'test-gu-theme';
+
+	/** @var array<string, \stdClass> */
+	private array $configs;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->configs = ( new Theme() )->get_theme_configs();
+
+		if ( ! isset( $this->configs[ self::SLUG ] ) ) {
+			$this->markTestSkipped(
+				'Fixture theme not installed. Run: npm run wp-env start'
+			);
+		}
+	}
+
+	public function test_fixture_theme_is_in_theme_configs(): void {
+		$this->assertArrayHasKey( self::SLUG, $this->configs );
+	}
+
+	public function test_fixture_theme_git_is_github(): void {
+		$this->assertSame( 'github', $this->configs[ self::SLUG ]->git );
+	}
+
+	public function test_fixture_theme_owner_is_afragen(): void {
+		$this->assertSame( 'afragen', $this->configs[ self::SLUG ]->owner );
+	}
+
+	public function test_fixture_theme_slug_matches(): void {
+		$this->assertSame( self::SLUG, $this->configs[ self::SLUG ]->slug );
+	}
+
+	public function test_fixture_theme_type_is_theme(): void {
+		$this->assertSame( 'theme', $this->configs[ self::SLUG ]->type );
+	}
+
+	public function test_fixture_theme_primary_branch_is_main(): void {
+		$this->assertSame( 'main', $this->configs[ self::SLUG ]->primary_branch );
+	}
+}

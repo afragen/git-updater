@@ -17,7 +17,7 @@ use WP_Error;
  * Exit if called directly.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	die; // @codeCoverageIgnore
 }
 
 /**
@@ -29,12 +29,14 @@ final class GU_Upgrade {
 	/**
 	 * DB version.
 	 *
-	 * @var int
+	 * @var string
 	 */
-	private $db_version = '12.24.2'; // TODO: change number.
+	private $db_version = '13.0.0'; // TODO: change number.
 
 	/**
 	 * Run update check against db_version.
+	 *
+	 * @return void
 	 */
 	public function run() {
 		$options    = $this->get_class_vars( 'Base', 'options' );
@@ -58,7 +60,7 @@ final class GU_Upgrade {
 	/**
 	 * Save $db_version on update.
 	 *
-	 * @param array $options Array of Git Updater options.
+	 * @param array<string, mixed> $options Array of Git Updater options.
 	 *
 	 * @return void
 	 */
@@ -72,6 +74,8 @@ final class GU_Upgrade {
 
 	/**
 	 * Flush caches and delete cached options.
+	 *
+	 * @return void
 	 */
 	private function delete_flush_cache() {
 		$this->delete_all_cached_data();
@@ -151,6 +155,9 @@ final class GU_Upgrade {
 	 * @return void
 	 */
 	private function schedule_access_token_cleanup() {
+		if ( is_multisite() && ! is_main_site() ) {
+			return; // @codeCoverageIgnore
+		}
 		if ( false === wp_next_scheduled( 'gu_delete_access_tokens' ) ) {
 			wp_schedule_event( time() + \MONTH_IN_SECONDS, 'twicedaily', 'gu_delete_access_tokens' );
 		}

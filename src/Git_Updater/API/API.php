@@ -26,6 +26,12 @@ if ( ! defined( 'WPINC' ) ) {
 
 /**
  * Class API
+ *
+ * @method mixed                                       parse_tag_response( mixed $response )
+ * @method array<string, mixed>                        parse_meta_response( mixed $response )
+ * @method array<string, array<string, string>>        parse_branch_response( mixed $response )
+ * @method array{files: list<string>, dirs: list<string>} parse_contents_response( mixed $response )
+ * @method stdClass|array<string, string>              parse_asset_dir_response( mixed $response )
  */
 class API {
 	use API_Common;
@@ -33,23 +39,16 @@ class API {
 	use Basic_Auth_Loader;
 
 	/**
-	 * Holds HTTP error code from API call.
-	 *
-	 * @var array ( $this->type->slug => $code )
-	 */
-	protected static $error_code = [];
-
-	/**
 	 * Holds site options.
 	 *
-	 * @var array $options
+	 * @var array<string, mixed>
 	 */
 	protected static $options;
 
 	/**
 	 * Holds extra headers.
 	 *
-	 * @var array $extra_headers
+	 * @var array<string, string>
 	 */
 	protected static $extra_headers;
 
@@ -63,17 +62,9 @@ class API {
 	/**
 	 * Holds 'plugin'|'theme' or plugin|theme object information for API classes.
 	 *
-	 * @var string|stdClass
+	 * @var stdClass
 	 */
 	public $type;
-
-	/**
-	 * Variable to hold all repository remote info.
-	 *
-	 * @access public
-	 * @var array
-	 */
-	public $response = [];
 
 	/**
 	 * Variable to hold AWS redirect URL.
@@ -85,7 +76,7 @@ class API {
 	/**
 	 * Default args to pass to wp_remote_get().
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	protected $default_http_get_args = [
 		'sslverify'     => true,
@@ -105,6 +96,7 @@ class API {
 	 * Add data in Settings page.
 	 *
 	 * @param object $git Git API object.
+	 * @return void
 	 */
 	public function settings_hook( $git ) {
 		add_action(
@@ -119,10 +111,10 @@ class API {
 	/**
 	 * Add data to the setting_field in Settings.
 	 *
-	 * @param array    $fields Array of settings fields.
-	 * @param stdClass $repo   Object of repo data.
+	 * @param array<string, mixed> $fields Array of settings fields.
+	 * @param stdClass             $repo   Object of repo data.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function add_setting_field( $fields, $repo ) {
 		if ( ! empty( $fields ) ) {
@@ -138,7 +130,7 @@ class API {
 	 * @param string        $git  'github'.
 	 * @param bool|stdClass $repo Repository object.
 	 *
-	 * @return stdClass
+	 * @return GitHub_API|null
 	 */
 	public function get_repo_api( $git, $repo = false ) {
 		$repo_api = null;
@@ -152,9 +144,9 @@ class API {
 		 * Filter git host API object.
 		 *
 		 * @since 10.0.0
-		 * @param null|stdClass $repo_api Git API object.
-		 * @param string        $git      Name of git host.
-		 * @param stdClass      $repo     Repository object.
+		 * @param GitHub_API|null $repo_api Git API object.
+		 * @param string          $git      Name of git host.
+		 * @param stdClass        $repo     Repository object.
 		 *
 		 * @return stdClass
 		 */
@@ -167,6 +159,7 @@ class API {
 	 * Add Install settings fields.
 	 *
 	 * @param object $git Git API from caller.
+	 * @return void
 	 */
 	public function add_install_fields( $git ) {
 		add_action(
@@ -185,22 +178,18 @@ class API {
 	 *
 	 * @param string $url The URL to send the request to.
 	 *
-	 * @return boolean|stdClass
+	 * @return bool|array<mixed>|stdClass|\WP_Error
 	 */
 	public function api( $url ) {
 		$url         = $this->get_api_url( $url );
 		$auth_header = $this->add_auth_header( [], $url );
-		$type        = $this->return_repo_type();
 
 		// Use cached API failure data to avoid hammering the API.
-		$response = $this->get_repo_cache( $this->type->slug );
-		$cached   = isset( $response['error_cache'] );
-		$response = ! empty( $response[ md5( $url ) ] ) ? $response[ md5( $url ) ] : false;
-		$response = $response && $cached && isset( $response['error_cache'] ) ? $response['error_cache'] : $response;
-		if ( ! $response ) {
-			$response = ! $response
-				? wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) )
-				: $response;
+		$error_cache = $this->get_repo_cache( $this->type->slug . '_error' );
+		$cached      = isset( $error_cache['error_cache'] );
+		$response    = false;
+		if ( ! $cached ) {
+			$response = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
 
 			$code          = (int) wp_remote_retrieve_response_code( $response );
 			$allowed_codes = [ 200 ];
@@ -212,57 +201,46 @@ class API {
 			}
 
 			// Cache HTTP API error code for 60 minutes.
-			if ( ! in_array( $code, $allowed_codes, true ) && ! $cached ) {
+			if ( ! in_array( $code, $allowed_codes, true ) ) {
 				$timeout = 60;
-
-				// Set timeout to GitHub rate limit reset.
-				if ( in_array( $type['git'], [ 'github', 'gist' ], true ) && isset( $response[ md5( $url ) ] ) ) {
-					$timeout = GitHub_API::ratelimit_reset( $response[ md5( $url ) ], $this->type->slug );
-				}
-				$response['timeout'] = ! $timeout ? $response['timeout'] : $timeout;
-				$this->set_repo_cache( 'error_cache', $response, false, "+{$timeout} minutes" );
+				$this->set_repo_cache( 'error_cache', [ 'timeout' => $timeout ], $this->type->slug . '_error', "+{$timeout} minutes" );
 			}
 
-			// If we made it this far API data must be OK, save to avoid extra call above.
-			$this->set_repo_cache( md5( $url ), $response );
+			$response = [
+				'url'  => $url,
+				'body' => wp_remote_retrieve_body( $response ),
+			];
 		}
 
-		static::$error_code[ $this->type->slug ] = static::$error_code[ $this->type->slug ] ?? [];
-		static::$error_code[ $this->type->slug ] = array_merge(
-			static::$error_code[ $this->type->slug ],
-			[
-				'repo' => $this->type->slug,
-				'code' => isset( $code ) ? $code : '',
-				'name' => $this->type->name ?? $this->type->slug,
-				'git'  => $this->type->git,
-			]
-		);
-		if ( in_array( $type['git'], [ 'github', 'gist' ], true ) && isset( $response[ md5( $url ) ] ) ) {
-			static::$error_code[ $this->type->slug ]['wait'] = GitHub_API::ratelimit_reset( $response[ md5( $url ) ], $this->type->slug );
+		if ( $cached ) {
+			return false;
 		}
-		Singleton::get_instance( 'Messages', $this )->create_error_message( $type['git'] );
 
-		if ( 'file' === self::$method && isset( $response['timeout'] ) && ! $cached && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		// @codeCoverageIgnoreStart
+		if ( 'file' === self::$method && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			$response_body = json_decode( wp_remote_retrieve_body( $response ) );
-			if ( null !== $response_body && property_exists( $response_body, 'message' ) ) {
+			if ( null !== $response_body && is_object( $response_body ) && property_exists( $response_body, 'message' ) ) {
 				$name        = $this->type->name ?? '';
 				$log_message = "Git Updater Error: {$name} ({$this->type->slug}:{$this->type->branch}) - {$response_body->message}";
 				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 				error_log( $log_message );
 			}
 		}
+		// @codeCoverageIgnoreEnd
 
 		/**
 		 * Filter HTTP GET remote response body.
 		 *
 		 * @since 10.0.0
-		 * @param string $response HTTP remote response body.
-		 * @param stdClass $this Current API object.
+		 * @param array<string, mixed> $response HTTP remote response array.
+		 * @param static               $instance Current API object.
 		 */
 		$response = apply_filters( 'gu_post_api_response_body', $response, $this );
 
-		$response = ! empty( $response[ md5( $url ) ] ) ? $response[ md5( $url ) ] : $response;
-		$body     = wp_remote_retrieve_body( $response );
+		if ( ! empty( $response[ md5( $url ) ] ) && is_array( $response[ md5( $url ) ] ) ) {
+			$response = $response[ md5( $url ) ]; // @codeCoverageIgnore
+		}
+		$body = wp_remote_retrieve_body( $response );
 
 		return is_null( json_decode( $body ) ) ? $body : json_decode( $body );
 	}
@@ -272,7 +250,7 @@ class API {
 	 *
 	 * @access protected
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	protected function return_repo_type() {
 		$arr         = [];
@@ -288,7 +266,8 @@ class API {
 		 * Filter to add git hosts API data.
 		 *
 		 * @since 10.0.0
-		 * @param array $arr Array of base git host data.
+		 * @param array    $arr  Array of base git host data.
+		 * @param stdClass $type Repo type object.
 		 */
 		$arr = apply_filters( 'gu_api_repo_type_data', $arr, $this->type );
 
@@ -333,7 +312,7 @@ class API {
 		 *
 		 * @since 10.0.0
 		 * @param array    $type          Array or git host data.
-		 * @param stdClass $this->type    Repo object.
+		 * @param stdClass $repo          Repo object.
 		 * @param bool     $download_link Boolean is this a download link.
 		 * @param string   $endpoint      Endpoint to URL.
 		 */
@@ -356,14 +335,14 @@ class API {
 	 * @return bool|int|mixed|string|WP_Error
 	 */
 	protected function get_dot_org_data() {
-		$this->response = $this->get_repo_cache( $this->type->slug );
-		$response       = $this->response['dot_org'] ?? false;
+		$cache    = $this->get_repo_cache( $this->type->slug, false );
+		$response = $cache['dot_org'] ?? false;
 
 		/**
 		 * Filter hook to set an API domain for updating.
 		 *
 		 * @since 12.6.0
-		 * @param string Default is 'api.wordpress.org'.
+		 * @param string $api_domain Default is 'api.wordpress.org'.
 		 */
 		$api_domain = apply_filters( 'gu_api_domain', 'api.wordpress.org' );
 
@@ -398,8 +377,8 @@ class API {
 	/**
 	 * Test to exit early if no update available, saves API calls.
 	 *
-	 * @param array|bool $response API response.
-	 * @param bool       $branch   Branch name.
+	 * @param array<string, mixed>|bool $response API response.
+	 * @param bool                      $branch   Branch name.
 	 *
 	 * @return bool
 	 */
@@ -408,7 +387,7 @@ class API {
 		 * Filters the return value of exit_no_update.
 		 *
 		 * @since 10.0.0
-		 * @param bool `true` will exit this function early, default will not.
+		 * @param bool $always_fetch True will exit this function early, false (default) will not.
 		 */
 		$always_fetch = (bool) apply_filters( 'gu_always_fetch_update', false );
 
@@ -430,7 +409,7 @@ class API {
 	 *
 	 * @access protected
 	 *
-	 * @param stdClass $response The response.
+	 * @param mixed $response The response.
 	 *
 	 * @return bool true if invalid
 	 */
@@ -455,7 +434,7 @@ class API {
 	/**
 	 * Sort tags and set object data.
 	 *
-	 * @param array $tags Associative array of tags[ tag ].
+	 * @param array<string, mixed> $tags Associative array of tags[ tag ].
 	 *
 	 * @return bool
 	 */
@@ -482,7 +461,7 @@ class API {
 	 * @return null|string
 	 */
 	public function get_local_info( $repo, $file ) {
-		$response = false;
+		$response = null;
 
 		if ( get_site_transient( 'gu_refresh_cache' ) ) {
 			return $response;
@@ -491,7 +470,8 @@ class API {
 		if ( is_dir( $repo->local_path )
 			&& file_exists( $repo->local_path . $file )
 		) {
-			$response = file_get_contents( $repo->local_path . $file );
+			$contents = file_get_contents( $repo->local_path . $file );
+			$response = false !== $contents ? $contents : null;
 		}
 
 		return $response;
@@ -500,9 +480,10 @@ class API {
 	/**
 	 * Set repo object file info.
 	 *
-	 * @param array $response Repo data.
+	 * @param array<string, mixed> $response Repo data.
+	 * @return void
 	 */
-	protected function set_file_info( $response ) {
+	protected function set_file_info( $response ): void {
 		$this->type->transient        = $response;
 		$this->type->remote_version   = ! empty( $response['Version'] ) ? strtolower( $response['Version'] ) : $this->type->remote_version;
 		$this->type->requires_php     = ! empty( $response['RequiresPHP'] ) ? $response['RequiresPHP'] : false;
@@ -531,6 +512,7 @@ class API {
 	 * Add remote data to type object.
 	 *
 	 * @access protected
+	 * @return void
 	 */
 	protected function add_meta_repo_object() {
 		$this->type->last_updated = $this->type->repo_meta['last_updated'];
@@ -542,7 +524,7 @@ class API {
 	 * Set data from readme.txt.
 	 * Prefer changelog from CHANGES.md.
 	 *
-	 * @param array $readme Array of parsed readme.txt data.
+	 * @param array<string, mixed> $readme Array of parsed readme.txt data.
 	 *
 	 * @return bool
 	 */
@@ -552,11 +534,6 @@ class API {
 				continue;
 			}
 			$readme['sections'][ $section ] = $value;
-		}
-
-		// Exit if readme is invalid.
-		if ( ! is_array( $readme ) ) {
-			return false;
 		}
 
 		$readme['remaining_content'] = ! empty( $readme['remaining_content'] ) ? $readme['remaining_content'] : null;
@@ -620,24 +597,25 @@ class API {
 		if ( ! $asset ) {
 			return false;
 		}
+		$cache = $this->get_repo_cache( $this->type->slug ?? false, false );
 
 		// Unset release asset url if older than 5 min to account for AWS expiration.
-		if ( $aws && ( time() - strtotime( '-12 hours', $this->response['timeout'] ) ) >= 300 ) {
-			unset( $this->response['release_asset'] );
-			unset( $this->response['release_asset_redirect'] );
+		if ( $aws && ( time() - strtotime( '-12 hours', $cache['timeout'] ) ) >= 300 ) {
+			unset( $cache['release_asset'] );
+			unset( $cache['release_asset_redirect'] );
 		}
 
-		$response = $this->response['release_asset_redirect'] ?? false;
+		$response = $cache['release_asset_redirect'] ?? false;
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_REQUEST['key'] ) ) {
 			$slug = isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : false;
 			$slug = ! $slug && isset( $_REQUEST['theme'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['theme'] ) ) : $slug;
-			$rest = $slug === $this->response['repo'];
+			$rest = $slug === $cache['repo'];
 		}
 		// phpcs:enable
 
-		if ( $this->exit_no_update( $response )
+		if ( ! $response && $this->exit_no_update( $response )
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			&& ! isset( $_REQUEST['override'] ) && ! isset( $_REQUEST['rollback'] )
 			&& ! $rest
@@ -648,8 +626,8 @@ class API {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! $response || isset( $_REQUEST['override'] ) ) {
 			$args = $this->add_auth_header( [], $asset );
-			if ( empty( $args ) ) {
-				return false;
+			if ( empty( $args ) ) { // @codeCoverageIgnore
+				return false; // @codeCoverageIgnore
 			}
 			$octet_stream = [ 'accept' => 'application/octet-stream' ];
 			add_action( 'requests-requests.before_redirect', [ $this, 'set_redirect' ], 10, 1 );

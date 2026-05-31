@@ -46,21 +46,21 @@ class Theme {
 	/**
 	 * Hold config array.
 	 *
-	 * @var array
+	 * @var array<string, stdClass>
 	 */
 	private $config;
 
 	/**
 	 * Holds extra headers.
 	 *
-	 * @var array
+	 * @var array<string, string>
 	 */
 	private static $extra_headers;
 
 	/**
 	 * Holds options.
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	private static $options;
 
@@ -83,15 +83,17 @@ class Theme {
 		// Get details of installed git sourced themes.
 		$this->config = $this->get_theme_meta();
 
+		// @codeCoverageIgnoreStart
 		if ( null === $this->config ) {
 			return;
 		}
+		// @codeCoverageIgnoreEnd
 	}
 
 	/**
 	 * Returns an array of configurations for the known themes.
 	 *
-	 * @return array
+	 * @return array<string, stdClass>
 	 */
 	public function get_theme_configs() {
 		return $this->config;
@@ -103,6 +105,7 @@ class Theme {
 	 * This action results in the extra headers not being added.
 	 *
 	 * @link https://github.com/afragen/github-updater/issues/586
+	 * @return void
 	 */
 	private function delete_current_theme_cache() {
 		$cache_hash = md5( get_stylesheet_directory() );
@@ -113,12 +116,13 @@ class Theme {
 	 * Get details of Git-sourced themes from those that are installed.
 	 * Populates variable array.
 	 *
-	 * @return array Indexed array of associative arrays of theme details.
+	 * @return array<string, stdClass> Indexed array of associative arrays of theme details.
 	 */
 	protected function get_theme_meta() {
 		$this->delete_current_theme_cache();
-		$git_themes = [];
-		$themes     = wp_get_themes( [ 'errors' => null ] );
+		$all_headers = $this->get_headers( 'theme' );
+		$git_themes  = [];
+		$themes      = wp_get_themes( [ 'errors' => null ] );
 
 		$paths = array_map(
 			function ( $theme ) {
@@ -134,7 +138,6 @@ class Theme {
 
 		$repos_arr = [];
 		foreach ( $paths as $slug => $path ) {
-			$all_headers        = $this->get_headers( 'theme' );
 			$repos_arr[ $slug ] = get_file_data( $path, $all_headers, 'theme' );
 		}
 
@@ -143,7 +146,7 @@ class Theme {
 			function ( $repo ) {
 				foreach ( $repo as $key => $value ) {
 					if ( in_array( $key, array_keys( self::$extra_headers ), true ) && false !== stripos( $key, 'theme' ) && ! empty( $value ) ) {
-						return $this->get_file_headers( $repo, 'theme' );
+						return (bool) $this->get_file_headers( $repo, 'theme' );
 					}
 				}
 			}
@@ -160,7 +163,7 @@ class Theme {
 				array_keys( $theme ),
 				function ( $key ) use ( $theme ) {
 					if ( false !== stripos( $key, 'themeuri' ) && ! empty( $theme[ $key ] ) & 'ThemeURI' !== $key ) {
-						return $key;
+						return true;
 					}
 				}
 			);
@@ -224,8 +227,8 @@ class Theme {
 
 			// Fix branch for .git VCS.
 			if ( isset( $git_theme['local_path'] ) && file_exists( $git_theme['local_path'] . '.git/HEAD' ) ) {
-				$git_branch           = implode( '/', array_slice( explode( '/', file_get_contents( $git_theme['local_path'] . '.git/HEAD' ) ), 2 ) );
-				$git_plugin['branch'] = preg_replace( "/\r|\n/", '', $git_branch );
+				$git_branch          = implode( '/', array_slice( explode( '/', file_get_contents( $git_theme['local_path'] . '.git/HEAD' ) ), 2 ) );
+				$git_theme['branch'] = preg_replace( "/\r|\n/", '', $git_branch );
 			}
 
 			$git_themes[ $git_theme['slug'] ] = (object) $git_theme;
@@ -237,6 +240,8 @@ class Theme {
 	/**
 	 * Get remote theme meta to populate $config theme objects.
 	 * Calls to remote APIs to get data.
+	 *
+	 * @return void
 	 */
 	public function get_remote_theme_meta() {
 		$themes = [];
@@ -245,7 +250,7 @@ class Theme {
 		 * Filter repositories.
 		 *
 		 * @since 10.2.0
-		 * @param array $this->config Array of repository objects.
+		 * @param array<string, stdClass> $config Array of repository objects.
 		 */
 		$config = apply_filters( 'gu_config_pre_process', $this->config );
 
@@ -262,21 +267,28 @@ class Theme {
 			/*
 			 * Add update row to theme row, only in multisite.
 			 */
+			// @codeCoverageIgnoreStart
 			if ( is_multisite() ) {
 				add_action( 'after_theme_row', [ $this, 'remove_after_theme_row' ], 10, 1 );
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_{$theme->slug}", [ $this, 'wp_theme_update_row' ], 10, 2 );
-					add_action( "after_theme_row_{$theme->slug}", [ new Branch(), 'multisite_branch_switcher' ], 15, 1 );
+					add_action(
+						"after_theme_row_{$theme->slug}",
+						function ( $theme_key ) {
+							( new Branch() )->multisite_branch_switcher( $theme_key );
+						},
+						15,
+						1
+					);
 				}
 			}
+			// @codeCoverageIgnoreEnd
 		}
 
 		$schedule_event = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ? is_main_site() : true;
 
-		if ( $schedule_event && ! empty( $themes ) ) {
-			if ( ! $disable_wp_cron && ! $this->is_cron_event_scheduled( 'gu_get_remote_theme' ) ) {
-				wp_schedule_single_event( time(), 'gu_get_remote_theme', [ $themes ] );
-			}
+		if ( $schedule_event && ! empty( $themes ) && ! $disable_wp_cron ) {
+			$this->merge_and_reschedule_cron_batch( 'gu_get_remote_theme', $themes );
 		}
 
 		if ( ! static::is_wp_cli() ) {
@@ -286,6 +298,8 @@ class Theme {
 
 	/**
 	 * Load pre-update filters.
+	 *
+	 * @return void
 	 */
 	public function load_pre_filters() {
 		if ( ! is_multisite() ) {
@@ -345,10 +359,11 @@ class Theme {
 	 * Add custom theme update row, from /wp-admin/includes/update.php
 	 * Display update details or rollback links for multisite installation.
 	 *
-	 * @param string $theme_key Theme slug.
-	 * @param array  $theme     Array of theme data.
+	 * @param string               $theme_key Theme slug.
+	 * @param array<string, mixed> $theme     Array of theme data.
 	 *
 	 * @author Seth Carstens
+	 * @return void
 	 */
 	public function wp_theme_update_row( $theme_key, $theme ) {
 		$current = get_site_transient( 'update_themes' );
@@ -436,6 +451,7 @@ class Theme {
 	 * @author @grappler
 	 *
 	 * @param string $theme_key Theme slug.
+	 * @return void
 	 */
 	public function remove_after_theme_row( $theme_key ) {
 		$themes = $this->get_theme_configs();
@@ -450,9 +466,9 @@ class Theme {
 	 *
 	 * @author Seth Carstens
 	 *
-	 * @param array $prepared_themes Array of prepared themes.
+	 * @param array<string, mixed> $prepared_themes Array of prepared themes.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function customize_theme_update_html( $prepared_themes ) {
 		foreach ( (array) $this->config as $theme ) {
@@ -566,9 +582,9 @@ class Theme {
 	 * Hook into site_transient_update_themes to update.
 	 * Finds newest tag and compares to current tag.
 	 *
-	 * @param array $transient Theme update transient.
+	 * @param mixed $transient Theme update transient.
 	 *
-	 * @return array|stdClass
+	 * @return mixed
 	 */
 	public function update_site_transient( $transient ) {
 		// needed to fix PHP 7.4 warning.
@@ -580,7 +596,7 @@ class Theme {
 		 * Filter repositories.
 		 *
 		 * @since 10.2.0
-		 * @param array $this->config Array of repository objects.
+		 * @param array<string, stdClass> $config Array of repository objects.
 		 */
 		$config = apply_filters( 'gu_config_pre_process', $this->config );
 

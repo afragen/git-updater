@@ -6,6 +6,8 @@
  * @package Git_Updater
  */
 
+ini_set( 'error_log', '/dev/null' );
+
 $_tests_dir = getenv( 'WP_TESTS_DIR' );
 
 if ( ! $_tests_dir ) {
@@ -37,3 +39,6 @@ tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
 // Start up the WP testing environment.
 require "{$_tests_dir}/includes/bootstrap.php";
+
+// Load base test case.
+require_once __DIR__ . '/class-gu-test-case.php';

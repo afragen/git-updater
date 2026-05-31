@@ -32,7 +32,7 @@ class Rest_Upgrader_Skin extends WP_Upgrader_Skin {
 	/**
 	 * Holds messages.
 	 *
-	 * @var array $messages
+	 * @var array<int, string> $messages
 	 */
 	public $messages = [];
 
@@ -48,7 +48,8 @@ class Rest_Upgrader_Skin extends WP_Upgrader_Skin {
 	 * Adds the feedback string to the messages array.
 	 *
 	 * @param string $message  Message.
-	 * @param array  ...$args Array of args.
+	 * @param string ...$args Array of args.
+	 * @return void
 	 */
 	public function feedback( $message, ...$args ) {
 		if ( isset( $this->upgrader->strings[ $message ] ) ) {
@@ -74,6 +75,7 @@ class Rest_Upgrader_Skin extends WP_Upgrader_Skin {
 	 * Set the error flag to true, then let the base class handle the rest.
 	 *
 	 * @param mixed $errors Error messages.
+	 * @return void
 	 */
 	public function error( $errors ) {
 		$this->error = true;

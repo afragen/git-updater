@@ -18,7 +18,7 @@ use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
  * Exit if called directly.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	die; // @codeCoverageIgnore
 }
 
 /**
@@ -47,6 +47,8 @@ class Init {
 
 	/**
 	 * Let's get going.
+	 *
+	 * @return void
 	 */
 	public function run() {
 		if ( ! static::is_heartbeat() ) {
@@ -54,6 +56,7 @@ class Init {
 		}
 
 		if ( static::is_wp_cli() ) {
+			// @codeCoverageIgnoreStart
 			include_once __DIR__ . '/WP_CLI/CLI.php';
 			include_once __DIR__ . '/WP_CLI/CLI_Integration.php';
 
@@ -62,12 +65,15 @@ class Init {
 
 			Singleton::get_instance( 'Theme', $this )->get_remote_theme_meta();
 			add_filter( 'site_transient_update_themes', [ Singleton::get_instance( 'Theme', $this ), 'update_site_transient' ], 15, 1 );
+			// @codeCoverageIgnoreEnd
 		}
 	}
 
 	/**
 	 * Load relevant action/filter hooks.
 	 * Use 'init' hook for user capabilities.
+	 *
+	 * @return void
 	 */
 	protected function load_hooks() {
 		add_action( 'init', [ $this->base, 'load' ] );
@@ -77,7 +83,7 @@ class Init {
 		// Load hook for adding authentication headers for download packages.
 		add_filter(
 			'upgrader_pre_download',
-			function () {
+			function (): bool {
 				add_filter( 'http_request_args', [ $this, 'download_package' ], 15, 2 );
 				return false; // upgrader_pre_download filter default return value.
 			}
@@ -103,7 +109,7 @@ class Init {
 	public function can_update() {
 		// WP-CLI access has full capabilities.
 		if ( static::is_wp_cli() ) {
-			return true;
+			return true; // @codeCoverageIgnore
 		}
 
 		return current_user_can( 'manage_options' );

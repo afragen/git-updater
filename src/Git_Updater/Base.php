@@ -44,28 +44,28 @@ class Base {
 	/**
 	 * Variable for holding extra theme and plugin headers.
 	 *
-	 * @var array
+	 * @var array<string, string>
 	 */
 	public static $extra_headers = [];
 
 	/**
 	 * Holds the values to be used in the fields callbacks.
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	public static $options;
 
 	/**
 	 * Holds git server types.
 	 *
-	 * @var array
+	 * @var array<string, string>
 	 */
 	public static $git_servers = [ 'github' => 'GitHub' ];
 
 	/**
 	 * Holds extra repo header types.
 	 *
-	 * @var array
+	 * @var array<string, string>
 	 */
 	protected static $extra_repo_headers = [
 		'Languages' => 'Languages',
@@ -75,7 +75,7 @@ class Base {
 	/**
 	 * Holds an array of installed git APIs.
 	 *
-	 * @var array
+	 * @var array<string, bool|string>
 	 */
 	public static $installed_apis = [ 'github_api' => true ];
 
@@ -119,13 +119,15 @@ class Base {
 
 	/**
 	 * Set boolean for installed API classes.
+	 *
+	 * @return void
 	 */
 	protected function set_installed_apis() {
 		/**
 		 * Filter to add active git servers.
 		 *
 		 * @since 10.0.0
-		 * @param array static::$git_servers Array of git servers.
+		 * @param array<string, string> $git_servers Array of git servers.
 		 */
 		static::$git_servers = apply_filters( 'gu_git_servers', static::$git_servers );
 
@@ -133,7 +135,7 @@ class Base {
 		 * Filter to add installed APIs.
 		 *
 		 * @since 10.0.0
-		 * @param array static::$installed_apis Array of installed APIs.
+		 * @param array<string, bool|string> $installed_apis Array of installed APIs.
 		 */
 		static::$installed_apis = apply_filters( 'gu_installed_apis', static::$installed_apis );
 	}
@@ -141,7 +143,7 @@ class Base {
 	/**
 	 * Load Plugin, Theme, and Settings with correct capabiltiies and on selective admin pages.
 	 *
-	 * @return bool
+	 * @return void
 	 */
 	public function load() {
 		if ( Singleton::get_instance( 'Init', $this )->can_update() ) {
@@ -150,7 +152,7 @@ class Base {
 		}
 
 		if ( ! static::should_run_on_current_page() ) {
-			return false;
+			return;
 		}
 
 		// Run Git Updater upgrade functions.
@@ -178,12 +180,12 @@ class Base {
 
 		$this->get_meta_plugins();
 		$this->get_meta_themes();
-
-		return true;
 	}
 
 	/**
 	 * Performs actual plugin metadata fetching.
+	 *
+	 * @return void
 	 */
 	public function get_meta_plugins() {
 		Singleton::get_instance( 'Plugin', $this )->get_remote_plugin_meta();
@@ -191,6 +193,8 @@ class Base {
 
 	/**
 	 * Performs actual theme metadata fetching.
+	 *
+	 * @return void
 	 */
 	public function get_meta_themes() {
 		Singleton::get_instance( 'Theme', $this )->get_remote_theme_meta();
@@ -200,6 +204,8 @@ class Base {
 	 * Run background processes.
 	 * Piggyback on built-in update function to get metadata.
 	 * Set update transients for remote management.
+	 *
+	 * @return void
 	 */
 	public function background_update() {
 		add_action( 'wp_update_plugins', [ $this, 'get_meta_plugins' ] );
@@ -216,6 +222,8 @@ class Base {
 	 * Hook requires return of associative element array.
 	 * $key === repo-name and $value === token
 	 * e.g.  array( 'repo-name' => 'access_token' );
+	 *
+	 * @return void
 	 */
 	public function set_options_filter() {
 		/**
@@ -241,7 +249,7 @@ class Base {
 	/**
 	 * Make and return extra headers.
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
 	public function add_extra_headers() {
 		$gu_extra_headers = [
@@ -276,7 +284,8 @@ class Base {
 	/**
 	 * Runs on wp-cron job to get remote repo meta in background.
 	 *
-	 * @param array $batches Cron event args, array of repo objects.
+	 * @param array<int, stdClass> $batches Cron event args, array of repo objects.
+	 * @return void
 	 */
 	public function run_cron_batch( array $batches ) {
 		foreach ( $batches as $repo ) {
@@ -295,7 +304,7 @@ class Base {
 	public function get_remote_repo_meta( $repo ) {
 		// Exit if non-privileged user and bypassing wp-cron.
 
-		/**
+		/*
 		 * Exit if bypassing wp-cron.
 		 *
 		 * @since 10.0.0
@@ -305,7 +314,7 @@ class Base {
 		$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
 
 		if ( $disable_wp_cron && ! Singleton::get_instance( 'Init', $this )->can_update() ) {
-			return;
+			return false;
 		}
 
 		$file = 'style.css';
@@ -322,22 +331,25 @@ class Base {
 		$this->set_defaults( $repo->type );
 
 		if ( $repo_api->get_remote_info( $file ) ) {
-			if ( ! self::is_wp_cli() ) {
-				$repo_api->get_repo_contents();
-				$repo_api->get_repo_assets();
-				$repo_api->get_remote_readme();
-				$repo_api->get_remote_changes( '' );
-				$repo_api->get_repo_meta();
-				if ( ! empty( self::$options['branch_switch'] ) ) {
-					$repo_api->get_remote_branches();
-				}
-			}
-			$repo_api->get_remote_tag();
-			$repo->download_link = $repo_api->construct_download_link();
-			$language_pack       = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
+			// phpcs:disable
+			$ran   = [];
+			$ran[] = false !== $repo_api->get_repo_contents()    ? 'contents' : null;
+			$ran[] = false !== $repo_api->get_repo_assets()      ? 'assets'   : null;
+			$ran[] = false !== $repo_api->get_remote_readme()    ? 'readme'   : null;
+			$ran[] = false !== $repo_api->get_remote_changes('') ? 'changes'  : null;
+			$ran[] = false !== $repo_api->get_remote_tag()       ? 'tags'     : null;
+			$ran[] = false !== $repo_api->get_remote_branches()  ? 'branches' : null;
+			$ran[] = false !== $repo_api->get_repo_meta()        ? 'meta'     : null;
+			$repo_api->set_repo_cache( 'ran', array_filter( $ran ) );
+			$repo_api->set_repo_cache_timeout( $repo->slug );
+			// phpcs:enable
+			$language_pack = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
 			$language_pack->run();
-			$this->add_assets( $repo_api );
 		}
+
+		$this->populate_api_data( $repo, $repo_api );
+		$repo->download_link = $repo_api->construct_download_link();
+		$this->add_assets( $repo_api );
 
 		do_action( 'get_remote_repo_meta', $repo, $repo_api );
 
@@ -357,6 +369,7 @@ class Base {
 	 * Set default values for plugin/theme.
 	 *
 	 * @param string $type (plugin|theme).
+	 * @return void
 	 */
 	protected function set_defaults( $type ) {
 		if ( ! isset( $this->$type->slug ) ) {
@@ -394,12 +407,13 @@ class Base {
 	/**
 	 * Add assets from remote repo.
 	 *
-	 * @param GitHub_API|Bitbucket_API|GitLab_API|Gitea_API $repo API object.
+	 * @param stdClass $repo API object.
 	 *
 	 * @return void
 	 */
 	public function add_assets( $repo ) {
-		$assets = $repo->response['assets'] ?? false;
+		$cache  = $this->get_repo_cache( $repo->type->slug ?? false, false );
+		$assets = $cache['assets'] ?? false;
 
 		if ( ! $assets || is_object( $assets ) ) {
 			return;
@@ -440,10 +454,10 @@ class Base {
 	 *
 	 * @since WordPress 4.4.0 The $hook_extra parameter became available.
 	 *
-	 * @param string      $source        File path of $source.
-	 * @param string      $remote_source File path of $remote_source.
-	 * @param WP_Upgrader $upgrader      An Upgrader object.
-	 * @param array       $hook_extra    Array of hook data.
+	 * @param string               $source        File path of $source.
+	 * @param string               $remote_source File path of $remote_source.
+	 * @param WP_Upgrader          $upgrader      An Upgrader object.
+	 * @param array<string, mixed> $hook_extra    Array of hook data.
 	 *
 	 * @return string|WP_Error
 	 */
@@ -518,7 +532,7 @@ class Base {
 		}
 
 		// Clean up $new_source directory.
-		add_action( 'upgrader_install_package_result', [ $this, 'delete_upgrade_source' ], 10, 1 );
+		add_filter( 'upgrader_install_package_result', [ $this, 'delete_upgrade_source' ], 10, 1 );
 
 		return trailingslashit( $new_source );
 	}
@@ -570,7 +584,7 @@ class Base {
 	 * @param string $type            plugin|theme.
 	 * @param bool   $branch_switcher Boolean for using branch switcher, default is false.
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
 	public function update_row_enclosure( $repo_name, $type, $branch_switcher = false ) {
 		global $wp_version;
@@ -644,10 +658,10 @@ class Base {
 	/**
 	 * Add git host based icons.
 	 *
-	 * @param array  $links Row meta action links.
-	 * @param string $file  Plugin or theme file.
+	 * @param array<int, string> $links Row meta action links.
+	 * @param string             $file  Plugin or theme file.
 	 *
-	 * @return array $links
+	 * @return array<int, string> $links
 	 */
 	public function row_meta_icons( $links, $file ) {
 		$icon = $this->get_git_icon( $file, false );
@@ -665,7 +679,7 @@ class Base {
 	 * @param  bool   $add_padding Whether or not to adding padding to the icon.
 	 *                             When used in row meta, icon should not have padding;
 	 *                             when used in branch switching row, icon should have padding.
-	 * @return string
+	 * @return string|null
 	 */
 	public function get_git_icon( $file, $add_padding ) {
 		$type     = str_contains( current_filter(), 'plugin' ) ? 'plugin' : 'theme';
@@ -688,10 +702,10 @@ class Base {
 		 * @access  public
 		 * @link https://github.com/afragen/git-updater-additions
 		 *
-		 * @param array        Listing of plugins/themes to add.
-		 *                     Default null.
-		 * @param array        Listing of all plugins/themes.
-		 * @param string $type Type being passed, plugin|theme'.
+		 * @param array|null $additions Listing of plugins/themes to add.
+		 *                              Default null.
+		 * @param array      $all_repos Listing of all plugins/themes.
+		 * @param string     $type      Type being passed, plugin|theme'.
 		 */
 		$additions = apply_filters( 'gu_additions', null, [], $type );
 

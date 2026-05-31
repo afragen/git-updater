@@ -40,6 +40,8 @@ class Add_Ons {
 
 	/**
 	 * Load needed action/filter hooks.
+	 *
+	 * @return void
 	 */
 	public function load_hooks() {
 		add_action( 'admin_init', [ $this, 'addons_page_init' ] );
@@ -51,6 +53,8 @@ class Add_Ons {
 
 	/**
 	 * Adds Remote Management tab to Settings page.
+	 *
+	 * @return void
 	 */
 	public function add_settings_tabs() {
 		$install_tabs = [ 'git_updater_addons' => esc_html__( 'Add-Ons', 'git-updater' ) ];
@@ -60,13 +64,13 @@ class Add_Ons {
 				return array_merge( $tabs, $install_tabs );
 			}
 		);
-		add_filter(
+		add_action(
 			'gu_add_admin_page',
 			function ( $tab ) {
 				$this->add_admin_page( $tab );
 			},
 			10,
-			2
+			1
 		);
 	}
 
@@ -76,6 +80,7 @@ class Add_Ons {
 	 * @uses 'gu_add_admin_page' action hook
 	 *
 	 * @param string $tab    Tab name.
+	 * @return void
 	 */
 	public function add_admin_page( $tab ) {
 		if ( 'git_updater_addons' === $tab ) {
@@ -95,6 +100,8 @@ class Add_Ons {
 
 	/**
 	 * Settings for Add Ons.
+	 *
+	 * @return void
 	 */
 	public function addons_page_init() {
 		register_setting(
@@ -135,10 +142,10 @@ class Add_Ons {
 	/**
 	 * Filters the plugins API result for an add-on.
 	 *
-	 * @param object|WP_Error $result Response object or WP_Error.
-	 * @param string          $action The action being taken.
-	 * @param object          $args   API arguments.
-	 * @return array|object The original result or the modified result as an object.
+	 * @param object|\WP_Error $result Response object or WP_Error.
+	 * @param string           $action The action being taken.
+	 * @param object           $args   API arguments.
+	 * @return array<string, mixed>|object The original result or the modified result as an object.
 	 */
 	public function plugins_api( $result, $action, $args ) {
 		if ( isset( $args->slug ) && in_array( $args->slug, static::$addons, true ) ) {
@@ -178,34 +185,36 @@ class Add_Ons {
 	 *
 	 * The results are cached.
 	 *
-	 * @return array An array of API results.
+	 * @return array<string, mixed> An array of API results.
 	 */
 	public function get_addon_api_results() {
-		$api_results = $this->get_repo_cache( 'gu_addon_api_results' );
+		$cache = $this->get_repo_cache( 'gu_addon_api_results' );
 
-		if ( false === $api_results ) {
-			$api_results = [];
-			$api_url     = 'https://git-updater.com/wp-json/git-updater/v1/plugins-api/?slug=';
-
-			foreach ( self::$addons as $addon ) {
-				$response = wp_remote_post( "{$api_url}{$addon}" );
-
-				if ( 200 !== wp_remote_retrieve_response_code( $response ) || is_wp_error( $response ) ) {
-					continue;
-				}
-
-				$response = json_decode( wp_remote_retrieve_body( $response ), true );
-				if ( isset( $response['error'] ) ) {
-					continue;
-				}
-
-				$api_results[ $addon ] = $response;
-			}
-			if ( count( $api_results ) === count( self::$addons ) ) {
-				$this->set_repo_cache( 'gu_addon_api_results', $api_results, 'gu_addon_api_results', '+7 days' );
-			}
+		if ( false !== $cache && isset( $cache['gu_addon_api_results'] ) ) {
+			return $cache['gu_addon_api_results'];
 		}
 
-		return isset( $api_results['timeout'] ) ? $api_results['gu_addon_api_results'] : $api_results;
+		$api_results = [];
+		$api_url     = 'https://git-updater.com/wp-json/git-updater/v1/plugins-api/?slug=';
+
+		foreach ( self::$addons as $addon ) {
+			$response = wp_remote_post( "{$api_url}{$addon}" );
+
+			if ( 200 !== wp_remote_retrieve_response_code( $response ) || is_wp_error( $response ) ) {
+				continue;
+			}
+
+			$response = json_decode( wp_remote_retrieve_body( $response ), true );
+			if ( isset( $response['error'] ) ) {
+				continue;
+			}
+
+			$api_results[ $addon ] = $response;
+		}
+		if ( count( $api_results ) === count( self::$addons ) ) {
+			$this->set_repo_cache( 'gu_addon_api_results', $api_results, 'gu_addon_api_results', '+7 days' );
+		}
+
+		return $api_results;
 	}
 }

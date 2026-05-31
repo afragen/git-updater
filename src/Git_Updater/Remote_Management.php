@@ -35,15 +35,19 @@ class Remote_Management {
 
 	/**
 	 * Ensure api key is set.
+	 *
+	 * @return void
 	 */
 	public function ensure_api_key_is_set() {
 		if ( ! self::$api_key ) {
-			update_site_option( 'git_updater_api_key', md5( uniqid( wp_rand(), true ) ) );
+			update_site_option( 'git_updater_api_key', md5( uniqid( (string) wp_rand(), true ) ) );
 		}
 	}
 
 	/**
 	 * Initialize.
+	 *
+	 * @return void
 	 */
 	public function init() {
 		$this->remote_management_page_init();
@@ -52,6 +56,8 @@ class Remote_Management {
 
 	/**
 	 * Adds Remote Management tab to Settings page.
+	 *
+	 * @return void
 	 */
 	public function add_settings_tabs() {
 		$install_tabs = [ 'git_updater_remote_management' => esc_html__( 'Remote Management', 'git-updater' ) ];
@@ -61,7 +67,7 @@ class Remote_Management {
 				return array_merge( $tabs, $install_tabs );
 			}
 		);
-		add_filter(
+		add_action(
 			'gu_add_admin_page',
 			function ( $tab, $action ) {
 				$this->add_admin_page( $tab, $action );
@@ -78,6 +84,7 @@ class Remote_Management {
 	 *
 	 * @param string $tab    Tab name.
 	 * @param string $action Form action.
+	 * @return void
 	 */
 	public function add_admin_page( $tab, $action ) {
 		if ( 'git_updater_remote_management' === $tab ) {
@@ -96,6 +103,8 @@ class Remote_Management {
 
 	/**
 	 * Display appropriate notice for Remote Management page action.
+	 *
+	 * @return void
 	 */
 	private function admin_page_notices() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -109,6 +118,8 @@ class Remote_Management {
 
 	/**
 	 * Settings for Remote Management.
+	 *
+	 * @return void
 	 */
 	public function remote_management_page_init() {
 		register_setting(
@@ -127,6 +138,8 @@ class Remote_Management {
 
 	/**
 	 * Print the Remote Management text.
+	 *
+	 * @return void
 	 */
 	public function print_section_remote_management() {
 		if ( empty( self::$api_key ) ) {
