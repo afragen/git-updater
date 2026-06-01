@@ -1,4 +1,5 @@
 #### [unreleased]
+* added support for OAuth tokens
 
 #### 13.0.0 / 2026-05-31 🎂
 * use `afragen/wp-readme-parser` drop-in replacement for `afragen/wordpress-plugin-readme-parser`
