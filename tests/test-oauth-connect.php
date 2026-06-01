@@ -31,7 +31,10 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->oauth = new OAuth_Connect();
 		delete_site_option( 'git_updater' );
 		Base::$options = [];
-		unset( $_GET['provider'], $_GET['gu_exchange_code'], $_GET['_wpnonce'], $_POST['provider'], $_POST['_wpnonce'] );
+		unset( $_GET['provider'], $_GET['gu_exchange_code'], $_GET['site_state'], $_GET['_wpnonce'], $_POST['provider'], $_POST['_wpnonce'] );
+		foreach ( [ 'github', 'gitlab', 'bitbucket', 'gitea' ] as $provider ) {
+			delete_site_transient( "gu_oauth_state_$provider" );
+		}
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'wp_redirect' );
 	}
@@ -41,7 +44,10 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	 */
 	public function tear_down(): void {
 		delete_site_option( 'git_updater' );
-		unset( $_GET['provider'], $_GET['gu_exchange_code'], $_GET['_wpnonce'], $_POST['provider'], $_POST['_wpnonce'] );
+		unset( $_GET['provider'], $_GET['gu_exchange_code'], $_GET['site_state'], $_GET['_wpnonce'], $_POST['provider'], $_POST['_wpnonce'] );
+		foreach ( [ 'github', 'gitlab', 'bitbucket', 'gitea' ] as $provider ) {
+			delete_site_transient( "gu_oauth_state_$provider" );
+		}
 		remove_all_actions( 'admin_post_gu_oauth_callback' );
 		remove_all_actions( 'admin_post_gu_oauth_disconnect' );
 		remove_all_filters( 'pre_http_request' );
@@ -247,8 +253,10 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->maybe_grant_super_admin( $user );
 		wp_set_current_user( $user );
 
+		set_site_transient( 'gu_oauth_state_github', 'test_state', 600 );
 		$_GET['provider']         = 'github';
 		$_GET['gu_exchange_code'] = 'test_exchange_code';
+		$_GET['site_state']       = 'test_state';
 
 		add_filter( 'pre_http_request', static function( $preempt, $args, $url ) {
 			if ( strpos( $url, '/token' ) !== false ) {
@@ -291,8 +299,10 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->maybe_grant_super_admin( $user );
 		wp_set_current_user( $user );
 
+		set_site_transient( 'gu_oauth_state_github', 'test_state', 600 );
 		$_GET['provider']         = 'github';
 		$_GET['gu_exchange_code'] = 'test_exchange_code';
+		$_GET['site_state']       = 'test_state';
 
 		add_filter( 'pre_http_request', static function( $preempt, $args, $url ) {
 			if ( strpos( $url, '/token' ) !== false ) {
@@ -398,8 +408,10 @@ class Test_OAuth_Connect extends GU_Test_Case {
 			define( 'GIT_UPDATER_OAUTH_CONNECTOR_URL', 'https://connector.example.com' );
 		}
 
+		set_site_transient( 'gu_oauth_state_github', 'github_state', 600 );
 		$_GET['provider']         = 'github';
 		$_GET['gu_exchange_code'] = 'github_code';
+		$_GET['site_state']       = 'github_state';
 		add_filter( 'pre_http_request', static function( $preempt, $args, $url ) {
 			if ( strpos( $url, 'github' ) !== false && strpos( $url, '/token' ) !== false ) {
 				return [
@@ -429,8 +441,10 @@ class Test_OAuth_Connect extends GU_Test_Case {
 			return $preempt;
 		}, 10, 4 );
 
+		set_site_transient( 'gu_oauth_state_gitlab', 'gitlab_state', 600 );
 		$_GET['provider']         = 'gitlab';
 		$_GET['gu_exchange_code'] = 'gitlab_code';
+		$_GET['site_state']       = 'gitlab_state';
 
 		try {
 			$this->oauth->handle_callback();
@@ -497,6 +511,38 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$this->assertNotNull( $captured_url );
 		$this->assertStringContainsString( 'oauth_error', $captured_url );
+	}
+
+	/**
+	 * Test handle_callback rejects when site_state is missing or does not match stored transient (CSRF protection).
+	 */
+	public function test_handle_callback_rejects_invalid_state(): void {
+		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->maybe_grant_super_admin( $user );
+		wp_set_current_user( $user );
+
+		set_site_transient( 'gu_oauth_state_github', 'expected_state', 600 );
+		$_GET['provider']         = 'github';
+		$_GET['gu_exchange_code'] = 'test_exchange_code';
+		$_GET['site_state']       = 'wrong_state';
+
+		$captured_url = null;
+		add_filter( 'wp_redirect', function( $url ) use ( &$captured_url ) {
+			$captured_url = $url;
+			throw new RuntimeException( 'Redirect captured' );
+		} );
+
+		try {
+			$this->oauth->handle_callback();
+			$this->fail( 'Expected redirect to be captured' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( 'Redirect captured', $e->getMessage() );
+		}
+
+		$this->assertNotNull( $captured_url );
+		$this->assertStringContainsString( 'oauth_error', $captured_url );
+		// Transient must be consumed even on rejection (single-use semantics).
+		$this->assertFalse( get_site_transient( 'gu_oauth_state_github' ) );
 	}
 
 	/**
@@ -819,8 +865,10 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->maybe_grant_super_admin( $user );
 		wp_set_current_user( $user );
 
+		set_site_transient( 'gu_oauth_state_gitlab', 'test_state', 600 );
 		$_GET['provider']         = 'gitlab';
 		$_GET['gu_exchange_code'] = 'test_exchange_code';
+		$_GET['site_state']       = 'test_state';
 
 		add_filter( 'pre_http_request', static function ( $preempt, $args, $url ) {
 			if ( strpos( $url, '/token' ) !== false ) {

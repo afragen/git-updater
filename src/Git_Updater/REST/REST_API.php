@@ -374,7 +374,7 @@ class REST_API {
 	 */
 	public function get_remote_repo_data( WP_REST_Request $request ) {
 		// Test for API key and exit if incorrect.
-		if ( $this->get_class_vars( 'Remote_Management', 'api_key' ) !== $request->get_param( 'key' ) ) {
+		if ( ! hash_equals( (string) $this->get_class_vars( 'Remote_Management', 'api_key' ), (string) $request->get_param( 'key' ) ) ) {
 			return [ 'error' => 'Bad API key. No repo data for you.' ];
 		}
 		$slugs      = [];
@@ -641,7 +641,7 @@ class REST_API {
 	 */
 	public function flush_repo_cache( $request ) {
 		// Test for API key and exit if incorrect.
-		if ( $this->get_class_vars( 'Remote_Management', 'api_key' ) !== $request->get_param( 'key' ) ) {
+		if ( ! hash_equals( (string) $this->get_class_vars( 'Remote_Management', 'api_key' ), (string) $request->get_param( 'key' ) ) ) {
 			return (object) [ 'error' => 'Bad API key. No flush for you.' ];
 		}
 
@@ -675,10 +675,14 @@ class REST_API {
 	public function reset_branch( WP_REST_Request $request ) {
 		$rest_update = new Rest_Update();
 		$start       = microtime( true );
+		$echo_args   = [
+			'plugin' => $request->get_param( 'plugin' ),
+			'theme'  => $request->get_param( 'theme' ),
+		];
 
 		try {
 			// Test for API key and exit if incorrect.
-			if ( $this->get_class_vars( 'Remote_Management', 'api_key' ) !== $request->get_param( 'key' ) ) {
+			if ( ! hash_equals( (string) $this->get_class_vars( 'Remote_Management', 'api_key' ), (string) $request->get_param( 'key' ) ) ) {
 				throw new UnexpectedValueException( 'Bad API key. No branch reset for you.' );
 			}
 
@@ -698,7 +702,7 @@ class REST_API {
 			$response = [
 				'success'      => true,
 				'messages'     => 'Reset to primary branch complete.',
-				'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
+				'webhook'      => $echo_args,
 				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 			];
 			$rest_update->log_exit( $response, 200 );
@@ -707,7 +711,7 @@ class REST_API {
 			$response = [
 				'success'      => false,
 				'messages'     => $e->getMessage(),
-				'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
+				'webhook'      => $echo_args,
 				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 			];
 			$rest_update->log_exit( $response, 418 );

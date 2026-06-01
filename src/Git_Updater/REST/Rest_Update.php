@@ -259,11 +259,21 @@ class Rest_Update {
 		$override   = $args['override'] ?? false;
 		$deprecated = $args['deprecated'] ?? '';
 
+		// Curated echo for the response. Never include the API key.
+		$echo_args = [
+			'plugin'     => $plugin,
+			'theme'      => $theme,
+			'tag'        => $tag,
+			'branch'     => $branch,
+			'committish' => $committish,
+			'override'   => (bool) $override,
+		];
+
 		$start          = microtime( true );
 		$current_branch = 'master';
 		try {
 			if ( ! $key
-				|| get_site_option( 'git_updater_api_key' ) !== $key
+				|| ! hash_equals( (string) get_site_option( 'git_updater_api_key' ), (string) $key )
 			) {
 				throw new UnexpectedValueException( 'Bad API key.' );
 			}
@@ -305,7 +315,7 @@ class Rest_Update {
 			$http_response = [
 				'success'      => false,
 				'messages'     => $e->getMessage(),
-				'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
+				'webhook'      => $echo_args,
 				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 				'deprecated'   => $deprecated,
 			];
@@ -332,7 +342,7 @@ class Rest_Update {
 		$response = [
 			'success'      => true,
 			'messages'     => $this->get_messages(),
-			'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
+			'webhook'      => $echo_args,
 			'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 			'deprecated'   => $deprecated,
 		];

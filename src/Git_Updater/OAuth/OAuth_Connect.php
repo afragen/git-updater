@@ -138,9 +138,14 @@ class OAuth_Connect {
 	private function render_connect_button( string $provider, array $config, string $connector ): void {
 		$callback_url = $this->get_callback_url( $provider );
 
+		// Generate single-use CSRF token, stashed for callback verification.
+		$site_state = wp_generate_password( 32, false );
+		set_site_transient( "gu_oauth_state_$provider", $site_state, 10 * MINUTE_IN_SECONDS );
+
 		// Build the authorize URL on the connector.
 		$authorize_url = $connector . 'git-updater/' . $provider . '/oauth/authorize';
 		$authorize_url = add_query_arg( 'redirect', rawurlencode( $callback_url ), $authorize_url );
+		$authorize_url = add_query_arg( 'site_state', $site_state, $authorize_url );
 
 		// Add Gitea-specific parameters if needed.
 		if ( 'gitea' === $provider ) {
@@ -174,8 +179,17 @@ class OAuth_Connect {
 
 		$provider      = sanitize_key( $_GET['provider'] ?? '' );
 		$exchange_code = sanitize_text_field( wp_unslash( $_GET['gu_exchange_code'] ?? '' ) );
+		$site_state    = sanitize_text_field( wp_unslash( $_GET['site_state'] ?? '' ) );
 
 		if ( ! isset( self::PROVIDERS[ $provider ] ) || empty( $exchange_code ) ) {
+			$this->redirect_with_status( $provider, 'oauth_error' );
+			return; // @codeCoverageIgnore
+		}
+
+		// Verify CSRF state — paired with the transient set in render_connect_button().
+		$expected_state = get_site_transient( "gu_oauth_state_$provider" );
+		delete_site_transient( "gu_oauth_state_$provider" );
+		if ( empty( $expected_state ) || empty( $site_state ) || ! hash_equals( (string) $expected_state, $site_state ) ) {
 			$this->redirect_with_status( $provider, 'oauth_error' );
 			return; // @codeCoverageIgnore
 		}

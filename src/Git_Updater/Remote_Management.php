@@ -40,7 +40,7 @@ class Remote_Management {
 	 */
 	public function ensure_api_key_is_set() {
 		if ( ! self::$api_key ) {
-			update_site_option( 'git_updater_api_key', md5( uniqid( (string) wp_rand(), true ) ) );
+			update_site_option( 'git_updater_api_key', bin2hex( random_bytes( 32 ) ) );
 		}
 	}
 
