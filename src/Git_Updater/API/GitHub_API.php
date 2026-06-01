@@ -461,25 +461,39 @@ class GitHub_API extends API implements API_Interface {
 			'git_updater_github_install_settings'
 		);
 
+		$token_args = [
+			'id'    => 'github_access_token',
+			'token' => true,
+			'class' => '',
+		];
+		$oauth_args = [
+			'provider' => 'github',
+			'class'    => '',
+		];
+		$oauth      = Singleton::get_instance( 'OAuth\OAuth_Connect', $this );
+		if ( $oauth->is_oauth_token( 'github' ) ) {
+			$token_args['class'] = trim( $token_args['class'] . ' hidden' );
+		}
+		if ( ! empty( static::$options['github_access_token'] ) && ! $oauth->is_oauth_token( 'github' ) ) {
+			$oauth_args['class'] = trim( $oauth_args['class'] . ' hidden' );
+		}
+
 		add_settings_field(
 			'github_access_token',
 			esc_html__( 'GitHub Access Token', 'git-updater' ),
 			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'git_updater_github_install_settings',
 			'github_access_token',
-			[
-				'id'    => 'github_access_token',
-				'token' => true,
-			]
+			$token_args
 		);
 
 		add_settings_field(
 			'github_oauth_connect',
 			esc_html__( 'GitHub OAuth', 'git-updater' ),
-			[ Singleton::get_instance( 'OAuth\OAuth_Connect', $this ), 'render_connect_field' ],
+			[ $oauth, 'render_connect_field' ],
 			'git_updater_github_install_settings',
 			'github_access_token',
-			[ 'provider' => 'github' ]
+			$oauth_args
 		);
 
 		/*

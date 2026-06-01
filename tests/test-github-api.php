@@ -18,6 +18,7 @@
  * @package Git_Updater
  */
 
+use Fragen\Git_Updater\API\API;
 use Fragen\Git_Updater\API\GitHub_API;
 use Fragen\Git_Updater\Base;
 
@@ -843,6 +844,8 @@ class Test_GitHub_API_Settings extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		Base::$options = [];
+		delete_site_option( 'git_updater' );
 		new Base();
 		$this->type = github_api_make_type();
 		$this->api  = new GitHub_API( $this->type );
@@ -853,6 +856,8 @@ class Test_GitHub_API_Settings extends WP_UnitTestCase {
 		remove_all_filters( 'gu_add_repo_setting_field' );
 		remove_all_actions( 'gu_add_settings' );
 		remove_all_actions( 'gu_add_install_settings_fields' );
+		Base::$options = [];
+		delete_site_option( 'git_updater' );
 		parent::tear_down();
 	}
 
@@ -887,6 +892,92 @@ class Test_GitHub_API_Settings extends WP_UnitTestCase {
 		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
 
 		$this->assertArrayNotHasKey( 'github_id', $wp_settings_sections['git_updater_github_install_settings'] ?? [] );
+	}
+
+	public function test_github_oauth_connect_field_visible_when_no_access_token(): void {
+		global $wp_settings_fields;
+
+		delete_site_option( 'git_updater' );
+		Base::$options = [];
+		API::$options  = [];
+
+		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$field = $wp_settings_fields['git_updater_github_install_settings']['github_access_token']['github_oauth_connect'] ?? null;
+		$this->assertNotNull( $field );
+		$class = $field['args']['class'] ?? '';
+		$this->assertStringNotContainsString( 'hidden', $class );
+	}
+
+	public function test_github_oauth_connect_field_hidden_when_pat_only(): void {
+		global $wp_settings_fields;
+
+		$options = [ 'github_access_token' => 'manual_pat' ];
+		update_site_option( 'git_updater', $options );
+		Base::$options = $options;
+		API::$options  = $options;
+
+		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$field = $wp_settings_fields['git_updater_github_install_settings']['github_access_token']['github_oauth_connect'] ?? null;
+		$this->assertNotNull( $field );
+		$this->assertArrayHasKey( 'class', $field['args'] );
+		$this->assertStringContainsString( 'hidden', $field['args']['class'] );
+	}
+
+	public function test_github_oauth_connect_field_visible_when_oauth_token_set(): void {
+		global $wp_settings_fields;
+
+		$options = [ 'github_access_token' => 'oauth_tok', 'github_is_oauth_token' => 'oauth' ];
+		update_site_option( 'git_updater', $options );
+		Base::$options = $options;
+		API::$options  = $options;
+
+		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$field = $wp_settings_fields['git_updater_github_install_settings']['github_access_token']['github_oauth_connect'] ?? null;
+		$this->assertNotNull( $field );
+		$class = $field['args']['class'] ?? '';
+		$this->assertStringNotContainsString( 'hidden', $class );
+
+		delete_site_option( 'git_updater' );
+		Base::$options = [];
+		API::$options  = [];
+	}
+
+	public function test_github_access_token_field_hidden_when_oauth_token_set(): void {
+		global $wp_settings_fields;
+
+		$options = [ 'github_access_token' => 'oauth_tok', 'github_is_oauth_token' => 'oauth' ];
+		update_site_option( 'git_updater', $options );
+		Base::$options = $options;
+		API::$options  = $options;
+
+		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$field = $wp_settings_fields['git_updater_github_install_settings']['github_access_token']['github_access_token'] ?? null;
+		$this->assertNotNull( $field );
+		$this->assertArrayHasKey( 'class', $field['args'] );
+		$this->assertStringContainsString( 'hidden', $field['args']['class'] );
+
+		delete_site_option( 'git_updater' );
+		Base::$options = [];
+		API::$options  = [];
+	}
+
+	public function test_github_access_token_field_visible_when_no_oauth_token(): void {
+		global $wp_settings_fields;
+
+		delete_site_option( 'git_updater' );
+		Base::$options = [];
+		API::$options  = [];
+
+		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$field = $wp_settings_fields['git_updater_github_install_settings']['github_access_token']['github_access_token'] ?? null;
+		$this->assertNotNull( $field );
+		$class = $field['args']['class'] ?? '';
+		$this->assertStringNotContainsString( 'hidden', $class );
 	}
 
 	public function test_add_repo_setting_field_returns_correct_page(): void {

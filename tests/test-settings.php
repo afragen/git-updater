@@ -803,6 +803,28 @@ class Test_Settings_Unset_Stale_Options extends GU_Test_Case {
 		remove_all_filters( 'gu_running_git_servers' );
 	}
 
+	public function test_unset_stale_options_preserves_oauth_metadata_keys(): void {
+		add_filter( 'gu_running_git_servers', fn( $gits ) => array_merge( $gits, [ 'github' ] ) );
+		Base::$options = [
+			'github_access_token'      => 'tok',
+			'github_refresh_token'     => 'ref',
+			'github_token_expires_in'  => 7200,
+			'github_token_acquired_at' => time(),
+			'github_is_oauth_token'    => 'oauth',
+			'stale'                    => 'val',
+		];
+		update_site_option( 'git_updater', Base::$options );
+		$this->settings->unset_stale_options( [], [] );
+		$saved = get_site_option( 'git_updater', [] );
+		$this->assertArrayHasKey( 'github_access_token', $saved );
+		$this->assertArrayHasKey( 'github_refresh_token', $saved );
+		$this->assertArrayHasKey( 'github_token_expires_in', $saved );
+		$this->assertArrayHasKey( 'github_token_acquired_at', $saved );
+		$this->assertSame( 'oauth', $saved['github_is_oauth_token'] );
+		$this->assertArrayNotHasKey( 'stale', $saved );
+		remove_all_filters( 'gu_running_git_servers' );
+	}
+
 	public function test_unset_stale_options_preserves_current_branch_for_existing_repo(): void {
 		$slug   = 'my-plugin';
 		$plugin = $this->make_plugin_obj( [ 'slug' => $slug ] );

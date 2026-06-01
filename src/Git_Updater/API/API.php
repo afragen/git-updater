@@ -44,7 +44,7 @@ class API {
 	 *
 	 * @var array<string, mixed>
 	 */
-	protected static $options;
+	public static $options;
 
 	/**
 	 * Holds extra headers.

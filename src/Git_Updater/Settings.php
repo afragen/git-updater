@@ -533,7 +533,18 @@ class Settings {
 		];
 
 		foreach ( $running_servers as $server ) {
-			$always_unset = array_merge( $always_unset, [ "{$server}_access_token", "{$server}_server", "{$server}_client_id" ] );
+			$always_unset = array_merge(
+				$always_unset,
+				[
+					"{$server}_access_token",
+					"{$server}_server",
+					"{$server}_client_id",
+					"{$server}_refresh_token",
+					"{$server}_token_expires_in",
+					"{$server}_token_acquired_at",
+					"{$server}_is_oauth_token",
+				]
+			);
 			$always_unset = array_unique( $always_unset );
 		}
 

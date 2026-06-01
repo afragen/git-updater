@@ -9,7 +9,8 @@
 
 namespace Fragen\Git_Updater\OAuth;
 
-use Fragen\Singleton;
+use Fragen\Git_Updater\API\API;
+use Fragen\Git_Updater\Base;
 
 /**
  * Class OAuth_Connect
@@ -137,11 +138,11 @@ class OAuth_Connect {
 	private function render_connect_button( string $provider, array $config, string $connector ): void {
 		$callback_url = $this->get_callback_url( $provider );
 
-		// Build the authorize URL on the connector
+		// Build the authorize URL on the connector.
 		$authorize_url = $connector . 'git-updater/' . $provider . '/oauth/authorize';
 		$authorize_url = add_query_arg( 'redirect', rawurlencode( $callback_url ), $authorize_url );
 
-		// Add Gitea-specific parameters if needed
+		// Add Gitea-specific parameters if needed.
 		if ( 'gitea' === $provider ) {
 			$options = get_site_option( 'git_updater', [] );
 			if ( ! empty( $options['gitea_server'] ) && ! empty( $options['gitea_client_id'] ) ) {
@@ -156,6 +157,7 @@ class OAuth_Connect {
 		}
 
 		echo '<a href="' . esc_url( $authorize_url ) . '" class="button button-primary">';
+		/* translators: %s is the provider label, e.g. "GitHub". */
 		echo esc_html( sprintf( __( 'Connect %s', 'git-updater' ), $config['label'] ) );
 		echo '</a>';
 	}
@@ -289,7 +291,8 @@ class OAuth_Connect {
 		$config  = self::PROVIDERS[ $provider ];
 		$options = get_site_option( 'git_updater', [] );
 
-		$options[ $config['option_key'] ] = $token;
+		$options[ $config['option_key'] ]         = $token;
+		$options[ $provider . '_is_oauth_token' ] = 'oauth';
 
 		if ( $refresh_token ) {
 			$options[ $config['refresh_option_key'] ] = $refresh_token;
@@ -305,6 +308,8 @@ class OAuth_Connect {
 		}
 
 		update_site_option( 'git_updater', $options );
+		Base::$options = $options;
+		API::$options  = $options;
 	}
 
 	/**
@@ -321,7 +326,10 @@ class OAuth_Connect {
 		unset( $options[ $config['refresh_option_key'] ] );
 		unset( $options[ $provider . '_token_expires_in' ] );
 		unset( $options[ $provider . '_token_acquired_at' ] );
+		unset( $options[ $provider . '_is_oauth_token' ] );
 		update_site_option( 'git_updater', $options );
+		Base::$options = $options;
+		API::$options  = $options;
 	}
 
 	/**
@@ -370,6 +378,20 @@ class OAuth_Connect {
 		$this->save_token( $provider, $new_token, $new_refresh_token ?? $refresh_token, $expires_in );
 
 		return $new_token;
+	}
+
+	/**
+	 * Check whether the stored token for a provider was acquired via OAuth.
+	 *
+	 * @param string $provider Provider slug.
+	 * @return bool True when the OAuth flag is set; false when missing or unknown provider.
+	 */
+	public function is_oauth_token( string $provider ): bool {
+		if ( ! isset( self::PROVIDERS[ $provider ] ) ) {
+			return false;
+		}
+		$options = ! empty( Base::$options ) ? Base::$options : get_site_option( 'git_updater', [] );
+		return ! empty( $options[ $provider . '_is_oauth_token' ] );
 	}
 
 	/**

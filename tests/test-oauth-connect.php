@@ -5,7 +5,11 @@
  * @package Git_Updater
  */
 
+use Fragen\Git_Updater\API\API;
+use Fragen\Git_Updater\API\GitHub_API;
+use Fragen\Git_Updater\Base;
 use Fragen\Git_Updater\OAuth\OAuth_Connect;
+use Fragen\Git_Updater\Settings;
 
 /**
  * Test OAuth_Connect functionality
@@ -26,6 +30,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		parent::set_up();
 		$this->oauth = new OAuth_Connect();
 		delete_site_option( 'git_updater' );
+		Base::$options = [];
 		unset( $_GET['provider'], $_GET['gu_exchange_code'], $_GET['_wpnonce'], $_POST['provider'], $_POST['_wpnonce'] );
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'wp_redirect' );
@@ -351,8 +356,9 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		wp_set_current_user( $user );
 
 		update_site_option( 'git_updater', [
-			'github_access_token' => 'test_token',
-			'gitlab_access_token' => 'other_token',
+			'github_access_token'   => 'test_token',
+			'github_is_oauth_token' => 'oauth',
+			'gitlab_access_token'   => 'other_token',
 		] );
 
 		$_GET['provider'] = 'github';
@@ -376,6 +382,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$options = get_site_option( 'git_updater' );
 		$this->assertArrayNotHasKey( 'github_access_token', $options );
+		$this->assertArrayNotHasKey( 'github_is_oauth_token', $options );
 		$this->assertEquals( 'other_token', $options['gitlab_access_token'] );
 	}
 
@@ -645,6 +652,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->assertSame( 'new_ref', $options['gitlab_refresh_token'] );
 		$this->assertSame( 7200, $options['gitlab_token_expires_in'] );
 		$this->assertArrayHasKey( 'gitlab_token_acquired_at', $options );
+		$this->assertSame( 'oauth', $options['gitlab_is_oauth_token'] );
 	}
 
 	public function test_refresh_token_preserves_old_refresh_when_not_rotated(): void {
@@ -731,6 +739,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$options = get_site_option( 'git_updater' );
 		$this->assertSame( 'tok', $options['gitlab_access_token'] );
 		$this->assertSame( 'ref', $options['gitlab_refresh_token'] );
+		$this->assertSame( 'oauth', $options['gitlab_is_oauth_token'] );
 	}
 
 	public function test_save_token_stores_expires_in_and_acquired_at(): void {
@@ -742,6 +751,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$options = get_site_option( 'git_updater' );
 		$this->assertSame( 7200, $options['gitlab_token_expires_in'] );
 		$this->assertArrayHasKey( 'gitlab_token_acquired_at', $options );
+		$this->assertSame( 'oauth', $options['gitlab_is_oauth_token'] );
 	}
 
 	public function test_save_token_clears_refresh_token_when_null(): void {
@@ -753,6 +763,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$options = get_site_option( 'git_updater' );
 		$this->assertArrayNotHasKey( 'gitlab_refresh_token', $options );
+		$this->assertSame( 'oauth', $options['gitlab_is_oauth_token'] );
 	}
 
 	public function test_save_token_clears_expiry_when_null(): void {
@@ -765,6 +776,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$options = get_site_option( 'git_updater' );
 		$this->assertArrayNotHasKey( 'gitlab_token_expires_in', $options );
 		$this->assertArrayNotHasKey( 'gitlab_token_acquired_at', $options );
+		$this->assertSame( 'oauth', $options['gitlab_is_oauth_token'] );
 	}
 
 	// -------------------------------------------------------------------------
@@ -777,6 +789,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 			'github_refresh_token'      => 'ref',
 			'github_token_expires_in'   => 7200,
 			'github_token_acquired_at'  => time(),
+			'github_is_oauth_token'     => 'oauth',
 			'gitlab_access_token'       => 'other_tok',
 		] );
 
@@ -789,6 +802,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->assertArrayNotHasKey( 'github_refresh_token', $options );
 		$this->assertArrayNotHasKey( 'github_token_expires_in', $options );
 		$this->assertArrayNotHasKey( 'github_token_acquired_at', $options );
+		$this->assertArrayNotHasKey( 'github_is_oauth_token', $options );
 		$this->assertSame( 'other_tok', $options['gitlab_access_token'] );
 	}
 
@@ -839,5 +853,100 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->assertEquals( 'test_refresh_token', $options['gitlab_refresh_token'] );
 		$this->assertEquals( 7200, $options['gitlab_token_expires_in'] );
 		$this->assertArrayHasKey( 'gitlab_token_acquired_at', $options );
+		$this->assertSame( 'oauth', $options['gitlab_is_oauth_token'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// is_oauth_token() tests
+	// -------------------------------------------------------------------------
+
+	public function test_is_oauth_token_returns_false_for_unknown_provider(): void {
+		$this->assertFalse( $this->oauth->is_oauth_token( 'fakehub' ) );
+	}
+
+	public function test_is_oauth_token_returns_false_when_option_missing(): void {
+		update_site_option( 'git_updater', [] );
+		$this->assertFalse( $this->oauth->is_oauth_token( 'github' ) );
+	}
+
+	public function test_is_oauth_token_returns_true_when_flag_set(): void {
+		update_site_option( 'git_updater', [ 'github_is_oauth_token' => 'oauth' ] );
+		$this->assertTrue( $this->oauth->is_oauth_token( 'github' ) );
+	}
+
+	public function test_is_oauth_token_returns_false_when_flag_explicitly_false(): void {
+		update_site_option( 'git_updater', [ 'github_is_oauth_token' => false ] );
+		$this->assertFalse( $this->oauth->is_oauth_token( 'github' ) );
+	}
+
+	public function test_is_oauth_token_true_after_save_token_then_false_after_delete_token(): void {
+		$save = new ReflectionMethod( OAuth_Connect::class, 'save_token' );
+		$save->setAccessible( true );
+		$save->invoke( $this->oauth, 'bitbucket', 'tok', null, null );
+
+		$this->assertTrue( $this->oauth->is_oauth_token( 'bitbucket' ) );
+
+		$delete = new ReflectionMethod( OAuth_Connect::class, 'delete_token' );
+		$delete->setAccessible( true );
+		$delete->invoke( $this->oauth, 'bitbucket' );
+
+		$this->assertFalse( $this->oauth->is_oauth_token( 'bitbucket' ) );
+	}
+
+	public function test_save_token_syncs_api_static_options(): void {
+		API::$options = [];
+
+		$save = new ReflectionMethod( OAuth_Connect::class, 'save_token' );
+		$save->setAccessible( true );
+		$save->invoke( $this->oauth, 'github', 'tok', null, null );
+
+		$this->assertSame( 'oauth', API::$options['github_is_oauth_token'] );
+		$this->assertSame( 'oauth', GitHub_API::$options['github_is_oauth_token'] );
+	}
+
+	public function test_delete_token_syncs_api_static_options(): void {
+		API::$options = [ 'github_is_oauth_token' => 'oauth', 'github_access_token' => 'tok' ];
+		update_site_option( 'git_updater', API::$options );
+
+		$delete = new ReflectionMethod( OAuth_Connect::class, 'delete_token' );
+		$delete->setAccessible( true );
+		$delete->invoke( $this->oauth, 'github' );
+
+		$this->assertArrayNotHasKey( 'github_is_oauth_token', API::$options );
+		$this->assertArrayNotHasKey( 'github_is_oauth_token', GitHub_API::$options );
+	}
+
+	/**
+	 * Regression: the OAuth flag must survive two consecutive settings-form saves.
+	 *
+	 * Pre-fix, boolean `true` was coerced to string '1' by sanitize_text_field on the
+	 * first save, then stripped by filter_options' array_filter on the second save.
+	 * With the string sentinel 'oauth', neither step removes it.
+	 */
+	public function test_is_oauth_token_survives_two_settings_form_saves(): void {
+		$save = new ReflectionMethod( OAuth_Connect::class, 'save_token' );
+		$save->setAccessible( true );
+		$save->invoke( $this->oauth, 'github', 'tok', null, null );
+
+		$filter = new ReflectionMethod( Settings::class, 'filter_options' );
+		$filter->setAccessible( true );
+
+		$run_save = function () use ( $filter ) {
+			$_POST['_wpnonce']    = wp_create_nonce( 'git_updater-options' );
+			$_POST['option_page'] = 'git_updater';
+			$_POST['git_updater'] = [];
+			Base::$options        = get_site_option( 'git_updater', [] );
+			$settings             = new Settings();
+			$options              = $filter->invoke( $settings );
+			update_site_option( 'git_updater', $settings->sanitize( $options ) );
+			unset( $_POST['_wpnonce'], $_POST['option_page'], $_POST['git_updater'] );
+		};
+
+		$run_save();
+		$run_save();
+
+		Base::$options = get_site_option( 'git_updater', [] );
+		$this->assertTrue( $this->oauth->is_oauth_token( 'github' ) );
+		$this->assertSame( 'oauth', Base::$options['github_is_oauth_token'] );
 	}
 }
