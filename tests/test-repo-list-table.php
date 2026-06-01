@@ -121,7 +121,21 @@ class Test_Repo_List_Table_Methods extends WP_UnitTestCase {
 
 	public function test_column_default_returns_release_asset_value(): void {
 		$item = $this->make_item( [ 'release_asset' => '<span>yes</span>' ] );
-		$this->assertSame( '<span>yes</span>', $this->table->column_default( $item, 'release_asset' ) );
+		$this->assertSame( '&lt;span&gt;yes&lt;/span&gt;', $this->table->column_default( $item, 'release_asset' ) );
+	}
+
+	public function test_column_default_escapes_html_in_field_values(): void {
+		$item = $this->make_item( [ 'uri' => '<script>alert(1)</script>' ] );
+		$result = $this->table->column_default( $item, 'uri' );
+		$this->assertStringNotContainsString( '<script>', $result );
+		$this->assertStringContainsString( '&lt;script&gt;', $result );
+	}
+
+	public function test_column_slug_escapes_html_in_slug(): void {
+		$item   = $this->make_item( [ 'slug' => '<img src=x onerror=alert(1)>', 'ID' => md5( 'xss-test' ) ] );
+		$result = $this->table->column_slug( $item );
+		$this->assertStringNotContainsString( '<img', $result );
+		$this->assertStringContainsString( '&lt;img', $result );
 	}
 
 	// -------------------------------------------------------------------------

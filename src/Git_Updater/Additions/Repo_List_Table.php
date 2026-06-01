@@ -124,10 +124,9 @@ class Repo_List_Table extends WP_List_Table {
 			case 'release_asset':
 			case 'type':
 			case 'private_package':
-				return $item[ $column_name ];
+				return esc_html( (string) $item[ $column_name ] );
 			default:
-				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
-				return print_r( $item, true ); // Show the whole array for troubleshooting purposes.
+				return esc_html( (string) wp_json_encode( $item ) );
 		}
 	}
 
@@ -168,9 +167,9 @@ class Repo_List_Table extends WP_List_Table {
 			/* translators: 1: title, 2: ID, 3: row actions */
 			'%1$s <span style="color:silver">(id:%2$s)</span>%3$s',
 			/*$1%s*/
-			$item['slug'],
+			esc_html( (string) $item['slug'] ),
 			/*$2%s*/
-			$item['ID'],
+			esc_html( (string) $item['ID'] ),
 			/*$3%s*/
 			$this->row_actions( $actions )
 		);
