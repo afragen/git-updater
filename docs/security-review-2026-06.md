@@ -485,6 +485,15 @@ Either is defensible. Option (a) is a meaningful new dependency on a constant th
 - **M3** — applied: `Rest_Update::log_exit()`'s `error_log` is gated on `WP_DEBUG`.
 - **M4** — applied (option b): admin-visible description added; this file is the docs counterpart.
 
+## Status — Lows
+
+All four Low findings deferred after re-assessment (June 2026):
+
+- **L1** — deferred: worthwhile architecturally, but moving to `permission_callback` is a breaking response-shape change for callers (Git Remote Updater, field tooling). Revisit when consumer coordination is in scope.
+- **L2** — deferred: legitimate `serialize → array_unique → unserialize` dedup over a site-option value the plugin wrote itself. No trust boundary crossing; no security benefit to changing it.
+- **L3** — deferred: admin→admin SSRF only. A real fix needs a `GIT_UPDATER_ALLOW_PRIVATE_HOSTS` escape hatch to avoid breaking self-hosted Gitea / GitLab intranet deployments.
+- **L4** — deferred: `download_url` legitimately points at provider CDN hosts (e.g. `objects.githubusercontent.com`). A strict same-origin check would break working downloads.
+
 ---
 
 ## Low / Informational
