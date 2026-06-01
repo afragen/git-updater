@@ -1,0 +1,9 @@
+{
+	"addDir": [
+		"~/Documents/github/git-updater-oauth-connector",
+		"~/Documents/github/git-updater-gist",
+		"~/Documents/github/git-updater-gitea",
+		"~/Documents/github/git-updater-gitlab",
+		"~/Documents/github/git-updater-bitbucket"
+	]
+}
