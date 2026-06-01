@@ -1,5 +1,6 @@
 #### [unreleased]
 * added support for OAuth tokens
+* updated for Claude Opus 4.7 security review
 
 #### 13.0.0 / 2026-05-31 🎂
 * use `afragen/wp-readme-parser` drop-in replacement for `afragen/wordpress-plugin-readme-parser`
