@@ -609,12 +609,13 @@ class API {
 	 * @since 6.1.0
 	 * @uses  Requests, requires WP 4.6
 	 *
-	 * @param string $asset Release asset URI from git host.
-	 * @param bool   $aws   Release asset hosted on AWS.
+	 * @param string $asset    Release asset URI from git host.
+	 * @param bool   $aws      Release asset hosted on AWS.
+	 * @param bool   $override Force cache-bypass without relying on $_REQUEST['override'].
 	 *
 	 * @return string|bool|stdClass Release asset URI from AWS.
 	 */
-	public function get_release_asset_redirect( $asset, $aws = false ) {
+	public function get_release_asset_redirect( $asset, $aws = false, $override = false ) {
 		$rest = false;
 		if ( ! $asset ) {
 			return false;
@@ -635,18 +636,18 @@ class API {
 			$slug = ! $slug && isset( $_REQUEST['theme'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['theme'] ) ) : $slug;
 			$rest = $slug === $cache['repo'];
 		}
+		$override = $override || isset( $_REQUEST['override'] );
 		// phpcs:enable
 
 		if ( ! $response && $this->exit_no_update( $response )
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			&& ! isset( $_REQUEST['override'] ) && ! isset( $_REQUEST['rollback'] )
+			&& ! $override && ! isset( $_REQUEST['rollback'] )
 			&& ! $rest
 		) {
 			return false;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( ! $response || isset( $_REQUEST['override'] ) ) {
+		if ( ! $response || $override ) {
 			$args = $this->add_auth_header( [], $asset );
 			if ( empty( $args ) ) { // @codeCoverageIgnore
 				return false; // @codeCoverageIgnore

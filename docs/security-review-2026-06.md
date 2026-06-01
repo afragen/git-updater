@@ -474,6 +474,17 @@ Migration: on first load, detect option values that don't decrypt → assume leg
 
 Either is defensible. Option (a) is a meaningful new dependency on a constant the operator must set; option (b) is honest about the threat model.
 
+**Decision (June 2026)**: option (b) — documented. `GitHub_API::print_section_github_access_token()` now displays a description note that access tokens are stored in the site options table and are present in cleartext in database backups. No encryption layer added. The other provider plugins (Bitbucket, GitLab, Gitea) should mirror this note in their own settings sections.
+
+---
+
+## Status — Mediums
+
+- **M1** — applied: block comment above the `wp_ajax_*git-updater-update` action registration documents the public-webhook threat model.
+- **M2** — applied: `API::get_release_asset_redirect()` gains an explicit `$override` third parameter; the superglobal write at `REST_API.php:567` is removed.
+- **M3** — applied: `Rest_Update::log_exit()`'s `error_log` is gated on `WP_DEBUG`.
+- **M4** — applied (option b): admin-visible description added; this file is the docs counterpart.
+
 ---
 
 ## Low / Informational

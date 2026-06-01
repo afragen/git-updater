@@ -48,7 +48,14 @@ class REST_API {
 	public function load_hooks() {
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 
-		// Deprecated AJAX request.
+		/*
+		 * Deprecated AJAX request. The `nopriv` variant is intentional — external CI / webhook
+		 * callers POST here without a logged-in session. Authentication is the shared API key,
+		 * validated inside Rest_Update::process_request() with hash_equals(). The response must
+		 * not echo the inbound query string back to the caller (see the `webhook` field, which
+		 * is built from a curated allow-list, never $_GET). Do not weaken this without
+		 * revisiting the threat model.
+		 */
 		add_action( 'wp_ajax_git-updater-update', [ Singleton::get_instance( 'REST\Rest_Update', $this ), 'process_request' ] );
 		add_action( 'wp_ajax_nopriv_git-updater-update', [ Singleton::get_instance( 'REST\Rest_Update', $this ), 'process_request' ] );
 	}
@@ -564,8 +571,7 @@ class REST_API {
 					? reset( $versions )
 					: $repo_cache['release_asset_download'];
 			} elseif ( isset( $repo_cache['release_asset'] ) && $repo_cache['release_asset'] ) {
-				$_REQUEST['override']           = true;
-				$repo_api_data['download_link'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->get_release_asset_redirect( $repo_cache['release_asset'], true );
+				$repo_api_data['download_link'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->get_release_asset_redirect( $repo_cache['release_asset'], true, true );
 				unset( $repo_api_data['auth_header'] );
 			}
 		}

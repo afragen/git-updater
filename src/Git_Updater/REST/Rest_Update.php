@@ -471,8 +471,10 @@ class Rest_Update {
 	public function log_exit( $response, $code ) {
 		$json_encode_flags = 128 | 64;
 
-		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-		error_log( json_encode( $response, $json_encode_flags ) );
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			error_log( json_encode( $response, $json_encode_flags ) ); // @codeCoverageIgnore
+		}
 
 		/**
 		 * Action hook after processing REST process.
