@@ -319,6 +319,17 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 	}
 
 	/**
+	 * When api() returns false (e.g. cached failure after OAuth disconnect),
+	 * parse_release_asset() must return '' instead of letting the github/gitea
+	 * foreach run on a non-iterable value.
+	 */
+	public function test_parse_release_asset_returns_empty_string_on_false_response(): void {
+		$rm     = $this->api->get_reflection_method( $this->api, 'parse_release_asset' );
+		$result = $rm->invoke( $this->api, 'github', '/repos/:owner/:repo/releases/latest', false );
+		$this->assertSame( '', $result );
+	}
+
+	/**
 	 * Stable release (tag '1.0.0') whose asset name does NOT start with the
 	 * repo slug: the inner foreach completes without continue 2 (covers line 82)
 	 * and the release is not added to the stable-assets bucket.
