@@ -610,27 +610,16 @@ class REST_API {
 			}
 		}
 
-		if ( '/git-updater/v1/update-api' === $request->get_route() ) {
-			// Only proxy downloads that require auth headers.
-			$needs_proxy = $repo_api_data['is_private']
-				|| ! empty( $this->get_class_vars( 'API\API', 'options' )[ $slug ] )
-				|| in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true );
+		// All endpoints: use signed proxy URL for repos that need auth,
+		// and never expose auth tokens to clients.
+		$needs_proxy = $repo_api_data['is_private']
+			|| ! empty( $this->get_class_vars( 'API\API', 'options' )[ $slug ] )
+			|| in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true );
 
-			if ( $needs_proxy && ! empty( $repo_api_data['download_link'] ) ) {
-				$repo_api_data['download_link'] = $this->sign_download_url( $slug );
-			}
-			// Never expose auth tokens to clients.
-			unset( $repo_api_data['auth_header'] );
-		} else {
-			// plugins-api / themes-api: existing behavior (auth stripped for non-private).
-			$private_or_token = $repo_api_data['is_private'] || ! empty( $this->get_class_vars( 'API\API', 'options' )[ $slug ] );
-			if ( ! $private_or_token && ! in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true ) ) {
-				unset( $repo_api_data['auth_header']['headers']['Authorization'] );
-			}
-			if ( empty( $repo_api_data['auth_header']['headers'] ) ) {
-				unset( $repo_api_data['auth_header'] );
-			}
+		if ( $needs_proxy && ! empty( $repo_api_data['download_link'] ) ) {
+			$repo_api_data['download_link'] = $this->sign_download_url( $slug );
 		}
+		unset( $repo_api_data['auth_header'] );
 
 		return $repo_api_data;
 	}
@@ -890,7 +879,7 @@ class REST_API {
 	 *
 	 * @return array<string, mixed>|WP_Error { download_link, auth_header } or error.
 	 */
-	private function build_download_metadata( string $slug ): array|WP_Error {
+	protected function build_download_metadata( string $slug ): array|WP_Error {
 		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
 		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
 		$gu_repos   = array_merge( $gu_plugins, $gu_themes );

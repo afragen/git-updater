@@ -1869,7 +1869,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( 'auth_header', $data );
 	}
 
-	public function test_plugins_api_may_still_include_auth_header(): void {
+	public function test_plugins_api_never_exposes_auth_header(): void {
 		$this->skip_if_fixture_absent();
 
 		new Base();
@@ -1903,10 +1903,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		delete_site_transient( 'update_themes' );
 		$GLOBALS['wp_rest_server'] = null;
 
-		// plugins-api route should NOT use proxy URLs — download_link should be original.
-		if ( isset( $data['download_link'] ) ) {
-			$this->assertStringNotContainsString( '/git-updater/v1/download/', $data['download_link'] );
-		}
+		$this->assertArrayNotHasKey( 'auth_header', $data );
 	}
 
 	// -------------------------------------------------------------------------
