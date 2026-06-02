@@ -1,4 +1,7 @@
 #### [unreleased]
+* harden `update-api` REST endpoint: replace cleartext auth tokens with signed download proxy (HMAC-SHA256, 5 min TTL)
+* add `download/{slug}` REST route for proxied package downloads requiring auth
+* public repos continue to download directly from git host without proxy
 
 #### 13.0.0 / 2026-05-31 🎂
 * use `afragen/wp-readme-parser` drop-in replacement for `afragen/wordpress-plugin-readme-parser`

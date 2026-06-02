@@ -13,3 +13,5 @@ phpcs.xml.dist export-ignore
 /tests export-ignore
 /wiki-assets export-ignore
 .wp-env export-ignore
+.commandcode export-ignore
+/docs export-ignore
