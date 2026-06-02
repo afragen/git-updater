@@ -297,7 +297,7 @@ class Settings {
 		?>
 		<div class="wrap git-updater-settings">
 			<h1>
-				<a href="https://github.com/afragen/git-updater" target="_blank"><img src="<?php echo esc_attr( $logo ); ?>" alt="Git Updater logo" /></a><br>
+				<a href="https://github.com/afragen/git-updater" target="_blank"><img src="<?php echo esc_url( $logo ); ?>" alt="Git Updater logo" /></a><br>
 				<?php esc_html_e( 'Git Updater', 'git-updater' ); ?>
 				<span class="description"><?php echo esc_html( ' v' . $this->get_plugin_version() ); ?></span>
 			</h1>
@@ -305,7 +305,7 @@ class Settings {
 			<?php $this->admin_page_notices(); ?>
 			<?php if ( 'git_updater_settings' === $tab ) : ?>
 				<?php $this->options_sub_tabs(); ?>
-				<form class="settings" method="post" action="<?php echo esc_attr( $action ); ?>">
+				<form class="settings" method="post" action="<?php echo esc_url( $action ); ?>">
 					<?php
 					settings_fields( 'git_updater' );
 					if ( 'git_updater' === $subtab ) {
@@ -320,7 +320,7 @@ class Settings {
 					?>
 				</form>
 				<?php $refresh_transients = add_query_arg( [ 'git_updater_refresh_transients' => true ], $action ); ?>
-				<form class="settings" method="post" action="<?php echo esc_attr( $refresh_transients ); ?>">
+				<form class="settings" method="post" action="<?php echo esc_url( $refresh_transients ); ?>">
 					<?php wp_nonce_field( 'gu_refresh_cache' ); ?>
 					<?php submit_button( esc_html__( 'Refresh Cache', 'git-updater' ), 'primary', 'gu_refresh_cache' ); ?>
 				</form>
