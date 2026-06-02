@@ -541,9 +541,9 @@ class GitHub_API extends API implements API_Interface {
 	 */
 	public function print_section_github_access_token() {
 		esc_html_e( 'Click the "Connect GitHub" button for an OAuth connection or enter your GitHub Access Token to avoid API access limits.', 'git-updater' );
+		printf( '<p class="description">%s</p>', esc_html__( 'Access tokens are stored in this site\'s options table. Database backups contain them in cleartext — handle backup files accordingly.', 'git-updater' ) );
 		$icon = plugin_dir_url( dirname( __DIR__, 2 ) ) . 'assets/github-logo.svg';
 		printf( '<img class="git-oauth-icon" src="%s" alt="GitHub logo" />', esc_attr( $icon ) );
-		printf( '<p class="description">%s</p>', esc_html__( 'Access tokens are stored in this site\'s options table. Database backups contain them in cleartext — handle backup files accordingly.', 'git-updater' ) );
 	}
 
 	/**
