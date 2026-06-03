@@ -505,8 +505,30 @@ class Test_Settings_Add_Admin_Page extends WP_UnitTestCase {
 		$output = ob_get_clean();
 		$this->assertStringContainsString( '<form', $output );
 	}
-}
 
-// ---------------------------------------------------------------------------
-// Repo_List_Table — extended coverage
-// ---------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
+	// uses_lite checkbox
+	// -------------------------------------------------------------------------
+
+	public function test_sanitize_preserves_uses_lite_true(): void {
+		$result = $this->settings->sanitize( [ 'slug' => 'my/plugin.php', 'uri' => 'https://github.com/owner/repo', 'uses_lite' => '1' ] );
+		$this->assertTrue( $result[0]['uses_lite'] );
+	}
+
+	public function test_sanitize_sets_uses_lite_false_when_absent(): void {
+		$result = $this->settings->sanitize( [ 'slug' => 'my/plugin.php', 'uri' => 'https://github.com/owner/repo' ] );
+		$this->assertFalse( $result[0]['uses_lite'] );
+	}
+
+	public function test_callback_checkbox_renders_uses_lite_field(): void {
+		ob_start();
+		$this->settings->callback_checkbox( [
+			'id' => 'git_updater_additions_uses_lite',
+			'setting' => 'uses_lite',
+			'title' => 'Uses Git Updater Lite',
+		] );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'name="git_updater_additions[uses_lite]"', $output );
+	}
+}

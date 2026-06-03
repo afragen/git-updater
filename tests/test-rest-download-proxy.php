@@ -420,7 +420,7 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 	// Helpers
 	// -------------------------------------------------------------------------
 
-	private function call_sign_download_url( string $slug, int $ttl = 300 ): string {
+	private function call_sign_download_url( string $slug, int $ttl = 43200 ): string {
 		$method = new ReflectionMethod( REST_API::class, 'sign_download_url' );
 		$method->setAccessible( true );
 		return $method->invoke( $this->rest, $slug, $ttl );

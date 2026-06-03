@@ -80,6 +80,7 @@ class Repo_List_Table extends WP_List_Table {
 			$option['primary_branch']  = ! empty( $option['primary_branch'] ) ? $option['primary_branch'] : 'master';
 			$option['release_asset']   = ! empty( $option['release_asset'] ) ? '<span class="dashicons dashicons-yes"></span>' : false;
 			$option['private_package'] = ! empty( $option['private_package'] ) ? '<span class="dashicons dashicons-yes"></span>' : false;
+			$option['uses_lite']       = ! empty( $option['uses_lite'] ) ? '<span class="dashicons dashicons-yes"></span>' : false;
 
 			$options[ $key ] = $option;
 		}
@@ -124,6 +125,7 @@ class Repo_List_Table extends WP_List_Table {
 			case 'release_asset':
 			case 'type':
 			case 'private_package':
+			case 'uses_lite':
 				return $item[ $column_name ];
 			default:
 				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
@@ -216,6 +218,7 @@ class Repo_List_Table extends WP_List_Table {
 			'primary_branch'  => esc_html__( 'Primary Branch', 'git-updater' ),
 			'release_asset'   => esc_html__( 'Release Asset', 'git-updater' ),
 			'private_package' => esc_html__( 'Private Package', 'git-updater' ),
+			'uses_lite'       => esc_html__( 'Lite Client', 'git-updater' ),
 			'type'            => esc_html__( 'Type', 'git-updater' ),
 		];
 

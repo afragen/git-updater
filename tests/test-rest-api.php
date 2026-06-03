@@ -2206,13 +2206,15 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 			$this->markTestSkipped( 'Fixture plugin metadata unavailable: ' . $data['error'] );
 		}
 
-		// With a per-slug token, download_link should be a proxy URL and auth_header absent.
+		// With a per-slug token, download_link should be a token proxy URL and auth_header absent.
 		$this->assertArrayNotHasKey( 'auth_header', $data );
 		if ( isset( $data['download_link'] ) && ! empty( $data['download_link'] ) ) {
 			$this->assertTrue(
-				str_contains( $data['download_link'], '/git-updater/v1/download/' )
+				str_contains( $data['download_link'], '/git-updater/v1/download-token/' )
+				|| str_contains( $data['download_link'], 'rest_route=%2Fgit-updater%2Fv1%2Fdownload-token%2F' )
+				|| str_contains( $data['download_link'], '/git-updater/v1/download/' )
 				|| str_contains( $data['download_link'], 'rest_route=%2Fgit-updater%2Fv1%2Fdownload%2F' ),
-				'Expected proxy URL but got: ' . $data['download_link']
+				'Expected proxy or token URL but got: ' . $data['download_link']
 			);
 		}
 	}
@@ -2607,5 +2609,198 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 			];
 		}
 		return $preempt;
+	}
+
+	// -------------------------------------------------------------------------
+	// get_api_data() — non-update-api proxy path (line 644 else branch)
+	// -------------------------------------------------------------------------
+
+	public function test_plugins_api_returns_direct_signed_url_for_private_repo(): void {
+		$this->skip_if_fixture_absent();
+
+		// Set per-slug token so $needs_proxy is true.
+		$options = get_site_option( 'git_updater', [] );
+		$options[ self::SLUG ] = 'fake-token-for-testing';
+		update_site_option( 'git_updater', $options );
+
+		new Base();
+		$GLOBALS['wp_rest_server'] = null;
+		$server = rest_get_server();
+
+		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
+
+		// Seed a release_asset_download so the download_link is populated.
+		$cache_key = 'ghu-' . md5( self::SLUG );
+		$existing  = get_site_option( $cache_key, [] );
+		$existing['release_asset_download'] = 'https://github.com/afragen/test-gu-plugin/archive/refs/tags/2.0.0.zip';
+		unset( $existing['release_asset_redirect'] );
+		update_site_option( $cache_key, $existing );
+
+		// Hit plugins-api (not update-api) with the private repo.
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
+		$request->set_param( 'slug', self::SLUG );
+		$response = $server->dispatch( $request );
+		$data     = (array) $response->get_data();
+
+		// Clean up.
+		unset( $options[ self::SLUG ] );
+		update_site_option( 'git_updater', $options );
+		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
+		delete_site_option( $cache_key );
+
+		if ( isset( $data['error'] ) ) {
+			$this->markTestSkipped( 'Fixture metadata unavailable: ' . $data['error'] );
+		}
+
+		// Should get a direct signed proxy URL (not a token URL).
+		$this->assertArrayNotHasKey( 'auth_header', $data );
+		if ( isset( $data['download_link'] ) && ! empty( $data['download_link'] ) ) {
+			$this->assertTrue(
+				str_contains( $data['download_link'], 'expires=' ) && str_contains( $data['download_link'], 'signature=' ),
+				'Expected direct signed URL but got: ' . $data['download_link']
+			);
+		}
+	}
+
+	// -------------------------------------------------------------------------
+	// get_download_token() — sign_download_url line 813
+	// -------------------------------------------------------------------------
+
+	public function test_get_download_token_returns_error_when_build_metadata_fails(): void {
+		new Base();
+		$rest    = new REST_API();
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/nonexistent-slug' );
+		$request->set_param( 'slug', 'nonexistent-slug' );
+		$response = $rest->get_download_token( $request );
+
+		$this->assertWPError( $response );
+	}
+
+	public function test_get_download_token_signs_url_on_success(): void {
+		$this->skip_if_fixture_absent();
+
+		new Base();
+
+		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
+
+		// Seed a release_asset_download so build_download_metadata succeeds.
+		$cache_key = 'ghu-' . md5( self::SLUG );
+		$existing  = get_site_option( $cache_key, [] );
+		$existing['release_asset_download'] = 'https://github.com/afragen/test-gu-plugin/archive/refs/tags/2.0.0.zip';
+		unset( $existing['release_asset_redirect'] );
+		update_site_option( $cache_key, $existing );
+
+		$rest    = new REST_API();
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/' . self::SLUG );
+		$request->set_param( 'slug', self::SLUG );
+		$response = $rest->get_download_token( $request );
+
+		// Clean up.
+		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
+		delete_site_option( $cache_key );
+
+		if ( is_wp_error( $response ) ) {
+			$this->markTestSkipped( 'Fixture metadata unavailable: ' . $response->get_error_message() );
+		}
+
+		$this->assertArrayHasKey( 'download_link', $response->get_data() );
+		$this->assertStringContainsString( 'expires=', $response->get_data()['download_link'] );
+		$this->assertStringContainsString( 'signature=', $response->get_data()['download_link'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_download_token() endpoint tests
+	// -------------------------------------------------------------------------
+
+	public function test_get_download_token_returns_200_for_valid_slug(): void {
+		$this->skip_if_fixture_absent();
+
+		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
+
+		new Base();
+		$GLOBALS['wp_rest_server'] = null;
+		$server = rest_get_server();
+
+		$request  = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/' . self::SLUG );
+		$response = $server->dispatch( $request );
+
+		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'download_link', $data );
+		$this->assertStringContainsString( 'download', $data['download_link'] );
+		$this->assertStringContainsString( 'expires=', $data['download_link'] );
+		$this->assertStringContainsString( 'signature=', $data['download_link'] );
+	}
+
+	public function test_get_download_token_returns_403_for_unauthorized_domain(): void {
+		$this->skip_if_fixture_absent();
+
+		// Set up authorized domain filter
+		add_filter( 'git_updater_lite_authorized_domains', function () {
+			return [ 'authorized-domain.com' ];
+		} );
+
+		$GLOBALS['wp_rest_server'] = null;
+		$server = rest_get_server();
+
+		$request  = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/' . self::SLUG );
+		$request->set_header( 'X-GU-Site-Domain', 'unauthorized-domain.com' );
+		$response = $server->dispatch( $request );
+
+		remove_all_filters( 'git_updater_lite_authorized_domains' );
+
+		$this->assertSame( 403, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertSame( 'gu_unauthorized_domain', $data['code'] );
+	}
+
+	public function test_get_download_token_returns_200_for_authorized_domain(): void {
+		$this->skip_if_fixture_absent();
+
+		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
+
+		// Set up authorized domain filter
+		add_filter( 'git_updater_lite_authorized_domains', function () {
+			return [ 'authorized-domain.com' ];
+		} );
+
+		new Base();
+		$GLOBALS['wp_rest_server'] = null;
+		$server = rest_get_server();
+
+		$request  = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/' . self::SLUG );
+		$request->set_header( 'X-GU-Site-Domain', 'authorized-domain.com' );
+		$response = $server->dispatch( $request );
+
+		remove_all_filters( 'git_updater_lite_authorized_domains' );
+		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
+
+		$this->assertSame( 200, $response->get_status() );
+	}
+
+	public function test_get_download_token_returns_200_for_subdomain(): void {
+		$this->skip_if_fixture_absent();
+
+		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
+
+		// Set up authorized domain filter
+		add_filter( 'git_updater_lite_authorized_domains', function () {
+			return [ 'authorized-domain.com' ];
+		} );
+
+		new Base();
+		$GLOBALS['wp_rest_server'] = null;
+		$server = rest_get_server();
+
+		$request  = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/' . self::SLUG );
+		$request->set_header( 'X-GU-Site-Domain', 'staging.authorized-domain.com' );
+		$response = $server->dispatch( $request );
+
+		remove_all_filters( 'git_updater_lite_authorized_domains' );
+		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
+
+		$this->assertSame( 200, $response->get_status() );
 	}
 }

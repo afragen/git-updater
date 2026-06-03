@@ -176,6 +176,25 @@ class REST_API {
 
 		register_rest_route(
 			self::$namespace,
+			'/download-token/(?P<slug>[a-z0-9-]+)',
+			[
+				[
+					'show_in_index'       => false,
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'get_download_token' ],
+					'permission_callback' => '__return_true',
+					'args'                => [
+						'slug' => [
+							'required'          => true,
+							'sanitize_callback' => 'sanitize_title_with_dashes',
+						],
+					],
+				],
+			]
+		);
+
+		register_rest_route(
+			self::$namespace,
 			'update-api-additions',
 			[
 				[
@@ -617,7 +636,13 @@ class REST_API {
 			|| in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true );
 
 		if ( $needs_proxy && ! empty( $repo_api_data['download_link'] ) ) {
-			$repo_api_data['download_link'] = $this->sign_download_url( $slug );
+			// Strictly isolate the token URL to the git-updater-lite update-api route.
+			if ( str_contains( $request->get_route(), 'update-api' ) ) {
+				$repo_api_data['download_link'] = rest_url( self::$namespace . '/download-token/' . rawurlencode( $slug ) );
+			} else {
+				// Main plugin continues to get the direct signed URL (12-hour default).
+				$repo_api_data['download_link'] = $this->sign_download_url( $slug );
+			}
 		}
 		unset( $repo_api_data['auth_header'] );
 
@@ -709,11 +734,11 @@ class REST_API {
 	 * Generate a signed download URL for the proxy endpoint.
 	 *
 	 * @param string $slug          The package slug.
-	 * @param int    $ttl_seconds   Time-to-live in seconds. Default 300 (5 min).
+	 * @param int    $ttl_seconds   Time-to-live in seconds. Default 43200 (12 hours).
 	 *
 	 * @return string
 	 */
-	private function sign_download_url( string $slug, int $ttl_seconds = 300 ): string {
+	private function sign_download_url( string $slug, int $ttl_seconds = 43200 ): string {
 		$expires   = time() + $ttl_seconds;
 		$payload   = $slug . '|' . $expires;
 		$secret    = wp_salt( 'auth' );
@@ -746,6 +771,51 @@ class REST_API {
 		$expected = hash_hmac( 'sha256', $payload, $secret );
 
 		return hash_equals( $expected, $signature );
+	}
+
+	/**
+	 * Generate a short-lived download token for git-updater-lite.
+	 *
+	 * @param WP_REST_Request $request REST API request with slug.
+	 *
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function get_download_token( WP_REST_Request $request ) {
+		$slug = $request->get_param( 'slug' );
+
+		// 1. Optional Server-Centric Domain Validation
+		$incoming_domain    = sanitize_text_field( $request->get_header( 'X-GU-Site-Domain' ) );
+		$authorized_domains = (array) apply_filters( 'git_updater_lite_authorized_domains', [], $slug );
+
+		if ( ! empty( $authorized_domains ) ) {
+			$domain_valid = false;
+			foreach ( $authorized_domains as $base_domain ) {
+				$base_domain = strtolower( trim( $base_domain ) );
+				// Matches exact domain OR any subdomain (e.g., staging.example.com, www.example.com).
+				if ( $incoming_domain === $base_domain || str_ends_with( $incoming_domain, '.' . $base_domain ) ) {
+					$domain_valid = true;
+					break;
+				}
+			}
+
+			if ( ! $domain_valid ) {
+				return new WP_Error(
+					'gu_unauthorized_domain',
+					'Domain not authorized for this package. Please contact the plugin developer.',
+					[ 'status' => 403 ]
+				);
+			}
+		}
+
+		// 2. Standard Repo Validation (handles private_package checks, etc.)
+		$repo_api_data = $this->build_download_metadata( $slug );
+		if ( is_wp_error( $repo_api_data ) ) {
+			return $repo_api_data;
+		}
+
+		// 3. Generate and return short-lived signed URL (60 seconds for lite)
+		$signed_url = $this->sign_download_url( $slug, 60 );
+		return rest_ensure_response( [ 'download_link' => $signed_url ] );
 	}
 
 	/**

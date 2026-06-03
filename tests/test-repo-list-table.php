@@ -57,8 +57,8 @@ class Test_Repo_List_Table_Methods extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'private_package', $this->table->get_columns() );
 	}
 
-	public function test_get_columns_returns_exactly_six_columns(): void {
-		$this->assertCount( 6, $this->table->get_columns() );
+	public function test_get_columns_returns_exactly_seven_columns(): void {
+		$this->assertCount( 7, $this->table->get_columns() );
 	}
 
 	// -------------------------------------------------------------------------
@@ -277,12 +277,42 @@ class Test_Repo_List_Table_Extended extends WP_UnitTestCase {
 		$output = ob_get_clean();
 		$this->assertStringContainsString( '<div class="wrap">', $output );
 	}
+
+	// -------------------------------------------------------------------------
+	// uses_lite column
+	// -------------------------------------------------------------------------
+
+	public function test_get_columns_includes_uses_lite(): void {
+		$this->assertArrayHasKey( 'uses_lite', $this->table->get_columns() );
+	}
+
+	public function test_column_default_renders_uses_lite_icon(): void {
+		$item = [
+			'slug' => 'test-plugin',
+			'uri' => 'https://github.com/test/plugin',
+			'type' => 'github_plugin',
+			'primary_branch' => 'master',
+			'release_asset' => false,
+			'private_package' => false,
+			'uses_lite' => '<span class="dashicons dashicons-yes"></span>',
+		];
+
+		$result = $this->table->column_default( $item, 'uses_lite' );
+		$this->assertStringContainsString( 'dashicons-yes', $result );
+	}
+
+	public function test_column_default_renders_uses_lite_false(): void {
+		$item = [
+			'slug' => 'test-plugin',
+			'uri' => 'https://github.com/test/plugin',
+			'type' => 'github_plugin',
+			'primary_branch' => 'master',
+			'release_asset' => false,
+			'private_package' => false,
+			'uses_lite' => false,
+		];
+
+		$result = $this->table->column_default( $item, 'uses_lite' );
+		$this->assertFalse( $result );
+	}
 }
-
-// ---------------------------------------------------------------------------
-// Add_Ons — add_admin_page and addons_page_init
-// ---------------------------------------------------------------------------
-
-/**
- * Class Test_Add_Ons_Admin_Page_And_Init
- */
