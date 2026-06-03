@@ -275,6 +275,19 @@ class Settings {
 				'title'   => __( 'Check if this package is not to be shared with aggregators.', 'git-updater' ),
 			]
 		);
+
+		add_settings_field(
+			'uses_lite',
+			esc_html__( 'Uses Git Updater Lite', 'git-updater' ),
+			[ $this, 'callback_checkbox' ],
+			'git_updater_additions',
+			'git_updater_additions',
+			[
+				'id'      => 'git_updater_additions_uses_lite',
+				'setting' => 'uses_lite',
+				'title'   => __( 'Check if this package is updated via git-updater-lite and requires domain validation.', 'git-updater' ),
+			]
+		);
 	}
 
 	/**
@@ -294,6 +307,7 @@ class Settings {
 		$new_input[0]['ID']              = md5( $new_input[0]['slug'] );
 		$new_input[0]['source']          = md5( home_url() );
 		$new_input[0]['private_package'] = ! empty( $new_input[0]['private_package'] ) ? true : false;
+		$new_input[0]['uses_lite']       = ! empty( $new_input[0]['uses_lite'] ) ? true : false;
 
 		return $new_input;
 	}

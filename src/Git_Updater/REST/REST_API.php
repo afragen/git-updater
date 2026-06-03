@@ -141,6 +141,65 @@ class REST_API {
 			);
 		}
 
+		$download_args = [
+			'slug'      => [
+				'required'          => true,
+				'validate_callback' => 'sanitize_title_with_dashes',
+			],
+			'expires'   => [
+				'required'          => true,
+				'validate_callback' => function ( $value ) {
+					return is_numeric( $value );
+				},
+			],
+			'signature' => [
+				'required'          => true,
+				'validate_callback' => function ( $value ) {
+					return preg_match( '/^[a-f0-9]{64}$/', $value );
+				},
+			],
+		];
+
+		register_rest_route(
+			self::$namespace,
+			'/download/(?P<slug>[a-z0-9-]+)',
+			[
+				[
+					'show_in_index'       => false,
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'proxy_download' ],
+					'permission_callback' => '__return_true',
+					'args'                => $download_args,
+				],
+				[
+					'show_in_index'       => false,
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'proxy_download' ],
+					'permission_callback' => '__return_true',
+					'args'                => $download_args,
+				],
+			]
+		);
+
+		register_rest_route(
+			self::$namespace,
+			'/download-token/(?P<slug>[a-z0-9-]+)',
+			[
+				[
+					'show_in_index'       => false,
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'get_download_token' ],
+					'permission_callback' => '__return_true',
+					'args'                => [
+						'slug' => [
+							'required'          => true,
+							'sanitize_callback' => 'sanitize_title_with_dashes',
+						],
+					],
+				],
+			]
+		);
+
 		register_rest_route(
 			self::$namespace,
 			'update-api-additions',
@@ -576,15 +635,22 @@ class REST_API {
 			}
 		}
 
-		$private_or_token = $repo_api_data['is_private'] || ! empty( $this->get_class_vars( 'API\API', 'options' )[ $slug ] );
-		$private_or_token = $private_or_token && ( '/git-updater/v1/update-api' === $request->get_route() );
-		if ( ! $private_or_token && ! in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true ) ) {
-			unset( $repo_api_data['auth_header']['headers']['Authorization'] );
-		}
+		// All endpoints: use signed proxy URL for repos that need auth,
+		// and never expose auth tokens to clients.
+		$needs_proxy = $repo_api_data['is_private']
+			|| ! empty( $this->get_class_vars( 'API\API', 'options' )[ $slug ] )
+			|| in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true );
 
-		if ( empty( $repo_api_data['auth_header']['headers'] ) ) {
-			unset( $repo_api_data['auth_header'] );
+		if ( $needs_proxy && ! empty( $repo_api_data['download_link'] ) ) {
+			// Strictly isolate the token URL to the git-updater-lite update-api route.
+			if ( str_contains( $request->get_route(), 'update-api' ) ) {
+				$repo_api_data['download_link'] = rest_url( self::$namespace . '/download-token/' . rawurlencode( $slug ) );
+			} else {
+				// Main plugin continues to get the direct signed URL (12-hour default).
+				$repo_api_data['download_link'] = $this->sign_download_url( $slug );
+			}
 		}
+		unset( $repo_api_data['auth_header'] );
 
 		return $repo_api_data;
 	}
@@ -668,6 +734,302 @@ class REST_API {
 			];
 
 		return (object) $message;
+	}
+
+	/**
+	 * Generate a signed download URL for the proxy endpoint.
+	 *
+	 * @param string $slug          The package slug.
+	 * @param int    $ttl_seconds   Time-to-live in seconds. Default 43200 (12 hours).
+	 *
+	 * @return string
+	 */
+	private function sign_download_url( string $slug, int $ttl_seconds = 43200 ): string {
+		$expires   = time() + $ttl_seconds;
+		$payload   = $slug . '|' . $expires;
+		$secret    = wp_salt( 'auth' );
+		$signature = hash_hmac( 'sha256', $payload, $secret );
+
+		return add_query_arg(
+			[
+				'expires'   => $expires,
+				'signature' => $signature,
+			],
+			rest_url( self::$namespace . '/download/' . rawurlencode( $slug ) )
+		);
+	}
+
+	/**
+	 * Verify a signed download request.
+	 *
+	 * @param string $slug      The package slug.
+	 * @param int    $expires   Unix timestamp when the signature expires.
+	 * @param string $signature The HMAC-SHA256 signature to verify.
+	 *
+	 * @return bool
+	 */
+	private function verify_download_signature( string $slug, int $expires, string $signature ): bool {
+		if ( $expires < time() ) {
+			return false;
+		}
+		$payload  = $slug . '|' . $expires;
+		$secret   = wp_salt( 'auth' );
+		$expected = hash_hmac( 'sha256', $payload, $secret );
+
+		return hash_equals( $expected, $signature );
+	}
+
+	/**
+	 * Generate a short-lived download token for git-updater-lite.
+	 *
+	 * @param WP_REST_Request $request REST API request with slug.
+	 *
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function get_download_token( WP_REST_Request $request ) {
+		$slug = $request->get_param( 'slug' );
+
+		// 1. Optional Server-Centric Domain Validation
+		$incoming_domain    = sanitize_text_field( $request->get_header( 'X-GU-Site-Domain' ) );
+		$authorized_domains = (array) apply_filters( 'git_updater_lite_authorized_domains', [], $slug );
+
+		if ( ! empty( $authorized_domains ) ) {
+			$domain_valid = false;
+			foreach ( $authorized_domains as $base_domain ) {
+				$base_domain = strtolower( trim( $base_domain ) );
+				// Matches exact domain OR any subdomain (e.g., staging.example.com, www.example.com).
+				if ( $incoming_domain === $base_domain || str_ends_with( $incoming_domain, '.' . $base_domain ) ) {
+					$domain_valid = true;
+					break;
+				}
+			}
+
+			if ( ! $domain_valid ) {
+				return new WP_Error(
+					'gu_unauthorized_domain',
+					'Domain not authorized for this package. Please contact the plugin developer.',
+					[ 'status' => 403 ]
+				);
+			}
+		}
+
+		// 2. Standard Repo Validation (handles private_package checks, etc.)
+		$repo_api_data = $this->build_download_metadata( $slug );
+		if ( is_wp_error( $repo_api_data ) ) {
+			return $repo_api_data;
+		}
+
+		// 3. Generate and return short-lived signed URL (60 seconds for lite)
+		$signed_url = $this->sign_download_url( $slug, 60 );
+		return rest_ensure_response( [ 'download_link' => $signed_url ] );
+	}
+
+	/**
+	 * Proxy download endpoint: fetches the package from the upstream
+	 * provider using stored auth tokens and streams it to the client.
+	 *
+	 * @param WP_REST_Request $request REST API request with slug, expires, signature.
+	 *
+	 * @return WP_Error|void
+	 */
+	public function proxy_download( WP_REST_Request $request ) {
+		$slug      = $request->get_param( 'slug' );
+		$expires   = (int) $request->get_param( 'expires' );
+		$signature = $request->get_param( 'signature' );
+
+		if ( ! $this->verify_download_signature( $slug, $expires, $signature ) ) {
+			return new WP_Error(
+				'gu_invalid_signature',
+				'Download link has expired or is invalid.',
+				[ 'status' => 403 ]
+			);
+		}
+
+		// Resolve upstream URL + auth headers server-side.
+		// Includes Authorization, Accept: application/octet-stream (for release assets),
+		// and git-server identification headers as needed.
+		$repo_api_data = $this->build_download_metadata( $slug );
+		if ( is_wp_error( $repo_api_data ) ) {
+			return $repo_api_data;
+		}
+
+		$download_url = $repo_api_data['download_link'] ?? '';
+		$auth_args    = $repo_api_data['auth_header'] ?? [];
+
+		if ( empty( $download_url ) ) {
+			return new WP_Error(
+				'gu_no_download_link',
+				'No download link available for this package.',
+				[ 'status' => 404 ]
+			);
+		}
+
+		// Create temp file and register cleanup in case of fatal error or disconnect.
+		$temp_file = wp_tempnam( "gu_download_{$slug}" );
+		$this->register_temp_file_cleanup( $temp_file );
+
+		// Fetch upstream with auth headers (Authorization + Accept + identification).
+		$upstream_args = array_merge(
+			$auth_args,
+			[
+				'stream'   => true,
+				'filename' => $temp_file,
+			]
+		);
+		$upstream      = wp_remote_get( $download_url, $upstream_args );
+
+		if ( is_wp_error( $upstream ) ) {
+			return new WP_Error(
+				'gu_upstream_error',
+				'Failed to download package from upstream: ' . $upstream->get_error_message(),
+				[ 'status' => 502 ]
+			);
+		}
+
+		$status_code = wp_remote_retrieve_response_code( $upstream );
+		if ( 200 !== $status_code ) {
+			return new WP_Error(
+				'gu_upstream_http_error',
+				"Upstream returned HTTP {$status_code}.",
+				[ 'status' => 502 ]
+			);
+		}
+
+		$body_file = wp_remote_retrieve_body( $upstream );
+
+		$this->send_file_response( $body_file, sanitize_file_name( $slug . '.zip' ), $temp_file );
+	}
+
+	/**
+	 * Stream a file to the HTTP client and terminate.
+	 *
+	 * Protected so tests can override to capture the file path without calling exit.
+	 *
+	 * @param string $file     Absolute path to the file to stream.
+	 * @param string $filename Download filename for Content-Disposition.
+	 * @param string $temp_file Temp file to clean up after streaming.
+	 *
+	 * @return void
+	 *
+	 * @codeCoverageIgnore — overridden in tests; production calls exit.
+	 */
+	protected function send_file_response( string $file, string $filename, string $temp_file ): void {
+		header( 'Content-Type: application/zip' );
+		header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+		header( 'Content-Length: ' . filesize( $file ) );
+		header( 'X-Content-Type-Options: nosniff' );
+
+		if ( ob_get_level() ) {
+			ob_end_clean();
+		}
+
+		readfile( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
+		wp_delete_file( $temp_file );
+		exit;
+	}
+
+	/**
+	 * Register a shutdown function to clean up a temp file.
+	 *
+	 * @codeCoverageIgnore — shutdown callbacks cannot be tested without terminating PHP.
+	 *
+	 * @param string $temp_file Absolute path to the temp file.
+	 *
+	 * @return void
+	 */
+	private function register_temp_file_cleanup( string $temp_file ): void {
+		register_shutdown_function(
+			function () use ( $temp_file ) {
+				if ( file_exists( $temp_file ) ) {
+					wp_delete_file( $temp_file );
+				}
+			}
+		);
+	}
+
+	/**
+	 * Resolve the upstream download URL and auth headers for a slug.
+	 * Used internally by the download proxy — never exposed to clients.
+	 *
+	 * @param string $slug The package slug.
+	 *
+	 * @return array<string, mixed>|WP_Error { download_link, auth_header } or error.
+	 */
+	protected function build_download_metadata( string $slug ): array|WP_Error {
+		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
+		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
+		$gu_repos   = array_merge( $gu_plugins, $gu_themes );
+
+		// Don't allow non-shared repos via this API. Set via Additions tab.
+		$additions = get_site_option( 'git_updater_additions', [] );
+		foreach ( $additions as $addition ) {
+			$addition_slug = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];
+
+			if ( $addition_slug === $slug ) {
+				if ( isset( $addition['private_package'] ) && true === (bool) $addition['private_package'] ) {
+					return new WP_Error(
+						'gu_private_package',
+						'Specified repo is not shared.',
+						[ 'status' => 403 ]
+					);
+				}
+			}
+		}
+
+		if ( ! array_key_exists( $slug, $gu_repos ) ) {
+			return new WP_Error(
+				'gu_repo_not_found',
+				'Specified repo does not exist.',
+				[ 'status' => 404 ]
+			);
+		}
+
+		add_filter( 'gu_disable_wpcron', '__return_false' );
+		$repo_data = Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->get_remote_repo_meta( $gu_repos[ $slug ] );
+
+		if ( ! is_object( $repo_data ) || '0.0.0' === $repo_data->remote_version ) {
+			return new WP_Error(
+				'gu_api_error',
+				'API data response is incorrect.',
+				[ 'status' => 502 ]
+			);
+		}
+
+		$download_link = $repo_data->download_link ?? '';
+
+		// Build auth headers server-side (Authorization + Accept + identification).
+		$auth_header = [];
+		if ( $download_link ) {
+			$api         = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this );
+			$auth_header = $api->add_auth_header( [], $download_link );
+			$auth_header = $api->unset_release_asset_auth( $auth_header, $download_link );
+			$auth_header = $api->add_accept_header( $auth_header, $download_link );
+		}
+
+		// Override download_link for release assets.
+		if ( $repo_data->release_asset ) {
+			$repo_cache = $this->get_repo_cache( $slug, false );
+
+			if ( ( isset( $repo_cache['release_asset_download'] )
+				&& ! isset( $repo_cache['release_asset_redirect'] ) )
+				&& 'bitbucket' !== $repo_data->git
+			) {
+				$download_link = $repo_cache['release_asset_download'];
+			} elseif ( isset( $repo_cache['release_asset'] ) && $repo_cache['release_asset'] ) {
+				$download_link = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->get_release_asset_redirect( $repo_cache['release_asset'], true, true );
+				$auth_header   = [];
+			}
+		}
+
+		$result = [
+			'download_link' => $download_link,
+		];
+
+		if ( ! empty( $auth_header['headers'] ) ) {
+			$result['auth_header'] = $auth_header;
+		}
+
+		return $result;
 	}
 
 	/**

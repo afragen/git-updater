@@ -84,7 +84,7 @@ class OAuth_Connect {
 		$connector = $this->get_connector_url();
 
 		if ( $token ) {
-			$this->render_connected_state( $provider, $config );
+			$this->render_connected_state( $provider );
 			return;
 		}
 
@@ -99,11 +99,10 @@ class OAuth_Connect {
 	/**
 	 * Render the connected state with disconnect button.
 	 *
-	 * @param string                $provider Provider slug.
-	 * @param array<string, string> $config   Provider configuration.
+	 * @param string $provider Provider slug.
 	 * @return void
 	 */
-	private function render_connected_state( string $provider, array $config ): void {
+	private function render_connected_state( string $provider ): void {
 		$disconnect_url = add_query_arg(
 			[
 				'action'   => 'gu_oauth_disconnect',

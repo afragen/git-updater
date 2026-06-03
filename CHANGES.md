@@ -1,6 +1,17 @@
 #### [unreleased]
 * added support for OAuth tokens
 * updated for Claude Opus 4.7 security review
+* implement two-step download flow for `git-updater-lite` to resolve cache mismatch between signed URL TTL and 6-hour client cache
+* add REST endpoint for generating fresh 60-second signed URLs for lite updates
+* isolate token URL generation strictly to the `update-api` route; main plugin continues to receive 12-hour signed URLs
+* add server-centric domain validation for private packages (optional, filterable via `git_updater_lite_authorized_domains`)
+* new `Lite_Domains` settings class and UI for managing authorized domains per slug with automatic subdomain matching
+* new "Uses Git Updater Lite" checkbox in Additions settings to manually flag packages for domain configuration
+* auto-detect private packages with `Update URI` header for domain configuration recommendations
+* client-side interception in `git-updater-lite` to fetch fresh download tokens via `upgrader_pre_download` hook
+* add domain header (`X-GU-Site-Domain`) to download token requests for server-side validation
+* add comprehensive documentation in `docs/lite-update-flow.md` explaining the new download flow and security features
+* add 100% test coverage for new `Lite_Domains` class, `get_download_token` endpoint, and `uses_lite` UI elements
 
 #### 13.0.0 / 2026-05-31 🎂
 * use `afragen/wp-readme-parser` drop-in replacement for `afragen/wordpress-plugin-readme-parser`
