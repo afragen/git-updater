@@ -2,7 +2,6 @@
 .idea
 .vscode
 .claude
-.commandcode
 
 vendor/bin
 vendor/dealerdirect
