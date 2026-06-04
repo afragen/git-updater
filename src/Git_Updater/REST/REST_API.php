@@ -954,26 +954,7 @@ class REST_API {
 				);
 			}
 
-			$file_size = filesize( $temp_file );
-			error_log(
-				sprintf(
-					'git-updater proxy_download: sending file slug=%s, size=%d, path=%s',
-					$slug,
-					$file_size,
-					$temp_file
-				)
-			);
-
-			$file_content = file_get_contents( $temp_file );
-			wp_delete_file( $temp_file );
-
-			return new \WP_REST_Response( $file_content, 200, [
-				'Content-Type'              => 'application/zip',
-				'Content-Disposition'       => 'attachment; filename="' . sanitize_file_name( $slug . '.zip' ) . '"',
-				'Content-Length'             => (string) $file_size,
-				'X-Content-Type-Options'    => 'nosniff',
-				'Content-Transfer-Encoding' => 'binary',
-			] );
+			$this->send_file( $temp_file, sanitize_file_name( $slug . '.zip' ) );
 		} catch ( \Throwable $e ) {
 			error_log(
 				sprintf(
@@ -990,6 +971,37 @@ class REST_API {
 				[ 'status' => 502 ]
 			);
 		}
+	}
+
+	/**
+	 * Send a file as a binary download response and terminate.
+	 *
+	 * Cannot use WP_REST_Response for binary data — it JSON-encodes the body,
+	 * corrupting zip content with unicode escape sequences.
+	 *
+	 * Protected so tests can override to capture content without calling exit.
+	 *
+	 * @param string $file     Absolute path to the file.
+	 * @param string $filename Download filename for Content-Disposition.
+	 *
+	 * @return void
+	 *
+	 * @codeCoverageIgnore — overridden in tests; production calls exit.
+	 */
+	protected function send_file( string $file, string $filename ): void {
+		if ( ob_get_level() ) {
+			ob_end_clean();
+		}
+
+		header( 'Content-Type: application/zip' );
+		header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+		header( 'Content-Length: ' . filesize( $file ) );
+		header( 'X-Content-Type-Options: nosniff' );
+		header( 'Content-Transfer-Encoding: binary' );
+
+		readfile( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
+		wp_delete_file( $file );
+		exit;
 	}
 
 	/**
