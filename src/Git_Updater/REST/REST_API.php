@@ -964,7 +964,16 @@ class REST_API {
 				)
 			);
 
-			$this->send_file_response( $temp_file, sanitize_file_name( $slug . '.zip' ), $temp_file );
+			$file_content = file_get_contents( $temp_file );
+			wp_delete_file( $temp_file );
+
+			return new \WP_REST_Response( $file_content, 200, [
+				'Content-Type'              => 'application/zip',
+				'Content-Disposition'       => 'attachment; filename="' . sanitize_file_name( $slug . '.zip' ) . '"',
+				'Content-Length'             => (string) $file_size,
+				'X-Content-Type-Options'    => 'nosniff',
+				'Content-Transfer-Encoding' => 'binary',
+			] );
 		} catch ( \Throwable $e ) {
 			error_log(
 				sprintf(
@@ -981,34 +990,6 @@ class REST_API {
 				[ 'status' => 502 ]
 			);
 		}
-	}
-
-	/**
-	 * Stream a file to the HTTP client and terminate.
-	 *
-	 * Protected so tests can override to capture the file path without calling exit.
-	 *
-	 * @param string $file     Absolute path to the file to stream.
-	 * @param string $filename Download filename for Content-Disposition.
-	 * @param string $temp_file Temp file to clean up after streaming.
-	 *
-	 * @return void
-	 *
-	 * @codeCoverageIgnore — overridden in tests; production calls exit.
-	 */
-	protected function send_file_response( string $file, string $filename, string $temp_file ): void {
-		header( 'Content-Type: application/zip' );
-		header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
-		header( 'Content-Length: ' . filesize( $file ) );
-		header( 'X-Content-Type-Options: nosniff' );
-
-		if ( ob_get_level() ) {
-			ob_end_clean();
-		}
-
-		readfile( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
-		wp_delete_file( $temp_file );
-		exit;
 	}
 
 	/**

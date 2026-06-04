@@ -5,28 +5,19 @@ use Fragen\Git_Updater\Base;
 use Fragen\Git_Updater\Remote_Management;
 
 /**
- * Subclass that captures the file path instead of streaming + exit,
+ * Subclass that captures the WP_REST_Response instead of using exit,
  * and allows overriding build_download_metadata() for isolated proxy tests.
  */
 class REST_API_Testable_Download extends REST_API {
 
-	/** @var string|null Captured file path from send_file_response(). */
-	public ?string $captured_file = null;
-
-	/** @var string|null Captured filename from send_file_response(). */
+	/** @var string|null Captured filename from Content-Disposition header. */
 	public ?string $captured_filename = null;
 
-	/** @var string|null Captured temp file path. */
-	public ?string $captured_temp_file = null;
+	/** @var int|null Captured file size from Content-Length header. */
+	public ?int $captured_file_size = null;
 
 	/** @var array<string, mixed>|WP_Error|null If set, returned by build_download_metadata(). */
 	public array|WP_Error|null $mock_metadata = null;
-
-	protected function send_file_response( string $file, string $filename, string $temp_file ): void {
-		$this->captured_file      = $file;
-		$this->captured_filename  = $filename;
-		$this->captured_temp_file = $temp_file;
-	}
 
 	protected function build_download_metadata( string $slug ): array|WP_Error {
 		if ( null !== $this->mock_metadata ) {
@@ -62,13 +53,6 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 	public function tear_down(): void {
 		delete_site_option( 'git_updater_api_key' );
 		delete_site_option( 'git_updater_additions' );
-
-		if ( $this->rest->captured_temp_file && file_exists( $this->rest->captured_temp_file ) ) {
-			wp_delete_file( $this->rest->captured_temp_file );
-		}
-		if ( $this->rest->captured_file && file_exists( $this->rest->captured_file ) ) {
-			wp_delete_file( $this->rest->captured_file );
-		}
 
 		parent::tear_down();
 	}
@@ -279,10 +263,11 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		$result    = $this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
 
 		$this->assertNotWPError( $result, 'Expected success but got: ' . ( is_wp_error( $result ) ? $result->get_error_message() : '' ) );
-		$this->assertNotNull( $this->rest->captured_file, 'send_file_response was not called' );
-		$this->assertFileExists( $this->rest->captured_file );
-		$this->assertSame( self::SLUG . '.zip', $this->rest->captured_filename );
-		$this->assertSame( $zip_content, file_get_contents( $this->rest->captured_file ) );
+		$this->assertInstanceOf( \WP_REST_Response::class, $result );
+		$this->assertSame( 200, $result->get_status() );
+		$this->assertSame( $zip_content, $result->get_data() );
+		$headers = $result->get_headers();
+		$this->assertStringContainsString( self::SLUG . '.zip', $headers['Content-Disposition'] ?? '' );
 
 		remove_all_filters( 'pre_http_request' );
 	}
@@ -405,13 +390,10 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 
 		$expires   = time() + 300;
 		$signature = $this->generate_signature( self::SLUG, $expires );
-		$this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
+		$result    = $this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
 
-		// When streaming, wp_remote_retrieve_body returns the temp file path,
-		// so send_file_response receives the same path for both $file and $temp_file.
-		$this->assertNotNull( $this->rest->captured_file );
-		$this->assertNotNull( $this->rest->captured_temp_file );
-		$this->assertSame( $zip_content, file_get_contents( $this->rest->captured_file ) );
+		$this->assertInstanceOf( \WP_REST_Response::class, $result );
+		$this->assertSame( $zip_content, $result->get_data() );
 
 		remove_all_filters( 'pre_http_request' );
 	}
@@ -505,16 +487,12 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 
 		remove_all_filters( 'pre_http_request' );
 
-		// This is the PCLZIP root cause: proxy_download succeeds and streams
-		// the HTML content to the client. WordPress tries to unzip HTML → PCLZIP fails.
-		// After fix: returns WP_Error. Before fix: streams HTML to client.
+		// After fix: non-zip upstream returns WP_Error. Before fix: streamed HTML.
 		if ( is_wp_error( $result ) ) {
 			$this->assertSame( 'gu_not_a_zip', $result->get_error_code() );
 		} else {
-			$this->assertNotNull( $this->rest->captured_file, 'send_file_response was called with HTML content' );
-			$this->assertFileExists( $this->rest->captured_file );
-			$this->assertSame( $html, file_get_contents( $this->rest->captured_file ) );
-			$this->assertStringNotContainsString( "PK\x03\x04", $html, 'Captured file does not contain zip magic bytes — this IS the PCLZIP root cause' );
+			$this->assertInstanceOf( \WP_REST_Response::class, $result );
+			$this->assertStringNotContainsString( "PK\x03\x04", $result->get_data(), 'Proxy streamed non-zip content' );
 		}
 	}
 
@@ -556,8 +534,8 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		if ( is_wp_error( $result ) ) {
 			$this->assertSame( 'gu_not_a_zip', $result->get_error_code() );
 		} else {
-			$this->assertNotNull( $this->rest->captured_file );
-			$this->assertSame( 0, filesize( $this->rest->captured_file ), 'Empty upstream body produced a 0-byte file — this causes PCLZIP' );
+			$this->assertInstanceOf( \WP_REST_Response::class, $result );
+			$this->assertSame( '', $result->get_data(), 'Empty upstream body produced empty response' );
 		}
 	}
 
@@ -605,14 +583,11 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		remove_all_filters( 'pre_http_request' );
 
 		$this->assertNotWPError( $result );
+		$this->assertInstanceOf( \WP_REST_Response::class, $result );
 
-		// The captured file should contain ONLY the zip content, no buffered output.
-		$this->assertNotNull( $this->rest->captured_file );
-		$captured = file_get_contents( $this->rest->captured_file );
-		$this->assertSame( $zip_content, $captured, 'send_file_response received clean content (no output buffer corruption)' );
-
-		// Verify the buffered output was NOT mixed into the file.
-		$this->assertStringNotContainsString( 'some prior output', $captured, 'Output buffer was not mixed into file content' );
+		// The response data should contain ONLY the zip content, no buffered output.
+		$this->assertSame( $zip_content, $result->get_data(), 'Response contains clean zip content (no output buffer corruption)' );
+		$this->assertStringNotContainsString( 'some prior output', $result->get_data(), 'Output buffer was not mixed into response' );
 	}
 
 	/**
@@ -694,8 +669,8 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		if ( is_wp_error( $result ) ) {
 			$this->assertSame( 'gu_not_a_zip', $result->get_error_code() );
 		} else {
-			$this->assertNotNull( $this->rest->captured_file );
-			$this->assertStringNotContainsString( "PK\x03\x04", file_get_contents( $this->rest->captured_file ),
+			$this->assertInstanceOf( \WP_REST_Response::class, $result );
+			$this->assertStringNotContainsString( "PK\x03\x04", $result->get_data(),
 				'Proxy streamed non-zip content — Content-Type validation is missing' );
 		}
 	}
@@ -841,7 +816,6 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		remove_all_filters( 'pre_http_request' );
 
 		$this->assertWPError( $result );
-		// Temp file should be cleaned up — no leaked non-zip files on disk.
-		$this->assertFileDoesNotExist( $this->rest->captured_file ?? '' );
+		$this->assertSame( 'gu_not_a_zip', $result->get_error_code() );
 	}
 }
