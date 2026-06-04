@@ -607,14 +607,7 @@ class REST_API {
 		$repo_cache = $this->get_repo_cache( $slug, false );
 		$api        = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this );
 
-		// Add HTTP headers.
-		if ( $repo_api_data['download_link'] ) {
-			$repo_api_data['auth_header'] = $api->add_auth_header( [], $repo_api_data['download_link'] );
-			$repo_api_data['auth_header'] = $api->unset_release_asset_auth( $repo_api_data['auth_header'], $repo_api_data['download_link'] );
-			$repo_api_data['auth_header'] = $api->add_accept_header( $repo_api_data['auth_header'], $repo_api_data['download_link'] );
-		}
-
-		// Update release asset download link .
+		// Update release asset download link.
 		if ( $repo_data->release_asset ) {
 			if ( ( isset( $repo_cache['release_asset_download'] )
 				&& ! isset( $repo_cache['release_asset_redirect'] ) )
@@ -633,7 +626,8 @@ class REST_API {
 		// and never expose auth tokens to clients.
 		$needs_proxy = $repo_api_data['is_private']
 			|| ! empty( $this->get_class_vars( 'API\API', 'options' )[ $slug ] )
-			|| in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true );
+			|| in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true )
+			|| $this->has_uses_lite( $slug );
 
 		if ( $needs_proxy && ! empty( $repo_api_data['download_link'] ) ) {
 			// Strictly isolate the token URL to the git-updater-lite update-api route.
@@ -644,7 +638,6 @@ class REST_API {
 				$repo_api_data['download_link'] = $this->sign_download_url( $slug );
 			}
 		}
-		unset( $repo_api_data['auth_header'] );
 
 		return $repo_api_data;
 	}
@@ -728,6 +721,26 @@ class REST_API {
 			];
 
 		return (object) $message;
+	}
+
+	/**
+	 * Check if a slug is flagged as using git-updater-lite in Additions.
+	 *
+	 * @param string $slug The package slug (folder name for plugins, theme slug for themes).
+	 *
+	 * @return bool
+	 */
+	private function has_uses_lite( string $slug ): bool {
+		$additions = get_site_option( 'git_updater_additions', [] );
+		foreach ( $additions as $addition ) {
+			$addition_slug = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];
+
+			if ( $addition_slug === $slug && ! empty( $addition['uses_lite'] ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

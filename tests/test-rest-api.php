@@ -2144,7 +2144,6 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'download_link', $result );
-		// When release_asset_redirect path is taken, auth_header is cleared.
 		$this->assertArrayNotHasKey( 'auth_header', $result );
 	}
 
@@ -2543,7 +2542,6 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'download_link', $result );
-		// When download_link is empty, auth_header should not be present.
 		if ( empty( $result['download_link'] ) ) {
 			$this->assertArrayNotHasKey( 'auth_header', $result );
 		}
@@ -2802,5 +2800,80 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
 
 		$this->assertSame( 200, $response->get_status() );
+	}
+
+	// -------------------------------------------------------------------------
+	// has_uses_lite() — private method via reflection
+	// -------------------------------------------------------------------------
+
+	public function test_has_uses_lite_returns_true_when_uses_lite_set(): void {
+		$method = new ReflectionMethod( REST_API::class, 'has_uses_lite' );
+		$method->setAccessible( true );
+
+		$additions = get_site_option( 'git_updater_additions', [] );
+		$additions[] = [
+			'slug'           => 'my-plugin/my-plugin.php',
+			'type'           => 'plugin',
+			'uri'            => 'https://github.com/owner/my-plugin',
+			'uses_lite'      => true,
+			'private_package' => false,
+		];
+		update_site_option( 'git_updater_additions', $additions );
+
+		$result = $method->invoke( $this->rest, 'my-plugin' );
+
+		update_site_option( 'git_updater_additions', [] );
+
+		$this->assertTrue( $result );
+	}
+
+	public function test_has_uses_lite_returns_false_when_uses_lite_not_set(): void {
+		$method = new ReflectionMethod( REST_API::class, 'has_uses_lite' );
+		$method->setAccessible( true );
+
+		$additions = get_site_option( 'git_updater_additions', [] );
+		$additions[] = [
+			'slug'           => 'my-plugin/my-plugin.php',
+			'type'           => 'plugin',
+			'uri'            => 'https://github.com/owner/my-plugin',
+			'private_package' => false,
+		];
+		update_site_option( 'git_updater_additions', $additions );
+
+		$result = $method->invoke( $this->rest, 'my-plugin' );
+
+		update_site_option( 'git_updater_additions', [] );
+
+		$this->assertFalse( $result );
+	}
+
+	public function test_has_uses_lite_returns_false_for_nonexistent_slug(): void {
+		$method = new ReflectionMethod( REST_API::class, 'has_uses_lite' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $this->rest, 'nonexistent-slug' );
+
+		$this->assertFalse( $result );
+	}
+
+	public function test_has_uses_lite_handles_theme_slug(): void {
+		$method = new ReflectionMethod( REST_API::class, 'has_uses_lite' );
+		$method->setAccessible( true );
+
+		$additions = get_site_option( 'git_updater_additions', [] );
+		$additions[] = [
+			'slug'           => 'my-theme',
+			'type'           => 'theme',
+			'uri'            => 'https://github.com/owner/my-theme',
+			'uses_lite'      => true,
+			'private_package' => false,
+		];
+		update_site_option( 'git_updater_additions', $additions );
+
+		$result = $method->invoke( $this->rest, 'my-theme' );
+
+		update_site_option( 'git_updater_additions', [] );
+
+		$this->assertTrue( $result );
 	}
 }
