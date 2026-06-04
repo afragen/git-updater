@@ -954,9 +954,7 @@ class REST_API {
 				);
 			}
 
-			$body_file = wp_remote_retrieve_body( $upstream );
-
-			$this->send_file_response( $body_file, sanitize_file_name( $slug . '.zip' ), $temp_file );
+			$this->send_file_response( $temp_file, sanitize_file_name( $slug . '.zip' ), $temp_file );
 		} catch ( \Throwable $e ) {
 			error_log(
 				sprintf(
