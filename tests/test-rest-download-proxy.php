@@ -264,12 +264,10 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 
 		$this->assertNotWPError( $result, 'Expected success but got: ' . ( is_wp_error( $result ) ? $result->get_error_message() : '' ) );
 		$this->assertInstanceOf( \WP_REST_Response::class, $result );
-		$this->assertSame( 302, $result->get_status() );
-		$headers = $result->get_headers();
-		$this->assertArrayHasKey( 'Location', $headers );
-		$this->assertStringContainsString( 'git-updater-downloads/', $headers['Location'] );
-		$this->assertStringContainsString( self::SLUG, $headers['Location'] );
-		$this->assertStringContainsString( '.zip', $headers['Location'] );
+		$data = $result->get_data();
+		$this->assertArrayHasKey( 'download_link', $data );
+		$this->assertStringContainsString( 'gu_dl=', $data['download_link'] );
+		$this->assertStringContainsString( 'signature=', $data['download_link'] );
 
 		remove_all_filters( 'pre_http_request' );
 	}
@@ -395,8 +393,7 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		$result    = $this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
 
 		$this->assertInstanceOf( \WP_REST_Response::class, $result );
-		$this->assertSame( 302, $result->get_status() );
-		$this->assertStringContainsString( 'git-updater-downloads/', $result->get_headers()['Location'] ?? '' );
+		$this->assertArrayHasKey( 'download_link', $result->get_data() );
 
 		remove_all_filters( 'pre_http_request' );
 	}
@@ -588,8 +585,7 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 
 		$this->assertNotWPError( $result );
 		$this->assertInstanceOf( \WP_REST_Response::class, $result );
-		$this->assertSame( 302, $result->get_status() );
-		$this->assertStringContainsString( 'git-updater-downloads/', $result->get_headers()['Location'] ?? '' );
+		$this->assertArrayHasKey( 'download_link', $result->get_data() );
 	}
 
 	/**

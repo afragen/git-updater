@@ -47,6 +47,7 @@ class REST_API {
 	 */
 	public function load_hooks() {
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_action( 'template_redirect', [ $this, 'serve_proxy_file' ] );
 
 		// Deprecated AJAX request.
 		add_action( 'wp_ajax_git-updater-update', [ Singleton::get_instance( 'REST\Rest_Update', $this ), 'process_request' ] );
@@ -954,26 +955,32 @@ class REST_API {
 				);
 			}
 
-			// Save to uploads and return a redirect URL.
-			// WP_REST_Response JSON-encodes string bodies (corrupting binary data),
-			// and raw header()+readfile()+exit breaks wp_remote_get() responses.
-			// A redirect lets download_url() fetch the file via a normal HTTP request.
-			$upload_dir = wp_upload_dir();
-			$gu_dir     = $upload_dir['basedir'] . '/git-updater-downloads';
+			// Store in temp dir and return a URL to a rewrite endpoint that
+			// serves raw binary — REST API JSON-encodes string bodies.
+			$gu_dir = sys_get_temp_dir() . '/gu-proxy';
 			if ( ! is_dir( $gu_dir ) ) {
 				wp_mkdir_p( $gu_dir );
 			}
 
-			$filename = sanitize_file_name( $slug . '-' . wp_hash( $slug . time() ) . '.zip' );
-			$dest     = $gu_dir . '/' . $filename;
-			copy( $temp_file, $dest );
-			wp_delete_file( $temp_file );
+			$key  = wp_generate_password( 32, false );
+			$dest = $gu_dir . '/' . $key . '.zip';
+			rename( $temp_file, $dest );
 
-			$file_url = $upload_dir['baseurl'] . '/git-updater-downloads/' . $filename;
+			$file_expires = time() + 300;
+			$file_sig     = hash_hmac( 'sha256', 'gu-dl|' . $key, wp_salt( 'auth' ) );
 
-			return new \WP_REST_Response( null, 302, [
-				'Location' => $file_url,
-			] );
+			return new \WP_REST_Response( [
+				'download_link' => add_query_arg(
+					[
+						'gu_dl'     => $key,
+						'expires'   => $file_expires,
+						'signature' => $file_sig,
+					],
+					home_url( '/' )
+				),
+			], 200 );
+
+			return new \WP_REST_Response( [ 'download_link' => $url ], 200 );
 		} catch ( \Throwable $e ) {
 			error_log(
 				sprintf(
@@ -990,6 +997,55 @@ class REST_API {
 				[ 'status' => 502 ]
 			);
 		}
+	}
+
+	/**
+	 * Serve a proxy-downloaded file via a rewrite endpoint.
+	 *
+	 * This runs outside the REST API lifecycle, so raw header()+readfile()
+	 * works correctly without breaking wp_remote_get() responses.
+	 *
+	 * @return void
+	 */
+	public function serve_proxy_file(): void {
+		$key = isset( $_GET['gu_dl'] ) ? sanitize_text_field( wp_unslash( $_GET['gu_dl'] ) ) : '';
+		if ( empty( $key ) ) {
+			return;
+		}
+
+		$expires   = isset( $_GET['expires'] ) ? (int) $_GET['expires'] : 0;
+		$signature = isset( $_GET['signature'] ) ? sanitize_text_field( wp_unslash( $_GET['signature'] ) ) : '';
+
+		// Re-verify the original download signature using a fixed payload.
+		$slug_payload = 'gu-dl|' . $key;
+		$secret       = wp_salt( 'auth' );
+		$expected     = hash_hmac( 'sha256', $slug_payload, $secret );
+
+		if ( $expires < time() || ! hash_equals( $expected, $signature ) ) {
+			status_header( 403 );
+			exit;
+		}
+
+		$file = sys_get_temp_dir() . '/gu-proxy/' . $key . '.zip';
+		if ( ! file_exists( $file ) ) {
+			status_header( 404 );
+			exit;
+		}
+
+		if ( ob_get_level() ) {
+			ob_end_clean();
+		}
+
+		header( 'Content-Type: application/zip' );
+		header( 'Content-Disposition: attachment; filename="download.zip"' );
+		header( 'Content-Length: ' . filesize( $file ) );
+		header( 'X-Content-Type-Options: nosniff' );
+		header( 'Content-Transfer-Encoding: binary' );
+		header( 'Cache-Control: no-store, no-cache, must-revalidate' );
+
+		readfile( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
+		wp_delete_file( $file );
+		exit;
 	}
 
 	/**
