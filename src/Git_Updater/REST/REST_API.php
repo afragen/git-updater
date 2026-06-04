@@ -47,7 +47,6 @@ class REST_API {
 	 */
 	public function load_hooks() {
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
-		add_action( 'template_redirect', [ $this, 'serve_proxy_file' ] );
 
 		// Deprecated AJAX request.
 		add_action( 'wp_ajax_git-updater-update', [ Singleton::get_instance( 'REST\Rest_Update', $this ), 'process_request' ] );
@@ -976,59 +975,7 @@ class REST_API {
 	}
 
 	/**
-	 * Serve a proxy-downloaded file via a rewrite endpoint.
-	 *
-	 * This runs outside the REST API lifecycle, so raw header()+readfile()
-	 * works correctly without breaking wp_remote_get() responses.
-	 *
-	 * @return void
-	 */
-	public function serve_proxy_file(): void {
-		$key = isset( $_GET['gu_dl'] ) ? sanitize_text_field( wp_unslash( $_GET['gu_dl'] ) ) : '';
-		if ( empty( $key ) ) {
-			return;
-		}
-
-		$expires   = isset( $_GET['expires'] ) ? (int) $_GET['expires'] : 0;
-		$signature = isset( $_GET['signature'] ) ? sanitize_text_field( wp_unslash( $_GET['signature'] ) ) : '';
-
-		// Re-verify the original download signature using a fixed payload.
-		$slug_payload = 'gu-dl|' . $key;
-		$secret       = wp_salt( 'auth' );
-		$expected     = hash_hmac( 'sha256', $slug_payload, $secret );
-
-		if ( $expires < time() || ! hash_equals( $expected, $signature ) ) {
-			status_header( 403 );
-			exit;
-		}
-
-		$file = sys_get_temp_dir() . '/gu-proxy/' . $key . '.zip';
-		if ( ! file_exists( $file ) ) {
-			status_header( 404 );
-			exit;
-		}
-
-		if ( ob_get_level() ) {
-			ob_end_clean();
-		}
-
-		header( 'Content-Type: application/zip' );
-		header( 'Content-Disposition: attachment; filename="download.zip"' );
-		header( 'Content-Length: ' . filesize( $file ) );
-		header( 'X-Content-Type-Options: nosniff' );
-		header( 'Content-Transfer-Encoding: binary' );
-		header( 'Cache-Control: no-store, no-cache, must-revalidate' );
-
-		readfile( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
-		wp_delete_file( $file );
-		exit;
-	}
-
-	/**
 	 * Send a file as a binary download response and terminate.
-	 *
-	 * Cannot use WP_REST_Response for binary data — it JSON-encodes the body,
-	 * corrupting zip content with unicode escape sequences.
 	 *
 	 * Protected so tests can override to capture content without calling exit.
 	 *
