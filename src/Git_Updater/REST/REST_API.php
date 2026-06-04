@@ -954,7 +954,26 @@ class REST_API {
 				);
 			}
 
-			$this->send_file( $temp_file, sanitize_file_name( $slug . '.zip' ) );
+			// Save to uploads and return a redirect URL.
+			// WP_REST_Response JSON-encodes string bodies (corrupting binary data),
+			// and raw header()+readfile()+exit breaks wp_remote_get() responses.
+			// A redirect lets download_url() fetch the file via a normal HTTP request.
+			$upload_dir = wp_upload_dir();
+			$gu_dir     = $upload_dir['basedir'] . '/git-updater-downloads';
+			if ( ! is_dir( $gu_dir ) ) {
+				wp_mkdir_p( $gu_dir );
+			}
+
+			$filename = sanitize_file_name( $slug . '-' . wp_hash( $slug . time() ) . '.zip' );
+			$dest     = $gu_dir . '/' . $filename;
+			copy( $temp_file, $dest );
+			wp_delete_file( $temp_file );
+
+			$file_url = $upload_dir['baseurl'] . '/git-updater-downloads/' . $filename;
+
+			return new \WP_REST_Response( null, 302, [
+				'Location' => $file_url,
+			] );
 		} catch ( \Throwable $e ) {
 			error_log(
 				sprintf(

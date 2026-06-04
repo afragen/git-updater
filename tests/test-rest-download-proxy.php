@@ -10,19 +10,14 @@ use Fragen\Git_Updater\Remote_Management;
  */
 class REST_API_Testable_Download extends REST_API {
 
-	/** @var string|null Captured file content from readfile(). */
-	public ?string $captured_content = null;
+	/** @var string|null Captured redirect URL. */
+	public ?string $captured_redirect_url = null;
 
-	/** @var string|null Captured filename from Content-Disposition. */
+	/** @var string|null Captured filename from send_file. */
 	public ?string $captured_filename = null;
 
 	/** @var array<string, mixed>|WP_Error|null If set, returned by build_download_metadata(). */
 	public array|WP_Error|null $mock_metadata = null;
-
-	protected function send_file( string $file, string $filename ): void {
-		$this->captured_content = file_get_contents( $file );
-		$this->captured_filename = $filename;
-	}
 
 	protected function build_download_metadata( string $slug ): array|WP_Error {
 		if ( null !== $this->mock_metadata ) {
@@ -268,9 +263,13 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		$result    = $this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
 
 		$this->assertNotWPError( $result, 'Expected success but got: ' . ( is_wp_error( $result ) ? $result->get_error_message() : '' ) );
-		$this->assertNotNull( $this->rest->captured_content, 'send_file was not called' );
-		$this->assertSame( $zip_content, $this->rest->captured_content );
-		$this->assertStringContainsString( self::SLUG . '.zip', $this->rest->captured_filename ?? '' );
+		$this->assertInstanceOf( \WP_REST_Response::class, $result );
+		$this->assertSame( 302, $result->get_status() );
+		$headers = $result->get_headers();
+		$this->assertArrayHasKey( 'Location', $headers );
+		$this->assertStringContainsString( 'git-updater-downloads/', $headers['Location'] );
+		$this->assertStringContainsString( self::SLUG, $headers['Location'] );
+		$this->assertStringContainsString( '.zip', $headers['Location'] );
 
 		remove_all_filters( 'pre_http_request' );
 	}
@@ -393,10 +392,11 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 
 		$expires   = time() + 300;
 		$signature = $this->generate_signature( self::SLUG, $expires );
-		$this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
+		$result    = $this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
 
-		$this->assertNotNull( $this->rest->captured_content );
-		$this->assertSame( $zip_content, $this->rest->captured_content );
+		$this->assertInstanceOf( \WP_REST_Response::class, $result );
+		$this->assertSame( 302, $result->get_status() );
+		$this->assertStringContainsString( 'git-updater-downloads/', $result->get_headers()['Location'] ?? '' );
 
 		remove_all_filters( 'pre_http_request' );
 	}
@@ -494,8 +494,9 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		if ( is_wp_error( $result ) ) {
 			$this->assertSame( 'gu_not_a_zip', $result->get_error_code() );
 		} else {
-			$this->assertNotNull( $this->rest->captured_content );
-			$this->assertStringNotContainsString( "PK\x03\x04", $this->rest->captured_content, 'Proxy streamed non-zip content' );
+			$this->assertInstanceOf( \WP_REST_Response::class, $result );
+			$this->assertSame( 302, $result->get_status() );
+			$this->assertStringContainsString( 'git-updater-downloads/', $result->get_headers()['Location'] ?? '' );
 		}
 	}
 
@@ -537,8 +538,8 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		if ( is_wp_error( $result ) ) {
 			$this->assertSame( 'gu_not_a_zip', $result->get_error_code() );
 		} else {
-			$this->assertNotNull( $this->rest->captured_content );
-			$this->assertSame( '', $this->rest->captured_content, 'Empty upstream body produced empty response' );
+			$this->assertInstanceOf( \WP_REST_Response::class, $result );
+			$this->assertSame( 302, $result->get_status() );
 		}
 	}
 
@@ -586,9 +587,9 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		remove_all_filters( 'pre_http_request' );
 
 		$this->assertNotWPError( $result );
-		$this->assertNotNull( $this->rest->captured_content, 'send_file was not called' );
-		$this->assertSame( $zip_content, $this->rest->captured_content, 'Response contains clean zip content (no output buffer corruption)' );
-		$this->assertStringNotContainsString( 'some prior output', $this->rest->captured_content, 'Output buffer was not mixed into response' );
+		$this->assertInstanceOf( \WP_REST_Response::class, $result );
+		$this->assertSame( 302, $result->get_status() );
+		$this->assertStringContainsString( 'git-updater-downloads/', $result->get_headers()['Location'] ?? '' );
 	}
 
 	/**
@@ -670,9 +671,8 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		if ( is_wp_error( $result ) ) {
 			$this->assertSame( 'gu_not_a_zip', $result->get_error_code() );
 		} else {
-			$this->assertNotNull( $this->rest->captured_content );
-			$this->assertStringNotContainsString( "PK\x03\x04", $this->rest->captured_content ?? '',
-				'Proxy streamed non-zip content — Content-Type validation is missing' );
+			$this->assertInstanceOf( \WP_REST_Response::class, $result );
+			$this->assertSame( 302, $result->get_status() );
 		}
 	}
 
