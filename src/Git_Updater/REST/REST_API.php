@@ -955,32 +955,8 @@ class REST_API {
 				);
 			}
 
-			// Store in temp dir and return a URL to a rewrite endpoint that
-			// serves raw binary — REST API JSON-encodes string bodies.
-			$gu_dir = sys_get_temp_dir() . '/gu-proxy';
-			if ( ! is_dir( $gu_dir ) ) {
-				wp_mkdir_p( $gu_dir );
-			}
-
-			$key  = wp_generate_password( 32, false );
-			$dest = $gu_dir . '/' . $key . '.zip';
-			rename( $temp_file, $dest );
-
-			$file_expires = time() + 300;
-			$file_sig     = hash_hmac( 'sha256', 'gu-dl|' . $key, wp_salt( 'auth' ) );
-
-			return new \WP_REST_Response( [
-				'download_link' => add_query_arg(
-					[
-						'gu_dl'     => $key,
-						'expires'   => $file_expires,
-						'signature' => $file_sig,
-					],
-					home_url( '/' )
-				),
-			], 200 );
-
-			return new \WP_REST_Response( [ 'download_link' => $url ], 200 );
+			// Stream binary zip directly — WP_REST_Response JSON-encodes the body.
+			$this->send_file( $temp_file, sanitize_file_name( $slug . '.zip' ) );
 		} catch ( \Throwable $e ) {
 			error_log(
 				sprintf(

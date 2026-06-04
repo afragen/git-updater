@@ -10,14 +10,19 @@ use Fragen\Git_Updater\Remote_Management;
  */
 class REST_API_Testable_Download extends REST_API {
 
-	/** @var string|null Captured redirect URL. */
-	public ?string $captured_redirect_url = null;
+	/** @var string|null Captured file content from readfile(). */
+	public ?string $captured_content = null;
 
 	/** @var string|null Captured filename from send_file. */
 	public ?string $captured_filename = null;
 
 	/** @var array<string, mixed>|WP_Error|null If set, returned by build_download_metadata(). */
 	public array|WP_Error|null $mock_metadata = null;
+
+	protected function send_file( string $file, string $filename ): void {
+		$this->captured_content = file_get_contents( $file );
+		$this->captured_filename = $filename;
+	}
 
 	protected function build_download_metadata( string $slug ): array|WP_Error {
 		if ( null !== $this->mock_metadata ) {
@@ -263,11 +268,9 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		$result    = $this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
 
 		$this->assertNotWPError( $result, 'Expected success but got: ' . ( is_wp_error( $result ) ? $result->get_error_message() : '' ) );
-		$this->assertInstanceOf( \WP_REST_Response::class, $result );
-		$data = $result->get_data();
-		$this->assertArrayHasKey( 'download_link', $data );
-		$this->assertStringContainsString( 'gu_dl=', $data['download_link'] );
-		$this->assertStringContainsString( 'signature=', $data['download_link'] );
+		$this->assertNotNull( $this->rest->captured_content, 'send_file was not called' );
+		$this->assertSame( $zip_content, $this->rest->captured_content );
+		$this->assertSame( self::SLUG . '.zip', $this->rest->captured_filename );
 
 		remove_all_filters( 'pre_http_request' );
 	}
@@ -392,8 +395,8 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		$signature = $this->generate_signature( self::SLUG, $expires );
 		$result    = $this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
 
-		$this->assertInstanceOf( \WP_REST_Response::class, $result );
-		$this->assertArrayHasKey( 'download_link', $result->get_data() );
+		$this->assertNotNull( $this->rest->captured_content );
+		$this->assertSame( $zip_content, $this->rest->captured_content );
 
 		remove_all_filters( 'pre_http_request' );
 	}
@@ -584,8 +587,8 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		remove_all_filters( 'pre_http_request' );
 
 		$this->assertNotWPError( $result );
-		$this->assertInstanceOf( \WP_REST_Response::class, $result );
-		$this->assertArrayHasKey( 'download_link', $result->get_data() );
+		$this->assertNotNull( $this->rest->captured_content );
+		$this->assertSame( $zip_content, $this->rest->captured_content );
 	}
 
 	/**
