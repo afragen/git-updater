@@ -605,12 +605,13 @@ class REST_API {
 		uksort( $repo_api_data['versions'], fn ( $a, $b ) => version_compare( $b, $a ) );
 
 		$repo_cache = $this->get_repo_cache( $slug, false );
+		$api        = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this );
 
 		// Add HTTP headers.
 		if ( $repo_api_data['download_link'] ) {
-			$repo_api_data['auth_header'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->add_auth_header( [], $repo_api_data['download_link'] );
-			$repo_api_data['auth_header'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->unset_release_asset_auth( $repo_api_data['auth_header'], $repo_api_data['download_link'] );
-			$repo_api_data['auth_header'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->add_accept_header( $repo_api_data['auth_header'], $repo_api_data['download_link'] );
+			$repo_api_data['auth_header'] = $api->add_auth_header( [], $repo_api_data['download_link'] );
+			$repo_api_data['auth_header'] = $api->unset_release_asset_auth( $repo_api_data['auth_header'], $repo_api_data['download_link'] );
+			$repo_api_data['auth_header'] = $api->add_accept_header( $repo_api_data['auth_header'], $repo_api_data['download_link'] );
 		}
 
 		// Update release asset download link .
@@ -624,8 +625,7 @@ class REST_API {
 					: $repo_cache['release_asset_download'];
 			} elseif ( isset( $repo_cache['release_asset'] ) && $repo_cache['release_asset'] ) {
 				$_REQUEST['override']           = true;
-				$repo_api_data['download_link'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->get_release_asset_redirect( $repo_cache['release_asset'], true );
-				unset( $repo_api_data['auth_header'] );
+				$repo_api_data['download_link'] = $api->get_release_asset_redirect( $repo_cache['release_asset'], true );
 			}
 		}
 
