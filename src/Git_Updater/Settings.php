@@ -305,7 +305,7 @@ class Settings {
 			<?php $this->admin_page_notices(); ?>
 			<?php if ( 'git_updater_settings' === $tab ) : ?>
 				<?php $this->options_sub_tabs(); ?>
-				<form class="settings" method="post" action="<?php echo esc_url( $action ); ?>">
+				<form class="settings" method="post" action="<?php echo esc_attr( $action ); ?>">
 					<?php
 					settings_fields( 'git_updater' );
 					if ( 'git_updater' === $subtab ) {
