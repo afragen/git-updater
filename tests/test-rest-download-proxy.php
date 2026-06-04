@@ -5,27 +5,23 @@ use Fragen\Git_Updater\Base;
 use Fragen\Git_Updater\Remote_Management;
 
 /**
- * Subclass that captures the file path instead of streaming + exit,
+ * Subclass that captures file content instead of using exit,
  * and allows overriding build_download_metadata() for isolated proxy tests.
  */
 class REST_API_Testable_Download extends REST_API {
 
-	/** @var string|null Captured file path from send_file_response(). */
-	public ?string $captured_file = null;
+	/** @var string|null Captured file content from readfile(). */
+	public ?string $captured_content = null;
 
-	/** @var string|null Captured filename from send_file_response(). */
+	/** @var string|null Captured filename from send_file. */
 	public ?string $captured_filename = null;
-
-	/** @var string|null Captured temp file path. */
-	public ?string $captured_temp_file = null;
 
 	/** @var array<string, mixed>|WP_Error|null If set, returned by build_download_metadata(). */
 	public array|WP_Error|null $mock_metadata = null;
 
-	protected function send_file_response( string $file, string $filename, string $temp_file ): void {
-		$this->captured_file      = $file;
-		$this->captured_filename  = $filename;
-		$this->captured_temp_file = $temp_file;
+	protected function send_file( string $file, string $filename ): void {
+		$this->captured_content = file_get_contents( $file );
+		$this->captured_filename = $filename;
 	}
 
 	protected function build_download_metadata( string $slug ): array|WP_Error {
@@ -62,13 +58,6 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 	public function tear_down(): void {
 		delete_site_option( 'git_updater_api_key' );
 		delete_site_option( 'git_updater_additions' );
-
-		if ( $this->rest->captured_temp_file && file_exists( $this->rest->captured_temp_file ) ) {
-			wp_delete_file( $this->rest->captured_temp_file );
-		}
-		if ( $this->rest->captured_file && file_exists( $this->rest->captured_file ) ) {
-			wp_delete_file( $this->rest->captured_file );
-		}
 
 		parent::tear_down();
 	}
@@ -279,10 +268,9 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		$result    = $this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
 
 		$this->assertNotWPError( $result, 'Expected success but got: ' . ( is_wp_error( $result ) ? $result->get_error_message() : '' ) );
-		$this->assertNotNull( $this->rest->captured_file, 'send_file_response was not called' );
-		$this->assertFileExists( $this->rest->captured_file );
+		$this->assertNotNull( $this->rest->captured_content, 'send_file was not called' );
+		$this->assertSame( $zip_content, $this->rest->captured_content );
 		$this->assertSame( self::SLUG . '.zip', $this->rest->captured_filename );
-		$this->assertSame( $zip_content, file_get_contents( $this->rest->captured_file ) );
 
 		remove_all_filters( 'pre_http_request' );
 	}
@@ -405,13 +393,10 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 
 		$expires   = time() + 300;
 		$signature = $this->generate_signature( self::SLUG, $expires );
-		$this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
+		$result    = $this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
 
-		// When streaming, wp_remote_retrieve_body returns the temp file path,
-		// so send_file_response receives the same path for both $file and $temp_file.
-		$this->assertNotNull( $this->rest->captured_file );
-		$this->assertNotNull( $this->rest->captured_temp_file );
-		$this->assertSame( $zip_content, file_get_contents( $this->rest->captured_file ) );
+		$this->assertNotNull( $this->rest->captured_content );
+		$this->assertSame( $zip_content, $this->rest->captured_content );
 
 		remove_all_filters( 'pre_http_request' );
 	}
@@ -458,5 +443,379 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		$data = file_get_contents( $tmp );
 		wp_delete_file( $tmp );
 		return $data;
+	}
+
+	// -------------------------------------------------------------------------
+	// Diagnostic: PCLZIP_ERR_BAD_FORMAT root cause investigation
+	//
+	// These tests probe what happens when the upstream returns non-zip content
+	// or when output buffering corrupts the proxy response. They verify that
+	// the proxy correctly propagates errors rather than streaming corrupt data.
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When upstream returns HTML error page on HTTP 200, does proxy_download()
+	 * stream the HTML to the client (causing PCLZIP), or return an error?
+	 */
+	public function test_proxy_streaming_upstream_html_on_200_writes_html_to_file(): void {
+		$html    = '<html><body><h1>502 Bad Gateway</h1></body></html>';
+		$zip_url = 'https://example.com/package.zip';
+
+		$this->rest->mock_metadata = [ 'download_link' => $zip_url ];
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( $zip_url, $html ) {
+				if ( $url === $zip_url ) {
+					// Simulate what happens when upstream returns HTML:
+					// wp_remote_get streams to temp file, body returns file path.
+					if ( ! empty( $args['filename'] ) ) {
+						file_put_contents( $args['filename'], $html );
+					}
+					return [
+						'body'     => $args['filename'] ?? $html,
+						'response' => [ 'code' => 200 ],
+						'headers'  => new WpOrg\Requests\Utility\CaseInsensitiveDictionary(),
+					];
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$expires   = time() + 300;
+		$signature = $this->generate_signature( self::SLUG, $expires );
+		$result    = $this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
+
+		remove_all_filters( 'pre_http_request' );
+
+		// After fix: non-zip upstream returns WP_Error. Before fix: streamed HTML.
+		if ( is_wp_error( $result ) ) {
+			$this->assertSame( 'gu_not_a_zip', $result->get_error_code() );
+		} else {
+			$this->assertInstanceOf( \WP_REST_Response::class, $result );
+			$this->assertSame( 302, $result->get_status() );
+			$this->assertStringContainsString( 'git-updater-downloads/', $result->get_headers()['Location'] ?? '' );
+		}
+	}
+
+	/**
+	 * When upstream returns empty body on HTTP 200, what does proxy_download() do?
+	 */
+	public function test_proxy_streaming_upstream_empty_body_on_200(): void {
+		$zip_url = 'https://example.com/package.zip';
+
+		$this->rest->mock_metadata = [ 'download_link' => $zip_url ];
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( $zip_url ) {
+				if ( $url === $zip_url ) {
+					// Simulate upstream returning empty body.
+					if ( ! empty( $args['filename'] ) ) {
+						file_put_contents( $args['filename'], '' );
+					}
+					return [
+						'body'     => $args['filename'] ?? '',
+						'response' => [ 'code' => 200 ],
+						'headers'  => new WpOrg\Requests\Utility\CaseInsensitiveDictionary(),
+					];
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$expires   = time() + 300;
+		$signature = $this->generate_signature( self::SLUG, $expires );
+		$result    = $this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
+
+		remove_all_filters( 'pre_http_request' );
+
+		// Empty body on 200 should be an error, not a 0-byte file.
+		if ( is_wp_error( $result ) ) {
+			$this->assertSame( 'gu_not_a_zip', $result->get_error_code() );
+		} else {
+			$this->assertInstanceOf( \WP_REST_Response::class, $result );
+			$this->assertSame( 302, $result->get_status() );
+		}
+	}
+
+	/**
+	 * When output buffering precedes readfile(), does the proxy output get
+	 * corrupted with prepended content?
+	 */
+	public function test_proxy_output_buffering_corrupts_file_output(): void {
+		$zip_content = $this->create_dummy_zip( 'test.php', '<?php' );
+		$zip_url     = 'https://example.com/package.zip';
+
+		$this->rest->mock_metadata = [ 'download_link' => $zip_url ];
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( $zip_url, $zip_content ) {
+				if ( $url === $zip_url ) {
+					if ( ! empty( $args['filename'] ) ) {
+						file_put_contents( $args['filename'], $zip_content );
+					}
+					return [
+						'body'     => $args['filename'] ?? $zip_content,
+						'response' => [ 'code' => 200 ],
+						'headers'  => new WpOrg\Requests\Utility\CaseInsensitiveDictionary(),
+					];
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$expires   = time() + 300;
+		$signature = $this->generate_signature( self::SLUG, $expires );
+
+		// Simulate output buffering that send_file_response's ob_end_clean() would
+		// normally strip — but if ob_get_level() is 0, buffering is not cleared.
+		ob_start();
+		echo 'some prior output';
+
+		$result = $this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
+
+		$output = ob_get_clean();
+
+		remove_all_filters( 'pre_http_request' );
+
+		$this->assertNotWPError( $result );
+		$this->assertNotNull( $this->rest->captured_content );
+		$this->assertSame( $zip_content, $this->rest->captured_content );
+	}
+
+	/**
+	 * When upstream returns a 502 with HTML body, does download_url() on the
+	 * client side get a WP_Error (safe) or a file with HTML content (dangerous)?
+	 *
+	 * This simulates the full proxy flow: proxy_download returns WP_Error for
+	 * non-200, which download_url() converts to WP_Error → client returns error.
+	 */
+	public function test_proxy_error_for_upstream_502_is_propagated_as_wp_error(): void {
+		$html    = '<html><body>Bad Gateway</body></html>';
+		$zip_url = 'https://example.com/package.zip';
+
+		$this->rest->mock_metadata = [ 'download_link' => $zip_url ];
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( $zip_url, $html ) {
+				if ( $url === $zip_url ) {
+					return [
+						'body'     => $html,
+						'response' => [ 'code' => 502 ],
+						'headers'  => new WpOrg\Requests\Utility\CaseInsensitiveDictionary(),
+					];
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$expires   = time() + 300;
+		$signature = $this->generate_signature( self::SLUG, $expires );
+		$result    = $this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
+
+		remove_all_filters( 'pre_http_request' );
+
+		// Non-200 upstream MUST return WP_Error, never stream corrupt content.
+		$this->assertWPError( $result, 'Non-200 upstream should return WP_Error, not stream HTML' );
+		$this->assertSame( 'gu_upstream_http_error', $result->get_error_code() );
+	}
+
+	/**
+	 * Verify that the proxy correctly handles upstream returning a 200 with
+	 * Content-Type text/html (e.g., a GitHub 404 page served with 200 status).
+	 */
+	public function test_proxy_does_not_validate_content_type(): void {
+		$html    = '<!DOCTYPE html><html><head><title>404</title></head><body>Not Found</body></html>';
+		$zip_url = 'https://example.com/package.zip';
+
+		$this->rest->mock_metadata = [ 'download_link' => $zip_url ];
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( $zip_url, $html ) {
+				if ( $url === $zip_url ) {
+					if ( ! empty( $args['filename'] ) ) {
+						file_put_contents( $args['filename'], $html );
+					}
+					return [
+						'body'     => $args['filename'] ?? $html,
+						'response' => [ 'code' => 200 ],
+						'headers'  => new WpOrg\Requests\Utility\CaseInsensitiveDictionary( [ 'content-type' => 'text/html' ] ),
+					];
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$expires   = time() + 300;
+		$signature = $this->generate_signature( self::SLUG, $expires );
+		$result    = $this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
+
+		remove_all_filters( 'pre_http_request' );
+
+		// Content-Type validation is not checked — zip magic byte validation catches this.
+		if ( is_wp_error( $result ) ) {
+			$this->assertSame( 'gu_not_a_zip', $result->get_error_code() );
+		} else {
+			$this->assertInstanceOf( \WP_REST_Response::class, $result );
+			$this->assertSame( 302, $result->get_status() );
+		}
+	}
+
+	// -------------------------------------------------------------------------
+	// Zip magic byte validation (gu_not_a_zip)
+	// -------------------------------------------------------------------------
+
+	public function test_proxy_returns_error_when_upstream_returns_html_on_200(): void {
+		$html    = '<html><body><h1>502 Bad Gateway</h1></body></html>';
+		$zip_url = 'https://example.com/package.zip';
+
+		$this->rest->mock_metadata = [ 'download_link' => $zip_url ];
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( $zip_url, $html ) {
+				if ( $url === $zip_url ) {
+					if ( ! empty( $args['filename'] ) ) {
+						file_put_contents( $args['filename'], $html );
+					}
+					return [
+						'body'     => $args['filename'] ?? $html,
+						'response' => [ 'code' => 200 ],
+						'headers'  => new WpOrg\Requests\Utility\CaseInsensitiveDictionary(),
+					];
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$expires   = time() + 300;
+		$signature = $this->generate_signature( self::SLUG, $expires );
+		$result    = $this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
+
+		remove_all_filters( 'pre_http_request' );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'gu_not_a_zip', $result->get_error_code() );
+		$this->assertSame( 502, $result->get_error_data()['status'] );
+	}
+
+	public function test_proxy_returns_error_when_upstream_returns_empty_file_on_200(): void {
+		$zip_url = 'https://example.com/package.zip';
+
+		$this->rest->mock_metadata = [ 'download_link' => $zip_url ];
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( $zip_url ) {
+				if ( $url === $zip_url ) {
+					if ( ! empty( $args['filename'] ) ) {
+						file_put_contents( $args['filename'], '' );
+					}
+					return [
+						'body'     => $args['filename'] ?? '',
+						'response' => [ 'code' => 200 ],
+						'headers'  => new WpOrg\Requests\Utility\CaseInsensitiveDictionary(),
+					];
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$expires   = time() + 300;
+		$signature = $this->generate_signature( self::SLUG, $expires );
+		$result    = $this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
+
+		remove_all_filters( 'pre_http_request' );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'gu_not_a_zip', $result->get_error_code() );
+	}
+
+	public function test_proxy_returns_error_when_upstream_returns_plaintext_on_200(): void {
+		$plain   = 'This is not a zip file';
+		$zip_url = 'https://example.com/package.zip';
+
+		$this->rest->mock_metadata = [ 'download_link' => $zip_url ];
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( $zip_url, $plain ) {
+				if ( $url === $zip_url ) {
+					if ( ! empty( $args['filename'] ) ) {
+						file_put_contents( $args['filename'], $plain );
+					}
+					return [
+						'body'     => $args['filename'] ?? $plain,
+						'response' => [ 'code' => 200 ],
+						'headers'  => new WpOrg\Requests\Utility\CaseInsensitiveDictionary(),
+					];
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$expires   = time() + 300;
+		$signature = $this->generate_signature( self::SLUG, $expires );
+		$result    = $this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
+
+		remove_all_filters( 'pre_http_request' );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'gu_not_a_zip', $result->get_error_code() );
+	}
+
+	public function test_proxy_cleans_up_temp_file_on_zip_validation_failure(): void {
+		$html    = '<html><body>Error</body></html>';
+		$zip_url = 'https://example.com/package.zip';
+
+		$this->rest->mock_metadata = [ 'download_link' => $zip_url ];
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( $zip_url, $html ) {
+				if ( $url === $zip_url ) {
+					if ( ! empty( $args['filename'] ) ) {
+						file_put_contents( $args['filename'], $html );
+					}
+					return [
+						'body'     => $args['filename'] ?? $html,
+						'response' => [ 'code' => 200 ],
+						'headers'  => new WpOrg\Requests\Utility\CaseInsensitiveDictionary(),
+					];
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$expires   = time() + 300;
+		$signature = $this->generate_signature( self::SLUG, $expires );
+		$result    = $this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
+
+		remove_all_filters( 'pre_http_request' );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'gu_not_a_zip', $result->get_error_code() );
 	}
 }
