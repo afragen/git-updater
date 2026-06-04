@@ -783,7 +783,22 @@ class REST_API {
 		$secret   = wp_salt( 'auth' );
 		$expected = hash_hmac( 'sha256', $payload, $secret );
 
-		return hash_equals( $expected, $signature );
+		$valid = hash_equals( $expected, $signature );
+
+		if ( ! $valid ) {
+			error_log(
+				sprintf(
+					'git-updater verify_signature: slug=%s, expires=%d, sig=%s, expected=%s, secret_len=%d',
+					$slug,
+					$expires,
+					$signature,
+					$expected,
+					strlen( $secret )
+				)
+			);
+		}
+
+		return $valid;
 	}
 
 	/**
@@ -840,8 +855,8 @@ class REST_API {
 	 * @return WP_Error|void
 	 */
 	public function proxy_download( WP_REST_Request $request ) {
-		$slug      = $request->get_param( 'slug' );
-		$expires   = (int) $request->get_param( 'expires' );
+		$slug    = $request->get_param( 'slug' );
+		$expires = (int) $request->get_param( 'expires' );
 		$signature = $request->get_param( 'signature' );
 
 		if ( ! $this->verify_download_signature( $slug, $expires, $signature ) ) {
@@ -852,59 +867,112 @@ class REST_API {
 			);
 		}
 
-		// Resolve upstream URL + auth headers server-side.
-		// Includes Authorization, Accept: application/octet-stream (for release assets),
-		// and git-server identification headers as needed.
-		$repo_api_data = $this->build_download_metadata( $slug );
-		if ( is_wp_error( $repo_api_data ) ) {
-			return $repo_api_data;
-		}
+		try {
+			// Resolve upstream URL + auth headers server-side.
+			$repo_api_data = $this->build_download_metadata( $slug );
+			if ( is_wp_error( $repo_api_data ) ) {
+				error_log(
+					sprintf(
+						'git-updater proxy_download: build_download_metadata failed for slug=%s, code=%s, message=%s',
+						$slug,
+						$repo_api_data->get_error_code(),
+						$repo_api_data->get_error_message()
+					)
+				);
+				return $repo_api_data;
+			}
 
-		$download_url = $repo_api_data['download_link'] ?? '';
-		$auth_args    = $repo_api_data['auth_header'] ?? [];
+			$download_url = $repo_api_data['download_link'] ?? '';
+			$auth_args    = $repo_api_data['auth_header'] ?? [];
 
-		if ( empty( $download_url ) ) {
-			return new WP_Error(
-				'gu_no_download_link',
-				'No download link available for this package.',
-				[ 'status' => 404 ]
+			if ( empty( $download_url ) ) {
+				return new WP_Error(
+					'gu_no_download_link',
+					'No download link available for this package.',
+					[ 'status' => 404 ]
+				);
+			}
+
+			// Create temp file and register cleanup in case of fatal error or disconnect.
+			$temp_file = wp_tempnam( "gu_download_{$slug}" );
+			$this->register_temp_file_cleanup( $temp_file );
+
+			// Fetch upstream with auth headers (Authorization + Accept + identification).
+			$upstream_args = array_merge(
+				$auth_args,
+				[
+					'stream'   => true,
+					'filename' => $temp_file,
+				]
 			);
-		}
+			$upstream      = wp_remote_get( $download_url, $upstream_args );
 
-		// Create temp file and register cleanup in case of fatal error or disconnect.
-		$temp_file = wp_tempnam( "gu_download_{$slug}" );
-		$this->register_temp_file_cleanup( $temp_file );
+			if ( is_wp_error( $upstream ) ) {
+				error_log(
+					sprintf(
+						'git-updater proxy_download: upstream fetch failed for slug=%s, url=%s, error=%s',
+						$slug,
+						$download_url,
+						$upstream->get_error_message()
+					)
+				);
+				return new WP_Error(
+					'gu_upstream_error',
+					'Failed to download package from upstream: ' . $upstream->get_error_message(),
+					[ 'status' => 502 ]
+				);
+			}
 
-		// Fetch upstream with auth headers (Authorization + Accept + identification).
-		$upstream_args = array_merge(
-			$auth_args,
-			[
-				'stream'   => true,
-				'filename' => $temp_file,
-			]
-		);
-		$upstream      = wp_remote_get( $download_url, $upstream_args );
+			$status_code = wp_remote_retrieve_response_code( $upstream );
+			if ( 200 !== $status_code ) {
+				error_log(
+					sprintf(
+						'git-updater proxy_download: upstream returned HTTP %d for slug=%s, url=%s',
+						$status_code,
+						$slug,
+						$download_url
+					)
+				);
+				return new WP_Error(
+					'gu_upstream_http_error',
+					"Upstream returned HTTP {$status_code}.",
+					[ 'status' => 502 ]
+				);
+			}
 
-		if ( is_wp_error( $upstream ) ) {
+			// Validate that upstream returned a zip file, not an HTML error page.
+			$fp   = fopen( $temp_file, 'rb' );
+			$head = fread( $fp, 4 );
+			fclose( $fp );
+
+			if ( $head !== "PK\x03\x04" ) {
+				wp_delete_file( $temp_file );
+				return new WP_Error(
+					'gu_not_a_zip',
+					'Upstream did not return a valid zip file.',
+					[ 'status' => 502 ]
+				);
+			}
+
+			$body_file = wp_remote_retrieve_body( $upstream );
+
+			$this->send_file_response( $body_file, sanitize_file_name( $slug . '.zip' ), $temp_file );
+		} catch ( \Throwable $e ) {
+			error_log(
+				sprintf(
+					'git-updater proxy_download: exception for slug=%s: %s in %s:%d',
+					$slug,
+					$e->getMessage(),
+					$e->getFile(),
+					$e->getLine()
+				)
+			);
 			return new WP_Error(
-				'gu_upstream_error',
-				'Failed to download package from upstream: ' . $upstream->get_error_message(),
+				'gu_proxy_exception',
+				'Proxy download failed: ' . $e->getMessage(),
 				[ 'status' => 502 ]
 			);
 		}
-
-		$status_code = wp_remote_retrieve_response_code( $upstream );
-		if ( 200 !== $status_code ) {
-			return new WP_Error(
-				'gu_upstream_http_error',
-				"Upstream returned HTTP {$status_code}.",
-				[ 'status' => 502 ]
-			);
-		}
-
-		$body_file = wp_remote_retrieve_body( $upstream );
-
-		$this->send_file_response( $body_file, sanitize_file_name( $slug . '.zip' ), $temp_file );
 	}
 
 	/**
