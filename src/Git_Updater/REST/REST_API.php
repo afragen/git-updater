@@ -954,6 +954,16 @@ class REST_API {
 				);
 			}
 
+			$file_size = filesize( $temp_file );
+			error_log(
+				sprintf(
+					'git-updater proxy_download: sending file slug=%s, size=%d, path=%s',
+					$slug,
+					$file_size,
+					$temp_file
+				)
+			);
+
 			$this->send_file_response( $temp_file, sanitize_file_name( $slug . '.zip' ), $temp_file );
 		} catch ( \Throwable $e ) {
 			error_log(
