@@ -861,8 +861,8 @@ class REST_API {
 	 * @return WP_Error|void
 	 */
 	public function proxy_download( WP_REST_Request $request ) {
-		$slug    = $request->get_param( 'slug' );
-		$expires = (int) $request->get_param( 'expires' );
+		$slug      = $request->get_param( 'slug' );
+		$expires   = (int) $request->get_param( 'expires' );
 		$signature = $request->get_param( 'signature' );
 
 		if ( ! $this->verify_download_signature( $slug, $expires, $signature ) ) {
