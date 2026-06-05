@@ -547,13 +547,6 @@ class REST_API {
 
 		$repo_cache = $this->get_repo_cache( $slug, false );
 
-		// Add HTTP headers.
-		if ( $repo_api_data['download_link'] ) {
-			$repo_api_data['auth_header'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->add_auth_header( [], $repo_api_data['download_link'] );
-			$repo_api_data['auth_header'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->unset_release_asset_auth( $repo_api_data['auth_header'], $repo_api_data['download_link'] );
-			$repo_api_data['auth_header'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->add_accept_header( $repo_api_data['auth_header'], $repo_api_data['download_link'] );
-		}
-
 		// Update release asset download link .
 		if ( $repo_data->release_asset ) {
 			if ( ( isset( $repo_cache['release_asset_download'] )
@@ -566,18 +559,7 @@ class REST_API {
 			} elseif ( isset( $repo_cache['release_asset'] ) && $repo_cache['release_asset'] ) {
 				$_REQUEST['override']           = true;
 				$repo_api_data['download_link'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->get_release_asset_redirect( $repo_cache['release_asset'], true );
-				unset( $repo_api_data['auth_header'] );
 			}
-		}
-
-		$private_or_token = $repo_api_data['is_private'] || ! empty( $this->get_class_vars( 'API\API', 'options' )[ $slug ] );
-		$private_or_token = $private_or_token && ( '/git-updater/v1/update-api' === $request->get_route() );
-		if ( ! $private_or_token && ! in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true ) ) {
-			unset( $repo_api_data['auth_header']['headers']['Authorization'] );
-		}
-
-		if ( empty( $repo_api_data['auth_header']['headers'] ) ) {
-			unset( $repo_api_data['auth_header'] );
 		}
 
 		return $repo_api_data;
