@@ -3,7 +3,7 @@
 * updated for Claude Opus 4.7 security review
 
 #### 13.0.1 / 2026-06-04
-* remove all Authorization headers from REST endpoints, under specific circumstances this could have leaked access tokens. Thanks to Simon Tiplady and Timo Klemm for disclosure.
+* remove all Authorization headers from REST endpoints, under specific circumstances this could have leaked access tokens. Thanks to Simon Tiplady, Timo Klemm, and Thomas Johannessen for disclosure.
 * Updating private repositories using Git Updater Lite will not work with this version
 
 #### 13.0.0 / 2026-05-31 🎂
