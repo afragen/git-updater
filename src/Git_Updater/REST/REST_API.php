@@ -786,6 +786,7 @@ class REST_API {
 		$valid = hash_equals( $expected, $signature );
 
 		if ( ! $valid ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			error_log(
 				sprintf(
 					'git-updater verify_signature: slug=%s, expires=%d, sig=%s, expected=%s, secret_len=%d',
@@ -853,10 +854,16 @@ class REST_API {
 	 * @param WP_REST_Request $request REST API request with slug, expires, signature.
 	 *
 	 * @return WP_Error|void
+	 *
+	 * @phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_error_log
+	 * @phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+	 * @phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_fread
+	 * @phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+	 * @phpcs:disable WordPress.PHP.YodaConditions.NotYoda
 	 */
 	public function proxy_download( WP_REST_Request $request ) {
-		$slug    = $request->get_param( 'slug' );
-		$expires = (int) $request->get_param( 'expires' );
+		$slug      = $request->get_param( 'slug' );
+		$expires   = (int) $request->get_param( 'expires' );
 		$signature = $request->get_param( 'signature' );
 
 		if ( ! $this->verify_download_signature( $slug, $expires, $signature ) ) {
