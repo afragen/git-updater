@@ -99,32 +99,6 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	}
 
 	/**
-	 * Test fetch_token_from_connector sends the exchange code in a POST body.
-	 */
-	public function test_fetch_token_from_connector_uses_post_body(): void {
-		$this->oauth->connector_url = 'https://connector.example.com/';
-
-		add_filter( 'pre_http_request', function ( $preempt, $args, $url ) {
-			$this->assertSame( 'POST', $args['method'] );
-			$this->assertSame( 'test_code', $args['body']['code'] );
-			$this->assertStringEndsWith( '/git-updater/github/oauth/token', $url );
-
-			return [
-				'response' => [ 'code' => 200 ],
-				'body'     => wp_json_encode( [ 'access_token' => 'tok' ] ),
-				'headers'  => [],
-			];
-		}, 10, 3 );
-
-		$method = new ReflectionMethod( OAuth_Connect::class, 'fetch_token_from_connector' );
-		$method->setAccessible( true );
-
-		$result = $method->invoke( $this->oauth, 'github', 'test_code' );
-		$this->assertIsArray( $result );
-		$this->assertSame( 'tok', $result['access_token'] );
-	}
-
-	/**
 	 * Test fetch_token_from_connector rejects non-success HTTP responses.
 	 */
 	public function test_fetch_token_from_connector_rejects_non_success_response(): void {

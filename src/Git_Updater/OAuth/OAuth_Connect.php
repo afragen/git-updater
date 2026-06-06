@@ -273,14 +273,9 @@ class OAuth_Connect {
 		}
 
 		$url = $connector . 'git-updater/' . $provider . '/oauth/token';
+		$url = add_query_arg( 'code', $exchange_code, $url );
 
-		$response = wp_remote_post(
-			$url,
-			[
-				'timeout' => 15,
-				'body'    => [ 'code' => $exchange_code ],
-			]
-		);
+		$response = wp_remote_get( $url, [ 'timeout' => 15 ] );
 		if ( is_wp_error( $response ) ) {
 			return null;
 		}
