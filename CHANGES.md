@@ -2,6 +2,10 @@
 * added support for OAuth tokens
 * updated for Claude Opus 4.7 security review
 
+#### 13.0.1 / 2026-06-04
+* remove all Authorization headers from REST endpoints, under specific circumstances this could have leaked access tokens. Thanks to Simon Tiplady and Timo Klemm for disclosure.
+* Updating private repositories using Git Updater Lite will not work with this version
+
 #### 13.0.0 / 2026-05-31 🎂
 * use `afragen/wp-readme-parser` drop-in replacement for `afragen/wordpress-plugin-readme-parser`
 * update requirements to PHP 8.0 for new parser due to testing
