@@ -190,7 +190,10 @@ class API {
 		$cached      = isset( $error_cache['error_cache'] );
 		$response    = false;
 		if ( ! $cached ) {
-			error_log( "Git Updater: Making API request to {$url}" ); // @codeCoverageIgnore
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				error_log( "Git Updater: Making API request to {$url}" ); // @codeCoverageIgnore
+			}
 			$response = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
 
 			$code          = (int) wp_remote_retrieve_response_code( $response );
