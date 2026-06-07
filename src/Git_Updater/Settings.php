@@ -320,7 +320,7 @@ class Settings {
 					?>
 				</form>
 				<?php $refresh_transients = add_query_arg( [ 'git_updater_refresh_transients' => true ], $action ); ?>
-				<form class="settings" method="post" action="<?php echo esc_url( $refresh_transients ); ?>">
+				<form class="settings" method="post" action="<?php echo esc_attr( $refresh_transients ); ?>">
 					<?php wp_nonce_field( 'gu_refresh_cache' ); ?>
 					<?php submit_button( esc_html__( 'Refresh Cache', 'git-updater' ), 'primary', 'gu_refresh_cache' ); ?>
 				</form>
