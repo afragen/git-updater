@@ -297,7 +297,7 @@ class Settings {
 		?>
 		<div class="wrap git-updater-settings">
 			<h1>
-				<a href="https://github.com/afragen/git-updater" target="_blank"><img src="<?php echo esc_attr( $logo ); ?>" alt="Git Updater logo" /></a><br>
+				<a href="https://github.com/afragen/git-updater" target="_blank"><img src="<?php echo esc_url( $logo ); ?>" alt="Git Updater logo" /></a><br>
 				<?php esc_html_e( 'Git Updater', 'git-updater' ); ?>
 				<span class="description"><?php echo esc_html( ' v' . $this->get_plugin_version() ); ?></span>
 			</h1>
