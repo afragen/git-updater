@@ -674,6 +674,24 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->assertNull( $this->oauth->refresh_token( 'gitlab' ) );
 	}
 
+	public function test_refresh_token_returns_null_on_non_success_response(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'gitlab_access_token' => 'tok', 'gitlab_refresh_token' => 'ref' ] );
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 401 ],
+				'body'     => wp_json_encode( [ 'access_token' => 'should_not_save' ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$this->assertNull( $this->oauth->refresh_token( 'gitlab' ) );
+
+		$options = get_site_option( 'git_updater' );
+		$this->assertSame( 'tok', $options['gitlab_access_token'] );
+	}
+
 	public function test_refresh_token_returns_new_token_on_success(): void {
 		$this->oauth->connector_url = 'https://connector.example.com/';
 		update_site_option( 'git_updater', [ 'gitlab_access_token' => 'old_tok', 'gitlab_refresh_token' => 'ref' ] );
@@ -727,7 +745,14 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	public function test_fetch_token_returns_array_with_access_token_only(): void {
 		$this->oauth->connector_url = 'https://connector.example.com/';
 
-		add_filter( 'pre_http_request', static function () {
+		add_filter( 'pre_http_request', static function ( $preempt, $args, $url ) {
+			if ( 'https://connector.example.com/git-updater/github/oauth/token' !== $url ) {
+				return $preempt;
+			}
+
+			Test_OAuth_Connect::assertSame( 'POST', $args['method'] );
+			Test_OAuth_Connect::assertSame( [ 'code' => 'code' ], $args['body'] );
+
 			return [
 				'response' => [ 'code' => 200 ],
 				'body'     => wp_json_encode( [ 'access_token' => 'tok' ] ),
@@ -744,6 +769,25 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->assertSame( 'tok', $result['access_token'] );
 		$this->assertNull( $result['refresh_token'] );
 		$this->assertNull( $result['expires_in'] );
+	}
+
+	public function test_fetch_token_returns_null_on_non_success_response(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 500 ],
+				'body'     => wp_json_encode( [ 'access_token' => 'should_not_save' ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$method = new ReflectionMethod( OAuth_Connect::class, 'fetch_token_from_connector' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $this->oauth, 'github', 'code' );
+
+		$this->assertNull( $result );
 	}
 
 	public function test_fetch_token_returns_array_with_all_fields(): void {
