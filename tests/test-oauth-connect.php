@@ -257,6 +257,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$_GET['provider']         = 'github';
 		$_GET['gu_exchange_code'] = 'test_exchange_code';
 		$_GET['site_state']       = 'test_state';
+		$_GET['_wpnonce']         = wp_create_nonce( 'gu_oauth_callback_github' );
 
 		add_filter( 'pre_http_request', static function( $preempt, $args, $url ) {
 			if ( strpos( $url, '/token' ) !== false ) {
@@ -303,6 +304,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$_GET['provider']         = 'github';
 		$_GET['gu_exchange_code'] = 'test_exchange_code';
 		$_GET['site_state']       = 'test_state';
+		$_GET['_wpnonce']         = wp_create_nonce( 'gu_oauth_callback_github' );
 
 		add_filter( 'pre_http_request', static function( $preempt, $args, $url ) {
 			if ( strpos( $url, '/token' ) !== false ) {
@@ -412,6 +414,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$_GET['provider']         = 'github';
 		$_GET['gu_exchange_code'] = 'github_code';
 		$_GET['site_state']       = 'github_state';
+		$_GET['_wpnonce']         = wp_create_nonce( 'gu_oauth_callback_github' );
 		add_filter( 'pre_http_request', static function( $preempt, $args, $url ) {
 			if ( strpos( $url, 'github' ) !== false && strpos( $url, '/token' ) !== false ) {
 				return [
@@ -445,6 +448,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$_GET['provider']         = 'gitlab';
 		$_GET['gu_exchange_code'] = 'gitlab_code';
 		$_GET['site_state']       = 'gitlab_state';
+		$_GET['_wpnonce']         = wp_create_nonce( 'gu_oauth_callback_gitlab' );
 
 		try {
 			$this->oauth->handle_callback();
@@ -467,6 +471,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$_GET['provider'] = 'invalid_provider';
 		$_GET['gu_exchange_code'] = 'test_code';
+		$_GET['_wpnonce'] = wp_create_nonce( 'gu_oauth_callback_invalid_provider' );
 
 		$captured_url = null;
 		add_filter( 'wp_redirect', function( $url ) use ( &$captured_url ) {
@@ -495,6 +500,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$_GET['provider'] = 'github';
 		$_GET['gu_exchange_code'] = '';
+		$_GET['_wpnonce'] = wp_create_nonce( 'gu_oauth_callback_github' );
 
 		$captured_url = null;
 		add_filter( 'wp_redirect', function( $url ) use ( &$captured_url ) {
@@ -525,6 +531,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$_GET['provider']         = 'github';
 		$_GET['gu_exchange_code'] = 'test_exchange_code';
 		$_GET['site_state']       = 'wrong_state';
+		$_GET['_wpnonce']         = wp_create_nonce( 'gu_oauth_callback_github' );
 
 		$captured_url = null;
 		add_filter( 'wp_redirect', function( $url ) use ( &$captured_url ) {
@@ -546,6 +553,68 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	}
 
 	/**
+	 * Test handle_callback rejects when _wpnonce is missing.
+	 */
+	public function test_handle_callback_rejects_missing_nonce(): void {
+		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->maybe_grant_super_admin( $user );
+		wp_set_current_user( $user );
+
+		set_site_transient( 'gu_oauth_state_github', 'test_state', 600 );
+		$_GET['provider']         = 'github';
+		$_GET['gu_exchange_code'] = 'test_code';
+		$_GET['site_state']       = 'test_state';
+		// Intentionally omit $_GET['_wpnonce'].
+
+		$captured_url = null;
+		add_filter( 'wp_redirect', function( $url ) use ( &$captured_url ) {
+			$captured_url = $url;
+			throw new RuntimeException( 'Redirect captured' );
+		} );
+
+		try {
+			$this->oauth->handle_callback();
+			$this->fail( 'Expected redirect to be captured' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( 'Redirect captured', $e->getMessage() );
+		}
+
+		$this->assertNotNull( $captured_url );
+		$this->assertStringContainsString( 'oauth_error', $captured_url );
+	}
+
+	/**
+	 * Test handle_callback rejects invalid nonce.
+	 */
+	public function test_handle_callback_rejects_invalid_nonce(): void {
+		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->maybe_grant_super_admin( $user );
+		wp_set_current_user( $user );
+
+		set_site_transient( 'gu_oauth_state_github', 'test_state', 600 );
+		$_GET['provider']         = 'github';
+		$_GET['gu_exchange_code'] = 'test_code';
+		$_GET['site_state']       = 'test_state';
+		$_GET['_wpnonce']         = 'invalid_nonce';
+
+		$captured_url = null;
+		add_filter( 'wp_redirect', function( $url ) use ( &$captured_url ) {
+			$captured_url = $url;
+			throw new RuntimeException( 'Redirect captured' );
+		} );
+
+		try {
+			$this->oauth->handle_callback();
+			$this->fail( 'Expected redirect to be captured' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( 'Redirect captured', $e->getMessage() );
+		}
+
+		$this->assertNotNull( $captured_url );
+		$this->assertStringContainsString( 'oauth_error', $captured_url );
+	}
+
+	/**
 	 * Test get_callback_url uses network_admin_url on multisite.
 	 * @group ms-required
 	 */
@@ -561,6 +630,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$this->assertStringContainsString( 'network/admin-post.php', $url );
 		$this->assertStringContainsString( 'action=gu_oauth_callback', $url );
+		$this->assertStringContainsString( '_wpnonce', $url );
 	}
 
 	// -------------------------------------------------------------------------
@@ -868,6 +938,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		set_site_transient( 'gu_oauth_state_gitlab', 'test_state', 600 );
 		$_GET['provider']         = 'gitlab';
 		$_GET['gu_exchange_code'] = 'test_exchange_code';
+		$_GET['_wpnonce']         = wp_create_nonce( 'gu_oauth_callback_gitlab' );
 		$_GET['site_state']       = 'test_state';
 
 		add_filter( 'pre_http_request', static function ( $preempt, $args, $url ) {

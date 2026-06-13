@@ -13,6 +13,10 @@
 * add comprehensive documentation in `docs/lite-update-flow.md` explaining the new download flow and security features
 * add 100% test coverage for new `Lite_Domains` class, `get_download_token` endpoint, and `uses_lite` UI elements
 
+#### 13.0.1 / 2026-06-04
+* remove all Authorization headers from REST endpoints, under specific circumstances this could have leaked access tokens. Thanks to Simon Tiplady, Timo Klemm, and Thomas Johannessen for disclosure.
+* Updating private repositories using Git Updater Lite will not work with this version
+
 #### 13.0.0 / 2026-05-31 🎂
 * use `afragen/wp-readme-parser` drop-in replacement for `afragen/wordpress-plugin-readme-parser`
 * update requirements to PHP 8.0 for new parser due to testing

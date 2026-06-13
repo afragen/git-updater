@@ -176,7 +176,16 @@ class OAuth_Connect {
 			wp_die( esc_html__( 'Forbidden', 'git-updater' ) ); // @codeCoverageIgnore
 		}
 
-		$provider      = sanitize_key( $_GET['provider'] ?? '' );
+		$provider = sanitize_key( $_GET['provider'] ?? '' );
+
+		// Verify WordPress nonce — proves the callback corresponds to this user's session.
+		if ( ! isset( $_GET['_wpnonce'] )
+			|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'gu_oauth_callback_' . $provider )
+		) {
+			$this->redirect_with_status( $provider, 'oauth_error' );
+			return; // @codeCoverageIgnore
+		}
+
 		$exchange_code = sanitize_text_field( wp_unslash( $_GET['gu_exchange_code'] ?? '' ) );
 		$site_state    = sanitize_text_field( wp_unslash( $_GET['site_state'] ?? '' ) );
 
@@ -253,6 +262,7 @@ class OAuth_Connect {
 			[
 				'action'   => 'gu_oauth_callback',
 				'provider' => $provider,
+				'_wpnonce' => wp_create_nonce( 'gu_oauth_callback_' . $provider ),
 			],
 			$base
 		);
