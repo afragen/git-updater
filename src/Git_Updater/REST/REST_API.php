@@ -554,7 +554,7 @@ class REST_API {
 
 		$repo_cache = $this->get_repo_cache( $slug, false );
 
-		// Update release asset download link .
+		// Update release asset download link.
 		if ( $repo_data->release_asset ) {
 			if ( ( isset( $repo_cache['release_asset_download'] )
 				&& ! isset( $repo_cache['release_asset_redirect'] ) )
