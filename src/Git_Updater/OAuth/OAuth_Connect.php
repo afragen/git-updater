@@ -84,7 +84,7 @@ class OAuth_Connect {
 		$connector = $this->get_connector_url();
 
 		if ( $token ) {
-			$this->render_connected_state( $provider, $config );
+			$this->render_connected_state( $provider );
 			return;
 		}
 
@@ -99,11 +99,10 @@ class OAuth_Connect {
 	/**
 	 * Render the connected state with disconnect button.
 	 *
-	 * @param string                $provider Provider slug.
-	 * @param array<string, string> $config   Provider configuration.
+	 * @param string $provider Provider slug.
 	 * @return void
 	 */
-	private function render_connected_state( string $provider, array $config ): void {
+	private function render_connected_state( string $provider ): void {
 		$disconnect_url = add_query_arg(
 			[
 				'action'   => 'gu_oauth_disconnect',
@@ -177,9 +176,12 @@ class OAuth_Connect {
 			wp_die( esc_html__( 'Forbidden', 'git-updater' ) ); // @codeCoverageIgnore
 		}
 
-		$provider      = sanitize_key( $_GET['provider'] ?? '' );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- OAuth callback is validated by the single-use site_state below.
+		$provider = sanitize_key( $_GET['provider'] ?? '' );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- OAuth callback is validated by the single-use site_state below.
 		$exchange_code = sanitize_text_field( wp_unslash( $_GET['gu_exchange_code'] ?? '' ) );
-		$site_state    = sanitize_text_field( wp_unslash( $_GET['site_state'] ?? '' ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- OAuth callback is validated by the single-use site_state below.
+		$site_state = sanitize_text_field( wp_unslash( $_GET['site_state'] ?? '' ) );
 
 		if ( ! isset( self::PROVIDERS[ $provider ] ) || empty( $exchange_code ) ) {
 			$this->redirect_with_status( $provider, 'oauth_error' );
