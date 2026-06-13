@@ -272,11 +272,20 @@ class OAuth_Connect {
 			return null;
 		}
 
-		$url = $connector . 'git-updater/' . $provider . '/oauth/token';
-		$url = add_query_arg( 'code', $exchange_code, $url );
-
-		$response = wp_remote_get( $url, [ 'timeout' => 15 ] );
+		$url      = $connector . 'git-updater/' . $provider . '/oauth/token';
+		$response = wp_remote_post(
+			$url,
+			[
+				'timeout' => 15,
+				'body'    => [ 'code' => $exchange_code ],
+			]
+		);
 		if ( is_wp_error( $response ) ) {
+			return null;
+		}
+
+		$response_code = wp_remote_retrieve_response_code( $response );
+		if ( $response_code < 200 || $response_code >= 300 ) {
 			return null;
 		}
 
@@ -377,6 +386,11 @@ class OAuth_Connect {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			return null;
+		}
+
+		$response_code = wp_remote_retrieve_response_code( $response );
+		if ( $response_code < 200 || $response_code >= 300 ) {
 			return null;
 		}
 
