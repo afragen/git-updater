@@ -19,12 +19,18 @@ class REST_API_Testable_Download extends REST_API {
 	/** @var array<string, mixed>|WP_Error|null If set, returned by build_download_metadata(). */
 	public array|WP_Error|null $mock_metadata = null;
 
+	/** @var \Throwable|null If set, thrown by build_download_metadata() to exercise the catch block. */
+	public ?\Throwable $mock_exception = null;
+
 	protected function send_file( string $file, string $filename ): void {
 		$this->captured_content = file_get_contents( $file );
 		$this->captured_filename = $filename;
 	}
 
 	protected function build_download_metadata( string $slug ): array|WP_Error {
+		if ( null !== $this->mock_exception ) {
+			throw $this->mock_exception;
+		}
 		if ( null !== $this->mock_metadata ) {
 			return $this->mock_metadata;
 		}
@@ -210,6 +216,19 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		$this->assertSame( 502, $result->get_error_data()['status'] );
 
 		remove_all_filters( 'pre_http_request' );
+	}
+
+	public function test_proxy_download_returns_502_on_throwable_exception(): void {
+		$this->rest->mock_exception = new \RuntimeException( 'Simulated upstream failure' );
+
+		$expires   = time() + 300;
+		$signature = $this->generate_signature( self::SLUG, $expires );
+		$result    = $this->rest->proxy_download( $this->make_download_request( self::SLUG, $expires, $signature ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'gu_proxy_exception', $result->get_error_code() );
+		$this->assertSame( 502, $result->get_error_data()['status'] );
+		$this->assertStringContainsString( 'Simulated upstream failure', $result->get_error_message() );
 	}
 
 	public function test_proxy_returns_502_on_non_200_upstream_status(): void {
