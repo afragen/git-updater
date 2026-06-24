@@ -175,15 +175,8 @@ class GitHub_API extends API implements API_Interface {
 				}
 			}
 
-			if ( empty( $cache['release_asset_download'] ) ) {
-				$this->set_repo_cache( 'release_asset_download', $release_asset );
-			}
-			if ( ! empty( $cache['release_asset_download'] ) ) {
-				$this->set_repo_cache( 'release_asset_redirect', null );
-				return $cache['release_asset_download'];
-			}
-
-			return $this->get_release_asset_redirect( $release_asset, true );
+			$this->set_repo_cache( 'release_asset_download', $release_asset );
+			return $cache['release_asset_download'];
 		}
 
 		/*

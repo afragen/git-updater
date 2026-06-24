@@ -1,6 +1,7 @@
 #### [unreleased]
 * added support for OAuth tokens
 * updated for Claude Opus 4.7 security review
+* remove release asset redirect, no longer used
 
 #### 13.0.1 / 2026-06-04
 * remove all Authorization headers from REST endpoints, under specific circumstances this could have leaked access tokens. Thanks to Simon Tiplady, Timo Klemm, and Thomas Johannessen for disclosure.
