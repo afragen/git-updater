@@ -825,8 +825,10 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 		$result = $this->api->construct_download_link();
 
-		// exit_no_update fires inside construct_download_link → returns false.
-		$this->assertFalse( $result );
+		$this->assertSame(
+			'https://github.com/test-owner/test-plugin/releases/download/v2.0.0-beta1/plugin-beta.zip',
+			$result
+		);
 	}
 }
 
