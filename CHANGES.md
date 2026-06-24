@@ -4,6 +4,7 @@
 * remove release asset redirect from `GitHub_API`, no longer used
 * add tests for `get_release_asset_redirect()` AWS expiration and REST key paths, achieving 100% line coverage on `API.php`
 * fix pre-existing test failure `test_get_api_data_covers_release_asset_download_path` by seeding `release_assets` cache entry
+* update `Freemius/wordpress-sdk`
 
 #### 13.0.1 / 2026-06-04
 * remove all Authorization headers from REST endpoints, under specific circumstances this could have leaked access tokens. Thanks to Simon Tiplady, Timo Klemm, and Thomas Johannessen for disclosure.
