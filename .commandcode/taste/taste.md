@@ -3,6 +3,7 @@
 
 # Workflow
 - Commit changes after completing each distinct work phase. Confidence: 0.90
+- Run tests before committing changes to verify nothing is broken. Confidence: 0.80
 - Use tiered approach: address High priority issues first, then Medium, then Low. Confidence: 0.80
 
 # Testing
