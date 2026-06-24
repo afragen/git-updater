@@ -921,7 +921,15 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 
 		$cache_key = 'ghu-' . md5( self::SLUG );
 		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset_download'] = 'https://example.com/stable-download.zip';
+
+		// Seed release_assets with a valid structure so construct_download_link()
+		// finds release assets in cache (no HTTP request needed) and writes
+		// the asset URL into release_asset_download. Also seed a valid timeout
+		// so get_repo_cache($slug, true) returns the cached data.
+		$download_url = 'https://example.com/stable-download.zip';
+		$existing['timeout']            = time() + 86400;
+		$existing['release_assets']     = [ 'assets' => [ '1.0.0' => $download_url ], 'dev_assets' => [] ];
+		$existing['release_asset_download'] = $download_url;
 		update_site_option( $cache_key, $existing );
 
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
@@ -932,7 +940,7 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 		delete_site_option( $cache_key );
 
 		$this->assertArrayNotHasKey( 'error', $data );
-		$this->assertSame( 'https://example.com/stable-download.zip', $data['download_link'] );
+		$this->assertSame( $download_url, $data['download_link'] );
 	}
 
 	// -------------------------------------------------------------------------

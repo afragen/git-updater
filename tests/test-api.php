@@ -75,8 +75,12 @@ class Test_API extends WP_UnitTestCase {
 	public function tear_down(): void {
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'gu_post_api_response_body' );
+		remove_all_filters( 'gu_always_fetch_update' );
+		remove_all_actions( 'requests-requests.before_redirect' );
 		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
 		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
+		delete_site_option( 'git_updater' );
+		unset( $_REQUEST['key'], $_REQUEST['plugin'], $_REQUEST['theme'], $_REQUEST['override'], $_REQUEST['rollback'] );
 		parent::tear_down();
 	}
 
@@ -1707,5 +1711,203 @@ class Test_API_Detect_Provider extends WP_UnitTestCase {
 		$this->api->api( $this->endpoint );
 
 		$this->assertSame( 1, $api_call_count );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_release_asset_redirect() — full coverage
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When called with a falsy asset value, get_release_asset_redirect()
+	 * returns false immediately.
+	 */
+	public function test_get_release_asset_redirect_returns_false_when_no_asset(): void {
+		$result = $this->api->get_release_asset_redirect( false );
+
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * When release_asset_redirect is already in the cache and no override is
+	 * requested, the cached URL is returned without making an HTTP request.
+	 */
+	public function test_get_release_asset_redirect_returns_cached_redirect_url(): void {
+		$cache_key = $this->api->get_cache_key( 'test-plugin' );
+		update_site_option(
+			$cache_key,
+			[
+				'release_asset_redirect' => 'https://objects.githubusercontent.com/download.zip',
+			]
+		);
+
+		$result = $this->api->get_release_asset_redirect( 'https://api.github.com/repos/owner/repo/releases/assets/1' );
+
+		$this->assertSame( 'https://objects.githubusercontent.com/download.zip', $result );
+	}
+
+	/**
+	 * When no cached redirect exists, no override is set, and no update is
+	 * available (exit_no_update returns true), the method returns false.
+	 */
+	public function test_get_release_asset_redirect_returns_false_when_no_update(): void {
+		// Ensure no cache entry for release_asset_redirect.
+		$cache_key = $this->api->get_cache_key( 'test-plugin' );
+		delete_site_option( $cache_key );
+
+		$result = $this->api->get_release_asset_redirect( 'https://api.github.com/repos/owner/repo/releases/assets/1' );
+
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * When no cached redirect exists and gu_always_fetch_update is true
+	 * (making exit_no_update return false), the method follows the redirect,
+	 * caches the resulting URL, and returns it.
+	 */
+	public function test_get_release_asset_redirect_follows_redirect_and_caches_url(): void {
+		$redirect_url = 'https://objects.githubusercontent.com/download-v2.zip';
+		$asset_url    = 'https://api.github.com/repos/owner/repo/releases/assets/42';
+
+		// Bypass exit_no_update so the redirect block is entered.
+		add_filter( 'gu_always_fetch_update', '__return_true' );
+
+		// Set a token so add_auth_header returns non-empty headers.
+		update_site_option( 'git_updater', [ 'github_access_token' => 'test-token' ] );
+
+		// Ensure no cached redirect.
+		$cache_key = $this->api->get_cache_key( 'test-plugin' );
+		delete_site_option( $cache_key );
+
+		$http_called = false;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( $redirect_url, &$http_called ) {
+				$http_called = true;
+
+				// Fire the redirect hook to simulate GitHub's 302 flow.
+				do_action( 'requests-requests.before_redirect', $redirect_url );
+
+				return [
+					'response' => [ 'code' => 302, 'message' => 'Found' ],
+					'headers'  => [ 'location' => $redirect_url ],
+					'body'     => '',
+				];
+			},
+			10,
+			3
+		);
+
+		$result = $this->api->get_release_asset_redirect( $asset_url, false, true );
+
+		$this->assertTrue( $http_called, 'HTTP request should have been made.' );
+		$this->assertSame( $redirect_url, $result );
+
+		// Verify the redirect URL was cached.
+		$cache = get_site_option( $cache_key, [] );
+		$this->assertSame( $redirect_url, $cache['release_asset_redirect'] );
+	}
+
+	/**
+	 * When $aws is true and the cache timeout is more than 5 minutes old,
+	 * the cached release_asset and release_asset_redirect entries are
+	 * cleared, so the redirect is fetched anew even with a cached value.
+	 */
+	public function test_get_release_asset_redirect_aws_expiration_clears_old_cache(): void {
+		$redirect_url = 'https://aws-cdn.example.com/download.zip';
+		$asset_url    = 'https://api.github.com/repos/owner/repo/releases/assets/99';
+
+		// Bypass exit_no_update.
+		add_filter( 'gu_always_fetch_update', '__return_true' );
+
+		// Auth header token.
+		update_site_option( 'git_updater', [ 'github_access_token' => 'test-token' ] );
+
+		// Seed cache with a release_asset_redirect and a timeout well in the past
+		// (older than 5 minutes relative to -12 hours) so the AWS branch fires.
+		$cache_key = $this->api->get_cache_key( 'test-plugin' );
+		update_site_option(
+			$cache_key,
+			[
+				'release_asset'          => 'https://api.github.com/repos/owner/repo/releases/assets/99',
+				'release_asset_redirect' => 'https://stale-cached-url.example.com/old.zip',
+				'timeout'                => time() - 3600, // 1 hour ago
+			]
+		);
+
+		$http_called = false;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( $redirect_url, &$http_called ) {
+				$http_called = true;
+				do_action( 'requests-requests.before_redirect', $redirect_url );
+				return [
+					'response' => [ 'code' => 302, 'message' => 'Found' ],
+					'headers'  => [ 'location' => $redirect_url ],
+					'body'     => '',
+				];
+			},
+			10,
+			3
+		);
+
+		// With $aws=true the old cached redirect should be cleared and the
+		// redirect followed. Without $aws the cached value would be returned.
+		$result = $this->api->get_release_asset_redirect( $asset_url, true );
+
+		$this->assertTrue( $http_called, 'HTTP request should have been made after AWS expiration cleared cache.' );
+		$this->assertSame( $redirect_url, $result );
+	}
+
+	/**
+	 * When $_REQUEST['key'] is set and $_REQUEST['plugin'] matches the
+	 * cache's 'repo' slug, the $rest flag prevents exit_no_update from
+	 * short-circuiting, even without gu_always_fetch_update.
+	 */
+	public function test_get_release_asset_redirect_rest_key_bypasses_exit_no_update(): void {
+		$redirect_url = 'https://objects.githubusercontent.com/rest-download.zip';
+		$asset_url    = 'https://api.github.com/repos/owner/repo/releases/assets/7';
+
+		// Auth header token.
+		update_site_option( 'git_updater', [ 'github_access_token' => 'test-token' ] );
+
+		// Seed cache with a matching 'repo' slug.
+		$cache_key = $this->api->get_cache_key( 'test-plugin' );
+		update_site_option(
+			$cache_key,
+			[
+				'repo'                    => 'test-plugin',
+				'release_asset_redirect'  => false,
+			]
+		);
+
+		// Simulate a REST request by setting $_REQUEST.
+		$_REQUEST['key']    = 'some-api-key';
+		$_REQUEST['plugin'] = 'test-plugin';
+
+		$http_called = false;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( $redirect_url, &$http_called ) {
+				$http_called = true;
+				do_action( 'requests-requests.before_redirect', $redirect_url );
+				return [
+					'response' => [ 'code' => 302, 'message' => 'Found' ],
+					'headers'  => [ 'location' => $redirect_url ],
+					'body'     => '',
+				];
+			},
+			10,
+			3
+		);
+
+		// Without gu_always_fetch_update, exit_no_update would return true.
+		// But $rest=true should bypass that guard and enter the redirect block.
+		$result = $this->api->get_release_asset_redirect( $asset_url );
+
+		$this->assertTrue( $http_called, 'HTTP request should have been made when $rest bypasses exit_no_update.' );
+		$this->assertSame( $redirect_url, $result );
+
+		// Clean up superglobals.
+		unset( $_REQUEST['key'], $_REQUEST['plugin'] );
 	}
 }

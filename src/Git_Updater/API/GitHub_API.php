@@ -150,7 +150,6 @@ class GitHub_API extends API implements API_Interface {
 		self::$method       = 'download_link';
 		$download_link_base = $this->get_api_url( '/repos/:owner/:repo/zipball/', true );
 		$endpoint           = '';
-		$cache              = $this->get_repo_cache( $this->type->slug ?? false, false );
 
 		// Release asset.
 		if ( $this->use_release_asset( $branch_switch ) ) {
@@ -175,9 +174,6 @@ class GitHub_API extends API implements API_Interface {
 				}
 			}
 
-			if ( ! empty( $cache['release_asset_download'] ) ) {
-				return $cache['release_asset_download'];
-			}
 			$this->set_repo_cache( 'release_asset_download', $release_asset );
 			return $release_asset;
 		}

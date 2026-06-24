@@ -763,18 +763,17 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 	}
 
 	/**
-	 * When the cache already has a release_asset_download URL,
-	 * construct_download_link() returns it immediately.
+	 * When release_assets has a single asset entry,
+	 * construct_download_link() returns its URL.
 	 */
-	public function test_construct_download_link_returns_cached_release_asset_download(): void {
+	public function test_construct_download_link_returns_release_asset_url(): void {
 		$cached_url = 'https://github.com/test-owner/test-plugin/releases/download/v1.0.0/plugin.zip';
 		$this->seed_cache(
 			[
-				'release_assets'         => [
+				'release_assets' => [
 					'assets'     => [ '1.0.0' => $cached_url ],
 					'dev_assets' => [],
 				],
-				'release_asset_download' => $cached_url,
 			]
 		);
 
