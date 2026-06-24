@@ -145,6 +145,10 @@ trait API_Common {
 		}
 
 		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
+			// phpcs:disable
+			error_log( sprintf( 'Git Updater: Invalid response for %s %s', $this->type->slug, $git ) );
+			error_log( sprintf( 'Git Updater: %s', print_r( $response, true ) ) );
+			// phpcs:enable
 			return false;
 		}
 
