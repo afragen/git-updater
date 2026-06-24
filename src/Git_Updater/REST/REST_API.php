@@ -556,15 +556,12 @@ class REST_API {
 
 		// Update release asset download link.
 		if ( $repo_data->release_asset ) {
-			if ( ( isset( $repo_cache['release_asset_download'] )
-				&& ! isset( $repo_cache['release_asset_redirect'] ) )
+			if ( isset( $repo_cache['release_asset_download'] )
 				&& 'bitbucket' !== $repo_api_data['git']
 			) {
 				$repo_api_data['download_link'] = $channel && $use_channel && ! empty( $versions )
 					? reset( $versions )
 					: $repo_cache['release_asset_download'];
-			} elseif ( isset( $repo_cache['release_asset'] ) && $repo_cache['release_asset'] ) {
-				$repo_api_data['download_link'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->get_release_asset_redirect( $repo_cache['release_asset'], true, true );
 			}
 		}
 

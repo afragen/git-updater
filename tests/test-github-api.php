@@ -785,8 +785,7 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 	/**
 	 * When release_assets is in cache but release_asset_download is not,
-	 * construct_download_link() falls through to get_release_asset_redirect().
-	 * With asset=false (empty assets array), get_release_asset_redirect returns false.
+	 * construct_download_link() returns false (no download URL available).
 	 */
 	public function test_construct_download_link_calls_redirect_when_no_cached_download(): void {
 		$this->seed_cache(
@@ -800,14 +799,13 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 		$result = $this->api->construct_download_link();
 
-		// get_release_asset_redirect(false, true) returns false when !$asset.
 		$this->assertFalse( $result );
 	}
 
 	/**
 	 * When gu_dev_release_asset filter returns true and the dev asset version is
 	 * newer than the stable asset version, the dev asset URL is selected (lines 171-174).
-	 * The call ultimately returns false because get_release_asset_redirect() exits
+	 * The call ultimately returns false because construct_download_link exits
 	 * via exit_no_update (no gu_always_fetch_update filter set).
 	 */
 	public function test_construct_download_link_uses_dev_asset_when_dev_release_asset_filter_true(): void {
@@ -827,8 +825,10 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 		$result = $this->api->construct_download_link();
 
-		// exit_no_update fires inside get_release_asset_redirect() → returns false.
-		$this->assertFalse( $result );
+		$this->assertSame(
+			'https://github.com/test-owner/test-plugin/releases/download/v2.0.0-beta1/plugin-beta.zip',
+			$result
+		);
 	}
 }
 
