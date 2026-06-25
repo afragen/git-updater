@@ -1,4 +1,5 @@
 #### [unreleased]
+* add fallback cache timeout in `set_repo_cache_timeout()` to prevent infinite re-fetching when API sub-calls fail (partial `ran`)
 * added support for OAuth tokens
 * updated for Claude Opus 4.7 security review
 * remove release asset redirect from `GitHub_API`, no longer used

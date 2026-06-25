@@ -359,7 +359,7 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 	// set_repo_cache_timeout()
 	// -------------------------------------------------------------------------
 
-	public function test_set_repo_cache_timeout_no_op_when_ran_missing(): void {
+	public function test_set_repo_cache_timeout_sets_fallback_when_ran_missing(): void {
 		$cache_key = $this->api->get_cache_key( 'test-plugin' );
 		update_site_option(
 			$cache_key,
@@ -368,14 +368,15 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 				'timeout'     => strtotime( '-1 hour' ),
 			]
 		);
-		$original = get_site_option( $cache_key );
 
 		$this->api->set_repo_cache_timeout( 'test-plugin' );
 
-		$this->assertSame( $original['timeout'], get_site_option( $cache_key )['timeout'] );
+		$cache = get_site_option( $cache_key );
+		$this->assertGreaterThan( time(), $cache['timeout'] );
+		$this->assertLessThan( time() + ( 2 * HOUR_IN_SECONDS ), $cache['timeout'] );
 	}
 
-	public function test_set_repo_cache_timeout_no_op_when_ran_incomplete(): void {
+	public function test_set_repo_cache_timeout_sets_fallback_when_ran_incomplete(): void {
 		$cache_key = $this->api->get_cache_key( 'test-plugin' );
 		update_site_option(
 			$cache_key,
@@ -385,11 +386,12 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 				'timeout'     => strtotime( '-1 hour' ),
 			]
 		);
-		$original = get_site_option( $cache_key );
 
 		$this->api->set_repo_cache_timeout( 'test-plugin' );
 
-		$this->assertSame( $original['timeout'], get_site_option( $cache_key )['timeout'] );
+		$cache = get_site_option( $cache_key );
+		$this->assertGreaterThan( time(), $cache['timeout'] );
+		$this->assertLessThan( time() + ( 2 * HOUR_IN_SECONDS ), $cache['timeout'] );
 	}
 
 	public function test_set_repo_cache_timeout_refreshes_expired_timeout_when_ran_complete(): void {

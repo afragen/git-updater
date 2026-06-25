@@ -196,7 +196,11 @@ trait GU_Trait {
 	 *
 	 * Companion to set_repo_cache(): per-entry writes preserve an existing 'timeout'
 	 * via `??`, so without this an expired timeout from the prior cycle would linger
-	 * and force the next pass to re-fetch. No-op if 'ran' bookkeeping is incomplete.
+	 * and force the next pass to re-fetch.
+	 *
+	 * When the 'ran' bookkeeping is incomplete (e.g. a transient API failure), a
+	 * fallback timeout is applied so the cache remains valid for a short interval
+	 * instead of triggering an immediate re-fetch on the next page load.
 	 *
 	 * @param string $slug Repo slug.
 	 *
@@ -208,6 +212,20 @@ trait GU_Trait {
 		$expected  = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
 
 		if ( ! isset( $cache['ran'] ) || array_diff( $expected, $cache['ran'] ) ) {
+			/**
+			 * Filter the fallback cache timeout duration (in hours) for an
+			 * incomplete fetch cycle.  Prevents infinite re-fetching by setting
+			 * a short timeout so the next retry happens after this interval
+			 * instead of on every page load.
+			 *
+			 * @since 11.0.0
+			 *
+			 * @param int    $hours Number of hours. Default 1.
+			 * @param string $slug  Repository slug.
+			 */
+			$fallback_hours    = (int) apply_filters( 'gu_repo_cache_timeout_fallback', 1, $slug );
+			$cache['timeout']  = strtotime( "+{$fallback_hours} hours" );
+			update_site_option( $cache_key, $cache );
 			return;
 		}
 
