@@ -124,9 +124,10 @@ class Repo_List_Table extends WP_List_Table {
 			case 'release_asset':
 			case 'type':
 			case 'private_package':
-				return esc_html( (string) $item[ $column_name ] );
+				return wp_kses_post( $item[ $column_name ] );
 			default:
-				return esc_html( (string) wp_json_encode( $item ) );
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+				return print_r( $item, true ); // Show the whole array for troubleshooting purposes.
 		}
 	}
 
