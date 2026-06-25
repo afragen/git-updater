@@ -386,11 +386,14 @@ class OAuth_Connect {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			error_log( 'Git Updater: Token refresh failed for ' . $provider . ': ' . $response->get_error_message() );
 			return null;
 		}
 
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 		if ( empty( $body['access_token'] ) ) {
+			error_log( 'Git Updater: Token refresh failed for ' . $provider . ': No access token received.' );
+			error_log( 'Response body: ' . wp_remote_retrieve_body( $response ) );
 			return null;
 		}
 
@@ -400,6 +403,7 @@ class OAuth_Connect {
 
 		$this->save_token( $provider, $new_token, $new_refresh_token ?? $refresh_token, $expires_in );
 
+		error_log( 'Git Updater: Token refreshed for ' . $provider . '. New token expires in ' . ( $expires_in ?? 'unknown' ) . ' seconds.' );
 		return $new_token;
 	}
 
