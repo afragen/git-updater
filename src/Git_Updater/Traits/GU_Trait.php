@@ -223,8 +223,8 @@ trait GU_Trait {
 			 * @param int    $hours Number of hours. Default 1.
 			 * @param string $slug  Repository slug.
 			 */
-			$fallback_hours    = (int) apply_filters( 'gu_repo_cache_timeout_fallback', 1, $slug );
-			$cache['timeout']  = strtotime( "+{$fallback_hours} hours" );
+			$fallback_hours   = (int) apply_filters( 'gu_repo_cache_timeout_fallback', 1, $slug );
+			$cache['timeout'] = strtotime( "+{$fallback_hours} hours" );
 			update_site_option( $cache_key, $cache );
 			return;
 		}
