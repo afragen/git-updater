@@ -191,7 +191,8 @@ class API {
 		$response    = false;
 		if ( ! $cached ) {
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				error_log( 'Git Updater: API request to ' . $url );
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				error_log( 'Git Updater: API request to ' . $url ); // @codeCoverageIgnore
 			}
 			$response = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
 

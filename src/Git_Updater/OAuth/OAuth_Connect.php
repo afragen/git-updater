@@ -360,6 +360,8 @@ class OAuth_Connect {
 	 *
 	 * @param string $provider Provider slug.
 	 * @return string|null New access token or null on failure.
+	 *
+	 * @phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_error_log
 	 */
 	public function refresh_token( string $provider ): ?string {
 		$connector = $this->get_connector_url();
