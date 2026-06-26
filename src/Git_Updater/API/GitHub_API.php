@@ -454,12 +454,12 @@ class GitHub_API extends API implements API_Interface {
 			'git_updater_github_install_settings'
 		);
 
-		$token_args = [
+		$token_args  = [
 			'id'    => 'github_access_token',
 			'token' => true,
 			'class' => '',
 		];
-		$oauth_args = [
+		$oauth_args  = [
 			'provider' => 'github',
 			'class'    => '',
 		];
@@ -467,7 +467,7 @@ class GitHub_API extends API implements API_Interface {
 			'provider' => 'github',
 			'class'    => '',
 		];
-		$oauth      = Singleton::get_instance( 'OAuth\OAuth_Connect', $this );
+		$oauth       = Singleton::get_instance( 'OAuth\OAuth_Connect', $this );
 		if ( $oauth->is_oauth_token( 'github' ) ) {
 			$token_args['class'] = trim( $token_args['class'] . ' hidden' );
 		}
