@@ -1024,4 +1024,56 @@ class Test_GitHub_API_Settings extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'github_access_token', $output );
 		$this->assertStringContainsString( 'type="password"', $output );
 	}
+
+	public function test_github_remove_token_field_hidden_when_no_token(): void {
+		global $wp_settings_fields;
+
+		delete_site_option( 'git_updater' );
+		Base::$options = [];
+		API::$options  = [];
+
+		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$field = $wp_settings_fields['git_updater_github_install_settings']['github_access_token']['github_remove_token'] ?? null;
+		$this->assertNotNull( $field );
+		$this->assertStringContainsString( 'hidden', $field['args']['class'] );
+	}
+
+	public function test_github_remove_token_field_hidden_when_oauth_token(): void {
+		global $wp_settings_fields;
+
+		$options = [ 'github_access_token' => 'oauth_tok', 'github_is_oauth_token' => 'oauth' ];
+		update_site_option( 'git_updater', $options );
+		Base::$options = $options;
+		API::$options  = $options;
+
+		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$field = $wp_settings_fields['git_updater_github_install_settings']['github_access_token']['github_remove_token'] ?? null;
+		$this->assertNotNull( $field );
+		$this->assertStringContainsString( 'hidden', $field['args']['class'] );
+
+		delete_site_option( 'git_updater' );
+		Base::$options = [];
+		API::$options  = [];
+	}
+
+	public function test_github_remove_token_field_visible_when_pat_only(): void {
+		global $wp_settings_fields;
+
+		$options = [ 'github_access_token' => 'manual_pat' ];
+		update_site_option( 'git_updater', $options );
+		Base::$options = $options;
+		API::$options  = $options;
+
+		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$field = $wp_settings_fields['git_updater_github_install_settings']['github_access_token']['github_remove_token'] ?? null;
+		$this->assertNotNull( $field );
+		$this->assertStringNotContainsString( 'hidden', $field['args']['class'] );
+
+		delete_site_option( 'git_updater' );
+		Base::$options = [];
+		API::$options  = [];
+	}
 }

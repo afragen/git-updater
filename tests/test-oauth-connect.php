@@ -50,6 +50,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		}
 		remove_all_actions( 'admin_post_gu_oauth_callback' );
 		remove_all_actions( 'admin_post_gu_oauth_disconnect' );
+		remove_all_actions( 'admin_post_gu_remove_token' );
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'wp_redirect' );
 		parent::tear_down();
@@ -134,6 +135,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->oauth->load_hooks();
 		$this->assertNotFalse( has_action( 'admin_post_gu_oauth_callback', [ $this->oauth, 'handle_callback' ] ) );
 		$this->assertNotFalse( has_action( 'admin_post_gu_oauth_disconnect', [ $this->oauth, 'handle_disconnect' ] ) );
+		$this->assertNotFalse( has_action( 'admin_post_gu_remove_token', [ $this->oauth, 'handle_remove_token' ] ) );
 	}
 
 	/**
@@ -1067,5 +1069,180 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		Base::$options = get_site_option( 'git_updater', [] );
 		$this->assertTrue( $this->oauth->is_oauth_token( 'github' ) );
 		$this->assertSame( 'oauth', Base::$options['github_is_oauth_token'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// render_remove_token_field() tests
+	// -------------------------------------------------------------------------
+
+	public function test_render_remove_token_field_with_invalid_provider(): void {
+		ob_start();
+		$this->oauth->render_remove_token_field( [ 'provider' => 'invalid_provider' ] );
+		$output = ob_get_clean();
+		$this->assertEmpty( $output );
+	}
+
+	public function test_render_remove_token_field_returns_nothing_without_token(): void {
+		delete_site_option( 'git_updater' );
+		Base::$options = [];
+
+		ob_start();
+		$this->oauth->render_remove_token_field( [ 'provider' => 'github' ] );
+		$output = ob_get_clean();
+		$this->assertEmpty( $output );
+	}
+
+	public function test_render_remove_token_field_returns_nothing_for_oauth_token(): void {
+		update_site_option( 'git_updater', [
+			'github_access_token'  => 'oauth_tok',
+			'github_is_oauth_token' => 'oauth',
+		] );
+
+		ob_start();
+		$this->oauth->render_remove_token_field( [ 'provider' => 'github' ] );
+		$output = ob_get_clean();
+		$this->assertEmpty( $output );
+	}
+
+	public function test_render_remove_token_field_shows_remove_button_for_pat(): void {
+		update_site_option( 'git_updater', [ 'github_access_token' => 'manual_pat' ] );
+
+		ob_start();
+		$this->oauth->render_remove_token_field( [ 'provider' => 'github' ] );
+		$output = ob_get_clean();
+		$this->assertStringContainsString( 'Remove Token', $output );
+		$this->assertStringContainsString( 'gu_remove_token', $output );
+	}
+
+	public function test_render_remove_token_field_shows_button_for_non_oauth_provider(): void {
+		update_site_option( 'git_updater', [ 'gitlab_access_token' => 'manual_pat' ] );
+
+		ob_start();
+		$this->oauth->render_remove_token_field( [ 'provider' => 'gitlab' ] );
+		$output = ob_get_clean();
+		$this->assertStringContainsString( 'Remove Token', $output );
+		$this->assertStringContainsString( 'gu_remove_token', $output );
+	}
+
+	// -------------------------------------------------------------------------
+	// handle_remove_token() tests
+	// -------------------------------------------------------------------------
+
+	public function test_handle_remove_token_requires_admin_capability(): void {
+		$user = self::factory()->user->create( [ 'role' => 'subscriber' ] );
+		wp_set_current_user( $user );
+
+		$_GET['provider'] = 'github';
+		$_GET['_wpnonce'] = wp_create_nonce( 'gu_remove_token_github' );
+
+		$this->expectException( WPDieException::class );
+		$this->oauth->handle_remove_token();
+	}
+
+	public function test_handle_remove_token_removes_token_from_options(): void {
+		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->maybe_grant_super_admin( $user );
+		wp_set_current_user( $user );
+
+		update_site_option( 'git_updater', [ 'github_access_token' => 'manual_pat' ] );
+
+		$_GET['provider'] = 'github';
+		$_GET['_wpnonce'] = wp_create_nonce( 'gu_remove_token_github' );
+
+		add_filter( 'wp_redirect', function () {
+			throw new RuntimeException( 'Redirect captured' );
+		} );
+
+		try {
+			$this->oauth->handle_remove_token();
+			$this->fail( 'Expected redirect to be captured' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( 'Redirect captured', $e->getMessage() );
+		}
+
+		$options = get_site_option( 'git_updater' );
+		$this->assertArrayNotHasKey( 'github_access_token', $options );
+	}
+
+	public function test_handle_remove_token_ignores_oauth_token(): void {
+		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->maybe_grant_super_admin( $user );
+		wp_set_current_user( $user );
+
+		update_site_option( 'git_updater', [
+			'github_access_token'  => 'oauth_tok',
+			'github_is_oauth_token' => 'oauth',
+		] );
+
+		$_GET['provider'] = 'github';
+		$_GET['_wpnonce'] = wp_create_nonce( 'gu_remove_token_github' );
+
+		add_filter( 'wp_redirect', function () {
+			throw new RuntimeException( 'Redirect captured' );
+		} );
+
+		try {
+			$this->oauth->handle_remove_token();
+			$this->fail( 'Expected redirect to be captured' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( 'Redirect captured', $e->getMessage() );
+		}
+
+		// handle_remove_token only unsets the access_token key, not the OAuth metadata.
+		$options = get_site_option( 'git_updater' );
+		$this->assertArrayNotHasKey( 'github_access_token', $options );
+		$this->assertSame( 'oauth', $options['github_is_oauth_token'] );
+	}
+
+	public function test_handle_remove_token_redirects_with_token_removed_status(): void {
+		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->maybe_grant_super_admin( $user );
+		wp_set_current_user( $user );
+
+		update_site_option( 'git_updater', [ 'github_access_token' => 'manual_pat' ] );
+
+		$_GET['provider'] = 'github';
+		$_GET['_wpnonce'] = wp_create_nonce( 'gu_remove_token_github' );
+
+		$captured_url = null;
+		add_filter( 'wp_redirect', function ( $url ) use ( &$captured_url ) {
+			$captured_url = $url;
+			throw new RuntimeException( 'Redirect captured' );
+		} );
+
+		try {
+			$this->oauth->handle_remove_token();
+			$this->fail( 'Expected redirect to be captured' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( 'Redirect captured', $e->getMessage() );
+		}
+
+		$this->assertNotNull( $captured_url );
+		$this->assertStringContainsString( 'token_removed', $captured_url );
+	}
+
+	public function test_handle_remove_token_syncs_static_options(): void {
+		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->maybe_grant_super_admin( $user );
+		wp_set_current_user( $user );
+
+		API::$options = [ 'github_access_token' => 'manual_pat' ];
+		update_site_option( 'git_updater', API::$options );
+
+		$_GET['provider'] = 'github';
+		$_GET['_wpnonce'] = wp_create_nonce( 'gu_remove_token_github' );
+
+		add_filter( 'wp_redirect', function () {
+			throw new RuntimeException( 'Redirect captured' );
+		} );
+
+		try {
+			$this->oauth->handle_remove_token();
+			$this->fail( 'Expected redirect to be captured' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( 'Redirect captured', $e->getMessage() );
+		}
+
+		$this->assertArrayNotHasKey( 'github_access_token', API::$options );
 	}
 }

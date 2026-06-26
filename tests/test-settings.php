@@ -541,6 +541,22 @@ class Test_Settings_Admin_Page_Notices_Multisite extends GU_Test_Case {
 		$this->assertStringContainsString( 'OAuth connection failed. Please try again.', $output );
 		$this->assertStringContainsString( 'error', $output );
 	}
+
+	/**
+	 * Test token removed notice is displayed.
+	 */
+	public function test_admin_page_notices_shows_token_removed(): void {
+		$_GET['_wpnonce']     = wp_create_nonce( 'gu_settings' );
+		$_GET['tab']          = 'git_updater_settings';
+		$_GET['subtab']       = 'git_updater';
+		$_GET['token_removed']  = '1';
+		add_filter( 'gu_config_pre_process', '__return_empty_array' );
+		ob_start();
+		$this->settings->create_admin_page();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( 'Token removed.', $output );
+		$this->assertStringContainsString( 'updated', $output );
+	}
 }
 
 // =============================================================================

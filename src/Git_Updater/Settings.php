@@ -355,7 +355,8 @@ class Settings {
 			|| isset( $_GET['refresh_transients'] )
 			|| isset( $_GET['oauth_connected'] )
 			|| isset( $_GET['oauth_disconnected'] )
-			|| isset( $_GET['oauth_error'] );
+			|| isset( $_GET['oauth_error'] )
+			|| isset( $_GET['token_removed'] );
 
 		$class = isset( $_GET['oauth_error'] ) && '1' === $_GET['oauth_error'] ? 'error' : 'updated';
 		if ( $display ) {
@@ -371,6 +372,8 @@ class Settings {
 			esc_html_e( 'Disconnected.', 'git-updater' );
 		} elseif ( isset( $_GET['oauth_error'] ) && '1' === $_GET['oauth_error'] ) {
 			esc_html_e( 'OAuth connection failed. Please try again.', 'git-updater' );
+		} elseif ( isset( $_GET['token_removed'] ) && '1' === $_GET['token_removed'] ) {
+			esc_html_e( 'Token removed.', 'git-updater' );
 		}
 		if ( $display ) {
 			echo '</p></div>';

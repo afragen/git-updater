@@ -63,6 +63,7 @@ class OAuth_Connect {
 	public function load_hooks(): void {
 		add_action( 'admin_post_gu_oauth_callback', [ $this, 'handle_callback' ] );
 		add_action( 'admin_post_gu_oauth_disconnect', [ $this, 'handle_disconnect' ] );
+		add_action( 'admin_post_gu_remove_token', [ $this, 'handle_remove_token' ] );
 	}
 
 	/**
@@ -94,6 +95,41 @@ class OAuth_Connect {
 		}
 
 		$this->render_connect_button( $provider, $config, $connector );
+	}
+
+	/**
+	 * Render the remove token button for non-OAuth tokens.
+	 *
+	 * Only shown when a manual API token (PAT) is stored and the token
+	 * was not acquired via OAuth. Hidden when no token is set or when
+	 * the token is an OAuth token.
+	 *
+	 * @param array<string, mixed> $args Field arguments.
+	 * @return void
+	 */
+	public function render_remove_token_field( array $args ): void {
+		$provider = $args['provider'] ?? '';
+		$config   = self::PROVIDERS[ $provider ] ?? null;
+
+		if ( ! $config ) {
+			return;
+		}
+
+		// Only show when a non-OAuth token is present.
+		$options = get_site_option( 'git_updater', [] );
+		if ( empty( $options[ $config['option_key'] ] ) || $this->is_oauth_token( $provider ) ) {
+			return;
+		}
+
+		$remove_url = add_query_arg(
+			[
+				'action'   => 'gu_remove_token',
+				'provider' => $provider,
+				'_wpnonce' => wp_create_nonce( 'gu_remove_token_' . $provider ),
+			],
+			admin_url( 'admin-post.php' )
+		);
+		echo '<a href="' . esc_url( $remove_url ) . '" class="button button-small">' . esc_html__( 'Remove Token', 'git-updater' ) . '</a>';
 	}
 
 	/**
@@ -233,6 +269,37 @@ class OAuth_Connect {
 
 		$this->delete_token( $provider );
 		$this->redirect_with_status( $provider, 'oauth_disconnected' );
+	}
+
+	/**
+	 * Handle removal of a non-OAuth token.
+	 *
+	 * @return void
+	 */
+	public function handle_remove_token(): void {
+		$provider = sanitize_key( $_GET['provider'] ?? '' );
+
+		if ( ! isset( $_GET['_wpnonce'] )
+			|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'gu_remove_token_' . $provider )
+		) {
+			wp_die( esc_html__( 'Forbidden', 'git-updater' ) ); // @codeCoverageIgnore
+		}
+
+		if ( ! current_user_can( is_multisite() ? 'manage_network_options' : 'manage_options' ) ) {
+			wp_die( esc_html__( 'Forbidden', 'git-updater' ) ); // @codeCoverageIgnore
+		}
+
+		$options = get_site_option( 'git_updater', [] );
+		$config  = self::PROVIDERS[ $provider ] ?? null;
+
+		if ( $config ) {
+			unset( $options[ $config['option_key'] ] );
+			update_site_option( 'git_updater', $options );
+			Base::$options = $options;
+			API::$options  = $options;
+		}
+
+		$this->redirect_with_status( $provider, 'token_removed' );
 	}
 
 	/**

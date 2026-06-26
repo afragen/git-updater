@@ -463,12 +463,19 @@ class GitHub_API extends API implements API_Interface {
 			'provider' => 'github',
 			'class'    => '',
 		];
+		$remove_args = [
+			'provider' => 'github',
+			'class'    => '',
+		];
 		$oauth      = Singleton::get_instance( 'OAuth\OAuth_Connect', $this );
 		if ( $oauth->is_oauth_token( 'github' ) ) {
 			$token_args['class'] = trim( $token_args['class'] . ' hidden' );
 		}
 		if ( ! empty( static::$options['github_access_token'] ) && ! $oauth->is_oauth_token( 'github' ) ) {
 			$oauth_args['class'] = trim( $oauth_args['class'] . ' hidden' );
+		}
+		if ( empty( static::$options['github_access_token'] ) || $oauth->is_oauth_token( 'github' ) ) {
+			$remove_args['class'] = trim( $remove_args['class'] . ' hidden' );
 		}
 
 		add_settings_field(
@@ -487,6 +494,15 @@ class GitHub_API extends API implements API_Interface {
 			'git_updater_github_install_settings',
 			'github_access_token',
 			$oauth_args
+		);
+
+		add_settings_field(
+			'github_remove_token',
+			esc_html__( 'Remove Token', 'git-updater' ),
+			[ $oauth, 'render_remove_token_field' ],
+			'git_updater_github_install_settings',
+			'github_access_token',
+			$remove_args
 		);
 
 		/*
