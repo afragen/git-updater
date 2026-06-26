@@ -190,6 +190,9 @@ class API {
 		$cached      = isset( $error_cache['error_cache'] );
 		$response    = false;
 		if ( ! $cached ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( 'Git Updater: API request to ' . $url );
+			}
 			$response = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
 
 			$code          = (int) wp_remote_retrieve_response_code( $response );
