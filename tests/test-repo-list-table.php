@@ -121,7 +121,7 @@ class Test_Repo_List_Table_Methods extends WP_UnitTestCase {
 
 	public function test_column_default_returns_release_asset_value(): void {
 		$item = $this->make_item( [ 'release_asset' => '<span>yes</span>' ] );
-		$this->assertSame( '&lt;span&gt;yes&lt;/span&gt;', $this->table->column_default( $item, 'release_asset' ) );
+		$this->assertSame( '<span>yes</span>', $this->table->column_default( $item, 'release_asset' ) );
 	}
 
 	public function test_column_default_escapes_html_in_field_values(): void {

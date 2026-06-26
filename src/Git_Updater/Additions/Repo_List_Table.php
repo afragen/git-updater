@@ -118,16 +118,16 @@ class Repo_List_Table extends WP_List_Table {
 	 **************************************************************************/
 	public function column_default( $item, $column_name ) {
 		switch ( $column_name ) {
+			case 'release_asset':
+			case 'private_package':
+				return wp_kses_post( $item[ $column_name ] );
 			case 'uri':
 			case 'slug':
 			case 'primary_branch':
-			case 'release_asset':
 			case 'type':
-			case 'private_package':
-				return wp_kses_post( $item[ $column_name ] );
+				return esc_html( $item[ $column_name ] );
 			default:
-				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
-				return print_r( $item, true ); // Show the whole array for troubleshooting purposes.
+				return esc_html( (string) wp_json_encode( $item ) );
 		}
 	}
 
