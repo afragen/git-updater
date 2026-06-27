@@ -1911,3 +1911,125 @@ class Test_API_Detect_Provider extends WP_UnitTestCase {
 		unset( $_REQUEST['key'], $_REQUEST['plugin'] );
 	}
 }
+
+class Test_API_Debug_Filters extends WP_UnitTestCase {
+
+	/**
+	 * @var GitHub_API
+	 */
+	private GitHub_API $api;
+
+	/**
+	 * @var stdClass
+	 */
+	private stdClass $type;
+
+	/**
+	 * Endpoint passed to api().
+	 *
+	 * @var string
+	 */
+	private string $endpoint = '/repos/:owner/:repo';
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->type = api_make_type();
+		$this->api  = new GitHub_API( $this->type );
+	}
+
+	public function tear_down(): void {
+		remove_all_filters( 'gu_debug_api_requests' );
+		remove_all_filters( 'pre_http_request' );
+		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
+		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
+		parent::tear_down();
+	}
+
+	/**
+	 * Redirect error_log to a temp file, run a callback, return captured output.
+	 *
+	 * @param callable $callback Code to execute while capturing error_log.
+	 * @return string Captured error_log output.
+	 */
+	private function with_error_log_capture( callable $callback ): string {
+		$tmp_file = tempnam( sys_get_temp_dir(), 'gu_err_' );
+		$original = ini_get( 'error_log' );
+		ini_set( 'error_log', $tmp_file );
+
+		try {
+			$callback();
+		} finally {
+			ini_set( 'error_log', $original );
+			$contents = file_get_contents( $tmp_file );
+			unlink( $tmp_file );
+		}
+
+		return $contents ?: '';
+	}
+
+	public function test_gu_debug_api_requests_filter_is_applied(): void {
+		$filter_applied = false;
+		add_filter(
+			'gu_debug_api_requests',
+			function () use ( &$filter_applied ) {
+				$filter_applied = true;
+				return false;
+			}
+		);
+
+		add_filter(
+			'pre_http_request',
+			fn() => [
+				'response' => [ 'code' => 200, 'message' => 'OK' ],
+				'body'     => wp_json_encode( [ 'name' => 'test-plugin' ] ),
+				'headers'  => [],
+			],
+			10,
+			3
+		);
+
+		$this->api->api( $this->endpoint );
+
+		$this->assertTrue( $filter_applied, 'gu_debug_api_requests filter callback should be invoked.' );
+	}
+
+	public function test_gu_debug_api_requests_no_log_when_filter_false(): void {
+		add_filter( 'gu_debug_api_requests', '__return_false' );
+
+		add_filter(
+			'pre_http_request',
+			fn() => [
+				'response' => [ 'code' => 200, 'message' => 'OK' ],
+				'body'     => wp_json_encode( [ 'name' => 'test-plugin' ] ),
+				'headers'  => [],
+			],
+			10,
+			3
+		);
+
+		$log = $this->with_error_log_capture( fn() => $this->api->api( $this->endpoint ) );
+
+		$this->assertStringNotContainsString( 'Git Updater: API request to', $log );
+	}
+
+	public function test_gu_debug_api_requests_logs_url_when_filter_true(): void {
+		add_filter( 'gu_debug_api_requests', '__return_true' );
+
+		add_filter(
+			'pre_http_request',
+			fn() => [
+				'response' => [ 'code' => 200, 'message' => 'OK' ],
+				'body'     => wp_json_encode( [ 'name' => 'test-plugin' ] ),
+				'headers'  => [],
+			],
+			10,
+			3
+		);
+
+		$log = $this->with_error_log_capture( fn() => $this->api->api( $this->endpoint ) );
+
+		$this->assertStringContainsString( 'Git Updater: API request to', $log );
+		$this->assertStringContainsString( 'api.github.com', $log );
+	}
+}

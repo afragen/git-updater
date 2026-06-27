@@ -53,6 +53,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		remove_all_actions( 'admin_post_gu_remove_token' );
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'wp_redirect' );
+		remove_all_filters( 'gu_debug_token_refresh' );
 		parent::tear_down();
 	}
 
@@ -1244,5 +1245,151 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		}
 
 		$this->assertArrayNotHasKey( 'github_access_token', API::$options );
+	}
+
+	// -------------------------------------------------------------------------
+	// gu_debug_token_refresh filter tests
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Redirect error_log to a temp file, run a callback, return captured output.
+	 *
+	 * @param callable $callback Code to execute while capturing error_log.
+	 * @return string Captured error_log output.
+	 */
+	private function with_error_log_capture( callable $callback ): string {
+		$tmp_file = tempnam( sys_get_temp_dir(), 'gu_err_' );
+		$original = ini_get( 'error_log' );
+		ini_set( 'error_log', $tmp_file );
+
+		try {
+			$callback();
+		} finally {
+			ini_set( 'error_log', $original );
+			$contents = file_get_contents( $tmp_file );
+			unlink( $tmp_file );
+		}
+
+		return $contents ?: '';
+	}
+
+	public function test_gu_debug_token_refresh_filter_is_applied(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'github_access_token'  => 'tok',
+			'github_refresh_token' => 'ref',
+		] );
+
+		$filter_applied = false;
+		add_filter(
+			'gu_debug_token_refresh',
+			function () use ( &$filter_applied ) {
+				$filter_applied = true;
+				return false;
+			}
+		);
+
+		add_filter( 'pre_http_request', static function () {
+			return new WP_Error( 'http_error', 'Connection failed' );
+		}, 10, 3 );
+
+		$this->oauth->refresh_token( 'github' );
+
+		$this->assertTrue( $filter_applied, 'gu_debug_token_refresh filter callback should be invoked.' );
+	}
+
+	public function test_refresh_token_logs_on_http_error_when_filter_true(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'github_access_token'  => 'tok',
+			'github_refresh_token' => 'ref',
+		] );
+
+		add_filter( 'gu_debug_token_refresh', '__return_true' );
+
+		add_filter( 'pre_http_request', static function () {
+			return new WP_Error( 'http_error', 'Connection failed' );
+		}, 10, 3 );
+
+		$log = $this->with_error_log_capture( function () {
+			$result = $this->oauth->refresh_token( 'github' );
+			$this->assertNull( $result );
+		} );
+
+		$this->assertStringContainsString( 'Token refresh failed for github', $log );
+		$this->assertStringContainsString( 'Connection failed', $log );
+	}
+
+	public function test_refresh_token_logs_on_missing_token_when_filter_true(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'github_access_token'  => 'tok',
+			'github_refresh_token' => 'ref',
+		] );
+
+		add_filter( 'gu_debug_token_refresh', '__return_true' );
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [ 'error' => 'invalid_grant' ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$log = $this->with_error_log_capture( function () {
+			$result = $this->oauth->refresh_token( 'github' );
+			$this->assertNull( $result );
+		} );
+
+		$this->assertStringContainsString( 'No access token received', $log );
+		$this->assertStringContainsString( 'Response body:', $log );
+	}
+
+	public function test_refresh_token_logs_on_success_when_filter_true(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'github_access_token'  => 'old_tok',
+			'github_refresh_token' => 'ref',
+		] );
+
+		add_filter( 'gu_debug_token_refresh', '__return_true' );
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [
+					'access_token' => 'new_tok',
+					'expires_in'   => 7200,
+				] ),
+				'headers' => [],
+			];
+		}, 10, 3 );
+
+		$log = $this->with_error_log_capture( function () {
+			$result = $this->oauth->refresh_token( 'github' );
+			$this->assertSame( 'new_tok', $result );
+		} );
+
+		$this->assertStringContainsString( 'Token refreshed for github', $log );
+		$this->assertStringContainsString( '7200 seconds', $log );
+	}
+
+	public function test_refresh_token_no_log_when_filter_false(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'github_access_token'  => 'tok',
+			'github_refresh_token' => 'ref',
+		] );
+
+		add_filter( 'pre_http_request', static function () {
+			return new WP_Error( 'http_error', 'Connection failed' );
+		}, 10, 3 );
+
+		$log = $this->with_error_log_capture( function () {
+			$this->oauth->refresh_token( 'github' );
+		} );
+
+		$this->assertStringNotContainsString( 'Token refresh failed', $log );
 	}
 }
