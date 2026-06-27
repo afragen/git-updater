@@ -190,7 +190,7 @@ class API {
 		$cached      = isset( $error_cache['error_cache'] );
 		$response    = false;
 		if ( ! $cached ) {
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			if ( apply_filters( 'gu_debug_api_requests', false ) ) {
 				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 				error_log( 'Git Updater: API request to ' . $url ); // @codeCoverageIgnore
 			}
