@@ -1,4 +1,5 @@
 #### [unreleased]
+* fix `Rest_Update::update_plugin()` inverted activation check — `activate_plugin()` returns `null` on success and `WP_Error` on failure; old code `if ( ! $activate )` silently swallowed failures; now reports error message from `WP_Error`
 * fix `OAuth_Connect::refresh_token()` race condition — use site transient lock and result coordination so concurrent requests reuse a successful refresh instead of re-posting the (potentially rotated) refresh token
 * fix `GU_Upgrade::run()` switch statement to use `switch ( true )` so `version_compare()` case actually matches
 * fix `Rest_Update::get_webhook_source()` switch statement to use `switch ( true )` so `isset()` cases actually match

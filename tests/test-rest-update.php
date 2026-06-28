@@ -631,6 +631,55 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 		$this->assertContains( 'Plugin reactivated successfully.', $messages );
 	}
 
+	/**
+	 * When activate_plugin() returns a WP_Error after upgrade,
+	 * update_plugin() should append a failure message instead of silently ignoring it.
+	 *
+	 * Covers the is_wp_error($activate) branch (line 149).
+	 */
+	public function test_update_plugin_reports_reactivation_failure(): void {
+		$this->skip_if_plugin_absent();
+
+		$plugin_file = self::PLUGIN_SLUG . '/' . self::PLUGIN_SLUG . '.php';
+		activate_plugin( $plugin_file );
+
+		$zip_path = $this->create_plugin_zip();
+		add_filter(
+			'upgrader_pre_download',
+			function ( $result ) use ( $zip_path ) {
+				return $zip_path;
+			},
+			15,
+			3
+		);
+
+		// Corrupt the plugin file after installation so activate_plugin() returns WP_Error.
+		add_filter(
+			'upgrader_post_install',
+			function ( $result ) {
+				$plugin_path = WP_PLUGIN_DIR . '/' . self::PLUGIN_SLUG . '/' . self::PLUGIN_SLUG . '.php';
+				file_put_contents( $plugin_path, '<?php // not a valid plugin' );
+				return $result;
+			},
+			10,
+			1
+		);
+
+		$_REQUEST = [];
+		$rest     = new Rest_Update();
+		$rest->update_plugin( self::PLUGIN_SLUG, 'main' );
+
+		$messages = $rest->get_messages();
+		$has_failure = false;
+		foreach ( $messages as $msg ) {
+			if ( str_contains( $msg, 'Plugin reactivation failed' ) ) {
+				$has_failure = true;
+				break;
+			}
+		}
+		$this->assertTrue( $has_failure, 'Expected reactivation failure message in: ' . implode( '; ', $messages ) );
+	}
+
 	// -------------------------------------------------------------------------
 	// update_theme() — lines 177-218
 	// -------------------------------------------------------------------------

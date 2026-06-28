@@ -145,7 +145,9 @@ class Rest_Update {
 
 		if ( $is_plugin_active ) {
 			$activate = is_multisite() ? activate_plugin( $plugin->file, '', true ) : activate_plugin( $plugin->file );
-			if ( ! $activate ) {
+			if ( is_wp_error( $activate ) ) {
+				$this->upgrader_skin->messages[] = 'Plugin reactivation failed: ' . $activate->get_error_message();
+			} else {
 				$this->upgrader_skin->messages[] = 'Plugin reactivated successfully.';
 			}
 		}
