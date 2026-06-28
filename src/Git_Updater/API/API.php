@@ -213,7 +213,12 @@ class API {
 					if ( $new_token ) {
 						$auth_header = $this->add_auth_header( [], $url );
 						$response    = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
-						$code        = (int) wp_remote_retrieve_response_code( $response );
+						if ( is_wp_error( $response ) ) {
+							Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
+
+							return $response;
+						}
+						$code = (int) wp_remote_retrieve_response_code( $response );
 					}
 				}
 			}
@@ -623,7 +628,7 @@ class API {
 		$cache = $this->get_repo_cache( $this->type->slug ?? false, false );
 
 		// Unset release asset url if older than 5 min to account for AWS expiration.
-		if ( $aws && ( time() - strtotime( '-12 hours', $cache['timeout'] ) ) >= 300 ) {
+		if ( $aws && ( time() - strtotime( "-{$this->hours} hours", $cache['timeout'] ) ) >= 300 ) {
 			unset( $cache['release_asset'] );
 			unset( $cache['release_asset_redirect'] );
 		}

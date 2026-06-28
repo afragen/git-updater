@@ -24,7 +24,6 @@ class CLI_Common {
 
 		$table              = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
 		$column             = is_multisite() ? 'meta_key' : 'option_name';
-		$delete_string      = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
 		$get_options_string = 'SELECT * FROM ' . $table . ' WHERE ' . $column . ' LIKE %s';
 
 		$ghu_options = $wpdb->get_results( $wpdb->prepare( $get_options_string, [ '%ghu-%' ] ) ); // phpcs:ignore
@@ -32,8 +31,6 @@ class CLI_Common {
 			$option_name = is_multisite() ? $option->meta_key : $option->option_name;
 			delete_site_option( $option_name );
 		}
-
-		$wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) ); // phpcs:ignore
 
 		return true;
 	}

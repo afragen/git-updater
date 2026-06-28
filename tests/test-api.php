@@ -1713,6 +1713,60 @@ class Test_API_Detect_Provider extends WP_UnitTestCase {
 		$this->assertSame( 1, $api_call_count );
 	}
 
+	public function test_api_returns_wp_error_when_retry_fails(): void {
+		$api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$api_call_count ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return $preempt;
+				}
+				$api_call_count++;
+				// First call returns 401 to trigger retry.
+				if ( 1 === $api_call_count ) {
+					return [
+						'response' => [ 'code' => 401, 'message' => 'Unauthorized' ],
+						'body'     => wp_json_encode( [ 'message' => 'Bad credentials' ] ),
+						'headers'  => [],
+					];
+				}
+				// Retry returns WP_Error.
+				return new \WP_Error( 'http_request_failed', 'cURL error 28: Connection timed out' );
+			},
+			10,
+			3
+		);
+
+		// Mock refresh_token to succeed.
+		$oauth = \Fragen\Singleton::get_instance( \Fragen\Git_Updater\OAuth\OAuth_Connect::class, $this->api );
+		$oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'github_access_token'  => 'old_tok',
+			'github_refresh_token' => 'ref',
+		] );
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return [
+						'response' => [ 'code' => 200 ],
+						'body'     => wp_json_encode( [ 'access_token' => 'new_tok', 'expires_in' => 7200 ] ),
+						'headers'  => [],
+					];
+				}
+				return $preempt;
+			},
+			20,
+			3
+		);
+
+		$result = $this->api->api( $this->endpoint );
+
+		$this->assertSame( 2, $api_call_count );
+		$this->assertWPError( $result );
+	}
+
 	// -------------------------------------------------------------------------
 	// get_release_asset_redirect() — full coverage
 	// -------------------------------------------------------------------------
