@@ -34,6 +34,8 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		unset( $_GET['provider'], $_GET['gu_exchange_code'], $_GET['site_state'], $_GET['_wpnonce'], $_POST['provider'], $_POST['_wpnonce'] );
 		foreach ( [ 'github', 'gitlab', 'bitbucket', 'gitea' ] as $provider ) {
 			delete_site_transient( "gu_oauth_state_$provider" );
+			delete_site_transient( "gu_oauth_refresh_lock_$provider" );
+			delete_site_transient( "gu_oauth_refresh_result_$provider" );
 		}
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'wp_redirect' );
@@ -47,6 +49,8 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		unset( $_GET['provider'], $_GET['gu_exchange_code'], $_GET['site_state'], $_GET['_wpnonce'], $_POST['provider'], $_POST['_wpnonce'] );
 		foreach ( [ 'github', 'gitlab', 'bitbucket', 'gitea' ] as $provider ) {
 			delete_site_transient( "gu_oauth_state_$provider" );
+			delete_site_transient( "gu_oauth_refresh_lock_$provider" );
+			delete_site_transient( "gu_oauth_refresh_result_$provider" );
 		}
 		remove_all_actions( 'admin_post_gu_oauth_callback' );
 		remove_all_actions( 'admin_post_gu_oauth_disconnect' );
@@ -791,6 +795,184 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$options = get_site_option( 'git_updater' );
 		$this->assertSame( 'old_ref', $options['gitlab_refresh_token'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// refresh_token() race condition / lock tests
+	// -------------------------------------------------------------------------
+
+	public function test_refresh_token_returns_null_when_lock_exists(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'github_access_token' => 'tok', 'github_refresh_token' => 'ref' ] );
+		set_site_transient( 'gu_oauth_refresh_lock_github', time(), 30 );
+
+		$http_called = false;
+		add_filter( 'pre_http_request', function () use ( &$http_called ) {
+			$http_called = true;
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [ 'access_token' => 'new_tok' ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$result = $this->oauth->refresh_token( 'github' );
+
+		$this->assertNull( $result );
+		$this->assertFalse( $http_called, 'HTTP request should not be made when lock is held.' );
+		// Lock should not be consumed.
+		$this->assertNotFalse( get_site_transient( 'gu_oauth_refresh_lock_github' ) );
+	}
+
+	public function test_refresh_token_returns_cached_token_on_success_result(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'gitlab_access_token' => 'refreshed_tok', 'gitlab_refresh_token' => 'ref' ] );
+		set_site_transient( 'gu_oauth_refresh_result_gitlab', 'success', 60 );
+
+		$http_called = false;
+		add_filter( 'pre_http_request', function () use ( &$http_called ) {
+			$http_called = true;
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [ 'access_token' => 'should_not_be_used' ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$result = $this->oauth->refresh_token( 'gitlab' );
+
+		$this->assertSame( 'refreshed_tok', $result );
+		$this->assertFalse( $http_called, 'HTTP request should not be made when success result exists.' );
+	}
+
+	public function test_refresh_token_syncs_static_options_on_success_result(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		Base::$options = [];
+		API::$options  = [];
+		update_site_option( 'git_updater', [ 'github_access_token' => 'cached_tok', 'github_refresh_token' => 'ref' ] );
+		set_site_transient( 'gu_oauth_refresh_result_github', 'success', 60 );
+
+		$this->oauth->refresh_token( 'github' );
+
+		$this->assertSame( 'cached_tok', Base::$options['github_access_token'] );
+		$this->assertSame( 'cached_tok', API::$options['github_access_token'] );
+	}
+
+	public function test_refresh_token_attempts_refresh_on_failure_result(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'github_access_token' => 'old_tok', 'github_refresh_token' => 'ref' ] );
+		set_site_transient( 'gu_oauth_refresh_result_github', 'failure', 60 );
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [ 'access_token' => 'new_tok' ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$result = $this->oauth->refresh_token( 'github' );
+
+		$this->assertSame( 'new_tok', $result );
+		// Failure transient was deleted before the attempt; success result is now set.
+		$this->assertSame( 'success', get_site_transient( 'gu_oauth_refresh_result_github' ) );
+	}
+
+	public function test_refresh_token_sets_lock_and_clears_on_success(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'gitlab_access_token' => 'old_tok', 'gitlab_refresh_token' => 'ref' ] );
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [ 'access_token' => 'new_tok', 'expires_in' => 7200 ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$result = $this->oauth->refresh_token( 'gitlab' );
+
+		$this->assertSame( 'new_tok', $result );
+		$this->assertFalse( get_site_transient( 'gu_oauth_refresh_lock_gitlab' ), 'Lock should be cleared after success.' );
+		$this->assertSame( 'success', get_site_transient( 'gu_oauth_refresh_result_gitlab' ) );
+	}
+
+	public function test_refresh_token_sets_failure_result_on_http_error(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'github_access_token' => 'tok', 'github_refresh_token' => 'ref' ] );
+
+		add_filter( 'pre_http_request', static function () {
+			return new WP_Error( 'http_error', 'Connection failed' );
+		}, 10, 3 );
+
+		$result = $this->oauth->refresh_token( 'github' );
+
+		$this->assertNull( $result );
+		$this->assertFalse( get_site_transient( 'gu_oauth_refresh_lock_github' ), 'Lock should be cleared after failure.' );
+		$this->assertSame( 'failure', get_site_transient( 'gu_oauth_refresh_result_github' ) );
+	}
+
+	public function test_refresh_token_sets_failure_result_on_empty_response(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'github_access_token' => 'tok', 'github_refresh_token' => 'ref' ] );
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [ 'error' => 'invalid_grant' ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$result = $this->oauth->refresh_token( 'github' );
+
+		$this->assertNull( $result );
+		$this->assertFalse( get_site_transient( 'gu_oauth_refresh_lock_github' ), 'Lock should be cleared after failure.' );
+		$this->assertSame( 'failure', get_site_transient( 'gu_oauth_refresh_result_github' ) );
+	}
+
+	public function test_delete_token_clears_refresh_transients(): void {
+		set_site_transient( 'gu_oauth_refresh_lock_github', time(), 30 );
+		set_site_transient( 'gu_oauth_refresh_result_github', 'success', 60 );
+
+		update_site_option( 'git_updater', [ 'github_access_token' => 'tok' ] );
+
+		$method = new ReflectionMethod( OAuth_Connect::class, 'delete_token' );
+		$method->setAccessible( true );
+		$method->invoke( $this->oauth, 'github' );
+
+		$this->assertFalse( get_site_transient( 'gu_oauth_refresh_lock_github' ) );
+		$this->assertFalse( get_site_transient( 'gu_oauth_refresh_result_github' ) );
+	}
+
+	public function test_refresh_token_debug_log_on_lock_contention(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'github_access_token' => 'tok', 'github_refresh_token' => 'ref' ] );
+		set_site_transient( 'gu_oauth_refresh_lock_github', time(), 30 );
+
+		add_filter( 'gu_debug_token_refresh', '__return_true' );
+
+		$log = $this->with_error_log_capture( function () {
+			$result = $this->oauth->refresh_token( 'github' );
+			$this->assertNull( $result );
+		} );
+
+		$this->assertStringContainsString( 'already in progress', $log );
+	}
+
+	public function test_refresh_token_debug_log_on_result_reuse(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'github_access_token' => 'tok', 'github_refresh_token' => 'ref' ] );
+		set_site_transient( 'gu_oauth_refresh_result_github', 'success', 60 );
+
+		add_filter( 'gu_debug_token_refresh', '__return_true' );
+
+		$log = $this->with_error_log_capture( function () {
+			$result = $this->oauth->refresh_token( 'github' );
+			$this->assertSame( 'tok', $result );
+		} );
+
+		$this->assertStringContainsString( 'Reusing successful token refresh', $log );
 	}
 
 	// -------------------------------------------------------------------------

@@ -48,6 +48,18 @@ class OAuth_Connect {
 	];
 
 	/**
+	 * TTL in seconds for the refresh lock transient.
+	 * Set to 2x the HTTP timeout (15s) to cover worst-case latency.
+	 */
+	private const REFRESH_LOCK_TTL = 30;
+
+	/**
+	 * TTL in seconds for the refresh result transient.
+	 * Long enough for concurrent request bursts to benefit.
+	 */
+	private const REFRESH_RESULT_TTL = 60;
+
+	/**
 	 * Override for connector URL. When set, bypasses the constant check.
 	 * Used for testing the "no connector" path.
 	 *
@@ -420,6 +432,9 @@ class OAuth_Connect {
 		update_site_option( 'git_updater', $options );
 		Base::$options = $options;
 		API::$options  = $options;
+
+		delete_site_transient( $this->get_lock_transient_name( $provider ) );
+		delete_site_transient( $this->get_result_transient_name( $provider ) );
 	}
 
 	/**
@@ -444,8 +459,38 @@ class OAuth_Connect {
 			return null;
 		}
 
-		$url = $connector . 'git-updater/' . $provider . '/oauth/refresh';
+		$debug = apply_filters( 'gu_debug_token_refresh', false );
 
+		// Check if a concurrent request already completed a refresh.
+		$result_transient = get_site_transient( $this->get_result_transient_name( $provider ) );
+		if ( 'success' === $result_transient ) {
+			// Another request refreshed successfully — reuse the new token.
+			$options = get_site_option( 'git_updater', [] );
+			Base::$options = $options;
+			API::$options  = $options;
+			if ( $debug ) {
+				error_log( 'Git Updater: Reusing successful token refresh for ' . $provider . '.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			}
+			return $options[ $config['option_key'] ] ?? null;
+		}
+		if ( 'failure' === $result_transient ) {
+			// Previous concurrent refresh failed — delete the result and try again.
+			delete_site_transient( $this->get_result_transient_name( $provider ) );
+		}
+
+		// Check if a concurrent request is already refreshing.
+		$lock_transient = get_site_transient( $this->get_lock_transient_name( $provider ) );
+		if ( $lock_transient ) {
+			if ( $debug ) {
+				error_log( 'Git Updater: Token refresh already in progress for ' . $provider . ', skipping.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			}
+			return null;
+		}
+
+		// Acquire the lock.
+		set_site_transient( $this->get_lock_transient_name( $provider ), time(), self::REFRESH_LOCK_TTL );
+
+		$url      = $connector . 'git-updater/' . $provider . '/oauth/refresh';
 		$response = wp_remote_post(
 			$url,
 			[
@@ -455,17 +500,21 @@ class OAuth_Connect {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			if ( apply_filters( 'gu_debug_token_refresh', false ) ) {
-				error_log( 'Git Updater: Token refresh failed for ' . $provider . ': ' . $response->get_error_message() );
+			delete_site_transient( $this->get_lock_transient_name( $provider ) );
+			set_site_transient( $this->get_result_transient_name( $provider ), 'failure', self::REFRESH_RESULT_TTL );
+			if ( $debug ) {
+				error_log( 'Git Updater: Token refresh failed for ' . $provider . ': ' . $response->get_error_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			}
 			return null;
 		}
 
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 		if ( empty( $body['access_token'] ) ) {
-			if ( apply_filters( 'gu_debug_token_refresh', false ) ) {
-				error_log( 'Git Updater: Token refresh failed for ' . $provider . ': No access token received.' );
-				error_log( 'Response body: ' . wp_remote_retrieve_body( $response ) );
+			delete_site_transient( $this->get_lock_transient_name( $provider ) );
+			set_site_transient( $this->get_result_transient_name( $provider ), 'failure', self::REFRESH_RESULT_TTL );
+			if ( $debug ) {
+				error_log( 'Git Updater: Token refresh failed for ' . $provider . ': No access token received.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				error_log( 'Response body: ' . wp_remote_retrieve_body( $response ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			}
 			return null;
 		}
@@ -476,8 +525,11 @@ class OAuth_Connect {
 
 		$this->save_token( $provider, $new_token, $new_refresh_token ?? $refresh_token, $expires_in );
 
-		if ( apply_filters( 'gu_debug_token_refresh', false ) ) {
-			error_log( 'Git Updater: Token refreshed for ' . $provider . '. New token expires in ' . ( $expires_in ?? 'unknown' ) . ' seconds.' );
+		delete_site_transient( $this->get_lock_transient_name( $provider ) );
+		set_site_transient( $this->get_result_transient_name( $provider ), 'success', self::REFRESH_RESULT_TTL );
+
+		if ( $debug ) {
+			error_log( 'Git Updater: Token refreshed for ' . $provider . '. New token expires in ' . ( $expires_in ?? 'unknown' ) . ' seconds.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
 		return $new_token;
 	}
@@ -527,6 +579,26 @@ class OAuth_Connect {
 		$remaining = (int) $expires_in - $elapsed;
 
 		return $remaining <= $buffer;
+	}
+
+	/**
+	 * Get the site transient name for the refresh lock.
+	 *
+	 * @param string $provider Provider slug.
+	 * @return string Transient name.
+	 */
+	private function get_lock_transient_name( string $provider ): string {
+		return 'gu_oauth_refresh_lock_' . $provider;
+	}
+
+	/**
+	 * Get the site transient name for the refresh result.
+	 *
+	 * @param string $provider Provider slug.
+	 * @return string Transient name.
+	 */
+	private function get_result_transient_name( string $provider ): string {
+		return 'gu_oauth_refresh_result_' . $provider;
 	}
 
 	/**

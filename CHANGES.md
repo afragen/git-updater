@@ -1,4 +1,5 @@
 #### [unreleased]
+* fix `OAuth_Connect::refresh_token()` race condition — use site transient lock and result coordination so concurrent requests reuse a successful refresh instead of re-posting the (potentially rotated) refresh token
 * fix `GU_Upgrade::run()` switch statement to use `switch ( true )` so `version_compare()` case actually matches
 * fix `Rest_Update::get_webhook_source()` switch statement to use `switch ( true )` so `isset()` cases actually match
 * fix `Base::set_options_filter()` to use `get_site_option( 'git_updater', [] )` preventing TypeError on PHP 8+ when option absent
