@@ -163,12 +163,7 @@ class Rest_Update {
 	public function update_theme( $theme_slug, $tag = 'master' ) {
 		$theme = null;
 
-		foreach ( (array) Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs() as $config_entry ) {
-			if ( $config_entry->slug === $theme_slug ) {
-				$theme = $config_entry;
-				break;
-			}
-		}
+		$theme = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs()[ $theme_slug ] ?? null;
 
 		if ( ! $theme ) {
 			throw new UnexpectedValueException( 'Theme not found or not updatable with Git Updater: ' . esc_html( $theme_slug ) );
@@ -438,7 +433,7 @@ class Rest_Update {
 	 * @return void
 	 */
 	private function get_webhook_source() {
-		switch ( $_SERVER ) {
+		switch ( true ) {
 			case isset( $_SERVER['HTTP_X_GITHUB_EVENT'] ):
 				$webhook_source = 'GitHub webhook';
 				break;

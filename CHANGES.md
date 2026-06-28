@@ -1,4 +1,30 @@
 #### [unreleased]
+* fix `GU_Upgrade::run()` switch statement to use `switch ( true )` so `version_compare()` case actually matches
+* fix `Rest_Update::get_webhook_source()` switch statement to use `switch ( true )` so `isset()` cases actually match
+* fix `Base::set_options_filter()` to use `get_site_option( 'git_updater', [] )` preventing TypeError on PHP 8+ when option absent
+* fix `Messages::get_license()` dismissible notice ID mismatch — `data-dismissible` now matches `is_admin_notice_active()` check
+* fix `Additions/Settings::callback_field()` missing `echo` on `esc_attr()` for input `id` attribute
+* fix `Theme::get_theme_meta()` bitwise `&` changed to logical `&&` in URI header filter
+* fix `Plugin::get_plugin_meta()` misplaced parenthesis in `empty()` call for URI header filter
+* fix `GU_Trait::parse_header_uri()` to return early for malformed URLs where `parse_url()` returns false
+* fix `Plugin::get_plugin_meta()` and `Theme::get_theme_meta()` to check `file_get_contents()` return value before processing `.git/HEAD`
+* fix `API::api()` double `json_decode()` — store decoded result in variable
+* fix `GU_Trait::get_class_vars()` to cache `ReflectionObject` and `Property` objects (not values) reducing reflection overhead
+* fix `Basic_Auth_Loader::get_credentials()` to cache merged repo configs as static property instead of rebuilding on every API call
+* fix `GU_Trait::waiting_for_background_update()` to batch-load all `ghu-*` cache options in single query instead of N+1
+* fix `API::api()` error cache to use shorter timeout (5 min) for transient HTTP errors (503, 429) vs 60 min for permanent (404, 410)
+* remove dead `$this->$type->requires = ''` assignment in `Base::set_defaults()` — overwritten by `false` later
+* fix `Base::set_defaults()` to use `update_site_option()` instead of `add_site_option()` which silently fails if option exists
+* fix `Plugin::get_plugin_meta()` and `Theme::get_theme_meta()` to compute `array_keys( self::$extra_headers )` once before loop instead of per-iteration
+* fix `Rest_Update::update_plugin()` and `update_theme()` to use direct array key lookup instead of foreach loop
+* fix `Bootstrap::remove_cron_events()` to include `gu_delete_access_tokens` in cleanup list
+* fix `Plugin::get_plugin_meta()` and `Theme::get_theme_meta()` to call `update_site_option()` once after loop instead of per-iteration
+* fix `GU_Trait::merge_and_reschedule_cron_batch()` to return early if hook already scheduled
+* fix `Remote_Management::reset_api_key()` to atomically replace API key instead of delete-then-recreate
+* fix `Branch::plugin_branch_switcher()` to check cache before triggering full API metadata fetch cycle
+* fix `Add_Ons::get_addon_api_results()` to cache partial results with selective retry — only missing addons are fetched on cache hit, full results cached 7 days, partial 8 hours
+* fix `REST_API::get_remote_repo_data()` to return cached update data instead of forcing `wp_update_plugins()` and `wp_update_themes()` full update cycle
+* fix `GU_Trait::delete_all_cached_data()` to remove redundant bulk `DELETE` query — `delete_site_option()` already handles both DB and cache invalidation
 * add fallback cache timeout in `set_repo_cache_timeout()` to prevent infinite re-fetching when API sub-calls fail (partial `ran`)
 * added support for OAuth tokens
 * add "Remove Token" button to settings — visible for manual API tokens (PATs) only, not OAuth tokens

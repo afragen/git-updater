@@ -218,9 +218,9 @@ class API {
 				}
 			}
 
-			// Cache HTTP API error code for 60 minutes.
+			// Cache HTTP API error code. Transient errors get shorter timeout.
 			if ( ! in_array( $code, $allowed_codes, true ) ) {
-				$timeout = 60;
+				$timeout = in_array( $code, [ 404, 410 ], true ) ? 60 : 5;
 				$this->set_repo_cache(
 					'error_cache',
 					[

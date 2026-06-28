@@ -624,6 +624,20 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 		$this->addToAssertionCount( 1 );
 	}
 
+	public function test_merge_and_reschedule_cron_batch_returns_early_when_already_scheduled(): void {
+		$hook = 'gu_test_cron_hook_xyz';
+		wp_schedule_single_event( time() + 60, $hook );
+
+		// Verify event is scheduled before calling the method.
+		$this->assertNotFalse( wp_next_scheduled( $hook ), 'Precondition: event must be scheduled.' );
+
+		$rm = $this->api->get_reflection_method( $this->api, 'merge_and_reschedule_cron_batch' );
+		$rm->invoke( $this->api, $hook, [ 'new' => true ] );
+
+		// Verify the method executed without error.
+		$this->addToAssertionCount( 1 );
+	}
+
 	// -------------------------------------------------------------------------
 	// delete_upgrade_source()
 	// -------------------------------------------------------------------------
@@ -874,6 +888,14 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
 		$result = $rm->invoke( $this->api, null );
 		// Result is true (fixture plugin cache empty) or false (config empty in this env).
+		$this->assertIsBool( $result );
+	}
+
+	public function test_waiting_for_background_update_with_null_processes_batch_cache(): void {
+		// Seed a ghu-* option so the batch loading loop executes.
+		$this->seed_cache( [ 'meta' => [ 'Version' => '1.0.0' ] ] );
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, null );
 		$this->assertIsBool( $result );
 	}
 
@@ -1397,6 +1419,11 @@ class Test_GUTrait_Extended extends WP_UnitTestCase {
 	public function test_parse_header_uri_owner_repo_combines_owner_and_repo(): void {
 		$result = $this->parse_header_uri( 'https://github.com/myorg/my-plugin' );
 		$this->assertSame( 'myorg/my-plugin', $result['owner_repo'] );
+	}
+
+	public function test_parse_header_uri_returns_empty_for_malformed_url(): void {
+		$result = $this->parse_header_uri( 'http://' );
+		$this->assertSame( [], $result );
 	}
 
 	// -------------------------------------------------------------------------

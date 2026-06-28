@@ -141,11 +141,12 @@ class Theme {
 			$repos_arr[ $slug ] = get_file_data( $path, $all_headers, 'theme' );
 		}
 
-		$themes = array_filter(
+		$extra_header_keys = array_keys( self::$extra_headers );
+		$themes            = array_filter(
 			$repos_arr,
-			function ( $repo ) {
+			function ( $repo ) use ( $extra_header_keys ) {
 				foreach ( $repo as $key => $value ) {
-					if ( in_array( $key, array_keys( self::$extra_headers ), true ) && false !== stripos( $key, 'theme' ) && ! empty( $value ) ) {
+					if ( in_array( $key, $extra_header_keys, true ) && false !== stripos( $key, 'theme' ) && ! empty( $value ) ) {
 						return (bool) $this->get_file_headers( $repo, 'theme' );
 					}
 				}
@@ -156,13 +157,14 @@ class Theme {
 		$themes    = array_merge( $themes, (array) $additions );
 		ksort( $themes );
 
+		$options_modified = false;
 		foreach ( (array) $themes as $slug => $theme ) {
 			$git_theme = [];
 			$header    = null;
 			$key       = array_filter(
 				array_keys( $theme ),
 				function ( $key ) use ( $theme ) {
-					if ( false !== stripos( $key, 'themeuri' ) && ! empty( $theme[ $key ] ) & 'ThemeURI' !== $key ) {
+					if ( false !== stripos( $key, 'themeuri' ) && ! empty( $theme[ $key ] ) && 'ThemeURI' !== $key ) {
 						return true;
 					}
 				}
@@ -187,7 +189,7 @@ class Theme {
 			&& ( 'master' === self::$options[ $current_branch ] && 'master' !== $header['primary_branch'] )
 			) {
 				unset( self::$options[ $current_branch ] );
-				update_site_option( 'git_updater', self::$options );
+				$options_modified = true;
 			}
 			$branch = self::$options[ $current_branch ] ?? $header['primary_branch'];
 
@@ -227,11 +229,18 @@ class Theme {
 
 			// Fix branch for .git VCS.
 			if ( isset( $git_theme['local_path'] ) && file_exists( $git_theme['local_path'] . '.git/HEAD' ) ) {
-				$git_branch          = implode( '/', array_slice( explode( '/', file_get_contents( $git_theme['local_path'] . '.git/HEAD' ) ), 2 ) );
-				$git_theme['branch'] = preg_replace( "/\r|\n/", '', $git_branch );
+				$contents = file_get_contents( $git_theme['local_path'] . '.git/HEAD' );
+				if ( false !== $contents ) {
+					$git_branch          = implode( '/', array_slice( explode( '/', $contents ), 2 ) );
+					$git_theme['branch'] = preg_replace( "/\r|\n/", '', $git_branch );
+				}
 			}
 
 			$git_themes[ $git_theme['slug'] ] = (object) $git_theme;
+		}
+
+		if ( $options_modified ) {
+			update_site_option( 'git_updater', self::$options );
 		}
 
 		return $git_themes;

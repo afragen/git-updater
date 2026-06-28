@@ -47,7 +47,7 @@ final class GU_Upgrade {
 			return;
 		}
 
-		switch ( $db_version ) {
+		switch ( true ) {
 			case version_compare( $db_version, $this->db_version, '<' ):
 				$this->delete_flush_cache();
 				$this->save_db_version( $options );

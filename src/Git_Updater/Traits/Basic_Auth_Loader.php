@@ -131,10 +131,14 @@ trait Basic_Auth_Loader {
 			return $credentials;
 		}
 
-		$repos = array_merge(
-			Singleton::get_instance( 'Plugin', $this )->get_plugin_configs(),
-			Singleton::get_instance( 'Theme', $this )->get_theme_configs()
-		);
+		static $cached_repos = null;
+		if ( null === $cached_repos ) {
+			$cached_repos = array_merge(
+				Singleton::get_instance( 'Plugin', $this )->get_plugin_configs(),
+				Singleton::get_instance( 'Theme', $this )->get_theme_configs()
+			);
+		}
+		$repos = $cached_repos;
 		$slug  = $this->get_slug_for_credentials( $headers, $repos, $url, $options );
 		$type  = $this->get_type_for_credentials( $slug, $repos, $url );
 
