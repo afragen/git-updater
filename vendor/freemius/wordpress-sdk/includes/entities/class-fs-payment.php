@@ -80,11 +80,22 @@
          */
         public $source = 0;
 
+        /**
+         * Presentment payment information for customer-facing currency display.
+         *
+         * @var object|null
+         */
+        public $presentment;
+
         #endregion Properties
 
         const CURRENCY_USD = 'usd';
         const CURRENCY_GBP = 'gbp';
         const CURRENCY_EUR = 'eur';
+        const CURRENCY_ILS = 'ils';
+        const CURRENCY_CAD = 'cad';
+        const CURRENCY_AUD = 'aud';
+        const CURRENCY_PLN = 'pln';
 
         /**
          * @param object|bool $payment
@@ -120,6 +131,44 @@
         }
 
         /**
+         * @return bool
+         */
+        private function has_presentment()
+        {
+            return is_object( $this->presentment );
+        }
+
+        /**
+         * @return float
+         */
+        private function get_display_gross()
+        {
+            return $this->has_presentment() ?
+                (float) $this->presentment->gross :
+                (float) $this->gross;
+        }
+
+        /**
+         * @return float
+         */
+        private function get_display_vat()
+        {
+            return $this->has_presentment() ?
+                (float) $this->presentment->vat :
+                (float) $this->vat;
+        }
+
+        /**
+         * @return string
+         */
+        private function get_display_currency()
+        {
+            return $this->has_presentment() ?
+                $this->presentment->currency :
+                $this->currency;
+        }
+
+        /**
          * Returns the gross in this format:
          *  `{symbol}{amount | 2 decimal digits} {currency | uppercase}`
          *
@@ -132,12 +181,13 @@
          */
         function formatted_gross()
         {
-            $price = $this->gross + $this->vat;
+            $price = $this->get_display_gross() + $this->get_display_vat();
+
             return (
                 ( $price < 0 ? '-' : '' ) .
                 $this->get_symbol() .
                 number_format( abs( $price ), 2, '.', ',' ) . ' ' .
-                strtoupper( $this->currency )
+                strtoupper( $this->get_display_currency() )
             );
         }
 
@@ -161,9 +211,17 @@
                     self::CURRENCY_USD => '$',
                     self::CURRENCY_GBP => '&pound;',
                     self::CURRENCY_EUR => '&euro;',
+                    self::CURRENCY_ILS => '₪',
+                    self::CURRENCY_CAD => '$',
+                    self::CURRENCY_AUD => '$',
+                    self::CURRENCY_PLN => 'zł',
                 );
             }
 
-            return self::$CURRENCY_2_SYMBOL[ $this->currency ];
+            $currency = $this->get_display_currency();
+
+            return isset( self::$CURRENCY_2_SYMBOL[ $currency ] )
+                ? self::$CURRENCY_2_SYMBOL[ $currency ]
+                : strtoupper( $currency ) . ' ';
         }
     }

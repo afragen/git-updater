@@ -3946,7 +3946,7 @@
 
             $this->_storage->connectivity_test = array(
                 'is_connected' => $is_connected,
-                'host'         => $_SERVER['HTTP_HOST'],
+                'host'         => isset( $_SERVER['HTTP_HOST'] ) ? $_SERVER['HTTP_HOST'] : '',
                 'server_ip'    => WP_FS__REMOTE_ADDR,
                 'is_active'    => $is_active,
                 'timestamp'    => WP_FS__SCRIPT_START_TIME,

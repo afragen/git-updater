@@ -210,6 +210,10 @@
         define( 'WP_FS__API_SANDBOX_ADDRESS_LOCALHOST', 'http://sandbox-api.freemius:8080' );
     }
 
+    if ( ! defined( 'WP_FS__API_TIMEOUT' ) ) {
+        define( 'WP_FS__API_TIMEOUT', 30 );
+    }
+
     // Set API address for local testing.
     if ( ! WP_FS__IS_PRODUCTION_MODE ) {
         if ( ! defined( 'FS_API__ADDRESS' ) ) {

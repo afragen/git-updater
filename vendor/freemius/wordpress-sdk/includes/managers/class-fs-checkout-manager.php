@@ -187,7 +187,7 @@
             // Allowlist only allowed query params.
             $filtered_params = array_intersect_key($filtered_params, $this->_allowed_custom_params);
 
-            return array_merge( $context_params, $filtered_params, $_GET, array(
+			return array_merge( $_GET, $context_params, $filtered_params, array(
 				// Current plugin version.
 				'plugin_version' => $fs->get_plugin_version(),
 				'sdk_version'    => WP_FS__SDK_VERSION,
