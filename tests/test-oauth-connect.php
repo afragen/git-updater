@@ -1554,7 +1554,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		} );
 
 		$this->assertStringContainsString( 'Token refreshed for github', $log );
-		$this->assertStringContainsString( '7200 seconds', $log );
+		$this->assertStringContainsString( '2 hours', $log );
 	}
 
 	public function test_refresh_token_no_log_when_filter_false(): void {

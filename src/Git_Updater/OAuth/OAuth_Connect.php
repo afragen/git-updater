@@ -465,7 +465,7 @@ class OAuth_Connect {
 		$result_transient = get_site_transient( $this->get_result_transient_name( $provider ) );
 		if ( 'success' === $result_transient ) {
 			// Another request refreshed successfully — reuse the new token.
-			$options = get_site_option( 'git_updater', [] );
+			$options       = get_site_option( 'git_updater', [] );
 			Base::$options = $options;
 			API::$options  = $options;
 			if ( $debug ) {
@@ -529,7 +529,7 @@ class OAuth_Connect {
 		set_site_transient( $this->get_result_transient_name( $provider ), 'success', self::REFRESH_RESULT_TTL );
 
 		if ( $debug ) {
-			error_log( 'Git Updater: Token refreshed for ' . $provider . '. New token expires in ' . ( $expires_in ?? 'unknown' ) . ' seconds.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			error_log( 'Git Updater: Token refreshed for ' . $provider . '. New token expires in ' . ( ( (int) $expires_in / 3600 ) ?? 'unknown' ) . ' hours.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
 		return $new_token;
 	}
