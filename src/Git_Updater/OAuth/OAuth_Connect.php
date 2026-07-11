@@ -529,7 +529,7 @@ class OAuth_Connect {
 		set_site_transient( $this->get_result_transient_name( $provider ), 'success', self::REFRESH_RESULT_TTL );
 
 		if ( $debug ) {
-			error_log( 'Git Updater: Token refreshed for ' . $provider . '. New token expires in ' . ( ( (int) $expires_in / 3600 ) ?? 'unknown' ) . ' hours.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			error_log( 'Git Updater: Token refreshed for ' . $provider . '. New token expires in ' . ( ( (int) $expires_in / 3600 ) ?: 'unknown' ) . ' hours.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
 		return $new_token;
 	}
