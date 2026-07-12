@@ -917,7 +917,9 @@ class Settings {
 				],
 				home_url( 'wp-json/' . $this->get_class_vars( 'REST\REST_API', 'namespace' ) . '/flush-repo-cache/' )
 			);
-			$dashicon_flush = '<button type="button" class="button-link gu-flush-repo dashicons-no-decoration" data-flush-url="' . esc_url( $flush_endpoint ) . '" title="' . esc_attr__( 'Flush repo cache', 'git-updater' ) . '">' . $dashicon . '</button>';
+			/* translators: %s is the name of the plugin or theme. */
+			$tooltip        = __( sprintf( 'Flush %s cache', $data['name'] ), 'git-updater' );
+			$dashicon_flush = '<button type="button" class="button-link gu-flush-repo dashicons-no-decoration" data-flush-url="' . esc_url( $flush_endpoint ) . '" title="' . esc_attr__( $tooltip ) . '">' . $dashicon . '</button>';
 			printf( '<p>' . wp_kses_post( $dashicon_flush . $data['name'] . $is_private . $is_dot_org . $is_broken . $is_dismissed ) . '</p>' );
 		}
 	}
