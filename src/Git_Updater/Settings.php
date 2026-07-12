@@ -127,6 +127,13 @@ class Settings {
 				function () {
 					wp_register_style( 'git-updater-settings', plugins_url( basename( dirname( __DIR__, 2 ) ) ) . '/css/git-updater-settings.css', [], $this->get_plugin_version() );
 					wp_enqueue_style( 'git-updater-settings' );
+					wp_enqueue_script(
+						'git-updater-settings',
+						plugins_url( basename( dirname( __DIR__, 2 ) ) ) . '/js/gu-settings.js',
+						[],
+						$this->get_plugin_version(),
+						true
+					);
 				}
 			);
 		}
@@ -848,6 +855,7 @@ class Settings {
 		$broken_title  = esc_html__( 'This repository has not connected to the API or was unable to connect.', 'git-updater' );
 		$dot_org_title = esc_html__( 'This repository is hosted on WordPress.org.', 'git-updater' );
 		$dismiss_title = esc_html__( 'This repository has been ignored and does not connect to the API.', 'git-updater' );
+		$api_key       = get_site_option( 'git_updater_api_key', '' );
 
 		$plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
 		$themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
@@ -888,20 +896,29 @@ class Settings {
 		);
 
 		$lock    = '&nbsp;<span title="' . $lock_title . '" class="dashicons dashicons-lock"></span>';
-		$broken  = '&nbsp;<span title="' . $broken_title . '" style="color:#f00;" class="dashicons dashicons-warning"></span>';
 		$dot_org = '&nbsp;<span title="' . $dot_org_title . '" class="dashicons dashicons-wordpress"></span></span>';
 		$dismiss = '&nbsp;<span title="' . $dismiss_title . '" class="dashicons dashicons-dismiss"></span></span>';
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'git-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
-			$dashicon     = str_contains( $data['type'], 'theme' )
-			? '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;'
-			: '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
-			$is_private   = $data['private'] ? $lock : null;
-			$is_broken    = $data['broken'] ? $broken : null;
-			$override     = $this->override_dot_org( $data['type'], $data );
-			$is_dot_org   = $data['dot_org'] && ! $override ? $dot_org : null;
-			$is_dismissed = $data['dismiss'] ? $dismiss : null;
-			printf( '<p>' . wp_kses_post( $dashicon . $data['name'] . $is_private . $is_dot_org . $is_broken . $is_dismissed ) . '</p>' );
+			$dashicon      = str_contains( $data['type'], 'theme' )
+			? '<span class="dashicons dashicons-admin-appearance dashicons-no-decoration"></span>&nbsp;&nbsp;'
+			: '<span class="dashicons dashicons-admin-plugins dashicons-no-decoration"></span>&nbsp;&nbsp;';
+			$is_private    = $data['private'] ? $lock : null;
+			$broken_hidden = $data['broken'] ? '' : 'display:none;';
+			$is_broken     = '&nbsp;<span title="' . $broken_title . '" class="dashicons dashicons-warning gu-repo-broken" style="color:#f00;' . $broken_hidden . '"></span>';
+			$override      = $this->override_dot_org( $data['type'], $data );
+			$is_dot_org    = $data['dot_org'] && ! $override ? $dot_org : null;
+			$is_dismissed  = $data['dismiss'] ? $dismiss : null;
+
+			$flush_endpoint = add_query_arg(
+				[
+					'key'  => $api_key,
+					'slug' => $data['slug'],
+				],
+				home_url( 'wp-json/' . $this->get_class_vars( 'REST\REST_API', 'namespace' ) . '/flush-repo-cache/' )
+			);
+			$dashicon_flush = '<button type="button" class="button-link gu-flush-repo dashicons-no-decoration" data-flush-url="' . esc_url( $flush_endpoint ) . '" title="' . esc_attr__( 'Flush repo cache', 'git-updater' ) . '">' . $dashicon . '</button>';
+			printf( '<p>' . wp_kses_post( $dashicon_flush . $data['name'] . $is_private . $is_dot_org . $is_broken . $is_dismissed ) . '</p>' );
 		}
 	}
 }

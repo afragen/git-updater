@@ -1,4 +1,5 @@
 #### [unreleased]
+* new easter egg: the repo dashicon is now a button that flushes the cache of that specific repository via the `flush-repo-cache` REST endpoint (no page navigation); the broken dashicon is revealed on a successful flush
 * fix `Rest_Update::update_plugin()` inverted activation check — `activate_plugin()` returns `null` on success and `WP_Error` on failure; old code `if ( ! $activate )` silently swallowed failures; now reports error message from `WP_Error`
 * fix `API::api()` missing `WP_Error` check after OAuth retry — retry response now validated like the initial request
 * fix `API::get_release_asset_redirect()` AWS cache age calculation to use `$this->hours` instead of hardcoded `-12 hours`
