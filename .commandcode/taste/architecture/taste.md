@@ -7,3 +7,4 @@
 - In Git Updater, `private_package` in Additions blocks API access entirely (not sharable); it does NOT indicate whether the repository is private on the git host. Use existing repo metadata from cached API data (not plugin/theme headers) for detection instead. Confidence: 0.85
 - When the system already stores relevant metadata, use it directly for feature targeting rather than introducing heuristic detection (e.g., composer.json parsing, auth token presence). Confidence: 0.75
 - Place new classes directly in their main namespace directory (e.g., src/Git_Updater/Lite_Domains.php) rather than creating new subdirectories (e.g., src/Git_Updater/Settings/Lite_Domains.php) unless the class is part of an existing sub-module like Additions. Confidence: 0.65
+- Prefer custom database tables over the WordPress options table for storing repository data/metadata, with indexing on the repository slug. Confidence: 0.70
