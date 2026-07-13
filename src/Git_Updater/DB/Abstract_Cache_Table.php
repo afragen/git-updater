@@ -193,6 +193,20 @@ abstract class Abstract_Cache_Table {
 	}
 
 	/**
+	 * Flush the per-request row cache.
+	 *
+	 * Primarily intended for test isolation: WP_UnitTestCase wraps each test
+	 * in a transaction that gets rolled back, but the row cache lives in PHP
+	 * memory on the singleton and survives that rollback. Tests that want
+	 * to observe the actual (rolled-back) DB state can call this in setUp.
+	 *
+	 * @return void
+	 */
+	public function reset_row_cache(): void {
+		$this->row_cache = [];
+	}
+
+	/**
 	 * Delete all cached data for a single repository.
 	 *
 	 * @param string $slug Repository slug.

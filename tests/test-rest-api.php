@@ -1384,6 +1384,12 @@ class Test_REST_API_Zero_Version extends WP_UnitTestCase {
 		// Clear all caches for the fixture plugin so no cached version pollutes the test.
 		delete_site_option( 'ghu-' . md5( self::SLUG ) );
 		delete_site_option( 'ghu-' . md5( self::SLUG . '_error' ) );
+		// The per-request row cache on Repo_Cache_Table lives on the singleton
+		// and survives DB transaction rollbacks, so an earlier test in this
+		// process can leave stale repo_headers behind. Flush so the mock_http_zero
+		// [] response actually drives the flow (instead of being short-circuited
+		// by a cached repo_headers with Version=2.0.0).
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->reset_row_cache();
 
 		// Pre-seed update transients to avoid api.wordpress.org calls.
 		$empty_transient = (object) [

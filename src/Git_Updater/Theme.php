@@ -184,9 +184,10 @@ class Theme {
 			$header = $this->parse_extra_headers( $header, $theme, $header_parts );
 
 			// Resolve the active branch from the cache table, falling back to the header's primary branch.
-			$cache_row    = $this->get_repo_cache( $header['repo'] ?? '', false );
-			$cache_branch = is_array( $cache_row ) ? ( $cache_row['current_branch'] ?? null ) : null;
-			$branch       = $cache_branch ?: $header['primary_branch'];
+			$cache_row     = $this->get_repo_cache( $header['repo'] ?? '', false );
+			$cache_branch  = is_array( $cache_row ) ? ( $cache_row['current_branch'] ?? null ) : null;
+			$cache_primary = is_array( $cache_row ) ? ( $cache_row['primary_branch'] ?? null ) : null;
+			$branch        = $cache_branch ?: $header['primary_branch'];
 
 			$git_theme['type']           = 'theme';
 			$git_theme['git']            = $repo_parts['git_server'];
@@ -231,8 +232,15 @@ class Theme {
 				}
 			}
 
-			$this->set_repo_cache( 'primary_branch', $header['primary_branch'], $git_theme['slug'] );
-			$this->set_repo_cache( 'current_branch', $git_theme['branch'], $git_theme['slug'] );
+			// Only write when the resolved value differs from the cached one.
+			// Empty/missing cache row already seeded both columns above, so a
+			// `null !== $value` first-run still triggers both writes here.
+			if ( $cache_primary !== $header['primary_branch'] ) {
+				$this->set_repo_cache( 'primary_branch', $header['primary_branch'], $git_theme['slug'] );
+			}
+			if ( $cache_branch !== $git_theme['branch'] ) {
+				$this->set_repo_cache( 'current_branch', $git_theme['branch'], $git_theme['slug'] );
+			}
 
 			$git_themes[ $git_theme['slug'] ] = (object) $git_theme;
 		}

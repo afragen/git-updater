@@ -1441,4 +1441,61 @@ class Test_Theme_Config_Discovery extends WP_UnitTestCase {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 		$this->assertSame( 'main', $table->get_entry( self::SLUG, 'current_branch' ) );
 	}
+
+	/**
+	 * Count write queries (INSERT/UPDATE) against the cache table during $fn.
+	 *
+	 * @param callable $fn Callback to execute.
+	 * @return int Number of INSERT/UPDATE queries against the cache table.
+	 */
+	private function count_cache_table_writes( callable $fn ): int {
+		global $wpdb;
+		$count      = 0;
+		$table_name = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->table_name();
+		$filter     = function ( $query ) use ( &$count, $table_name ) {
+			if ( false === strpos( $query, $table_name ) ) {
+				return $query;
+			}
+			$verb = strtoupper( ltrim( $query ) );
+			if ( str_starts_with( $verb, 'INSERT' ) || str_starts_with( $verb, 'UPDATE' ) ) {
+				++$count;
+			}
+			return $query;
+		};
+		add_filter( 'query', $filter );
+		try {
+			$fn();
+		} finally {
+			remove_filter( 'query', $filter );
+		}
+		return $count;
+	}
+
+	public function test_get_theme_meta_skips_unchanged_branch_writes(): void {
+		// First call (setUp) already seeded the cache. Second call should see
+		// matching primary_branch/current_branch and skip both upserts.
+		$writes = $this->count_cache_table_writes( function () {
+			$rm = new ReflectionMethod( new Theme(), 'get_theme_meta' );
+			$rm->setAccessible( true );
+			$rm->invoke( new Theme() );
+		} );
+
+		$this->assertSame( 0, $writes, 'Unchanged primary_branch/current_branch must not produce write queries' );
+	}
+
+	public function test_get_theme_meta_writes_when_primary_branch_changes(): void {
+		// Mutate the cached primary_branch so the next get_theme_meta() sees
+		// a mismatch against the parsed header and rewrites it.
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->update_entry( self::SLUG, 'primary_branch', 'stale-branch' );
+
+		$writes = $this->count_cache_table_writes( function () {
+			$rm = new ReflectionMethod( new Theme(), 'get_theme_meta' );
+			$rm->setAccessible( true );
+			$rm->invoke( new Theme() );
+		} );
+
+		$this->assertSame( 1, $writes, 'primary_branch mismatch must produce exactly one upsert' );
+		$this->assertSame( 'main', $table->get_entry( self::SLUG, 'primary_branch' ) );
+	}
 }
