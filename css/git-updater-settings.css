@@ -54,6 +54,41 @@ div.hide-git-updater-settings {
 	display: none;
 }
 
+/* Add-Ons — card grid */
+.git-updater-addons #the-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 20px;
+	padding: 0;
+	margin: 0;
+}
+
+.git-updater-addons .wp-list-table.plugin-install {
+	padding: 0;
+	border: 0;
+}
+
+.git-updater-addons .plugin-card {
+	/* Minimum so the card content (icon at left, action links at right)
+	 * displays normally. Core WP's .plugin-card .desc > p has 148px left
+	 * + 128px right margins for the icon and action links; below ~560px
+	 * the remaining text area is unreadable. The larger basis keeps 3-up
+	 * viewports from squeezing the cards. */
+	flex: 1 1 560px;
+	min-width: 560px;
+	max-width: 100%;
+	box-sizing: border-box;
+	margin: 0;
+}
+
+@media screen and (max-width: 600px) {
+	.git-updater-addons .plugin-card {
+		flex-basis: 100%;
+		min-width: 0;
+	}
+}
+
+/* Flush Repo button */
 button.gu-flush-repo.dashicons-no-decoration {
 	color: inherit;
 	text-decoration: none;
