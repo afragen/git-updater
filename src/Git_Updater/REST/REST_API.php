@@ -444,7 +444,7 @@ class REST_API {
 		if ( ! $slug ) {
 			return [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
 		}
-		$channel    = null !== $request->get_param( 'channel' );
+
 		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
 		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
 		$gu_repos   = array_merge( $gu_plugins, $gu_themes );
@@ -467,6 +467,9 @@ class REST_API {
 
 		add_filter( 'gu_disable_wpcron', '__return_false' );
 		$repo_data = Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->get_remote_repo_meta( $gu_repos[ $slug ] );
+
+		$channel    = null !== $request->get_param( 'channel' );
+		$channel = apply_filters( 'gu_dev_release_asset', false, $repo_data ) ?: $channel;
 
 		if ( ! is_object( $repo_data ) || '0.0.0' === $repo_data->remote_version ) {
 			$rate_limit = 'github' === $repo_data->git ? $this->get_github_rate_limit_headers() : [];
