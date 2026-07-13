@@ -103,6 +103,8 @@ class Settings {
 	 * @return void
 	 */
 	protected function load_hooks() {
+		// Always register Install AJAX handlers so they work during wp-ajax requests.
+		Singleton::get_instance( 'Install', $this )->register_ajax_handlers();
 		if ( ! (bool) apply_filters( 'gu_hide_settings', false ) ) {
 			add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', [ $this, 'add_plugin_page' ] );
 		}

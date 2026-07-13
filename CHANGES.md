@@ -1,4 +1,17 @@
 #### [unreleased]
+* add GitHub OAuth-powered autocomplete to the Install Plugin/Theme screen — repo URI field shows a live-filtered dropdown of all repositories (personal + organization) accessible via the connected OAuth account, with debounce, spinner, keyboard navigation (↑ ↓ Enter Esc), and ARIA attributes
+* add branch autocomplete to the Repository Branch field — once a connected-account repo URI is entered, typing in the branch field filters available branches fetched from the GitHub API
+* add branch autofill — when a connected-account repo is selected and its default branch is not `master`, the Repository Branch field is populated automatically
+* add field-hiding — when the entered URI belongs to the connected GitHub account (personal or org), the Remote Repository Host selector and GitHub Access Token field are hidden as they are not needed for OAuth-authenticated installs
+* add `Install::ajax_github_repos()` AJAX handler (`gu_github_repos`) — returns paginated, cached repo list for the connected account, searched by query string
+* add `Install::ajax_github_branches()` AJAX handler (`gu_github_branches`) — returns branch names for a given `owner/repo`, cached 5 minutes
+* add `Install::ajax_github_repo_info()` AJAX handler (`gu_github_repo_info`) — returns `default_branch` and owner for a given repo, cached 5 minutes
+* add `Install::fetch_all_github_repos()` — paginates `/user/repos` and all organization repos via `/user/orgs` + `/orgs/{org}/repos`, deduplicates by `full_name`, capped at 1 000 items
+* add `Install::github_paginate()` — shared paginator for GitHub API endpoints
+* add `Install::get_github_username()` — fetches and caches the authenticated user's login for 1 hour
+* add `Install::get_github_org_logins()` — fetches and caches the authenticated user's organization slugs for 1 hour, used by JS to recognize org repos as connected-account repos
+* add `Install::register_ajax_handlers()` — hooked from `Settings::load_hooks()` so AJAX actions are registered on all admin requests including `admin-ajax.php`
+* fix `Install` AJAX handlers were unreachable during `wp_doing_ajax()` because `Settings::page_init()` (which called `Install::run()`) was gated behind `! wp_doing_ajax()`; handlers are now registered in `Settings::load_hooks()` instead
 * fix `Rest_Update::update_plugin()` inverted activation check — `activate_plugin()` returns `null` on success and `WP_Error` on failure; old code `if ( ! $activate )` silently swallowed failures; now reports error message from `WP_Error`
 * fix `API::api()` missing `WP_Error` check after OAuth retry — retry response now validated like the initial request
 * fix `API::get_release_asset_redirect()` AWS cache age calculation to use `$this->hours` instead of hardcoded `-12 hours`

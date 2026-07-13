@@ -94,6 +94,38 @@ Plugin/theme repo objects (`$this->type`) are `stdClass` instances populated wit
 
 All plugin options are stored in a single site option `git_updater` (an array). `GU_Upgrade` handles migration from legacy `github_updater` option names. Settings UI is in `Settings.php`; per-repo authentication fields are added via `gu_add_settings` and `gu_add_repo_setting_field` filters implemented in each API class.
 
+### Install screen GitHub OAuth autocomplete
+
+`Install.php` adds three `wp_ajax_*` AJAX handlers that power the autocomplete UX on the Install Plugin / Install Theme tab when a GitHub OAuth token is active.
+
+**AJAX registration** — `Install::register_ajax_handlers()` is called from `Settings::load_hooks()` (not from `Install::run()`) so the handlers are available on all admin requests, including `admin-ajax.php`. `Install::run()` is gated behind `! wp_doing_ajax()` in `Settings::page_init()`, so any hook registration inside `run()` would be invisible to AJAX requests.
+
+**`gu_github_repos`** — Accepts a `q` query param. Calls `fetch_all_github_repos()` which paginates `/user/repos` (type=all) and then paginates `/orgs/{org}/repos` for every org returned by `/user/orgs`. Results are deduplicated by `full_name` and cached in a site transient keyed by `md5($token)` for 5 minutes. The handler filters the cached list by `q` and returns up to 20 matches.
+
+**`gu_github_branches`** — Accepts a `repo` param (`owner/repo`). Paginates `/repos/{owner}/{repo}/branches` and caches the branch name list for 5 minutes.
+
+**`gu_github_repo_info`** — Accepts a `repo` param. Fetches `/repos/{owner}/{repo}` and returns `default_branch`, `private`, and `owner` login. Cached 5 minutes.
+
+**Script data** — `load_js()` localises `guInstallData` onto `gu-install` with:
+- `ajaxurl` — `admin-ajax.php` URL
+- `nonce` — `gu_github_install_autocomplete` nonce
+- `github_oauth` — `'1'` when a GitHub OAuth token is stored
+- `github_username` — authenticated user's login (from `/user`, cached 1 hour via `get_github_username()`)
+- `github_orgs` — lowercase array of org slugs the user belongs to (from `/user/orgs`, cached 1 hour via `get_github_org_logins()`), used to recognise org repos as "connected account" repos
+
+**JS behaviour** (`js/gu-install-vanilla.js`) — The autocomplete runs only when `github_oauth === '1'`. Both the URI and Branch fields get independent dropdowns with:
+- Debounced input (250 ms) with an immediate CSS spinner while waiting
+- Keyboard navigation: ↑/↓ moves highlight, Enter selects, Escape closes
+- ARIA: `role="combobox"` on inputs, `role="listbox"` on lists, `role="option"` on items, `aria-expanded`, `aria-activedescendant`
+- `li._guRepo` / `li._guBranch` properties store the data object for keyboard selection without re-parsing `dataset`
+
+When a URI from a connected account is entered or selected, `applyConnectedRepoState()`:
+1. Sets the host dropdown to `github` and dispatches a `change` event (to trigger existing show/hide logic for other API token fields)
+2. Calls `hideHostAndTokenFields()` **after** the dispatch — the change handler would otherwise re-show the `github_setting` rows
+3. Fetches and autofills the default branch if the field is empty or set to `master` and the actual default differs
+
+The "connected account" check compares the repo owner (extracted from full URL or `owner/repo` slug) against `github_username` and all entries in `github_orgs`.
+
 ### Coding standards
 
 PHPCS uses the `WordPress` ruleset with several exclusions defined in `phpcs.xml`. Notable: short array syntax (`[]`) is enforced, file naming and variable naming WordPress conventions are relaxed, and some Squiz control structure rules are disabled.

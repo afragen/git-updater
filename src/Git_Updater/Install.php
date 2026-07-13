@@ -14,6 +14,7 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
+use Fragen\Git_Updater\OAuth\OAuth_Connect;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
 use Fragen\Git_Updater\WP_CLI\CLI_Plugin_Installer_Skin;
@@ -100,6 +101,23 @@ class Install {
 			function () {
 				wp_register_script( 'gu-install', plugins_url( basename( dirname( __DIR__, 2 ) ) . '/js/gu-install-vanilla.js' ), [], $this->get_plugin_version(), true );
 				wp_enqueue_script( 'gu-install' );
+
+				$oauth           = Singleton::get_instance( 'Fragen\Git_Updater\OAuth\OAuth_Connect', $this );
+				$github_oauth    = $oauth->is_oauth_token( 'github' );
+				$github_username = $github_oauth ? $this->get_github_username() : '';
+				$github_orgs     = $github_oauth ? $this->get_github_org_logins() : [];
+
+				wp_localize_script(
+					'gu-install',
+					'guInstallData',
+					[
+						'ajaxurl'         => admin_url( 'admin-ajax.php' ),
+						'nonce'           => wp_create_nonce( 'gu_github_install_autocomplete' ),
+						'github_oauth'    => $github_oauth ? '1' : '0',
+						'github_username' => $github_username,
+						'github_orgs'     => $github_orgs,
+					]
+				);
 			}
 		);
 	}
@@ -531,5 +549,351 @@ class Install {
 		ksort( $install_actions );
 
 		return $install_actions;
+	}
+
+	/**
+	 * Register AJAX handlers for GitHub install autocomplete.
+	 *
+	 * @return void
+	 */
+	public function register_ajax_handlers(): void {
+		add_action( 'wp_ajax_gu_github_repos', [ $this, 'ajax_github_repos' ] );
+		add_action( 'wp_ajax_gu_github_branches', [ $this, 'ajax_github_branches' ] );
+		add_action( 'wp_ajax_gu_github_repo_info', [ $this, 'ajax_github_repo_info' ] );
+	}
+
+	/**
+	 * AJAX handler: return GitHub repos matching a search query.
+	 *
+	 * Returns repos from the connected GitHub account whose full_name contains
+	 * the query string. Results are cached in a site transient for 5 minutes.
+	 *
+	 * @return void
+	 */
+	public function ajax_github_repos(): void {
+		check_ajax_referer( 'gu_github_install_autocomplete', 'nonce' );
+
+		if ( ! current_user_can( 'install_plugins' ) && ! current_user_can( 'install_themes' ) ) {
+			wp_send_json_error( 'Forbidden', 403 );
+		}
+
+		$options = get_site_option( 'git_updater', [] );
+		$token   = $options['github_access_token'] ?? '';
+
+		if ( ! $token ) {
+			wp_send_json_success( [] );
+		}
+
+		$search = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) );
+
+		// Attempt to serve from transient cache.
+		$cache_key  = 'gu_github_repos_' . md5( $token );
+		$all_repos  = get_site_transient( $cache_key );
+
+		if ( false === $all_repos ) {
+			$all_repos = $this->fetch_all_github_repos( $token );
+			set_site_transient( $cache_key, $all_repos, 5 * MINUTE_IN_SECONDS );
+		}
+
+		if ( ! is_array( $all_repos ) ) {
+			wp_send_json_success( [] );
+		}
+
+		$results = [];
+		foreach ( $all_repos as $repo ) {
+			if ( empty( $search ) || stripos( $repo['full_name'], $search ) !== false || stripos( $repo['name'], $search ) !== false ) {
+				$results[] = [
+					'full_name'      => $repo['full_name'],
+					'html_url'       => $repo['html_url'],
+					'default_branch' => $repo['default_branch'],
+					'private'        => $repo['private'],
+				];
+				if ( count( $results ) >= 20 ) {
+					break;
+				}
+			}
+		}
+
+		wp_send_json_success( $results );
+	}
+
+	/**
+	 * AJAX handler: return branch list for a given owner/repo.
+	 *
+	 * @return void
+	 */
+	public function ajax_github_branches(): void {
+		check_ajax_referer( 'gu_github_install_autocomplete', 'nonce' );
+
+		if ( ! current_user_can( 'install_plugins' ) && ! current_user_can( 'install_themes' ) ) {
+			wp_send_json_error( 'Forbidden', 403 );
+		}
+
+		$options    = get_site_option( 'git_updater', [] );
+		$token      = $options['github_access_token'] ?? '';
+		$owner_repo = sanitize_text_field( wp_unslash( $_GET['repo'] ?? '' ) );
+
+		if ( ! $token || ! $owner_repo || ! preg_match( '/^[^\/]+\/[^\/]+$/', $owner_repo ) ) {
+			wp_send_json_success( [] );
+		}
+
+		$cache_key = 'gu_github_branches_' . md5( $token . $owner_repo );
+		$branches  = get_site_transient( $cache_key );
+
+		if ( false === $branches ) {
+			$url      = 'https://api.github.com/repos/' . $owner_repo . '/branches';
+			$url      = add_query_arg( 'per_page', '100', $url );
+			$response = wp_remote_get(
+				$url,
+				[
+					'headers' => [
+						'Authorization' => 'Bearer ' . $token,
+						'Accept'        => 'application/vnd.github.v3+json',
+					],
+					'timeout' => 10,
+				]
+			);
+
+			$branches = [];
+			if ( ! is_wp_error( $response ) && 200 === (int) wp_remote_retrieve_response_code( $response ) ) {
+				$body = json_decode( wp_remote_retrieve_body( $response ), true );
+				if ( is_array( $body ) ) {
+					foreach ( $body as $branch ) {
+						$branches[] = $branch['name'] ?? '';
+					}
+					$branches = array_filter( $branches );
+				}
+			}
+			set_site_transient( $cache_key, $branches, 5 * MINUTE_IN_SECONDS );
+		}
+
+		wp_send_json_success( array_values( $branches ) );
+	}
+
+	/**
+	 * AJAX handler: return default branch for a given owner/repo.
+	 *
+	 * Used to auto-populate the branch field when a connected-account repo
+	 * is entered in the URI field.
+	 *
+	 * @return void
+	 */
+	public function ajax_github_repo_info(): void {
+		check_ajax_referer( 'gu_github_install_autocomplete', 'nonce' );
+
+		if ( ! current_user_can( 'install_plugins' ) && ! current_user_can( 'install_themes' ) ) {
+			wp_send_json_error( 'Forbidden', 403 );
+		}
+
+		$options    = get_site_option( 'git_updater', [] );
+		$token      = $options['github_access_token'] ?? '';
+		$owner_repo = sanitize_text_field( wp_unslash( $_GET['repo'] ?? '' ) );
+
+		if ( ! $token || ! $owner_repo || ! preg_match( '/^[^\/]+\/[^\/]+$/', $owner_repo ) ) {
+			wp_send_json_error( 'Invalid input' );
+		}
+
+		$cache_key = 'gu_github_repo_info_' . md5( $token . $owner_repo );
+		$info      = get_site_transient( $cache_key );
+
+		if ( false === $info ) {
+			$url      = 'https://api.github.com/repos/' . $owner_repo;
+			$response = wp_remote_get(
+				$url,
+				[
+					'headers' => [
+						'Authorization' => 'Bearer ' . $token,
+						'Accept'        => 'application/vnd.github.v3+json',
+					],
+					'timeout' => 10,
+				]
+			);
+
+			if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+				wp_send_json_error( 'API error' );
+			}
+
+			$body = json_decode( wp_remote_retrieve_body( $response ), true );
+			if ( ! is_array( $body ) ) {
+				wp_send_json_error( 'Invalid response' );
+			}
+
+			$info = [
+				'default_branch' => $body['default_branch'] ?? 'master',
+				'private'        => $body['private'] ?? false,
+				'owner'          => $body['owner']['login'] ?? '',
+			];
+			set_site_transient( $cache_key, $info, 5 * MINUTE_IN_SECONDS );
+		}
+
+		wp_send_json_success( $info );
+	}
+
+	/**
+	 * Fetch all repos for the authenticated GitHub user, including organization repos (paginated).
+	 *
+	 * Queries /user/repos for personal and directly-accessible repos, then /user/orgs
+	 * to enumerate all organizations and fetches each org's repos separately.
+	 * Results are deduplicated by full_name.
+	 *
+	 * @param string $token GitHub access token.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function fetch_all_github_repos( string $token ): array {
+		$headers = [
+			'Authorization' => 'Bearer ' . $token,
+			'Accept'        => 'application/vnd.github.v3+json',
+		];
+
+		// Fetch user repos (personal + repos the user has direct access to).
+		$all_repos = $this->github_paginate( 'https://api.github.com/user/repos', [ 'type' => 'all', 'sort' => 'pushed' ], $headers );
+
+		// Fetch all orgs the user belongs to.
+		$orgs = $this->github_paginate( 'https://api.github.com/user/orgs', [], $headers );
+
+		// For each org, fetch its repos and merge.
+		foreach ( $orgs as $org ) {
+			$org_login  = $org['login'] ?? '';
+			if ( ! $org_login ) {
+				continue;
+			}
+			$org_repos = $this->github_paginate(
+				'https://api.github.com/orgs/' . rawurlencode( $org_login ) . '/repos',
+				[ 'type' => 'all', 'sort' => 'pushed' ],
+				$headers
+			);
+			$all_repos = array_merge( $all_repos, $org_repos );
+		}
+
+		// Deduplicate by full_name.
+		$seen      = [];
+		$unique    = [];
+		foreach ( $all_repos as $repo ) {
+			$key = $repo['full_name'] ?? '';
+			if ( $key && ! isset( $seen[ $key ] ) ) {
+				$seen[ $key ] = true;
+				$unique[]     = $repo;
+			}
+		}
+
+		return $unique;
+	}
+
+	/**
+	 * Paginate a GitHub API endpoint and return all results (capped at 1000 items).
+	 *
+	 * @param string                         $base_url Base API URL without query args.
+	 * @param array<string, mixed>           $params   Extra query parameters.
+	 * @param array<string, string>          $headers  HTTP headers (including Authorization).
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function github_paginate( string $base_url, array $params, array $headers ): array {
+		$results = [];
+		$page    = 1;
+
+		do {
+			$url      = add_query_arg( array_merge( $params, [ 'per_page' => 100, 'page' => $page ] ), $base_url );
+			$response = wp_remote_get( $url, [ 'headers' => $headers, 'timeout' => 10 ] );
+
+			if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+				break;
+			}
+
+			$body = json_decode( wp_remote_retrieve_body( $response ), true );
+			if ( ! is_array( $body ) || empty( $body ) ) {
+				break;
+			}
+
+			$results = array_merge( $results, $body );
+			$page++;
+		} while ( count( $body ) === 100 && count( $results ) < 1000 );
+
+		return $results;
+	}
+
+	/**
+	 * Get the GitHub username for the connected OAuth account.
+	 *
+	 * Result is cached in a site transient for 1 hour.
+	 *
+	 * @return string Username or empty string on failure.
+	 */
+	private function get_github_username(): string {
+		$options = get_site_option( 'git_updater', [] );
+		$token   = $options['github_access_token'] ?? '';
+
+		if ( ! $token ) {
+			return '';
+		}
+
+		$cache_key = 'gu_github_username_' . md5( $token );
+		$username  = get_site_transient( $cache_key );
+
+		if ( false !== $username ) {
+			return (string) $username;
+		}
+
+		$response = wp_remote_get(
+			'https://api.github.com/user',
+			[
+				'headers' => [
+					'Authorization' => 'Bearer ' . $token,
+					'Accept'        => 'application/vnd.github.v3+json',
+				],
+				'timeout' => 5,
+			]
+		);
+
+		if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+			return '';
+		}
+
+		$body     = json_decode( wp_remote_retrieve_body( $response ), true );
+		$username = is_array( $body ) ? ( $body['login'] ?? '' ) : '';
+
+		set_site_transient( $cache_key, $username, HOUR_IN_SECONDS );
+
+		return (string) $username;
+	}
+
+	/**
+	 * Get the login slugs of all GitHub organizations the authenticated user belongs to.
+	 *
+	 * Result is cached in a site transient for 1 hour.
+	 *
+	 * @return list<string>
+	 */
+	private function get_github_org_logins(): array {
+		$options = get_site_option( 'git_updater', [] );
+		$token   = $options['github_access_token'] ?? '';
+
+		if ( ! $token ) {
+			return [];
+		}
+
+		$cache_key = 'gu_github_orgs_' . md5( $token );
+		$orgs      = get_site_transient( $cache_key );
+
+		if ( false !== $orgs ) {
+			return is_array( $orgs ) ? $orgs : [];
+		}
+
+		$headers = [
+			'Authorization' => 'Bearer ' . $token,
+			'Accept'        => 'application/vnd.github.v3+json',
+		];
+
+		$raw_orgs = $this->github_paginate( 'https://api.github.com/user/orgs', [], $headers );
+
+		$logins = [];
+		foreach ( $raw_orgs as $org ) {
+			if ( ! empty( $org['login'] ) ) {
+				$logins[] = strtolower( $org['login'] );
+			}
+		}
+
+		set_site_transient( $cache_key, $logins, HOUR_IN_SECONDS );
+
+		return $logins;
 	}
 }
