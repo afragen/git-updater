@@ -31,7 +31,9 @@ class Test_API_Common extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		$this->type = $this->make_type();
 		$this->api  = new GitHub_API( $this->type );
 	}
@@ -40,8 +42,7 @@ class Test_API_Common extends WP_UnitTestCase {
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'gu_parse_api_branches' );
 		remove_all_filters( 'gu_always_fetch_update' );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		parent::tear_down();
 	}
 
@@ -88,12 +89,13 @@ class Test_API_Common extends WP_UnitTestCase {
 	 */
 	public function test_get_remote_api_tag_with_failed_api_returns_false(): void {
 		// Seed an in-force error cache so api() returns false immediately.
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin_error' ),
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->set_error_cache(
+			'test-plugin_error',
 			[
-				'error_cache' => $this->mock_http_response( 403, [ 'message' => 'Rate limited' ] ),
-				'timeout'     => strtotime( '+1 hour' ),
-			]
+				'timeout'   => 60,
+				'http_code' => 403,
+			],
+			60
 		);
 
 		$result = $this->api->get_remote_tag();
@@ -196,12 +198,13 @@ class Test_API_Common extends WP_UnitTestCase {
 	 * !$response branch and returns null — counted as complete.
 	 */
 	public function test_get_remote_api_branches_with_failed_api_returns_false(): void {
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin_error' ),
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->set_error_cache(
+			'test-plugin_error',
 			[
-				'error_cache' => $this->mock_http_response( 403, [ 'message' => 'Rate limited' ] ),
-				'timeout'     => strtotime( '+1 hour' ),
-			]
+				'timeout'   => 60,
+				'http_code' => 403,
+			],
+			60
 		);
 
 		$result = $this->api->get_remote_branches();
@@ -220,7 +223,9 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		$this->type = $this->make_type();
 		$this->api  = new GitHub_API( $this->type );
 	}
@@ -229,8 +234,7 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'gu_always_fetch_update' );
 		remove_all_filters( 'gu_parse_api_branches' );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		parent::tear_down();
 	}
 
@@ -268,10 +272,15 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 	}
 
 	private function seed_cache( array $extra ): void {
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin' ),
-			array_merge( [ 'timeout' => strtotime( '+12 hours' ) ], $extra )
-		);
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$table->add_entry( 'test-plugin', 'repo', '', strtotime( '+12 hours' ) );
+		foreach ( $extra as $column => $value ) {
+			if ( 'timeout' === $column ) {
+				continue;
+			}
+			$table->add_entry( 'test-plugin', $column, $value );
+		}
 	}
 
 	// -------------------------------------------------------------------------
@@ -418,14 +427,13 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 	public function test_get_remote_api_info_returns_false_when_maybe_extend_cache_returns_true(): void {
 		// Pre-seed with an expired timeout so api() is called, but the old cached version
 		// and ran are readable via get_repo_cache($slug, false) for maybe_extend_repo_cache.
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin' ),
-			[
-				'timeout'     => strtotime( '-1 hour' ),
-				'repo'        => 'test-plugin',
-				'test-plugin' => [ 'Version' => '1.0.0' ],
-				'ran'         => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-			]
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$table->add_entry( 'test-plugin', 'repo_headers', [ 'Version' => '1.0.0' ], strtotime( '-1 hour' ) );
+		$table->add_entry(
+			'test-plugin',
+			'ran',
+			[ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ]
 		);
 
 		$plugin_header = implode(
@@ -1104,7 +1112,9 @@ class Test_API_Common_Extended extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		$this->type = $this->make_type();
 		$this->api  = new GitHub_API( $this->type );
 	}
@@ -1112,8 +1122,7 @@ class Test_API_Common_Extended extends WP_UnitTestCase {
 	public function tear_down(): void {
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'gu_always_fetch_update' );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		parent::tear_down();
 	}
 
@@ -1159,13 +1168,11 @@ class Test_API_Common_Extended extends WP_UnitTestCase {
 	 * outbound call to api.wordpress.org.
 	 */
 	private function seed_dot_org_cache(): void {
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'dot_org' => 'not in dot org',
-				'timeout' => strtotime( '+12 hours' ),
-			]
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'dot_org',
+			'not in dot org',
+			strtotime( '+12 hours' )
 		);
 	}
 
@@ -1173,12 +1180,13 @@ class Test_API_Common_Extended extends WP_UnitTestCase {
 	 * Seed the error cache so api() returns false immediately without HTTP.
 	 */
 	private function seed_error_cache(): void {
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin_error' ),
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->set_error_cache(
+			'test-plugin_error',
 			[
-				'error_cache' => $this->mock_http_response( 403, [ 'message' => 'Rate limited' ] ),
-				'timeout'     => strtotime( '+1 hour' ),
-			]
+				'timeout'   => 60,
+				'http_code' => 403,
+			],
+			60
 		);
 	}
 
@@ -1400,7 +1408,9 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		$this->type = $this->make_type();
 		$this->api  = new GitHub_API( $this->type );
 	}
@@ -1408,8 +1418,7 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 	public function tear_down(): void {
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'gu_always_fetch_update' );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		parent::tear_down();
 	}
 
@@ -1451,10 +1460,15 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 	}
 
 	private function seed_main_cache( array $data ): void {
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin' ),
-			array_merge( [ 'timeout' => strtotime( '+12 hours' ) ], $data )
-		);
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$table->add_entry( 'test-plugin', 'repo', '', strtotime( '+12 hours' ) );
+		foreach ( $data as $column => $value ) {
+			if ( 'timeout' === $column ) {
+				continue;
+			}
+			$table->add_entry( 'test-plugin', $column, $value );
+		}
 	}
 
 	// -------------------------------------------------------------------------

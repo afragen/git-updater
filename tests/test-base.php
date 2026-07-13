@@ -21,20 +21,32 @@ class Test_Base extends WP_UnitTestCase {
 
 	private Base   $base;
 	private string $slug      = 'test-base-plugin';
-	private string $cache_key;
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		delete_site_option( 'git_updater' );
-		$this->base      = new Base();
-		$this->cache_key = 'ghu-' . md5( $this->slug );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
+		$this->base = new Base();
 	}
 
 	public function tear_down(): void {
-		delete_site_option( $this->cache_key );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( $this->slug );
 		delete_site_option( 'git_updater' );
 		remove_all_filters( 'gu_set_options' );
 		parent::tear_down();
+	}
+
+	private function seed_cache( array $data ): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( $this->slug );
+		$table->add_entry( $this->slug, 'placeholder', '', strtotime( '+12 hours' ) );
+		foreach ( $data as $column => $value ) {
+			if ( 'timeout' === $column ) {
+				continue;
+			}
+			$table->add_entry( $this->slug, $column, $value );
+		}
 	}
 
 	// -------------------------------------------------------------------------
@@ -74,13 +86,9 @@ class Test_Base extends WP_UnitTestCase {
 	}
 
 	public function test_add_assets_populates_low_banner_from_cached_assets(): void {
-		update_site_option(
-			$this->cache_key,
-			[
-				'assets'  => [ 'banner-772x250.png' => 'https://example.com/banner-low.png' ],
-				'timeout' => strtotime( '+12 hours' ),
-			]
-		);
+		$this->seed_cache( [
+			'assets' => [ 'banner-772x250.png' => 'https://example.com/banner-low.png' ],
+		] );
 
 		$repo = $this->make_repo();
 		$this->base->add_assets( $repo );
@@ -89,13 +97,9 @@ class Test_Base extends WP_UnitTestCase {
 	}
 
 	public function test_add_assets_populates_high_banner_from_cached_assets(): void {
-		update_site_option(
-			$this->cache_key,
-			[
-				'assets'  => [ 'banner-1544x500.png' => 'https://example.com/banner-high.png' ],
-				'timeout' => strtotime( '+12 hours' ),
-			]
-		);
+		$this->seed_cache( [
+			'assets' => [ 'banner-1544x500.png' => 'https://example.com/banner-high.png' ],
+		] );
 
 		$repo = $this->make_repo();
 		$this->base->add_assets( $repo );
@@ -104,13 +108,9 @@ class Test_Base extends WP_UnitTestCase {
 	}
 
 	public function test_add_assets_populates_icon_from_cached_assets(): void {
-		update_site_option(
-			$this->cache_key,
-			[
-				'assets'  => [ 'icon-128x128.png' => 'https://example.com/icon.png' ],
-				'timeout' => strtotime( '+12 hours' ),
-			]
-		);
+		$this->seed_cache( [
+			'assets' => [ 'icon-128x128.png' => 'https://example.com/icon.png' ],
+		] );
 
 		$repo = $this->make_repo();
 		$this->base->add_assets( $repo );
@@ -120,7 +120,7 @@ class Test_Base extends WP_UnitTestCase {
 
 	public function test_add_assets_does_not_set_banners_when_no_assets_in_cache(): void {
 		// Cache exists but has no 'assets' key.
-		update_site_option( $this->cache_key, [ 'timeout' => strtotime( '+12 hours' ) ] );
+		$this->seed_cache( [] );
 
 		$repo = $this->make_repo();
 		$this->base->add_assets( $repo );
@@ -138,13 +138,9 @@ class Test_Base extends WP_UnitTestCase {
 
 	public function test_add_assets_does_nothing_when_assets_value_is_object(): void {
 		// The guard `is_object($assets)` short-circuits when assets is an object.
-		update_site_option(
-			$this->cache_key,
-			[
-				'assets'  => (object) [ 'banner-772x250.png' => 'https://example.com/banner.png' ],
-				'timeout' => strtotime( '+12 hours' ),
-			]
-		);
+		$this->seed_cache( [
+			'assets' => (object) [ 'banner-772x250.png' => 'https://example.com/banner.png' ],
+		] );
 
 		$repo = $this->make_repo();
 		$this->base->add_assets( $repo );
@@ -397,9 +393,7 @@ class Test_Base_Load extends WP_UnitTestCase {
 	public function tear_down(): void {
 		global $pagenow;
 		$pagenow = '';
-		unset( $_POST['_wpnonce'], $_POST['gu_refresh_cache'] );
 		wp_set_current_user( 0 );
-		remove_all_actions( 'gu_refresh_transients' );
 		wp_deregister_style( 'git-updater' );
 		wp_cache_delete( 'cron', 'options' );
 		wp_unschedule_hook( 'gu_get_remote_plugin' );
@@ -444,17 +438,6 @@ class Test_Base_Load extends WP_UnitTestCase {
 		$this->assertTrue( wp_style_is( 'git-updater', 'registered' ) );
 	}
 
-	// Lines 172–179: valid POST nonce → do_action('gu_refresh_transients') fires.
-	public function test_load_fires_refresh_transients_on_valid_post_nonce(): void {
-		global $pagenow;
-		$pagenow                   = 'plugins.php';
-		$_POST['_wpnonce']         = wp_create_nonce( 'gu_refresh_cache' );
-		$_POST['gu_refresh_cache'] = '1';
-		$fired                     = false;
-		add_action( 'gu_refresh_transients', function () use ( &$fired ) { $fired = true; } );
-		$this->base->load();
-		$this->assertTrue( $fired );
-	}
 }
 
 // =============================================================================
@@ -972,19 +955,18 @@ class Test_Base_Get_Remote_Repo_Meta_Flow extends WP_UnitTestCase {
 
 	private const SLUG = 'test-gu-plugin';
 
-	private string    $cache_key;
 	private \stdClass $config;
 	private int       $request_count = 0;
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
 
-		$this->cache_key     = 'ghu-' . md5( self::SLUG );
 		$this->request_count = 0;
 
-		delete_site_option( $this->cache_key );
-		delete_site_option( $this->cache_key . '_error' );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG );
 
 		$configs = ( new Fragen\Git_Updater\Plugin() )->get_plugin_configs();
 		if ( ! isset( $configs[ self::SLUG ] ) ) {
@@ -997,8 +979,7 @@ class Test_Base_Get_Remote_Repo_Meta_Flow extends WP_UnitTestCase {
 
 	public function tear_down(): void {
 		remove_filter( 'pre_http_request', [ $this, 'mock_http' ], 10 );
-		delete_site_option( $this->cache_key );
-		delete_site_option( $this->cache_key . '_error' );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG );
 		parent::tear_down();
 	}
 
@@ -1123,14 +1104,18 @@ class Test_Base_Get_Remote_Repo_Meta_Flow extends WP_UnitTestCase {
 	}
 
 	private function seed_cache( string $version ): void {
-		update_site_option(
-			$this->cache_key,
-			[
-				'timeout'  => strtotime( '-1 hour' ),
-				'ran'      => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-				self::SLUG => [ 'Version' => $version ],
-				'repo'     => self::SLUG,
-			]
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( self::SLUG );
+		$table->add_entry(
+			self::SLUG,
+			'repo_headers',
+			[ 'Version' => $version ],
+			strtotime( '-1 hour' )
+		);
+		$table->add_entry(
+			self::SLUG,
+			'ran',
+			[ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ]
 		);
 	}
 
@@ -1152,7 +1137,7 @@ class Test_Base_Get_Remote_Repo_Meta_Flow extends WP_UnitTestCase {
 		( new Base() )->get_remote_repo_meta( $this->config );
 
 		$this->assertGreaterThan( 1, $this->request_count );
-		$cache = get_site_option( $this->cache_key );
-		$this->assertNotEmpty( $cache['ran'] );
+		$ran = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_entry( self::SLUG, 'ran' );
+		$this->assertNotEmpty( $ran );
 	}
 }

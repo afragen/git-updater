@@ -127,7 +127,6 @@ class Plugin {
 		}
 
 		$extra_header_keys = array_keys( self::$extra_headers );
-		$options_modified  = false;
 		$plugins           = array_filter(
 			$repos_arr,
 			function ( $repo ) use ( $extra_header_keys ) {
@@ -167,16 +166,12 @@ class Plugin {
 				$header = $this->parse_header_uri( $plugin[ $key ] );
 			}
 
-			$header         = $this->parse_extra_headers( $header, $plugin, $header_parts );
-			$current_branch = isset( $header['repo'] ) ? "current_branch_{$header['repo']}" : null;
+			$header = $this->parse_extra_headers( $header, $plugin, $header_parts );
 
-			if ( isset( self::$options[ $current_branch ] )
-			&& ( 'master' === self::$options[ $current_branch ] && 'master' !== $header['primary_branch'] )
-			) {
-				unset( self::$options[ $current_branch ] );
-				$options_modified = true;
-			}
-			$branch = self::$options[ $current_branch ] ?? $header['primary_branch'];
+			// Resolve the active branch from the cache table, falling back to the header's primary branch.
+			$cache_row    = $this->get_repo_cache( $header['repo'] ?? '', false );
+			$cache_branch = is_array( $cache_row ) ? ( $cache_row['current_branch'] ?? null ) : null;
+			$branch       = $cache_branch ?: $header['primary_branch'];
 
 			$git_plugin['type']           = 'plugin';
 			$git_plugin['git']            = $repo_parts['git_server'];
@@ -231,10 +226,6 @@ class Plugin {
 			$git_plugin = apply_filters( 'gu_fix_repo_slug', $git_plugin );
 
 			$git_plugins[ $git_plugin['slug'] ] = (object) $git_plugin;
-		}
-
-		if ( $options_modified ) {
-			update_site_option( 'git_updater', self::$options );
 		}
 
 		return $git_plugins;

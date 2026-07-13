@@ -186,8 +186,11 @@ class API {
 		$auth_header = $this->add_auth_header( [], $url );
 
 		// Use cached API failure data to avoid hammering the API.
-		$error_cache = $this->get_repo_cache( $this->type->slug . '_error' );
-		$cached      = isset( $error_cache['error_cache'] );
+		// The error cache has its own expiry in the `error_timeout` column.
+		$error_cache = $this->get_repo_cache( $this->type->slug . '_error', false );
+		$cached      = isset( $error_cache['error_cache'] )
+			&& ! empty( $error_cache['error_timeout'] )
+			&& time() < (int) $error_cache['error_timeout'];
 		$response    = false;
 		$code        = 0;
 		if ( ! $cached ) {
@@ -490,9 +493,7 @@ class API {
 			return empty( static::$options['branch_switch'] );
 		}
 
-		$refresh = get_site_transient( 'gu_refresh_cache' );
-
-		return ! $refresh && ! $response && ! $this->can_update_repo( $this->type );
+		return ! $response && ! $this->can_update_repo( $this->type );
 	}
 
 	/**
@@ -553,10 +554,6 @@ class API {
 	 */
 	public function get_local_info( $repo, $file ) {
 		$response = null;
-
-		if ( get_site_transient( 'gu_refresh_cache' ) ) {
-			return $response;
-		}
 
 		if ( is_dir( $repo->local_path )
 			&& file_exists( $repo->local_path . $file )

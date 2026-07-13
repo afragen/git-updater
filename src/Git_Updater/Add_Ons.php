@@ -189,8 +189,8 @@ class Add_Ons {
 	 */
 	public function get_addon_api_results() {
 		$cache          = $this->get_repo_cache( 'gu_addon_api_results' );
-		$cached_results = ( false !== $cache && isset( $cache['gu_addon_api_results'] ) )
-			? $cache['gu_addon_api_results']
+		$cached_results = ( false !== $cache && isset( $cache['addon_api_results'] ) )
+			? $cache['addon_api_results']
 			: [];
 
 		if ( count( $cached_results ) === count( self::$addons ) ) {
@@ -221,7 +221,7 @@ class Add_Ons {
 
 		if ( ! empty( $api_results ) && $api_results !== $cached_results ) {
 			$timeout = count( $api_results ) === count( self::$addons ) ? '+7 days' : '+8 hours';
-			$this->set_repo_cache( 'gu_addon_api_results', $api_results, 'gu_addon_api_results', $timeout );
+			$this->set_repo_cache( 'addon_api_results', $api_results, 'gu_addon_api_results', $timeout );
 		}
 
 		return $api_results;

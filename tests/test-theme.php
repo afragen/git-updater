@@ -190,28 +190,20 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		$this->cache_key = 'ghu-' . md5( 'test-gu-theme' );
 		delete_site_option( $this->cache_key );
 	}
 
 	public function tear_down(): void {
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme' );
 		delete_site_option( $this->cache_key );
 		parent::tear_down();
 	}
 
-	/**
-	 * Seed a complete 'ran' cache so waiting_for_background_update() returns
-	 * false (background fetch already finished) and themes_api() proceeds.
-	 */
-	private function seed_complete_cache(): void {
-		update_site_option(
-			$this->cache_key,
-			[
-				'timeout' => strtotime( '+12 hours' ),
-				'any'     => 'data',
-				'ran'     => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-			]
-		);
+	private function seed_cache(): void {
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( 'test-gu-theme', 'repo', '', strtotime( '+12 hours' ) );
 	}
 
 	public function test_returns_result_for_non_theme_information_action(): void {
@@ -241,7 +233,7 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_returns_result_for_dot_org_theme(): void {
-		$this->seed_complete_cache();
+		$this->seed_cache();
 		$theme_obj = $this->make_theme_obj( [ 'dot_org' => true ] );
 		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 		$response  = new stdClass();
@@ -251,7 +243,7 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_populates_response_for_git_theme(): void {
-		$this->seed_complete_cache();
+		$this->seed_cache();
 		$theme_obj = $this->make_theme_obj( [ 'dot_org' => false ] );
 		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 		$response  = new stdClass();
@@ -264,7 +256,7 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_populates_description_as_joined_sections(): void {
-		$this->seed_complete_cache();
+		$this->seed_cache();
 		$theme_obj = $this->make_theme_obj( [
 			'dot_org'  => false,
 			'sections' => [
@@ -910,17 +902,16 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 			$this->markTestSkipped( 'Fixture theme test-gu-theme not installed — run `npm run wp-env start`.' );
 		}
 
-		// Simulate a legacy 'master' current_branch entry for the fixture theme whose
-		// style.css declares 'Primary Branch: main'.
-		Base::$options['current_branch_test-gu-theme'] = 'master';
+		// Current branch is resolved from the cache table (not a legacy option key).
+		// Seed the table and confirm make_repo() picks it up.
+		$slug = 'test-gu-theme';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $slug, 'current_branch', 'develop', strtotime( '+12 hours' ) );
 
-		// Theme constructor calls get_theme_meta(), which triggers the migration.
 		new Theme();
 
-		$options_ref = new ReflectionProperty( Theme::class, 'options' );
-		PHP_VERSION_ID < 80100 && $options_ref->setAccessible( true );
-		$options = $options_ref->getValue( null );
-		$this->assertArrayNotHasKey( 'current_branch_test-gu-theme', $options );
+		$configs = ( new Theme() )->get_theme_configs();
+		$this->assertSame( 'develop', $configs[ $slug ]->branch ?? null );
+		$this->assertArrayNotHasKey( 'current_branch_' . $slug, Base::$options );
 	}
 
 	public function test_git_head_file_overrides_branch_value(): void {
@@ -1272,16 +1263,9 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		wp_cache_delete( 'cron', 'options' );
 		wp_unschedule_hook( 'gu_get_remote_theme' );
 
-		// Seed a complete 'ran' cache so waiting_for_background_update($repo) →
-		// is_repo_cache_complete() returns true → not waiting → direct fetch.
-		update_site_option(
-			'ghu-' . md5( 'test-gu-theme' ),
-			[
-				'timeout' => strtotime( '+12 hours' ),
-				'dot_org' => false,
-				'ran'     => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-			]
-		);
+		// Seed a non-empty cache so waiting_for_background_update($repo) → get_repo_cache(slug, false)
+		// returns a non-empty array, making empty($cache) === false → not waiting → direct fetch.
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( 'test-gu-theme', 'dot_org', false, strtotime( '+12 hours' ) );
 
 		// Mock HTTP to prevent outbound calls and error-cache contamination.
 		add_filter(

@@ -7,24 +7,24 @@
 
 use Fragen\Git_Updater\API\Language_Pack_API;
 use Fragen\Git_Updater\Base;
+use Fragen\Git_Updater\DB\Repo_Cache_Table;
 
 class Test_Language_Pack_API extends WP_UnitTestCase {
 
-	private string $slug      = 'test-langpack-plugin';
-	private string $cache_key;
+	private string $slug = 'test-langpack-plugin';
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
-		$this->cache_key = 'ghu-' . md5( $this->slug );
+		Repo_Cache_Table::instance()->install_table();
 	}
 
 	public function tear_down(): void {
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'gu_get_language_pack_json' );
 		remove_all_filters( 'gu_post_process_language_pack_package' );
-		delete_site_option( $this->cache_key );
-		delete_site_option( 'ghu-' . md5( $this->slug . '_error' ) );
+		Repo_Cache_Table::instance()->delete_repo( $this->slug );
 		parent::tear_down();
 	}
 
@@ -45,7 +45,7 @@ class Test_Language_Pack_API extends WP_UnitTestCase {
 
 	public function test_get_language_pack_returns_true_on_cache_hit(): void {
 		$languages = (object) [ 'en_US' => (object) [ 'language' => 'en_US', 'package' => 'en_US.zip' ] ];
-		update_site_option( $this->cache_key, [ 'languages' => $languages ] );
+		Repo_Cache_Table::instance()->add_entry( $this->slug, 'languages', $languages, strtotime( '+12 hours' ) );
 
 		$api    = new Language_Pack_API( $this->make_type() );
 		$result = $api->get_language_pack( [ 'owner_repo' => 'owner/test-langpack-plugin', 'uri' => 'https://github.com/owner/test-langpack-plugin' ] );
@@ -55,7 +55,7 @@ class Test_Language_Pack_API extends WP_UnitTestCase {
 
 	public function test_get_language_pack_sets_language_packs_on_type_from_cache(): void {
 		$languages = (object) [ 'en_US' => (object) [ 'language' => 'en_US', 'package' => 'en_US.zip' ] ];
-		update_site_option( $this->cache_key, [ 'languages' => $languages ] );
+		Repo_Cache_Table::instance()->add_entry( $this->slug, 'languages', $languages, strtotime( '+12 hours' ) );
 
 		$type   = $this->make_type();
 		$api    = new Language_Pack_API( $type );
@@ -67,7 +67,7 @@ class Test_Language_Pack_API extends WP_UnitTestCase {
 	public function test_get_language_pack_does_not_set_language_packs_when_cache_has_empty_languages(): void {
 		// Cache exists but 'languages' key is missing — should fall through to the API call path.
 		// Seed with a cache that has no 'languages' key.
-		update_site_option( $this->cache_key, [ 'timeout' => strtotime( '+12 hours' ) ] );
+		Repo_Cache_Table::instance()->add_entry( $this->slug, 'placeholder', '', strtotime( '+12 hours' ) );
 
 		$type = $this->make_type();
 		// language_packs should NOT be set yet.
@@ -168,8 +168,8 @@ class Test_Language_Pack_API extends WP_UnitTestCase {
 			'uri'        => 'https://github.com/owner/' . $this->slug,
 		] );
 
-		$cache = get_site_option( $this->cache_key );
-		$this->assertArrayHasKey( 'languages', $cache );
+		$cache = Repo_Cache_Table::instance()->get_entry( $this->slug, 'languages' );
+		$this->assertNotNull( $cache );
 	}
 
 	public function test_get_language_pack_constructs_package_url_from_uri_and_primary_branch(): void {

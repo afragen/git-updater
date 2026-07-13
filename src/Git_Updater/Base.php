@@ -169,17 +169,21 @@ class Base {
 			);
 		}
 
-		if ( isset( $_POST['_wpnonce'], $_POST['gu_refresh_cache'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
-			/**
-			 * Fires later in cycle when Refreshing Cache.
-			 *
-			 * @since 10.0.0
-			 */
-			do_action( 'gu_refresh_transients' );
-		}
-
 		$this->get_meta_plugins();
 		$this->get_meta_themes();
+
+		// Prune cached repo rows for repos no longer present (network-wide table:
+		// only safe to run from the main site / network admin).
+		if ( ! is_multisite() || is_main_site() ) {
+			$gu_plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
+			$gu_themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
+			$live_slugs = array_merge( array_keys( $gu_plugins ), array_keys( $gu_themes ) );
+			$additions  = (array) get_site_option( 'git_updater_additions', [] );
+			foreach ( $additions as $addition ) {
+				$live_slugs[] = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];
+			}
+			\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->prune_stale( $live_slugs );
+		}
 	}
 
 	/**

@@ -737,10 +737,15 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 	}
 
 	private function seed_cache( array $data ): void {
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin' ),
-			array_merge( [ 'timeout' => strtotime( '+12 hours' ) ], $data )
-		);
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$table->add_entry( 'test-plugin', 'repo', '', strtotime( '+12 hours' ) );
+		foreach ( $data as $column => $value ) {
+			if ( 'timeout' === $column ) {
+				continue;
+			}
+			$table->add_entry( 'test-plugin', $column, $value );
+		}
 	}
 
 	// -------------------------------------------------------------------------

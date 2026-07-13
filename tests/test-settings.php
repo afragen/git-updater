@@ -128,57 +128,6 @@ trait Settings_Test_Helper {
 }
 
 // =============================================================================
-// Test_Settings_Refresh_Caches  lines 80–89
-// =============================================================================
-
-/**
- * Class Test_Settings_Refresh_Caches
- *
- * Tests refresh_caches() — called from constructor.
- */
-class Test_Settings_Refresh_Caches extends GU_Test_Case {
-	use Settings_Test_Helper;
-
-	public function set_up(): void {
-		parent::set_up();
-		new Base();
-		$this->settings = new Settings();
-	}
-
-	public function tear_down(): void {
-		delete_site_transient( 'gu_refresh_cache' );
-		$this->settings_tear_down();
-		parent::tear_down();
-	}
-
-	public function test_refresh_caches_returns_early_without_nonce(): void {
-		unset( $_POST['_wpnonce'] );
-		$new = new Settings();
-		$this->assertFalse( (bool) get_site_transient( 'gu_refresh_cache' ) );
-	}
-
-	public function test_refresh_caches_returns_early_with_invalid_nonce(): void {
-		$_POST['_wpnonce'] = 'bad_nonce';
-		$new               = new Settings();
-		$this->assertFalse( (bool) get_site_transient( 'gu_refresh_cache' ) );
-	}
-
-	public function test_refresh_caches_with_valid_nonce_but_no_gu_refresh_cache_flag(): void {
-		$_POST['_wpnonce'] = wp_create_nonce( 'gu_refresh_cache' );
-		unset( $_POST['gu_refresh_cache'] );
-		$new = new Settings();
-		$this->assertFalse( (bool) get_site_transient( 'gu_refresh_cache' ) );
-	}
-
-	public function test_refresh_caches_sets_transient_when_flag_present(): void {
-		$_POST['_wpnonce']       = wp_create_nonce( 'gu_refresh_cache' );
-		$_POST['gu_refresh_cache'] = '1';
-		$new                     = new Settings();
-		$this->assertTrue( (bool) get_site_transient( 'gu_refresh_cache' ) );
-	}
-}
-
-// =============================================================================
 // Test_Settings_Load_Hooks  lines 105–145
 // =============================================================================
 
@@ -845,6 +794,8 @@ class Test_Settings_Unset_Stale_Options extends GU_Test_Case {
 	public function test_unset_stale_options_preserves_current_branch_for_existing_repo(): void {
 		$slug   = 'my-plugin';
 		$plugin = $this->make_plugin_obj( [ 'slug' => $slug ] );
+		// current_branch_<slug> no longer lives in the git_updater option; it is
+		// stored in the cache table, so an option key of this shape is stale and removed.
 		Base::$options = [ "current_branch_{$slug}" => 'develop' ];
 		update_site_option( 'git_updater', Base::$options );
 		$this->settings->unset_stale_options(
@@ -852,7 +803,7 @@ class Test_Settings_Unset_Stale_Options extends GU_Test_Case {
 			[ $slug => $plugin ]
 		);
 		$saved = get_site_option( 'git_updater', [] );
-		$this->assertArrayHasKey( "current_branch_{$slug}", $saved );
+		$this->assertArrayNotHasKey( "current_branch_{$slug}", $saved );
 	}
 
 	public function test_unset_stale_options_removes_current_branch_for_missing_repo(): void {

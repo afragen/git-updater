@@ -129,12 +129,12 @@ trait API_Common {
 	 */
 	final public function get_remote_api_info( $git, $request ): bool {
 		$cache    = $this->get_repo_cache( $this->type->slug );
-		$response = is_array( $cache ) ? ( $cache[ $this->type->slug ] ?? false ) : false;
+		$response = is_array( $cache ) ? ( $cache['repo_headers'] ?? false ) : false;
 
 		// Capture old version before overwriting: use valid cache if available, else raw option.
 		$prior       = is_array( $cache ) ? $cache : $this->get_repo_cache( $this->type->slug, false );
-		$old_version = is_array( $prior ) && isset( $prior[ $this->type->slug ]['Version'] )
-			? (string) $prior[ $this->type->slug ]['Version']
+		$old_version = is_array( $prior ) && isset( $prior['repo_headers']['Version'] )
+			? (string) $prior['repo_headers']['Version']
 			: '';
 
 		if ( ! $response ) {
@@ -153,7 +153,7 @@ trait API_Common {
 
 		$response['dot_org'] = $this->get_dot_org_data();
 		$this->set_file_info( $response );
-		$this->set_repo_cache( $this->type->slug, $response, false, false );
+		$this->set_repo_cache( 'repo_headers', $response, false, false );
 		$this->set_repo_cache( 'repo', $this->type->slug, false, false );
 
 		// Check remote version against the pre-fetch cached version; extend cache if unchanged.

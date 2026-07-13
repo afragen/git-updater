@@ -687,7 +687,6 @@ class REST_API {
 	 */
 	public function get_additions_data() {
 		$additions = get_site_option( 'git_updater_additions', [] );
-		$additions = ( new Additions() )->deduplicate( $additions );
 		$additions = array_filter(
 			$additions,
 			function ( $addition ) {
@@ -715,9 +714,8 @@ class REST_API {
 		if ( ! $slug ) {
 			return (object) [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
 		}
-		$cache_key = $this->get_cache_key( $slug );
-		$flush     = delete_site_option( $cache_key );
-		$message   = $flush
+		$flush   = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( $slug );
+		$message = $flush
 			? [
 				'success' => true,
 				$slug     => "Repository cache for $slug has been flushed.",
@@ -1170,8 +1168,6 @@ class REST_API {
 			}
 
 			$this->set_repo_cache( 'current_branch', '', $slug );
-			unset( $options[ "current_branch_$slug" ] );
-			update_site_option( 'git_updater', $options );
 
 			$response = [
 				'success'      => true,

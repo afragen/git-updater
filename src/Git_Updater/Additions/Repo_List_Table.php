@@ -308,6 +308,7 @@ class Repo_List_Table extends WP_List_Table {
 				if ( in_array( $slug, $option, true ) ) {
 					unset( self::$options[ $key ] );
 					update_site_option( 'git_updater_additions', self::$options );
+					\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( $slug );
 				}
 			}
 		}

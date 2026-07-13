@@ -15,23 +15,11 @@ namespace Fragen\Git_Updater\WP_CLI;
  */
 class CLI_Common {
 	/**
-	 * Delete all `ghu-` prefixed data from options table.
+	 * Delete all cached repository data from the cache table.
 	 *
 	 * @return bool
 	 */
 	public function delete_all_cached_data() {
-		global $wpdb;
-
-		$table              = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
-		$column             = is_multisite() ? 'meta_key' : 'option_name';
-		$get_options_string = 'SELECT * FROM ' . $table . ' WHERE ' . $column . ' LIKE %s';
-
-		$ghu_options = $wpdb->get_results( $wpdb->prepare( $get_options_string, [ '%ghu-%' ] ) ); // phpcs:ignore
-		foreach ( $ghu_options as $option ) {
-			$option_name = is_multisite() ? $option->meta_key : $option->option_name;
-			delete_site_option( $option_name );
-		}
-
-		return true;
+		return \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_all_repos();
 	}
 }

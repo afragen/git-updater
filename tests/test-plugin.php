@@ -313,15 +313,16 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 			3
 		);
 
-		// Simulate a legacy 'master' current_branch entry for a plugin whose header
-		// declares 'PrimaryBranch: main'. Constructor calls get_plugin_meta() which triggers migration.
-		Base::$options['current_branch_branch-plugin'] = 'master';
+		// Current branch is resolved from the cache table (not a legacy option key).
+		// Seed the table and confirm make_repo() picks it up.
+		$slug = 'branch-plugin';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $slug, 'current_branch', 'develop', strtotime( '+12 hours' ) );
+
 		new Plugin();
 
-		$options_ref = new ReflectionProperty( Plugin::class, 'options' );
-		PHP_VERSION_ID < 80100 && $options_ref->setAccessible( true );
-		$options = $options_ref->getValue( null );
-		$this->assertArrayNotHasKey( 'current_branch_branch-plugin', $options );
+		$configs = ( new Plugin() )->get_plugin_configs();
+		$this->assertSame( 'develop', $configs[ $slug ]->branch ?? null );
+		$this->assertArrayNotHasKey( 'current_branch_' . $slug, Base::$options );
 	}
 
 	public function test_gu_fix_repo_slug_filter_can_modify_slug(): void {
@@ -532,17 +533,17 @@ class Test_Plugin_Load_Pre_Filters extends WP_UnitTestCase {
 class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 	use Plugin_Mock_Helper;
 
-	private string $cache_key;
+	private string $slug = 'test-plugin';
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
-		$this->cache_key = 'ghu-' . md5( 'test-plugin' );
-		delete_site_option( $this->cache_key );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 	}
 
 	public function tear_down(): void {
-		delete_site_option( $this->cache_key );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( $this->slug );
 		parent::tear_down();
 	}
 
@@ -588,7 +589,7 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_returns_result_when_dot_org_on_primary_branch(): void {
-		$this->seed_complete_cache();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
 		$plugin_obj = $this->make_plugin_obj( [
 			'dot_org'        => true,
 			'branch'         => 'main',
@@ -602,7 +603,7 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_populates_response_for_git_plugin(): void {
-		$this->seed_complete_cache();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
 		$plugin_obj = $this->make_plugin_obj( [ 'dot_org' => false ] );
 		$plugin     = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
 		$response   = new stdClass();
@@ -616,7 +617,7 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_response_version_falls_back_to_local_version(): void {
-		$this->seed_complete_cache();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
 		$plugin_obj = $this->make_plugin_obj( [
 			'dot_org'        => false,
 			'remote_version' => '',
@@ -630,7 +631,7 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_response_short_description_is_truncated(): void {
-		$this->seed_complete_cache();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
 		$long_desc  = str_repeat( 'A', 200 );
 		$plugin_obj = $this->make_plugin_obj( [
 			'dot_org'  => false,
@@ -645,7 +646,7 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 
 	public function test_dot_org_on_non_primary_branch_returns_response(): void {
 		// dot_org = true but branch != primary_branch → should NOT skip (returns populated response).
-		$this->seed_complete_cache();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
 		$plugin_obj = $this->make_plugin_obj( [
 			'dot_org'        => true,
 			'branch'         => 'develop',
@@ -1064,15 +1065,8 @@ class Test_Plugin_Get_Remote_Plugin_Meta extends WP_UnitTestCase {
 		wp_cache_delete( 'cron', 'options' );
 		wp_unschedule_hook( 'gu_get_remote_plugin' );
 
-		// Seed a complete 'ran' cache so waiting_for_background_update($plugin) returns false.
-		update_site_option(
-			'ghu-' . md5( 'test-plugin' ),
-			[
-				'timeout' => strtotime( '+12 hours' ),
-				'dot_org' => false,
-				'ran'     => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-			]
-		);
+		// Seed a non-empty cache so waiting_for_background_update($plugin) returns false.
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( 'test-plugin', 'dot_org', false, strtotime( '+12 hours' ) );
 
 		// Mock HTTP to prevent outbound calls and error-cache contamination.
 		add_filter(
@@ -1228,11 +1222,9 @@ class Test_Plugin_Meta_HTTP_Mock extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
-
-		$this->cache_key = 'ghu-' . md5( self::SLUG );
-		delete_site_option( $this->cache_key );
-		delete_site_option( $this->cache_key . '_error' );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 
 		$configs = ( new Plugin() )->get_plugin_configs();
 		if ( ! isset( $configs[ self::SLUG ] ) ) {
@@ -1245,8 +1237,8 @@ class Test_Plugin_Meta_HTTP_Mock extends WP_UnitTestCase {
 
 	public function tear_down(): void {
 		remove_filter( 'pre_http_request', [ $this, 'mock_http' ], 10 );
-		delete_site_option( $this->cache_key );
-		delete_site_option( $this->cache_key . '_error' );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG . '_error' );
 		parent::tear_down();
 	}
 

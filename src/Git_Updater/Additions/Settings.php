@@ -158,15 +158,14 @@ class Settings {
 		$this->additions_page_init();
 
 		if ( 'git_updater_additions' === $tab ) {
-			$action  = add_query_arg(
+			$action = add_query_arg(
 				[
 					'page' => 'git-updater',
 					'tab'  => $tab,
 				],
 				$action
 			);
-			$options = ( new Additions() )->deduplicate( self::$options_additions );
-			( new Repo_List_Table( $options ) )->render_list_table();
+			( new Repo_List_Table( self::$options_additions ) )->render_list_table();
 			?>
 			<form class="settings" method="post" action="<?php echo esc_attr( $action ); ?>">
 				<?php

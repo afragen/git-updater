@@ -166,6 +166,7 @@ class GU_Freemius {
 	 */
 	public function uninstall_cleanup() {
 		require_once dirname( __DIR__, 2 ) . '/gu-uninstall.php';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->uninstall_table();
 	}
 
 	/**

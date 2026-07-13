@@ -24,7 +24,9 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		$this->api = new GitHub_API( $this->make_type() );
 	}
 
@@ -526,9 +528,13 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 	 * (lines 308–314).
 	 */
 	public function test_add_accept_header_adds_octet_stream_for_github_release_asset(): void {
-		$slug      = 'test-plugin';
-		$cache_key = $this->api->get_cache_key( $slug );
-		update_site_option( $cache_key, [ 'release_asset_download' => 'https://cdn.example.com/release.zip' ] );
+		$slug = 'test-plugin';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			$slug,
+			'release_asset_download',
+			'https://cdn.example.com/release.zip',
+			strtotime( '+12 hours' )
+		);
 
 		// On CI no repos are installed, so get_running_git_servers() returns [].
 		// Force 'github' into the list so the foreach body executes.
@@ -537,7 +543,7 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 		$result = $this->api->add_accept_header( [ 'headers' => [ 'github' => $slug ] ] );
 
 		remove_all_filters( 'gu_running_git_servers' );
-		delete_site_option( $cache_key );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( $slug );
 
 		$this->assertSame( 'application/octet-stream', $result['headers']['Accept'] );
 		$this->assertArrayNotHasKey( 'github', $result['headers'] );

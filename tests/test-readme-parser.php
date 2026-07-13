@@ -64,18 +64,14 @@ README;
 	 */
 	private const SLUG = 'test-plugin';
 
-	/**
-	 * Computed cache key: 'ghu-' . md5( SLUG ).
-	 */
-	private string $cache_key;
-
 	public function set_up(): void {
 		parent::set_up();
-		$this->cache_key = 'ghu-' . md5( self::SLUG );
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 	}
 
 	public function tear_down(): void {
-		delete_site_option( $this->cache_key );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG );
 		parent::tear_down();
 	}
 
@@ -97,12 +93,11 @@ README;
 	 * @param array<string, string> $assets filename => URL pairs.
 	 */
 	private function seed_assets( array $assets ): void {
-		update_site_option(
-			$this->cache_key,
-			[
-				'assets'  => $assets,
-				'timeout' => strtotime( '+12 hours' ),
-			]
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			self::SLUG,
+			'assets',
+			$assets,
+			strtotime( '+12 hours' )
 		);
 	}
 

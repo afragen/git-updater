@@ -103,6 +103,8 @@ class Test_Rest_Update_Process extends GU_Test_Case {
 		);
 
 		update_site_option( 'git_updater_api_key', 'test-process-key' );
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		$_REQUEST   = [];
 		$_GET       = [];
 		$this->rest = new Rest_Update();
@@ -271,9 +273,10 @@ class Test_Rest_Update_Process extends GU_Test_Case {
 	// -------------------------------------------------------------------------
 
 	public function test_get_primary_branch_returns_value_from_cache(): void {
-		$slug      = 'primary-branch-test-slug-xyz';
-		$cache_key = 'ghu-' . md5( $slug );
-		update_site_option( $cache_key, [ $slug => [ 'PrimaryBranch' => 'main' ] ] );
+		$slug = 'primary-branch-test-slug-xyz';
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( $slug );
+		$table->add_entry( $slug, 'primary_branch', 'main', strtotime( '+12 hours' ) );
 
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/update' );
 		$request->set_param( 'plugin', $slug );
@@ -286,7 +289,6 @@ class Test_Rest_Update_Process extends GU_Test_Case {
 
 		$result = $this->rest->process_request_data( $request );
 
-		delete_site_option( $cache_key );
 		$this->assertSame( 'main', $result['tag'] );
 	}
 }

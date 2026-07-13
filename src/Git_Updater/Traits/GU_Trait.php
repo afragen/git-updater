@@ -128,7 +128,10 @@ trait GU_Trait {
 	}
 
 	/**
-	 * Get cache key.
+	 * Get cache key (slug normalizer).
+	 *
+	 * The repository cache now lives in a dedicated table indexed on `slug`, so
+	 * the `ghu-` + md5 prefix is no longer used. This returns the repo slug.
 	 *
 	 * @param  string|bool $repo Repo name or false.
 	 *
@@ -138,7 +141,7 @@ trait GU_Trait {
 		if ( ! $repo ) {
 			$repo = $this->type->slug ?? 'ghu';
 		}
-		return 'ghu-' . md5( $repo );
+		return (string) $repo;
 	}
 
 	/**
@@ -152,22 +155,30 @@ trait GU_Trait {
 	 * @return array<string, mixed>|false The repo cache. False if expired.
 	 */
 	final public function get_repo_cache( $repo = false, $timeout = true ) {
-		$cache_key = $this->get_cache_key( $repo );
-		$cache     = get_site_option( $cache_key, [] );
+		$slug  = $this->get_cache_key( $repo );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$row   = $table->get_repo( $slug );
 
-		if ( $timeout && ! $this->is_cache_timeout_valid( $cache['timeout'] ?? 0 ) ) {
+		if ( null === $row ) {
 			return false;
 		}
 
-		return $cache;
+		if ( $timeout && ! $this->is_cache_timeout_valid( (int) ( $row['timeout'] ?? 0 ) ) ) {
+			return false;
+		}
+
+		// Expose the row timeout for callers that gate on it.
+		$row['timeout'] = (int) ( $row['timeout'] ?? 0 );
+
+		return $row;
 	}
 
 	/**
-	 * Sets repo data for cache in site option.
+	 * Sets repo data for cache in the cache table.
 	 *
 	 * @access protected
 	 *
-	 * @param string      $id       Data Identifier.
+	 * @param string      $id       Column name / data identifier.
 	 * @param mixed       $response Data to be stored.
 	 * @param string|bool $repo     Repo name or false.
 	 * @param string|bool $timeout  Timeout for cache.
@@ -179,30 +190,40 @@ trait GU_Trait {
 		if ( is_wp_error( $response ) ) {
 			return false;
 		}
-		$cache_key = $this->get_cache_key( $repo );
-		$cache     = get_site_option( $cache_key, [] );
+		$slug  = $this->get_cache_key( $repo );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 
-		$hours   = $this->get_class_vars( 'API\API', 'hours' );
-		$timeout = $timeout ? $timeout : '+' . $hours . ' hours';
+		$int_timeout = 0;
+		if ( $timeout ) {
+			$hours   = $this->get_class_vars( 'API\API', 'hours' );
+			$timeout = apply_filters( 'gu_repo_cache_timeout', $timeout, $id, $response, $repo );
 
-		/**
-		 * Allow filtering of cache timeout for repo information.
-		 *
-		 * @since 10.0.0
-		 *
-		 * @param string      $timeout  Timeout value used with strtotime().
-		 * @param string      $id       Data Identifier.
-		 * @param mixed       $response Data to be stored.
-		 * @param string|bool $repo     Repo name or false.
-		 */
-		$timeout = apply_filters( 'gu_repo_cache_timeout', $timeout, $id, $response, $repo );
+			/**
+			 * Allow filtering of cache timeout for repo information.
+			 *
+			 * @since 10.0.0
+			 *
+			 * @param string      $timeout  Timeout value used with strtotime().
+			 * @param string      $id       Data Identifier.
+			 * @param mixed       $response Data to be stored.
+			 * @param string|bool $repo     Repo name or false.
+			 */
+			$int_timeout = strtotime( $timeout );
+		}
 
-		$cache['timeout'] = $cache['timeout'] ?? strtotime( $timeout );
-		$cache[ $id ]     = $response;
+		if ( 'error_cache' === $id ) {
+			$error_timeout = $int_timeout > 0 ? $int_timeout - time() : 0;
 
-		update_site_option( $cache_key, $cache );
+			return $table->set_error_cache( $slug, $response, max( $error_timeout, 0 ) );
+		}
 
-		return true;
+		// When $timeout is false, preserve the existing row timeout.
+		if ( 0 === $int_timeout ) {
+			$existing    = $table->get_repo( $slug );
+			$int_timeout = null === $existing ? (int) ( $this->get_class_vars( 'API\API', 'hours' ) * HOUR_IN_SECONDS + time() ) : (int) ( $existing['timeout'] ?? 0 );
+		}
+
+		return $table->add_entry( $slug, $id, $response, $int_timeout );
 	}
 
 	/**
@@ -221,10 +242,10 @@ trait GU_Trait {
 	 * @return void
 	 */
 	final public function set_repo_cache_timeout( string $slug ): void {
-		$cache_key = $this->get_cache_key( $slug );
-		$cache     = get_site_option( $cache_key, [] );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$row   = $table->get_repo( $slug );
 
-		if ( ! isset( $cache['ran'] ) || array_diff( self::expected_ran_steps(), $cache['ran'] ) ) {
+		if ( null === $row || ! isset( $row['ran'] ) || array_diff( self::expected_ran_steps(), $row['ran'] ) ) {
 			/**
 			 * Filter the fallback cache timeout duration (in hours) for an
 			 * incomplete fetch cycle.  Prevents infinite re-fetching by setting
@@ -236,15 +257,16 @@ trait GU_Trait {
 			 * @param int    $hours Number of hours. Default 1.
 			 * @param string $slug  Repository slug.
 			 */
-			$fallback_hours   = (int) apply_filters( 'gu_repo_cache_timeout_fallback', 1, $slug );
-			$cache['timeout'] = strtotime( "+{$fallback_hours} hours" );
-			update_site_option( $cache_key, $cache );
+			$fallback_hours = (int) apply_filters( 'gu_repo_cache_timeout_fallback', 1, $slug );
+			$table->set_repo_timeout( $slug, strtotime( "+{$fallback_hours} hours" ) );
 			return;
 		}
 
-		$hours            = $this->get_class_vars( 'API\\API', 'hours' );
-		$cache['timeout'] = strtotime( apply_filters( 'gu_repo_cache_timeout', '+' . $hours . ' hours', 'ran', $cache['ran'], $slug ) );
-		update_site_option( $cache_key, $cache );
+		$hours = $this->get_class_vars( 'API\\API', 'hours' );
+		$table->set_repo_timeout(
+			$slug,
+			strtotime( apply_filters( 'gu_repo_cache_timeout', '+' . $hours . ' hours', 'ran', $row['ran'], $slug ) )
+		);
 	}
 
 	/**
@@ -273,15 +295,15 @@ trait GU_Trait {
 	 * @return bool
 	 */
 	final public function maybe_extend_repo_cache( $remote_headers, $repo, string $old_version = '' ): bool {
-		$return    = false;
-		$cache_key = $this->get_cache_key( $repo->slug ?? false );
-		$cache     = get_site_option( $cache_key, [] );
+		$return = false;
+		$slug   = $this->get_cache_key( $repo->slug ?? false );
+		$table  = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$cache  = $table->get_repo( $slug );
 
-		if ( isset( $cache['ran'] ) && ! array_diff( self::expected_ran_steps(), $cache['ran'] ) ) {
+		if ( null !== $cache && isset( $cache['ran'] ) && ! array_diff( self::expected_ran_steps(), $cache['ran'] ) ) {
 			if ( version_compare( $remote_headers['Version'], $old_version, '==' ) ) {
-				if ( ! $this->is_cache_timeout_valid( $cache['timeout'] ?? 0 ) ) {
-					$cache['timeout'] = strtotime( '+6 hours' );
-					update_site_option( $cache_key, $cache );
+				if ( ! $this->is_cache_timeout_valid( (int) ( $cache['timeout'] ?? 0 ) ) ) {
+					$table->set_repo_timeout( $slug, strtotime( '+6 hours' ) );
 				}
 				$return = true;
 			}
@@ -463,22 +485,13 @@ trait GU_Trait {
 	}
 
 	/**
-	 * Delete all `ghu-` prefixed data from options table.
+	 * Delete all cached repository data from the cache table.
 	 *
 	 * @return bool
 	 */
 	final public function delete_all_cached_data() {
-		global $wpdb;
-
-		$table              = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
-		$column             = is_multisite() ? 'meta_key' : 'option_name';
-		$get_options_string = 'SELECT * FROM ' . $table . ' WHERE ' . $column . ' LIKE %s';
-
-		$ghu_options = $wpdb->get_results( $wpdb->prepare( $get_options_string, [ '%ghu-%' ] ) ); // phpcs:ignore
-		foreach ( $ghu_options as $option ) {
-			$option_name = is_multisite() ? $option->meta_key : $option->option_name;
-			delete_site_option( $option_name );
-		}
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_all_repos();
 
 		if ( ! is_multisite() || is_main_site() ) {
 			wp_cron();
@@ -630,22 +643,16 @@ trait GU_Trait {
 		 */
 		$repos = apply_filters( 'gu_config_pre_process', $repos );
 
-		// Batch-load all ghu-* cache options in a single query.
-		global $wpdb;
-		$table        = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
-		$column       = is_multisite() ? 'meta_key' : 'option_name';
-		$value_column = is_multisite() ? 'meta_value' : 'option_value';
-		$all_ghu       = $wpdb->get_results( $wpdb->prepare( "SELECT {$column}, {$value_column} FROM {$table} WHERE {$column} LIKE %s", [ '%ghu-%' ] ), OBJECT_K ); // phpcs:ignore
-		$ghu_lookup   = [];
-		foreach ( (array) $all_ghu as $row ) {
-			$key                = is_multisite() ? $row->meta_key : $row->option_name;
-			$val                = is_multisite() ? $row->meta_value : $row->option_value;
-			$ghu_lookup[ $key ] = maybe_unserialize( $val );
+		// Batch-load all cache rows from the cache table in a single query.
+		$table      = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$rows       = $table->get_all_rows();
+		$ghu_lookup = [];
+		foreach ( (array) $rows as $row ) {
+			$ghu_lookup[ $row['slug'] ] = $row;
 		}
 
 		foreach ( $repos as $git_repo ) {
-			$cache_key                 = $this->get_cache_key( $git_repo->slug );
-			$caches[ $git_repo->slug ] = $ghu_lookup[ $cache_key ] ?? [];
+			$caches[ $git_repo->slug ] = $ghu_lookup[ $git_repo->slug ] ?? [];
 		}
 		$waiting = array_filter(
 			$caches,

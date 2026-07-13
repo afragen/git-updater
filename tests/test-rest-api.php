@@ -15,6 +15,8 @@ class Test_REST_API extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		// build_download_metadata()/proxy_download() look up the slug in the
 		// Plugin/Theme singletons. Tests in earlier classes reset the Plugin
 		// singleton via GU_Test_Case::tear_down(); re-instantiate it here so
@@ -104,9 +106,9 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
-
-		// Initialise Base so extra_headers and git_servers are populated.
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 
 		// Reset the global server so rest_get_server() creates a fresh one and
 		// re-fires rest_api_init — which triggers register_endpoints() via the
@@ -261,9 +263,8 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 	}
 
 	public function test_flush_endpoint_returns_success_true_and_clears_cache(): void {
-		$slug      = 'test-flush-slug-xyzzy';
-		$cache_key = 'ghu-' . md5( $slug );
-		update_site_option( $cache_key, [ 'some' => 'data' ] );
+		$slug = 'test-flush-slug-xyzzy';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $slug, 'repo', 'data', strtotime( '+12 hours' ) );
 
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/flush-repo-cache' );
 		$request->set_param( 'key', $this->api_key );
@@ -272,9 +273,7 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 		$data     = (array) $response->get_data();
 
 		$this->assertTrue( $data['success'] );
-		$this->assertFalse( get_site_option( $cache_key, false ) );
-
-		delete_site_option( $cache_key );
+		$this->assertNull( \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $slug ) );
 	}
 
 	// -------------------------------------------------------------------------
@@ -368,7 +367,9 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 
 		// Pre-seed update transients so wp_update_plugins/themes() return early
 		// without making real HTTP calls to api.wordpress.org.
@@ -394,6 +395,18 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 
 		// Install the HTTP mock for GitHub and wordpress.org calls.
 		add_filter( 'pre_http_request', [ $this, 'mock_http' ], 10, 3 );
+	}
+
+	private function seed_cache( array $data ): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( self::SLUG );
+		$table->add_entry( self::SLUG, 'repo', '', strtotime( '+12 hours' ) );
+		foreach ( $data as $column => $value ) {
+			if ( 'timeout' === $column ) {
+				continue;
+			}
+			$table->add_entry( self::SLUG, $column, $value );
+		}
 	}
 
 	public function tear_down(): void {
@@ -873,15 +886,16 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 
 		// Pre-seed the release_assets cache with stable + dev versions.
 		// populate_api_data() reads $cache['release_assets']['assets'] → $repo->release_assets.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_assets'] = [
-			'assets'     => [ '2.0.0' => 'https://example.com/stable.zip' ],
-			'created_at' => [ '2.0.0' => '2024-01-01T00:00:00Z' ],
-			'dev_assets'     => [ '3.0.0-beta1' => 'https://example.com/dev.zip' ],
-			'dev_created_at' => [ '3.0.0-beta1' => '2024-02-01T00:00:00Z' ],
-		];
-		update_site_option( $cache_key, $existing );
+		$this->seed_cache(
+			[
+				'release_assets' => [
+					'assets'     => [ '2.0.0' => 'https://example.com/stable.zip' ],
+					'created_at' => [ '2.0.0' => '2024-01-01T00:00:00Z' ],
+					'dev_assets'     => [ '3.0.0-beta1' => 'https://example.com/dev.zip' ],
+					'dev_created_at' => [ '3.0.0-beta1' => '2024-02-01T00:00:00Z' ],
+				],
+			]
+		);
 
 		// channel param non-null → $channel=true; '2.0.0' < '3.0.0-beta1' → $use_channel=true.
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
@@ -889,8 +903,6 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 		$request->set_param( 'channel', 'dev' );
 		$response = $this->server->dispatch( $request );
 		$data     = (array) $response->get_data();
-
-		delete_site_option( $cache_key );
 
 		$this->assertArrayNotHasKey( 'error', $data );
 		// The dev asset version ('3.0.0-beta1') differs from the actual remote
@@ -958,25 +970,22 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 	public function test_get_api_data_covers_release_asset_download_path(): void {
 		$this->skip_if_fixture_absent();
 
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-
 		// Seed release_assets with a valid structure so construct_download_link()
 		// finds release assets in cache (no HTTP request needed) and writes
 		// the asset URL into release_asset_download. Also seed a valid timeout
 		// so get_repo_cache($slug, true) returns the cached data.
 		$download_url = 'https://example.com/stable-download.zip';
-		$existing['timeout']            = time() + 86400;
-		$existing['release_assets']     = [ 'assets' => [ '1.0.0' => $download_url ], 'dev_assets' => [] ];
-		$existing['release_asset_download'] = $download_url;
-		update_site_option( $cache_key, $existing );
+		$this->seed_cache(
+			[
+				'release_assets'         => [ 'assets' => [ '1.0.0' => $download_url ], 'dev_assets' => [] ],
+				'release_asset_download' => $download_url,
+			]
+		);
 
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
 		$request->set_param( 'slug', self::SLUG );
 		$response = $this->server->dispatch( $request );
 		$data     = (array) $response->get_data();
-
-		delete_site_option( $cache_key );
 
 		$this->assertArrayNotHasKey( 'error', $data );
 		$this->assertSame( $download_url, $data['download_link'] );
@@ -1019,7 +1028,7 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
  * get_additions_data():
  * - no additions → empty array
  * - private addition → filtered out
- * - public addition → included after deduplicate() normalisation
+ * - public addition → included
  */
 
 class Test_REST_API_Additions extends WP_UnitTestCase {
@@ -1030,12 +1039,6 @@ class Test_REST_API_Additions extends WP_UnitTestCase {
 		parent::set_up();
 		new Base();
 
-		// Seed addon caches so deduplicate() doesn't access false['key'].
-		$plugin_cache_key = 'ghu-' . md5( 'git_updater_repository_add_plugin' );
-		$theme_cache_key  = 'ghu-' . md5( 'git_updater_repository_add_theme' );
-		update_site_option( $plugin_cache_key, [ 'git_updater_repository_add_plugin' => [], 'timeout' => strtotime( '+12 hours' ) ] );
-		update_site_option( $theme_cache_key, [ 'git_updater_repository_add_theme' => [], 'timeout' => strtotime( '+12 hours' ) ] );
-
 		$GLOBALS['wp_rest_server'] = null;
 		$this->server              = rest_get_server();
 	}
@@ -1043,8 +1046,6 @@ class Test_REST_API_Additions extends WP_UnitTestCase {
 	public function tear_down(): void {
 		$GLOBALS['wp_rest_server'] = null;
 		delete_site_option( 'git_updater_additions' );
-		delete_site_option( 'ghu-' . md5( 'git_updater_repository_add_plugin' ) );
-		delete_site_option( 'ghu-' . md5( 'git_updater_repository_add_theme' ) );
 		parent::tear_down();
 	}
 
@@ -1340,15 +1341,14 @@ class Test_REST_API_Reset_Branch extends WP_UnitTestCase {
 	}
 
 	public function test_reset_branch_success_clears_cache_and_triggers_wp_die(): void {
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		update_site_option( $cache_key, [ 'current_branch' => 'develop', 'timeout' => strtotime( '+12 hours' ) ] );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( self::SLUG, 'current_branch', 'develop', strtotime( '+12 hours' ) );
 
 		$request = $this->make_request( [ 'key' => self::API_KEY, 'plugin' => self::SLUG ] );
 		$this->assert_wp_die_thrown( fn() => $this->api->reset_branch( $request ) );
 
 		// After reset, current_branch should be '' (cleared) in the cache.
-		$cache = get_site_option( $cache_key, [] );
-		$this->assertSame( '', $cache['current_branch'] ?? 'NOT_SET' );
+		$cache = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_entry( self::SLUG, 'current_branch' );
+		$this->assertSame( '', $cache ?? 'NOT_SET' );
 	}
 }
 

@@ -163,6 +163,8 @@ class Test_GU_Upgrade extends WP_UnitTestCase {
 			'db_version'                   => '12.24.2',
 			'branch_switch'                => '1',
 			'bypass_background_processing' => '1',
+			// current_branch_* no longer lives in the git_updater option (it is in the
+			// cache table), so a stray key of this shape is not preserved by the upgrade.
 			'current_branch_my-plugin'     => 'main',
 			'github_access_token'          => 'secret',
 			'bitbucket_token'              => 'other',
@@ -175,7 +177,7 @@ class Test_GU_Upgrade extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'db_version', $stored );
 		$this->assertArrayHasKey( 'branch_switch', $stored );
 		$this->assertArrayHasKey( 'bypass_background_processing', $stored );
-		$this->assertArrayHasKey( 'current_branch_my-plugin', $stored );
+		$this->assertArrayNotHasKey( 'current_branch_my-plugin', $stored );
 		$this->assertArrayNotHasKey( 'github_access_token', $stored );
 		$this->assertArrayNotHasKey( 'bitbucket_token', $stored );
 	}

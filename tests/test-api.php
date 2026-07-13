@@ -67,7 +67,9 @@ class Test_API extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		$this->type = api_make_type();
 		$this->api  = new GitHub_API( $this->type );
 	}
@@ -77,8 +79,7 @@ class Test_API extends WP_UnitTestCase {
 		remove_all_filters( 'gu_post_api_response_body' );
 		remove_all_filters( 'gu_always_fetch_update' );
 		remove_all_actions( 'requests-requests.before_redirect' );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		delete_site_option( 'git_updater' );
 		unset( $_REQUEST['key'], $_REQUEST['plugin'], $_REQUEST['theme'], $_REQUEST['override'], $_REQUEST['rollback'] );
 		parent::tear_down();
@@ -134,17 +135,18 @@ class Test_API extends WP_UnitTestCase {
 
 		$this->api->api( $this->endpoint );
 
-		$error_cache = get_site_option( $this->api->get_cache_key( 'test-plugin_error' ), [] );
-		$this->assertArrayHasKey( 'error_cache', $error_cache );
+		$error_cache = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_error_cache( 'test-plugin_error' );
+		$this->assertNotEmpty( $error_cache );
 	}
 
 	public function test_skips_request_and_returns_false_when_error_cache_is_fresh(): void {
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin_error' ),
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->set_error_cache(
+			'test-plugin_error',
 			[
-				'error_cache' => $this->mock_http_response( 403, [ 'message' => 'Rate limited' ] ),
-				'timeout'     => strtotime( '+1 hour' ),
-			]
+				'timeout'   => 60,
+				'http_code' => 403,
+			],
+			60
 		);
 
 		$call_count = 0;
@@ -157,12 +159,13 @@ class Test_API extends WP_UnitTestCase {
 	}
 
 	public function test_retries_request_after_error_cache_expires(): void {
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin_error' ),
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->set_error_cache(
+			'test-plugin_error',
 			[
-				'error_cache' => $this->mock_http_response( 403, [ 'message' => 'Rate limited' ] ),
-				'timeout'     => strtotime( '-2 hours' ),
-			]
+				'timeout'   => 60,
+				'http_code' => 403,
+			],
+			-120
 		);
 
 		$call_count = 0;
@@ -861,7 +864,9 @@ class Test_API_Dot_Org_Data extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		$this->type = api_make_type();
 		$this->api  = new GitHub_API( $this->type );
 	}
@@ -869,7 +874,7 @@ class Test_API_Dot_Org_Data extends WP_UnitTestCase {
 	public function tear_down(): void {
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'gu_api_domain' );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		parent::tear_down();
 	}
 
@@ -885,9 +890,11 @@ class Test_API_Dot_Org_Data extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	public function test_get_dot_org_data_returns_true_when_cache_says_in_dot_org(): void {
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin' ),
-			[ 'dot_org' => 'in dot org' ]
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'dot_org',
+			'in dot org',
+			strtotime( '+12 hours' )
 		);
 
 		$result = $this->call_get_dot_org_data();
@@ -896,9 +903,11 @@ class Test_API_Dot_Org_Data extends WP_UnitTestCase {
 	}
 
 	public function test_get_dot_org_data_returns_false_when_cache_says_not_in_dot_org(): void {
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin' ),
-			[ 'dot_org' => 'not in dot org' ]
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'dot_org',
+			'not in dot org',
+			strtotime( '+12 hours' )
 		);
 
 		$result = $this->call_get_dot_org_data();
@@ -1033,14 +1042,6 @@ class Test_API_Exit_No_Update extends WP_UnitTestCase {
 		$this->assertTrue( $result ); // empty(options['branch_switch']) = true
 	}
 
-	public function test_exit_no_update_returns_false_when_refresh_transient_set(): void {
-		set_site_transient( 'gu_refresh_cache', true );
-
-		$result = $this->call_exit_no_update( false );
-
-		$this->assertFalse( $result );
-	}
-
 	public function test_exit_no_update_returns_false_when_response_is_truthy(): void {
 		$result = $this->call_exit_no_update( [ 'some' => 'data' ] );
 
@@ -1109,16 +1110,6 @@ class Test_API_Local_Info extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 	// get_local_info()
 	// -------------------------------------------------------------------------
-
-	public function test_get_local_info_returns_null_when_refresh_cache_transient_set(): void {
-		set_site_transient( 'gu_refresh_cache', true );
-		$repo             = new stdClass();
-		$repo->local_path = $this->temp_dir;
-
-		$result = $this->api->get_local_info( $repo, 'test-file.txt' );
-
-		$this->assertNull( $result );
-	}
 
 	public function test_get_local_info_returns_file_contents_when_file_exists(): void {
 		$repo             = new stdClass();
@@ -1415,12 +1406,15 @@ class Test_API_Detect_Provider extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		$this->type = api_make_type();
 		$this->api  = new GitHub_API( $this->type );
 	}
 
 	public function tear_down(): void {
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		delete_site_option( 'git_updater' );
 		parent::tear_down();
 	}
@@ -2000,12 +1994,11 @@ class Test_API_Detect_Provider extends WP_UnitTestCase {
 	 * requested, the cached URL is returned without making an HTTP request.
 	 */
 	public function test_get_release_asset_redirect_returns_cached_redirect_url(): void {
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'release_asset_redirect' => 'https://objects.githubusercontent.com/download.zip',
-			]
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'release_asset_redirect',
+			'https://objects.githubusercontent.com/download.zip',
+			strtotime( '+12 hours' )
 		);
 
 		$result = $this->api->get_release_asset_redirect( 'https://api.github.com/repos/owner/repo/releases/assets/1' );
@@ -2018,9 +2011,7 @@ class Test_API_Detect_Provider extends WP_UnitTestCase {
 	 * available (exit_no_update returns true), the method returns false.
 	 */
 	public function test_get_release_asset_redirect_returns_false_when_no_update(): void {
-		// Ensure no cache entry for release_asset_redirect.
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		delete_site_option( $cache_key );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 
 		$result = $this->api->get_release_asset_redirect( 'https://api.github.com/repos/owner/repo/releases/assets/1' );
 
@@ -2043,8 +2034,7 @@ class Test_API_Detect_Provider extends WP_UnitTestCase {
 		update_site_option( 'git_updater', [ 'github_access_token' => 'test-token' ] );
 
 		// Ensure no cached redirect.
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		delete_site_option( $cache_key );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 
 		$http_called = false;
 		add_filter(
@@ -2071,8 +2061,8 @@ class Test_API_Detect_Provider extends WP_UnitTestCase {
 		$this->assertSame( $redirect_url, $result );
 
 		// Verify the redirect URL was cached.
-		$cache = get_site_option( $cache_key, [] );
-		$this->assertSame( $redirect_url, $cache['release_asset_redirect'] );
+		$cache = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_entry( 'test-plugin', 'release_asset_redirect' );
+		$this->assertSame( $redirect_url, $cache );
 	}
 
 	/**
@@ -2092,15 +2082,11 @@ class Test_API_Detect_Provider extends WP_UnitTestCase {
 
 		// Seed cache with a release_asset_redirect and a timeout well in the past
 		// (older than 5 minutes relative to -12 hours) so the AWS branch fires.
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'release_asset'          => 'https://api.github.com/repos/owner/repo/releases/assets/99',
-				'release_asset_redirect' => 'https://stale-cached-url.example.com/old.zip',
-				'timeout'                => time() - 3600, // 1 hour ago
-			]
-		);
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$table->add_entry( 'test-plugin', 'repo', 'test-plugin', time() - 3600 );
+		$table->add_entry( 'test-plugin', 'release_asset', 'https://api.github.com/repos/owner/repo/releases/assets/99' );
+		$table->add_entry( 'test-plugin', 'release_asset_redirect', 'https://stale-cached-url.example.com/old.zip' );
 
 		$http_called = false;
 		add_filter(
@@ -2139,14 +2125,10 @@ class Test_API_Detect_Provider extends WP_UnitTestCase {
 		update_site_option( 'git_updater', [ 'github_access_token' => 'test-token' ] );
 
 		// Seed cache with a matching 'repo' slug.
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'repo'                    => 'test-plugin',
-				'release_asset_redirect'  => false,
-			]
-		);
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$table->add_entry( 'test-plugin', 'repo', 'test-plugin' );
+		$table->add_entry( 'test-plugin', 'release_asset_redirect', false );
 
 		// Simulate a REST request by setting $_REQUEST.
 		$_REQUEST['key']    = 'some-api-key';

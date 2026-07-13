@@ -143,7 +143,7 @@ class Branch {
 		$tag_array    = isset( $cache['tags'] ) && is_array( $cache['tags'] );
 		$in_tag_array = $tag_array && in_array( $rollback, $cache['tags'], true );
 		if ( $in_tag_array ) {
-			$current_branch = $cache[ $repo ]['PrimaryBranch'] ?? 'master';
+			$current_branch = $cache['repo_headers']['PrimaryBranch'] ?? 'master';
 		}
 
 		if ( ! $in_tag_array && isset( $_GET['action'], $cache['branches'] )
@@ -156,8 +156,6 @@ class Branch {
 		}
 		if ( isset( $current_branch ) ) {
 			$this->set_repo_cache( 'current_branch', $current_branch, $repo );
-			self::$options[ 'current_branch_' . $repo ] = $current_branch;
-			update_site_option( 'git_updater', self::$options );
 		}
 	}
 
@@ -171,7 +169,6 @@ class Branch {
 	 */
 	public function set_branch_on_install( $install ) {
 		$this->set_repo_cache( 'current_branch', $install['git_updater_branch'], $install['repo'] );
-		self::$options[ 'current_branch_' . $install['repo'] ] = $install['git_updater_branch'];
 		self::$options = isset( $install['options'] ) && is_array( $install['options'] )
 			? array_merge( self::$options, $install['options'] )
 			: self::$options;

@@ -11,6 +11,7 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Git_Updater\Traits\GU_Trait;
+use Fragen\Git_Updater\DB\Repo_Cache_Table;
 use WP_Error;
 
 /**
@@ -49,11 +50,41 @@ final class GU_Upgrade {
 
 		switch ( true ) {
 			case version_compare( $db_version, $this->db_version, '<' ):
+				$this->install_cache_table();
+				$this->drop_ghu_options();
 				$this->delete_flush_cache();
 				$this->save_db_version( $options );
 				break;
 			default:
 				break;
+		}
+	}
+
+	/**
+	 * Install the repository cache table.
+	 *
+	 * @return void
+	 */
+	private function install_cache_table() {
+		Repo_Cache_Table::instance()->install_table();
+	}
+
+	/**
+	 * Drop legacy `ghu-` prefixed cache options (clean break).
+	 *
+	 * @return void
+	 */
+	private function drop_ghu_options() {
+		global $wpdb;
+
+		$table  = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
+		$column = is_multisite() ? 'meta_key' : 'option_name';
+		$query  = "SELECT {$column} FROM {$table} WHERE {$column} LIKE %s";
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$ghu_options = $wpdb->get_results( $wpdb->prepare( $query, [ '%ghu-%' ] ), ARRAY_A ); // phpcs:ignore
+		foreach ( $ghu_options as $option ) {
+			delete_site_option( $option[ $column ] );
 		}
 	}
 
@@ -138,7 +169,7 @@ final class GU_Upgrade {
 		$new_options  = array_filter(
 			$options,
 			static function ( $value, $key ) use ( &$options, $base_options ) {
-				if ( in_array( $key, $base_options, true ) || str_contains( $key, 'current_branch' ) ) {
+				if ( in_array( $key, $base_options, true ) ) {
 					return $options[ $key ];
 				}
 			},

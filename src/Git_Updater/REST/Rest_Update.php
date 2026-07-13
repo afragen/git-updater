@@ -321,19 +321,12 @@ class Rest_Update {
 
 		// Only set branch on successful update.
 		if ( ! $this->is_error() ) {
-			$slug      = $plugin ? $plugin : false;
-			$slug      = $theme ? $theme : $slug;
-			$file      = $plugin ? $plugin . '.php' : 'style.css';
-			$options   = $this->get_class_vars( 'Base', 'options' );
-			$cache     = $this->get_repo_cache( $slug, false );
-			$cache_key = 'ghu-' . md5( $slug );
+			$slug = $plugin ? $plugin : false;
+			$slug = $theme ? $theme : $slug;
 
-			$cache['current_branch'] = $current_branch;
-			unset( $cache[ $file ] );
-			update_site_option( $cache_key, $cache );
-
-			$options[ 'current_branch_' . $slug ] = $current_branch;
-			update_site_option( 'git_updater', $options );
+			// Persist the active branch in the cache table; the git_updater options no
+			// longer carry per-repo current_branch state.
+			$this->set_repo_cache( 'current_branch', $current_branch, $slug );
 		}
 
 		$response = [
@@ -424,7 +417,7 @@ class Rest_Update {
 	 */
 	private function get_primary_branch( $slug ) {
 		$cache          = $this->get_repo_cache( $slug, false );
-		$primary_branch = $cache[ $slug ]['PrimaryBranch'] ?? 'master';
+		$primary_branch = $cache['primary_branch'] ?? 'master';
 
 		return $primary_branch;
 	}

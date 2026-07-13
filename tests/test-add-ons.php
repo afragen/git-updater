@@ -7,20 +7,21 @@
 
 use Fragen\Git_Updater\Add_Ons;
 use Fragen\Git_Updater\Base;
+use Fragen\Git_Updater\DB\Repo_Cache_Table;
 
 class Test_Add_Ons extends WP_UnitTestCase {
 
 	private Add_Ons $addons;
-	private string  $addons_cache_key;
 
 	public function set_up(): void {
 		parent::set_up();
-		$this->addons           = new Add_Ons();
-		$this->addons_cache_key = 'ghu-' . md5( 'gu_addon_api_results' );
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		Repo_Cache_Table::instance()->install_table();
+		$this->addons = new Add_Ons();
 	}
 
 	public function tear_down(): void {
-		delete_site_option( $this->addons_cache_key );
+		Repo_Cache_Table::instance()->delete_repo( 'gu_addon_api_results' );
 		remove_all_filters( 'gu_add_settings_tabs' );
 		remove_all_actions( 'gu_add_admin_page' );
 		parent::tear_down();
@@ -41,12 +42,11 @@ class Test_Add_Ons extends WP_UnitTestCase {
 
 	public function test_plugins_api_returns_cached_addon_data_as_object(): void {
 		$addon_data = [ 'git-updater-gist' => [ 'name' => 'Git Updater Gist', 'slug' => 'git-updater-gist', 'version' => '1.0.0' ] ];
-		update_site_option(
-			$this->addons_cache_key,
-			[
-				'gu_addon_api_results' => $addon_data,
-				'timeout'              => strtotime( '+7 days' ),
-			]
+		Repo_Cache_Table::instance()->add_entry(
+			'gu_addon_api_results',
+			'addon_api_results',
+			$addon_data,
+			strtotime( '+7 days' )
 		);
 
 		$args   = (object) [ 'slug' => 'git-updater-gist' ];
@@ -136,16 +136,16 @@ class Test_Add_Ons_Load_Hooks extends WP_UnitTestCase {
 class Test_Add_Ons_Api_Results extends WP_UnitTestCase {
 
 	private Add_Ons $addons;
-	private string  $cache_key;
 
 	public function set_up(): void {
 		parent::set_up();
-		$this->addons    = new Add_Ons();
-		$this->cache_key = 'ghu-' . md5( 'gu_addon_api_results' );
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		Repo_Cache_Table::instance()->install_table();
+		$this->addons = new Add_Ons();
 	}
 
 	public function tear_down(): void {
-		delete_site_option( $this->cache_key );
+		Repo_Cache_Table::instance()->delete_repo( 'gu_addon_api_results' );
 		remove_all_filters( 'pre_http_request' );
 		parent::tear_down();
 	}
@@ -170,9 +170,11 @@ class Test_Add_Ons_Api_Results extends WP_UnitTestCase {
 			'git-updater-gitlab'    => [ 'name' => 'Git Updater GitLab' ],
 			'git-updater-gitea'     => [ 'name' => 'Git Updater Gitea' ],
 		];
-		update_site_option(
-			$this->cache_key,
-			[ 'gu_addon_api_results' => $data, 'timeout' => strtotime( '+7 days' ) ]
+		Repo_Cache_Table::instance()->add_entry(
+			'gu_addon_api_results',
+			'addon_api_results',
+			$data,
+			strtotime( '+7 days' )
 		);
 
 		$result = $this->addons->get_addon_api_results();
@@ -233,9 +235,9 @@ class Test_Add_Ons_Api_Results extends WP_UnitTestCase {
 
 		$this->addons->get_addon_api_results();
 
-		$cache = get_site_option( $this->cache_key );
+		$cache = Repo_Cache_Table::instance()->get_entry( 'gu_addon_api_results', 'addon_api_results' );
 		$this->assertIsArray( $cache );
-		$this->assertArrayHasKey( 'gu_addon_api_results', $cache );
+		$this->assertNotEmpty( $cache );
 	}
 
 	public function test_get_addon_api_results_caches_partial_results_on_failure(): void {
@@ -256,9 +258,9 @@ class Test_Add_Ons_Api_Results extends WP_UnitTestCase {
 
 		$this->addons->get_addon_api_results();
 
-		$cache = get_site_option( $this->cache_key );
+		$cache = Repo_Cache_Table::instance()->get_entry( 'gu_addon_api_results', 'addon_api_results' );
 		$this->assertIsArray( $cache );
-		$this->assertArrayHasKey( 'gu_addon_api_results', $cache );
+		$this->assertNotEmpty( $cache );
 	}
 
 	public function test_plugins_api_returns_original_result_for_addon_slug_with_no_cached_data(): void {
@@ -275,9 +277,11 @@ class Test_Add_Ons_Api_Results extends WP_UnitTestCase {
 
 	public function test_plugins_api_returns_result_object_when_slug_found_in_api_results(): void {
 		$data = [ 'git-updater-gist' => [ 'name' => 'Git Updater Gist', 'slug' => 'git-updater-gist' ] ];
-		update_site_option(
-			$this->cache_key,
-			[ 'gu_addon_api_results' => $data, 'timeout' => strtotime( '+7 days' ) ]
+		Repo_Cache_Table::instance()->add_entry(
+			'gu_addon_api_results',
+			'addon_api_results',
+			$data,
+			strtotime( '+7 days' )
 		);
 
 		$args   = (object) [ 'slug' => 'git-updater-gist' ];
@@ -393,17 +397,17 @@ class Test_Add_Ons_Modal_Prevention extends WP_UnitTestCase {
 class Test_Add_Ons_Insert_Cards extends WP_UnitTestCase {
 
 	private Add_Ons $addons;
-	private string  $cache_key;
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		require_once ABSPATH . 'wp-admin/includes/template.php';
-		$this->addons    = new Add_Ons();
-		$this->cache_key = 'ghu-' . md5( 'gu_addon_api_results' );
+		Repo_Cache_Table::instance()->install_table();
+		$this->addons = new Add_Ons();
 	}
 
 	public function tear_down(): void {
-		delete_site_option( $this->cache_key );
+		Repo_Cache_Table::instance()->delete_repo( 'gu_addon_api_results' );
 		remove_all_filters( 'pre_http_request' );
 		$GLOBALS['current_screen'] = null;
 		parent::tear_down();
@@ -442,9 +446,11 @@ class Test_Add_Ons_Insert_Cards extends WP_UnitTestCase {
 			'git-updater-gitlab'    => $this->make_addon_item( 'Git Updater GitLab',    'git-updater-gitlab' ),
 			'git-updater-gitea'     => $this->make_addon_item( 'Git Updater Gitea',     'git-updater-gitea' ),
 		];
-		update_site_option(
-			$this->cache_key,
-			[ 'gu_addon_api_results' => $data, 'timeout' => strtotime( '+7 days' ) ]
+		Repo_Cache_Table::instance()->add_entry(
+			'gu_addon_api_results',
+			'addon_api_results',
+			$data,
+			strtotime( '+7 days' )
 		);
 
 		set_current_screen( 'plugin-install' );

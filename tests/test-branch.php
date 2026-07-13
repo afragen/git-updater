@@ -47,16 +47,6 @@ function branch_make_repo_obj( array $overrides = [] ): stdClass {
 	);
 }
 
-/**
- * Cache key helper.
- *
- * @param string $slug
- * @return string
- */
-function branch_cache_key( string $slug ): string {
-	return 'ghu-' . md5( $slug );
-}
-
 // ---------------------------------------------------------------------------
 // Test_Branch_Constructor
 // ---------------------------------------------------------------------------
@@ -97,23 +87,27 @@ class Test_Branch_GetCurrentBranch extends GU_Test_Case {
 
 	private Branch $branch;
 	private string $slug      = 'test-gcb-repo';
-	private string $cache_key;
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
-		$this->branch    = new Branch();
-		$this->cache_key = branch_cache_key( $this->slug );
-		delete_site_option( $this->cache_key );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
+		$this->branch = new Branch();
 	}
 
 	public function tear_down(): void {
-		delete_site_option( $this->cache_key );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( $this->slug );
 		parent::tear_down();
 	}
 
 	public function test_returns_cached_current_branch(): void {
-		update_site_option( $this->cache_key, [ 'current_branch' => 'develop' ] );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			$this->slug,
+			'current_branch',
+			'develop',
+			strtotime( '+12 hours' )
+		);
 		$repo = (object) [ 'slug' => $this->slug, 'branch' => 'main' ];
 
 		$this->assertSame( 'develop', $this->branch->get_current_branch( $repo ) );
@@ -152,7 +146,6 @@ class Test_Branch_SetRollbackTransient extends GU_Test_Case {
 	public function tear_down(): void {
 		unset( $_GET['rollback'] );
 		remove_all_filters( 'gu_post_construct_download_link' );
-		delete_site_option( branch_cache_key( 'test-repo' ) );
 		parent::tear_down();
 	}
 
@@ -209,108 +202,87 @@ class Test_Branch_SetBranchOnSwitch extends GU_Test_Case {
 
 	private Branch $branch;
 	private string $slug      = 'test-sbos-repo';
-	private string $cache_key;
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
-		$this->branch    = new Branch();
-		$this->cache_key = branch_cache_key( $this->slug );
-		delete_site_option( $this->cache_key );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
+		$this->branch = new Branch();
 		delete_site_option( 'git_updater' );
 	}
 
 	public function tear_down(): void {
 		unset( $_GET['rollback'], $_GET['action'] );
-		delete_site_option( $this->cache_key );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( $this->slug );
 		delete_site_option( 'git_updater' );
 		parent::tear_down();
 	}
 
 	public function test_exits_early_when_no_rollback_param(): void {
 		unset( $_GET['rollback'] );
-		update_site_option( $this->cache_key, [ 'branches' => [ 'main' => [] ] ] );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'branches', [ 'main' => [] ], strtotime( '+12 hours' ) );
 
 		$this->branch->set_branch_on_switch( $this->slug );
 
-		$cache = get_site_option( $this->cache_key, [] );
-		$this->assertArrayNotHasKey( 'current_branch', $cache );
+		$cache = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_entry( $this->slug, 'current_branch' );
+		$this->assertNull( $cache );
 	}
 
 	public function test_sets_primary_branch_when_rollback_in_tags(): void {
 		$_GET['rollback'] = 'v1.0.0';
-		update_site_option(
-			$this->cache_key,
-			[
-				'tags'          => [ 'v1.0.0', 'v0.9.0' ],
-				$this->slug     => [ 'PrimaryBranch' => 'main' ],
-			]
-		);
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'tags', [ 'v1.0.0', 'v0.9.0' ], strtotime( '+12 hours' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo_headers', [ 'PrimaryBranch' => 'main' ] );
 
 		$this->branch->set_branch_on_switch( $this->slug );
 
-		$cache = get_site_option( $this->cache_key, [] );
-		$this->assertSame( 'main', $cache['current_branch'] );
+		$cache = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_entry( $this->slug, 'current_branch' );
+		$this->assertSame( 'main', $cache );
 	}
 
 	public function test_falls_back_to_master_when_no_primary_branch_key_in_cache(): void {
 		$_GET['rollback'] = 'v1.0.0';
-		update_site_option( $this->cache_key, [ 'tags' => [ 'v1.0.0' ] ] );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'tags', [ 'v1.0.0' ], strtotime( '+12 hours' ) );
 
 		$this->branch->set_branch_on_switch( $this->slug );
 
-		$cache = get_site_option( $this->cache_key, [] );
-		$this->assertSame( 'master', $cache['current_branch'] );
+		$cache = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_entry( $this->slug, 'current_branch' );
+		$this->assertSame( 'master', $cache );
 	}
 
 	public function test_sets_branch_from_branches_cache(): void {
 		$_GET['rollback'] = 'develop';
 		$_GET['action']   = 'upgrade-plugin';
-		update_site_option(
-			$this->cache_key,
-			[
-				'tags'     => [ 'v1.0.0' ],
-				'branches' => [ 'develop' => [], 'main' => [] ],
-			]
-		);
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'tags', [ 'v1.0.0' ], strtotime( '+12 hours' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'branches', [ 'develop' => [], 'main' => [] ] );
 
 		$this->branch->set_branch_on_switch( $this->slug );
 
-		$cache = get_site_option( $this->cache_key, [] );
-		$this->assertSame( 'develop', $cache['current_branch'] );
+		$cache = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_entry( $this->slug, 'current_branch' );
+		$this->assertSame( 'develop', $cache );
 	}
 
 	public function test_defaults_to_master_when_branch_not_in_cache_branches(): void {
 		$_GET['rollback'] = 'nonexistent';
 		$_GET['action']   = 'upgrade-plugin';
-		update_site_option(
-			$this->cache_key,
-			[
-				'tags'     => [],
-				'branches' => [ 'main' => [] ],
-			]
-		);
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'tags', [], strtotime( '+12 hours' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'branches', [ 'main' => [] ] );
 
 		$this->branch->set_branch_on_switch( $this->slug );
 
-		$cache = get_site_option( $this->cache_key, [] );
-		$this->assertSame( 'master', $cache['current_branch'] );
+		$cache = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_entry( $this->slug, 'current_branch' );
+		$this->assertSame( 'master', $cache );
 	}
 
 	public function test_does_not_update_when_neither_branch_condition_matches(): void {
 		$_GET['rollback'] = 'v1.0.0';
-		update_site_option(
-			$this->cache_key,
-			[
-				'tags'     => [ 'other-tag' ],
-				'branches' => [ 'main' => [] ],
-			]
-		);
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'tags', [ 'other-tag' ], strtotime( '+12 hours' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'branches', [ 'main' => [] ] );
 
 		$this->branch->set_branch_on_switch( $this->slug );
 
-		$cache = get_site_option( $this->cache_key, [] );
-		$this->assertArrayNotHasKey( 'current_branch', $cache );
+		$cache = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_entry( $this->slug, 'current_branch' );
+		$this->assertNull( $cache );
 	}
 }
 
@@ -322,20 +294,19 @@ class Test_Branch_SetBranchOnInstall extends GU_Test_Case {
 
 	private Branch $branch;
 	private string $slug      = 'test-sboi-repo';
-	private string $cache_key;
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
-		$this->branch    = new Branch();
-		$this->cache_key = branch_cache_key( $this->slug );
-		delete_site_option( $this->cache_key );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
+		$this->branch = new Branch();
 		delete_site_option( 'git_updater' );
 		$this->set_branch_options( [] );
 	}
 
 	public function tear_down(): void {
-		delete_site_option( $this->cache_key );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( $this->slug );
 		delete_site_option( 'git_updater' );
 		parent::tear_down();
 	}
@@ -348,8 +319,8 @@ class Test_Branch_SetBranchOnInstall extends GU_Test_Case {
 
 		$this->branch->set_branch_on_install( $install );
 
-		$cache = get_site_option( $this->cache_key, [] );
-		$this->assertSame( 'develop', $cache['current_branch'] );
+		$cache = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_entry( $this->slug, 'current_branch' );
+		$this->assertSame( 'develop', $cache );
 	}
 
 	public function test_updates_current_branch_option(): void {
@@ -360,8 +331,8 @@ class Test_Branch_SetBranchOnInstall extends GU_Test_Case {
 
 		$this->branch->set_branch_on_install( $install );
 
-		$opts = $this->get_branch_options();
-		$this->assertSame( 'develop', $opts[ 'current_branch_' . $this->slug ] );
+		$branch = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_entry( $this->slug, 'current_branch' );
+		$this->assertSame( 'develop', $branch );
 	}
 
 	public function test_merges_install_options_when_array(): void {
@@ -375,7 +346,7 @@ class Test_Branch_SetBranchOnInstall extends GU_Test_Case {
 
 		$opts = $this->get_branch_options();
 		$this->assertSame( 'extra_value', $opts['extra_key'] );
-		$this->assertSame( 'main', $opts[ 'current_branch_' . $this->slug ] );
+		$this->assertSame( 'main', \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_entry( $this->slug, 'current_branch' ) );
 	}
 }
 
@@ -796,17 +767,17 @@ class Test_Branch_Current_Branch extends GU_Test_Case {
 
 	private Branch $branch;
 	private string $slug      = 'test-plugin';
-	private string $cache_key;
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
-		$this->branch    = new Branch();
-		$this->cache_key = 'ghu-' . md5( $this->slug );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
+		$this->branch = new Branch();
 	}
 
 	public function tear_down(): void {
-		delete_site_option( $this->cache_key );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( $this->slug );
 		parent::tear_down();
 	}
 
@@ -823,7 +794,12 @@ class Test_Branch_Current_Branch extends GU_Test_Case {
 	}
 
 	public function test_get_current_branch_returns_cached_branch_when_set(): void {
-		update_site_option( $this->cache_key, [ 'current_branch' => 'develop' ] );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			$this->slug,
+			'current_branch',
+			'develop',
+			strtotime( '+12 hours' )
+		);
 
 		$result = $this->branch->get_current_branch( $this->make_repo( 'master' ) );
 
@@ -831,7 +807,12 @@ class Test_Branch_Current_Branch extends GU_Test_Case {
 	}
 
 	public function test_get_current_branch_falls_back_to_repo_branch_when_cache_has_no_current_branch(): void {
-		update_site_option( $this->cache_key, [ 'some_other_key' => 'value' ] );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			$this->slug,
+			'some_other_key',
+			'value',
+			strtotime( '+12 hours' )
+		);
 
 		$result = $this->branch->get_current_branch( $this->make_repo( 'feature' ) );
 
@@ -839,7 +820,12 @@ class Test_Branch_Current_Branch extends GU_Test_Case {
 	}
 
 	public function test_get_current_branch_falls_back_when_cached_current_branch_is_empty_string(): void {
-		update_site_option( $this->cache_key, [ 'current_branch' => '' ] );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			$this->slug,
+			'current_branch',
+			'',
+			strtotime( '+12 hours' )
+		);
 
 		$result = $this->branch->get_current_branch( $this->make_repo( 'main' ) );
 
