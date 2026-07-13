@@ -48,6 +48,9 @@ trait Theme_Mock_Helper {
 				'file'           => 'test-gu-theme/style.css',
 				'uri'            => 'https://github.com/afragen/test-gu-theme',
 				'theme_uri'      => 'https://github.com/afragen/test-gu-theme',
+				'owner'          => 'afragen',
+				'enterprise'     => '',
+				'enterprise_api' => '',
 				'branch'         => 'main',
 				'primary_branch' => 'main',
 				'git'            => 'github',
@@ -226,6 +229,8 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	public function test_returns_result_when_waiting_for_background_update(): void {
 		// Empty cache → waiting_for_background_update = true.
 		$theme    = $this->theme_with_config( [ 'test-gu-theme' => $this->make_theme_obj() ] );
+		// Theme constructor populates the cache; clear it to simulate uncached state.
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme' );
 		$response = new stdClass();
 		$response->slug = 'test-gu-theme';
 		$result = $theme->themes_api( 'original', 'theme_information', $response );
@@ -1092,6 +1097,11 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->uninstall_table();
+		$table->install_table();
+		$table->delete_repo( 'test-gu-theme' );
+		$table->delete_repo( 'test-gu-theme_error' );
 	}
 
 	public function tear_down(): void {
@@ -1107,6 +1117,8 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		wp_cache_delete( 'cron', 'options' );
 		wp_unschedule_hook( 'gu_get_remote_theme' );
 		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme' );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme_error' );
 		parent::tear_down();
 	}
 
@@ -1139,6 +1151,8 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
 
 		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		// Theme constructor populates the cache; clear it to simulate uncached state.
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme' );
 		$theme->get_remote_theme_meta();
 
 		// wp_next_scheduled() can't find args-keyed events without passing the exact args,
@@ -1165,6 +1179,7 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
 
 		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme' );
 		$theme->get_remote_theme_meta();
 
 		// Hook should still exist (not cleared), and exactly one event was scheduled.
@@ -1187,7 +1202,9 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		$this->assertSame( 2, $this->cron_hook_count( 'gu_get_remote_theme' ), 'Pre-condition: two race-left events must exist' );
 
 		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
+
 		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme' );
 		$theme->get_remote_theme_meta();
 
 		// All pre-existing timestamps must be merged and collapsed into one event.
@@ -1379,6 +1396,9 @@ class Test_Theme_Config_Discovery extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->uninstall_table();
+		$table->install_table();
 		$this->configs = ( new Theme() )->get_theme_configs();
 
 		if ( ! isset( $this->configs[ self::SLUG ] ) ) {
@@ -1410,5 +1430,15 @@ class Test_Theme_Config_Discovery extends WP_UnitTestCase {
 
 	public function test_fixture_theme_primary_branch_is_main(): void {
 		$this->assertSame( 'main', $this->configs[ self::SLUG ]->primary_branch );
+	}
+
+	public function test_parse_meta_persists_primary_branch_to_cache_table(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$this->assertSame( 'main', $table->get_entry( self::SLUG, 'primary_branch' ) );
+	}
+
+	public function test_parse_meta_persists_current_branch_to_cache_table(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$this->assertSame( 'main', $table->get_entry( self::SLUG, 'current_branch' ) );
 	}
 }

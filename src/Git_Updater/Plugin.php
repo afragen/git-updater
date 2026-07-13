@@ -216,6 +216,9 @@ class Plugin {
 				}
 			}
 
+			$this->set_repo_cache( 'primary_branch', $header['primary_branch'], $git_plugin['slug'] );
+			$this->set_repo_cache( 'current_branch', $git_plugin['branch'], $git_plugin['slug'] );
+
 			/**
 			 * Filter config to fix repo slug.
 			 * Eg change Gist ID to slug.

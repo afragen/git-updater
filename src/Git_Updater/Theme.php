@@ -231,6 +231,9 @@ class Theme {
 				}
 			}
 
+			$this->set_repo_cache( 'primary_branch', $header['primary_branch'], $git_theme['slug'] );
+			$this->set_repo_cache( 'current_branch', $git_theme['branch'], $git_theme['slug'] );
+
 			$git_themes[ $git_theme['slug'] ] = (object) $git_theme;
 		}
 

@@ -39,6 +39,9 @@ trait Plugin_Mock_Helper {
 				'slug'           => 'test-plugin',
 				'file'           => 'test-plugin/test-plugin.php',
 				'uri'            => 'https://github.com/test-owner/test-plugin',
+				'owner'          => 'test-owner',
+				'enterprise'     => '',
+				'enterprise_api' => '',
 				'icons'          => [ 'default' => 'https://s.w.org/plugins/geopattern-icon/test-plugin.svg' ],
 				'banners'        => [],
 				'branch'         => 'main',
@@ -1177,6 +1180,9 @@ class Test_Plugin_Config_Discovery extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->uninstall_table();
+		$table->install_table();
 		$this->configs = ( new Plugin() )->get_plugin_configs();
 
 		if ( ! isset( $this->configs[ self::SLUG ] ) ) {
@@ -1335,5 +1341,15 @@ class Test_Plugin_Meta_HTTP_Mock extends WP_UnitTestCase {
 	public function test_get_remote_repo_meta_sets_correct_remote_version(): void {
 		( new Base() )->get_remote_repo_meta( $this->config );
 		$this->assertSame( '2.0.0', $this->config->remote_version );
+	}
+
+	public function test_parse_meta_persists_primary_branch_to_cache_table(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$this->assertSame( 'main', $table->get_entry( self::SLUG, 'primary_branch' ) );
+	}
+
+	public function test_parse_meta_persists_current_branch_to_cache_table(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$this->assertSame( 'main', $table->get_entry( self::SLUG, 'current_branch' ) );
 	}
 }

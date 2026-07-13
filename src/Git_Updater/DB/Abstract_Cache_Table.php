@@ -78,6 +78,10 @@ abstract class Abstract_Cache_Table {
 	 */
 	public function install_table(): void {
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		// Drop first to guarantee a clean schema: dbDelta is unreliable for
+		// adding new columns to an existing table, and production callers
+		// (GU_Upgrade::run) flush the cache immediately after install.
+		$this->uninstall_table();
 		dbDelta( $this->schema() ); // @codeCoverageIgnore
 	}
 
