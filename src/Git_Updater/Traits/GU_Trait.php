@@ -196,7 +196,6 @@ trait GU_Trait {
 		$int_timeout = 0;
 		if ( $timeout ) {
 			$hours   = $this->get_class_vars( 'API\API', 'hours' );
-			$timeout = apply_filters( 'gu_repo_cache_timeout', $timeout, $id, $response, $repo );
 
 			/**
 			 * Allow filtering of cache timeout for repo information.
@@ -208,6 +207,8 @@ trait GU_Trait {
 			 * @param mixed       $response Data to be stored.
 			 * @param string|bool $repo     Repo name or false.
 			 */
+			$timeout = apply_filters( 'gu_repo_cache_timeout', $timeout, $id, $response, $repo );
+
 			$int_timeout = strtotime( $timeout );
 		}
 
