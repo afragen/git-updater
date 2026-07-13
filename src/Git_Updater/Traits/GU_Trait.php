@@ -190,12 +190,26 @@ trait GU_Trait {
 		if ( is_wp_error( $response ) ) {
 			return false;
 		}
-		$slug  = $this->get_cache_key( $repo );
-		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$slug     = $this->get_cache_key( $repo );
+		$table    = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$existing = $table->get_repo( $slug );
+
+		// Skip the write when the new value matches the cached value for this
+		// column. Serialized comparison is robust against null vs '', array
+		// key reordering, and float precision edge cases. error_cache is
+		// excluded because it manages its own short timeout and must refresh
+		// on every retry.
+		if ( null !== $existing
+			&& 'error_cache' !== $id
+			&& array_key_exists( $id, $existing )
+			&& maybe_serialize( $existing[ $id ] ) === maybe_serialize( $response )
+		) {
+			return true;
+		}
 
 		$int_timeout = 0;
 		if ( $timeout ) {
-			$hours   = $this->get_class_vars( 'API\API', 'hours' );
+			$hours = $this->get_class_vars( 'API\API', 'hours' );
 
 			/**
 			 * Allow filtering of cache timeout for repo information.
@@ -220,7 +234,6 @@ trait GU_Trait {
 
 		// When $timeout is false, preserve the existing row timeout.
 		if ( 0 === $int_timeout ) {
-			$existing    = $table->get_repo( $slug );
 			$int_timeout = null === $existing ? (int) ( $this->get_class_vars( 'API\API', 'hours' ) * HOUR_IN_SECONDS + time() ) : (int) ( $existing['timeout'] ?? 0 );
 		}
 

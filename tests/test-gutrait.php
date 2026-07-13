@@ -350,6 +350,111 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 		$this->assertSame( 'b', $cache['tags'] );
 	}
 
+	/**
+	 * Count write queries (INSERT/UPDATE) against the cache table during $fn.
+	 *
+	 * @param callable $fn Callback to execute.
+	 * @return int Number of INSERT/UPDATE queries against the cache table.
+	 */
+	private function count_cache_table_writes( callable $fn ): int {
+		global $wpdb;
+		$count      = 0;
+		$table_name = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->table_name();
+		$filter     = function ( $query ) use ( &$count, $table_name ) {
+			if ( false === strpos( $query, $table_name ) ) {
+				return $query;
+			}
+			$verb = strtoupper( ltrim( $query ) );
+			if ( str_starts_with( $verb, 'INSERT' ) || str_starts_with( $verb, 'UPDATE' ) ) {
+				++$count;
+			}
+			return $query;
+		};
+		add_filter( 'query', $filter );
+		try {
+			$fn();
+		} finally {
+			remove_filter( 'query', $filter );
+		}
+		return $count;
+	}
+
+	public function test_set_repo_cache_skips_write_when_value_unchanged(): void {
+		// First call writes the value. Second call with the same value must
+		// not produce any INSERT/UPDATE against the cache table.
+		$this->api->set_repo_cache( 'tags', [ '1.0.0' ], 'test-plugin', '+1 hour' );
+
+		$writes = $this->count_cache_table_writes( function () {
+			$this->api->set_repo_cache( 'tags', [ '1.0.0' ], 'test-plugin', '+1 hour' );
+		} );
+
+		$this->assertSame( 0, $writes, 'Unchanged value must not produce write queries' );
+	}
+
+	public function test_set_repo_cache_writes_when_value_differs(): void {
+		$this->api->set_repo_cache( 'tags', [ '1.0.0' ], 'test-plugin', '+1 hour' );
+
+		$writes = $this->count_cache_table_writes( function () {
+			$this->api->set_repo_cache( 'tags', [ '2.0.0' ], 'test-plugin', '+1 hour' );
+		} );
+
+		$this->assertSame( 1, $writes, 'Changed value must produce exactly one write' );
+		$cache = $this->api->get_repo_cache( 'test-plugin' );
+		$this->assertSame( [ '2.0.0' ], $cache['tags'] );
+	}
+
+	public function test_set_repo_cache_skips_write_for_null_to_empty_string(): void {
+		// WordPress's maybe_serialize() returns the input unchanged for null
+		// and '' (both are not is_serialized()), and wpdb stores both as
+		// SQL NULL → '' when read back. The diff guard correctly treats
+		// them as semantically equal.
+		$this->api->set_repo_cache( 'meta', null, 'test-plugin', '+1 hour' );
+
+		$writes = $this->count_cache_table_writes( function () {
+			$this->api->set_repo_cache( 'meta', '', 'test-plugin', '+1 hour' );
+		} );
+
+		$this->assertSame( 0, $writes, 'null → "" round-trips to "" and must not produce a write' );
+	}
+
+	public function test_set_repo_cache_writes_when_column_not_yet_present(): void {
+		// Row exists for the slug but the column was never written.
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'repo',
+			'existing',
+			strtotime( '+1 hour' )
+		);
+
+		$writes = $this->count_cache_table_writes( function () {
+			$this->api->set_repo_cache( 'tags', [ '1.0.0' ], 'test-plugin', '+1 hour' );
+		} );
+
+		$this->assertSame( 1, $writes, 'Missing column must produce a write' );
+	}
+
+	public function test_set_repo_cache_writes_when_no_existing_row(): void {
+		// No row for the slug at all → first call must write.
+		$writes = $this->count_cache_table_writes( function () {
+			$this->api->set_repo_cache( 'tags', [ '1.0.0' ], 'test-plugin', '+1 hour' );
+		} );
+
+		$this->assertSame( 1, $writes, 'First write (no existing row) must produce a write' );
+	}
+
+	public function test_set_repo_cache_always_writes_error_cache(): void {
+		// error_cache is excluded from the diff guard so the short retry
+		// window always refreshes.
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->set_error_cache( 'test-plugin', [ 'http_code' => 500 ], 300 );
+
+		$writes = $this->count_cache_table_writes( function () use ( $table ) {
+			$table->set_error_cache( 'test-plugin', [ 'http_code' => 500 ], 300 );
+		} );
+
+		$this->assertGreaterThan( 0, $writes, 'error_cache must always be refreshable' );
+	}
+
 	// -------------------------------------------------------------------------
 	// set_repo_cache_timeout()
 	// -------------------------------------------------------------------------
