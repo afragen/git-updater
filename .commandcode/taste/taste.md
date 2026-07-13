@@ -1,3 +1,7 @@
+# Taste (Continuously Learned by [CommandCode][cmd])
+
+[cmd]: https://commandcode.ai/
+
 # Security
 - Proactively offer security reviews for codebase changes. Confidence: 0.85
 
@@ -12,5 +16,8 @@
 - Achieve 100% line test coverage with zero test failures for all modifications. Confidence: 0.94
 - Use @codeCoverageIgnore annotation when appropriate for uncovered lines. Confidence: 0.75
 
-# WordPress
+# Wordpress
 - Use `$wpdb->prepare()` with `%i` placeholders for table names (SQL identifiers) in `$wpdb->query()` DDL calls instead of raw concatenation with `phpcs:ignore`. Confidence: 0.65
+
+# architecture
+See [architecture/taste.md](architecture/taste.md)
