@@ -64,6 +64,7 @@ class Test_GitHub_API_Parse extends WP_UnitTestCase {
 		remove_all_filters( 'pre_http_request' );
 		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
 		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		parent::tear_down();
 	}
 

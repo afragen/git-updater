@@ -29,6 +29,19 @@ if ( ! defined( 'WPINC' ) ) {
 abstract class Abstract_Cache_Table {
 
 	/**
+	 * Per-request row memoization, keyed by slug.
+	 *
+	 * The value is either an unserialized row array, or a literal `null` to
+	 * remember "no row exists" so we don't re-query the DB for missing slugs.
+	 *
+	 * Lives on the instance, so the `Repo_Cache_Table` singleton shares one
+	 * cache across all callers for the duration of a request.
+	 *
+	 * @var array<string, array<string, mixed>|null>
+	 */
+	protected $row_cache = [];
+
+	/**
 	 * Allowed column names.
 	 *
 	 * Column identifiers are interpolated into SQL, so they must be drawn from
@@ -95,6 +108,11 @@ abstract class Abstract_Cache_Table {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
 		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $this->table_name() ) );
+
+		// Drop the table → all cached rows are now stale. install_table() calls
+		// uninstall_table() first, so this also resets state for re-installs
+		// (e.g. in test setUp).
+		$this->row_cache = [];
 	}
 
 	/**
@@ -161,6 +179,20 @@ abstract class Abstract_Cache_Table {
 	abstract public function get_entry( string $slug, string $column );
 
 	/**
+	 * Drop a single slug's row from the per-request row cache.
+	 *
+	 * Centralised so all write paths stay in lockstep with `get_repo()`'s
+	 * memoization. Safe to call for unknown slugs.
+	 *
+	 * @param string $slug Repository slug.
+	 *
+	 * @return void
+	 */
+	protected function invalidate_row_cache( string $slug ): void {
+		unset( $this->row_cache[ $slug ] );
+	}
+
+	/**
 	 * Delete all cached data for a single repository.
 	 *
 	 * @param string $slug Repository slug.
@@ -172,6 +204,8 @@ abstract class Abstract_Cache_Table {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$result = $wpdb->delete( $this->table_name(), [ 'slug' => $slug ], [ '%s' ] );
+
+		$this->invalidate_row_cache( $slug );
 
 		// Return false when no row existed so callers can distinguish a no-op flush.
 		return false !== $result && $result > 0;
@@ -187,6 +221,8 @@ abstract class Abstract_Cache_Table {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i', $this->table_name() ) );
+
+		$this->row_cache = [];
 
 		return true;
 	}
@@ -211,6 +247,9 @@ abstract class Abstract_Cache_Table {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$result = $wpdb->query( $wpdb->prepare( "DELETE FROM {$this->table_name()} WHERE slug NOT IN ({$placeholders})", $live_slugs ) ); // phpcs:ignore
 
+		// prune_stale may delete arbitrary slugs; safest to drop the whole cache.
+		$this->row_cache = [];
+
 		return (int) ( $result ?: 0 );
 	}
 
@@ -222,12 +261,17 @@ abstract class Abstract_Cache_Table {
 	 * @return array<string, mixed>|null
 	 */
 	public function get_repo( string $slug ) {
+		if ( array_key_exists( $slug, $this->row_cache ) ) {
+			return $this->row_cache[ $slug ];
+		}
+
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE slug = %s', $this->table_name(), $slug ), ARRAY_A );
 
 		if ( ! is_array( $row ) ) {
+			$this->row_cache[ $slug ] = null;
 			return null;
 		}
 
@@ -239,6 +283,7 @@ abstract class Abstract_Cache_Table {
 			}
 		}
 
+		$this->row_cache[ $slug ] = $row;
 		return $row;
 	}
 
@@ -251,7 +296,18 @@ abstract class Abstract_Cache_Table {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		return (array) $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i', $this->table_name() ), ARRAY_A );
+		$rows = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i', $this->table_name() ), ARRAY_A );
+
+		foreach ( $rows as $row ) {
+			foreach ( $row as $key => $value ) {
+				if ( is_string( $value ) ) {
+					$row[ $key ] = maybe_unserialize( $value );
+				}
+			}
+			$this->row_cache[ (string) $row['slug'] ] = $row;
+		}
+
+		return $rows;
 	}
 
 	/**
@@ -267,6 +323,8 @@ abstract class Abstract_Cache_Table {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$result = $wpdb->update( $this->table_name(), [ 'timeout' => $timeout ], [ 'slug' => $slug ], [ '%d' ], [ '%s' ] );
+
+		$this->invalidate_row_cache( $slug );
 
 		return false !== $result;
 	}
@@ -298,7 +356,6 @@ abstract class Abstract_Cache_Table {
 
 		$error_timeout = time() + $error_timeout_seconds;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$result = $wpdb->query(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -311,6 +368,8 @@ abstract class Abstract_Cache_Table {
 				0
 			)
 		);
+
+		$this->invalidate_row_cache( $slug );
 
 		return false !== $result;
 	}
@@ -367,6 +426,8 @@ abstract class Abstract_Cache_Table {
 				array_values( $values )
 			)
 		);
+
+		$this->invalidate_row_cache( $slug );
 
 		return false !== $result;
 	}

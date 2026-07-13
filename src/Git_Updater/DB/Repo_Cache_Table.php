@@ -137,6 +137,8 @@ final class Repo_Cache_Table extends Abstract_Cache_Table {
 			$wpdb->prepare( "UPDATE {$this->table_name()} SET `{$column}` = NULL WHERE slug = %s", $slug ) // phpcs:ignore
 		);
 
+		$this->invalidate_row_cache( $slug );
+
 		return false !== $result;
 	}
 

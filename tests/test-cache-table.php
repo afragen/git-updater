@@ -20,9 +20,7 @@ class Test_Cache_Table extends WP_UnitTestCase {
 	}
 
 	public function tear_down(): void {
-		global $wpdb;
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->query( 'DROP TABLE IF EXISTS ' . $this->table->table_name() );
+		$this->table->uninstall_table();
 		parent::tear_down();
 	}
 
@@ -192,5 +190,189 @@ class Test_Cache_Table extends WP_UnitTestCase {
 		$this->table->modify_table();
 		// Existing row preserved; table still functional.
 		$this->assertSame( [ '1.0.0' ], $this->table->get_entry( 'test-plugin', 'tags' ) );
+	}
+
+	/**
+	 * Count queries against the cache table during the callback.
+	 *
+	 * Hooks the wpdb `query` action to filter to just the git_updater_cache
+	 * table. Used to assert the row-cache memoization actually short-circuits
+	 * DB hits within a single request.
+	 *
+	 * @param callable $fn Callback to execute.
+	 *
+	 * @return int Number of queries against the cache table during $fn().
+	 */
+	private function count_cache_table_queries( callable $fn ): int {
+		global $wpdb;
+		$count      = 0;
+		$table_name = $this->table->table_name();
+		$filter     = function ( $query ) use ( &$count, $table_name ) {
+			if ( false !== strpos( $query, $table_name ) ) {
+				++$count;
+			}
+			return $query;
+		};
+		add_filter( 'query', $filter );
+		try {
+			$fn();
+		} finally {
+			remove_filter( 'query', $filter );
+		}
+		return $count;
+	}
+
+	public function test_get_repo_memoizes_within_request(): void {
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ] );
+
+		$queries = $this->count_cache_table_queries( function () {
+			$this->table->get_repo( 'test-plugin' );
+			$this->table->get_repo( 'test-plugin' );
+			$this->table->get_repo( 'test-plugin' );
+		} );
+
+		$this->assertSame( 1, $queries, 'get_repo() must hit the DB at most once per slug per request' );
+	}
+
+	public function test_get_repo_returns_same_array_on_cache_hit(): void {
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ] );
+
+		$first  = $this->table->get_repo( 'test-plugin' );
+		$second = $this->table->get_repo( 'test-plugin' );
+
+		$this->assertSame( $first, $second );
+	}
+
+	public function test_get_repo_caches_negative_lookups(): void {
+		// First call records "no row"; second call must not re-query.
+		$queries = $this->count_cache_table_queries( function () {
+			$this->assertNull( $this->table->get_repo( 'no-such-slug' ) );
+			$this->assertNull( $this->table->get_repo( 'no-such-slug' ) );
+		} );
+
+		$this->assertSame( 1, $queries );
+	}
+
+	public function test_get_repo_cache_survives_get_entry(): void {
+		// get_entry() routes through get_repo(); both reads of the same slug
+		// in one request must share a single DB hit.
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ] );
+
+		$queries = $this->count_cache_table_queries( function () {
+			$this->table->get_entry( 'test-plugin', 'tags' );
+			$this->table->get_entry( 'test-plugin', 'meta' );
+		} );
+
+		$this->assertSame( 1, $queries );
+	}
+
+	public function test_add_entry_invalidates_row_cache(): void {
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ] );
+		$this->assertSame( [ '1.0.0' ], $this->table->get_repo( 'test-plugin' )['tags'] );
+
+		$this->table->add_entry( 'test-plugin', 'tags', [ '2.0.0' ] );
+
+		$this->assertSame( [ '2.0.0' ], $this->table->get_repo( 'test-plugin' )['tags'] );
+	}
+
+	public function test_update_entry_invalidates_row_cache(): void {
+		$this->table->add_entry( 'test-plugin', 'meta', 'first' );
+		$this->assertSame( 'first', $this->table->get_repo( 'test-plugin' )['meta'] );
+
+		$this->table->update_entry( 'test-plugin', 'meta', 'second' );
+
+		$this->assertSame( 'second', $this->table->get_repo( 'test-plugin' )['meta'] );
+	}
+
+	public function test_delete_entry_invalidates_row_cache(): void {
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ] );
+		$this->assertSame( [ '1.0.0' ], $this->table->get_repo( 'test-plugin' )['tags'] );
+
+		$this->table->delete_entry( 'test-plugin', 'tags' );
+
+		$this->assertNull( $this->table->get_repo( 'test-plugin' )['tags'] );
+	}
+
+	public function test_delete_repo_invalidates_row_cache(): void {
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ] );
+		$this->assertNotNull( $this->table->get_repo( 'test-plugin' ) );
+
+		$this->table->delete_repo( 'test-plugin' );
+
+		$this->assertNull( $this->table->get_repo( 'test-plugin' ) );
+	}
+
+	public function test_set_repo_timeout_invalidates_row_cache(): void {
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ] );
+		$old_timeout = (int) $this->table->get_repo( 'test-plugin' )['timeout'];
+
+		$new_timeout = time() + 7200;
+		$this->table->set_repo_timeout( 'test-plugin', $new_timeout );
+
+		$row = $this->table->get_repo( 'test-plugin' );
+		$this->assertSame( (string) $new_timeout, $row['timeout'] );
+		$this->assertNotSame( (string) $old_timeout, $row['timeout'] );
+	}
+
+	public function test_set_error_cache_invalidates_row_cache(): void {
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ] );
+		$this->assertNull( $this->table->get_error_cache( 'test-plugin' ) );
+
+		$this->table->set_error_cache( 'test-plugin', [ 'http_code' => 500 ], 300 );
+
+		$this->assertSame( [ 'http_code' => 500 ], $this->table->get_error_cache( 'test-plugin' ) );
+	}
+
+	public function test_get_all_rows_populates_per_slug_cache(): void {
+		$this->table->add_entry( 'plugin-a', 'tags', [ '1.0.0' ] );
+		$this->table->add_entry( 'plugin-b', 'tags', [ '2.0.0' ] );
+		$this->table->add_entry( 'plugin-c', 'tags', [ '3.0.0' ] );
+
+		$this->table->get_all_rows();
+
+		$queries = $this->count_cache_table_queries( function () {
+			$this->assertSame( [ '1.0.0' ], $this->table->get_repo( 'plugin-a' )['tags'] );
+			$this->assertSame( [ '2.0.0' ], $this->table->get_repo( 'plugin-b' )['tags'] );
+			$this->assertSame( [ '3.0.0' ], $this->table->get_repo( 'plugin-c' )['tags'] );
+		} );
+
+		$this->assertSame( 0, $queries, 'get_all_rows() should warm the per-slug cache' );
+	}
+
+	public function test_delete_all_repos_flushes_row_cache(): void {
+		$this->table->add_entry( 'plugin-a', 'tags', [ '1.0.0' ] );
+		$this->table->add_entry( 'plugin-b', 'tags', [ '2.0.0' ] );
+		$this->table->get_repo( 'plugin-a' );
+		$this->table->get_repo( 'plugin-b' );
+
+		$this->table->delete_all_repos();
+
+		$this->assertNull( $this->table->get_repo( 'plugin-a' ) );
+		$this->assertNull( $this->table->get_repo( 'plugin-b' ) );
+	}
+
+	public function test_prune_stale_flushes_row_cache(): void {
+		$this->table->add_entry( 'plugin-a', 'tags', [ '1.0.0' ] );
+		$this->table->add_entry( 'plugin-stale', 'tags', [ '2.0.0' ] );
+		$this->table->get_repo( 'plugin-a' );
+		$this->table->get_repo( 'plugin-stale' );
+
+		$this->table->prune_stale( [ 'plugin-a' ] );
+
+		$this->assertNotNull( $this->table->get_repo( 'plugin-a' ) );
+		$this->assertNull( $this->table->get_repo( 'plugin-stale' ) );
+	}
+
+	public function test_row_cache_does_not_leak_across_writes_for_unrelated_slugs(): void {
+		// Invalidating one slug must not poison the cache for another.
+		$this->table->add_entry( 'plugin-a', 'tags', [ '1.0.0' ] );
+		$this->table->add_entry( 'plugin-b', 'tags', [ '2.0.0' ] );
+		$row_a = $this->table->get_repo( 'plugin-a' );
+		$row_b = $this->table->get_repo( 'plugin-b' );
+
+		$this->table->add_entry( 'plugin-a', 'tags', [ '9.9.9' ] );
+
+		$this->assertSame( [ '9.9.9' ], $this->table->get_repo( 'plugin-a' )['tags'] );
+		$this->assertSame( $row_b, $this->table->get_repo( 'plugin-b' ) );
 	}
 }
