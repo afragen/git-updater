@@ -438,6 +438,28 @@ class Test_Base_Load extends WP_UnitTestCase {
 		$this->assertTrue( wp_style_is( 'git-updater', 'registered' ) );
 	}
 
+	// Line 183: load() prunes cache rows for slugs no longer in the live repo set.
+	public function test_load_prunes_stale_cache_rows(): void {
+		// Pin db_version to the current version so GU_Upgrade::run() is a no-op
+		// and does NOT call delete_all_cached_data() (which would mask the prune).
+		update_site_option( 'git_updater', [ 'db_version' => '13.1.0' ] );
+		// Seed a theme addition so the additions foreach in load() iterates and
+		// the closing brace (line 183) is covered.
+		update_site_option( 'git_updater_additions', [
+			[ 'type' => 'github_theme', 'slug' => 'test-gu-theme' ],
+		] );
+
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'stale-slug', 'tags', [ '1.0.0' ], strtotime( '+12 hours' ) );
+		$this->assertNotNull( $table->get_repo( 'stale-slug' ) );
+
+		global $pagenow;
+		$pagenow = 'plugins.php';
+		$this->base->load();
+
+		$this->assertNull( $table->get_repo( 'stale-slug' ) );
+	}
+
 }
 
 // =============================================================================

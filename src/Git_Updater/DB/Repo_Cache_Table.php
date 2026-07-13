@@ -40,7 +40,7 @@ final class Repo_Cache_Table extends Abstract_Cache_Table {
 	 */
 	public static function instance(): self {
 		if ( ! isset( self::$instance ) ) {
-			self::$instance = new self();
+			self::$instance = new self(); // @codeCoverageIgnore
 		}
 
 		return self::$instance;

@@ -126,6 +126,21 @@ class Test_GU_Upgrade extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'some_token', $stored );
 	}
 
+	public function test_run_drops_legacy_ghu_options(): void {
+		// Seed a legacy `ghu-<md5>` site option and verify it is removed
+		// when the upgrade runs.
+		$legacy_key = 'ghu-' . md5( 'test-plugin' );
+		update_site_option( $legacy_key, [ 'tags' => [ '1.0.0' ] ] );
+		$this->assertNotFalse( get_site_option( $legacy_key ) );
+
+		\Fragen\Git_Updater\Base::$options = [];
+		update_site_option( 'git_updater', \Fragen\Git_Updater\Base::$options );
+
+		$this->upgrade->run();
+
+		$this->assertFalse( get_site_option( $legacy_key ) );
+	}
+
 	public function test_run_hits_default_branch_when_db_version_is_newer(): void {
 		\Fragen\Git_Updater\Base::$options = [ 'db_version' => '99.0.0' ];
 		update_site_option( 'git_updater', \Fragen\Git_Updater\Base::$options );

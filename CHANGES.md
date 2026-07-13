@@ -9,6 +9,7 @@
 * refactor repo API cache from per-repo `ghu-<md5>` site options into a dedicated `git_updater_cache` table (`Fragen\Git_Updater\DB\Repo_Cache_Table`); all `get_repo_cache`/`set_repo_cache` reads and writes now go through the table, with per-column `timeout` and a separate `error_timeout` for error-cache expiry
 * store per-repo `current_branch` solely in the `git_updater_cache` table; remove the redundant `current_branch_<slug>` key from the `git_updater` options and its write/prune/preserve paths in `Branch`, `Rest_Update`, `REST_API`, `Settings`, and `GU_Upgrade`
 * reflect cache-table migration and `current_branch` consolidation in the test suite (new `tests/test-cache-table.php`; updated cache-seeding helpers across test files)
+* extract `GU_Trait::is_fetch_complete()` to centralize the "all API data returned" check (table-backed via the `ran` column); refactor `set_repo_cache_timeout()` and `maybe_extend_repo_cache()` to use it
 
 #### 14.2.3 / 2026-08-05
 * remove filter `gu_dev_release_asset_version`

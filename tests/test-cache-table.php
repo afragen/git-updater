@@ -65,6 +65,10 @@ class Test_Cache_Table extends WP_UnitTestCase {
 		$this->assertNull( $this->table->get_repo( 'test-plugin' ) );
 	}
 
+	public function test_delete_repo_returns_false_when_row_absent(): void {
+		$this->assertFalse( $this->table->delete_repo( 'no-such-slug' ) );
+	}
+
 	public function test_delete_repo_is_isolated(): void {
 		$this->table->add_entry( 'plugin-a', 'tags', [ '1.0.0' ] );
 		$this->table->add_entry( 'plugin-b', 'tags', [ '2.0.0' ] );
@@ -147,5 +151,46 @@ class Test_Cache_Table extends WP_UnitTestCase {
 		$schema = $ref->invoke( Repo_Cache_Table::instance() );
 		$this->assertStringContainsString( 'UNIQUE KEY slug', $schema );
 		$this->assertStringContainsString( 'error_timeout', $schema );
+	}
+
+	public function test_uninstall_table_runs_without_error_and_table_remains_usable(): void {
+		// The DROP may be a no-op in test environments that restrict DDL
+		// privileges, but the call must succeed and the table must remain
+		// in a usable state.
+		$this->table->uninstall_table();
+		$this->assertTrue( $this->table->add_entry( 'after-uninstall', 'tags', [ '1.0.0' ] ) );
+		$this->assertSame( [ '1.0.0' ], $this->table->get_entry( 'after-uninstall', 'tags' ) );
+	}
+
+	public function test_add_entry_passes_error_timeout_to_upsert_for_non_error_cache_column(): void {
+		$this->assertTrue(
+			$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ], 0, 60 )
+		);
+		$row = (array) $this->table->get_repo( 'test-plugin' );
+		$this->assertGreaterThan( time(), (int) $row['error_timeout'] );
+		$this->assertLessThan( time() + 120, (int) $row['error_timeout'] );
+	}
+
+	public function test_add_entry_routes_error_cache_column_to_set_error_cache(): void {
+		// add_entry( $slug, 'error_cache', ... ) must delegate to set_error_cache(),
+		// writing both error_cache and error_timeout columns.
+		$this->assertTrue(
+			$this->table->add_entry( 'test-plugin', 'error_cache', [ 'http_code' => 503 ], 0, 300 )
+		);
+		$cache = $this->table->get_error_cache( 'test-plugin' );
+		$this->assertSame( [ 'http_code' => 503 ], $cache );
+		$row = (array) $this->table->get_repo( 'test-plugin' );
+		$this->assertGreaterThan( time(), (int) $row['error_timeout'] );
+		$this->assertLessThan( time() + 600, (int) $row['error_timeout'] );
+	}
+
+	public function test_modify_table_is_callable_and_idempotent(): void {
+		// modify_table() runs dbDelta(schema). Idempotent — calling it a second
+		// time must not throw and must leave the table usable.
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ] );
+		$this->table->modify_table();
+		$this->table->modify_table();
+		// Existing row preserved; table still functional.
+		$this->assertSame( [ '1.0.0' ], $this->table->get_entry( 'test-plugin', 'tags' ) );
 	}
 }

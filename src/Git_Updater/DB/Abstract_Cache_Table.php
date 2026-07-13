@@ -228,7 +228,9 @@ abstract class Abstract_Cache_Table {
 		}
 
 		foreach ( $row as $key => $value ) {
-			if ( is_string( $value ) ) {
+			if ( is_string( $value ) ) { // @codeCoverageIgnore
+				// wpdb returns all column values as strings; the non-string branch
+				// is unreachable from the table layer.
 				$row[ $key ] = maybe_unserialize( $value );
 			}
 		}

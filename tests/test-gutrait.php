@@ -507,6 +507,39 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 	}
 
 	// -------------------------------------------------------------------------
+	// is_fetch_complete()
+	// -------------------------------------------------------------------------
+
+	public function test_is_fetch_complete_true_when_all_calls_ran(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', [ 'Version' => '1.0.0' ] );
+		$table->add_entry(
+			'test-plugin',
+			'ran',
+			[ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ]
+		);
+
+		$this->assertTrue( $this->api->is_fetch_complete( 'test-plugin' ) );
+	}
+
+	public function test_is_fetch_complete_false_when_ran_incomplete(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', [ 'Version' => '1.0.0' ] );
+		// Missing 'branches' and 'meta' — interrupted mid-sequence.
+		$table->add_entry(
+			'test-plugin',
+			'ran',
+			[ 'contents', 'assets', 'readme', 'changes', 'tags' ]
+		);
+
+		$this->assertFalse( $this->api->is_fetch_complete( 'test-plugin' ) );
+	}
+
+	public function test_is_fetch_complete_false_when_row_missing(): void {
+		$this->assertFalse( $this->api->is_fetch_complete( 'no-such-repo' ) );
+	}
+
+	// -------------------------------------------------------------------------
 	// delete_all_cached_data()
 	// -------------------------------------------------------------------------
 

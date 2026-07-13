@@ -243,9 +243,8 @@ trait GU_Trait {
 	 */
 	final public function set_repo_cache_timeout( string $slug ): void {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
-		$row   = $table->get_repo( $slug );
 
-		if ( null === $row || ! isset( $row['ran'] ) || array_diff( self::expected_ran_steps(), $row['ran'] ) ) {
+		if ( ! $this->is_fetch_complete( $slug ) ) {
 			/**
 			 * Filter the fallback cache timeout duration (in hours) for an
 			 * incomplete fetch cycle.  Prevents infinite re-fetching by setting
@@ -262,6 +261,7 @@ trait GU_Trait {
 			return;
 		}
 
+		$row   = $table->get_repo( $slug );
 		$hours = $this->get_class_vars( 'API\\API', 'hours' );
 		$table->set_repo_timeout(
 			$slug,
@@ -281,12 +281,32 @@ trait GU_Trait {
 	}
 
 	/**
+	 * Determine if a repo's full fetch cycle has completed by inspecting the
+	 * `ran` column in the cache table.
+	 *
+	 * Each fetch step appends its key to `ran` only when it returns successfully,
+	 * so a complete `ran` set means all API calls executed. A missing row, a
+	 * missing `ran` column, or a partial `ran` set all indicate an incomplete cycle.
+	 *
+	 * @param string $slug Repository slug.
+	 *
+	 * @return bool
+	 */
+	final public function is_fetch_complete( string $slug ): bool {
+		$expected = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
+		$row      = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $slug );
+
+		return null !== $row
+			&& isset( $row['ran'] )
+			&& [] === array_diff( $expected, (array) $row['ran'] );
+	}
+
+	/**
 	 * Maybe extend API cached data and set new timeout if remote version
 	 * is same as cached remote version?
 	 *
-	 * Use presence of 'ran' in cache to determine if all API calls have executed and are complete.
-	 * Each key is appended to 'ran' after its specific call returns, so a partial list indicates
-	 * interrupted execution. If not present or incomplete, do not extend or set timeout.
+	 * Uses is_fetch_complete() (which inspects the `ran` column) to determine if
+	 * all API calls have executed. If not complete, do not extend or set timeout.
 	 *
 	 * @param array<string, string> $remote_headers Remote headers data array.
 	 * @param stdClass              $repo           Repo data object.
@@ -300,7 +320,7 @@ trait GU_Trait {
 		$table  = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 		$cache  = $table->get_repo( $slug );
 
-		if ( null !== $cache && isset( $cache['ran'] ) && ! array_diff( self::expected_ran_steps(), $cache['ran'] ) ) {
+		if ( $this->is_fetch_complete( $slug ) ) {
 			if ( version_compare( $remote_headers['Version'], $old_version, '==' ) ) {
 				if ( ! $this->is_cache_timeout_valid( (int) ( $cache['timeout'] ?? 0 ) ) ) {
 					$table->set_repo_timeout( $slug, strtotime( '+6 hours' ) );
