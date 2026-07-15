@@ -1,4 +1,7 @@
 #### [unreleased]
+* replace `afterStart` Xdebug install script with wp-env's native `--xdebug=coverage` build flag; Xdebug is now compiled into the `tests-cli` image at build time instead of installed at runtime (the `afterStart` hook ran as the non-root `www-data` user and could not `apk add`/`pecl install`)
+* add `wp-env:start` npm script (`wp-env start --xdebug=coverage`) and point Composer's `wp-env-start` at it
+* remove obsolete `bin/install-xdebug.sh`
 * new easter egg: the repo dashicon is now a button that flushes the cache of that specific repository via the `flush-repo-cache` REST endpoint (no page navigation); the broken dashicon is revealed on a successful flush
 * fix `Rest_Update::update_plugin()` inverted activation check — `activate_plugin()` returns `null` on success and `WP_Error` on failure; old code `if ( ! $activate )` silently swallowed failures; now reports error message from `WP_Error`
 * fix `API::api()` missing `WP_Error` check after OAuth retry — retry response now validated like the initial request

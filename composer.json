@@ -70,7 +70,7 @@
 	"scripts": {
 		"lint": "@php ./vendor/bin/phpcs .",
 		"format": "@php ./vendor/bin/phpcbf .",
-		"wp-env-start": "npm run wp-env start",
+		"wp-env-start": "npm run wp-env:start",
 		"wp-env-stop": "npm run wp-env stop",
 		"test": "npm test",
 		"test-ms": "npm run test:multisite",
