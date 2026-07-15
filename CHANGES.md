@@ -1,7 +1,4 @@
 #### [unreleased]
-* replace `afterStart` Xdebug install script with wp-env's native `--xdebug=coverage` build flag; Xdebug is now compiled into the `tests-cli` image at build time instead of installed at runtime (the `afterStart` hook ran as the non-root `www-data` user and could not `apk add`/`pecl install`)
-* add `wp-env:start` npm script (`wp-env start --xdebug=coverage`) and point Composer's `wp-env-start` at it
-* remove obsolete `bin/install-xdebug.sh`
 * fix test isolation: clear the WordPress theme cache in `GU_Test_Case::tear_down()` so each test re-scans installed themes; otherwise a stale `wp_get_themes()` cache from a prior test hid the `test-gu-theme` fixture from Git Updater's `get_theme_meta()`, causing `Test_Theme_Get_Theme_Meta` and `Test_Rest_Update_Full_Path` failures in the full suite (they passed in isolation)
 * add `index.php` to the `test-gu-theme` fixture so it is a valid standalone WordPress theme
 * new easter egg: the repo dashicon is now a button that flushes the cache of that specific repository via the `flush-repo-cache` REST endpoint (no page navigation); the broken dashicon is revealed on a successful flush
