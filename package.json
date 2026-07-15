@@ -6,11 +6,11 @@
 		"@wordpress/env": "^10.0"
 	},
 	"scripts": {
-		"wp-env": "wp-env",
-		"wp-env:start": "wp-env start --xdebug=coverage",
-		"test": "wp-env run tests-cli env WP_TESTS_PHPUNIT_POLYFILLS_PATH=/var/www/html/wp-content/plugins/git-updater/vendor/yoast/phpunit-polyfills /var/www/html/wp-content/plugins/git-updater/vendor/bin/phpunit --config=/var/www/html/wp-content/plugins/git-updater/phpunit.xml",
-		"test:multisite": "wp-env run tests-cli env WP_MULTISITE=1 WP_TESTS_PHPUNIT_POLYFILLS_PATH=/var/www/html/wp-content/plugins/git-updater/vendor/yoast/phpunit-polyfills /var/www/html/wp-content/plugins/git-updater/vendor/bin/phpunit --config=/var/www/html/wp-content/plugins/git-updater/phpunit.xml",
-		"test:coverage": "wp-env run tests-cli env WP_TESTS_PHPUNIT_POLYFILLS_PATH=/var/www/html/wp-content/plugins/git-updater/vendor/yoast/phpunit-polyfills /var/www/html/wp-content/plugins/git-updater/vendor/bin/phpunit --config=/var/www/html/wp-content/plugins/git-updater/phpunit.xml --coverage-text --colors=never",
-		"test:php80": "wp-env run tests-cli env WP_TESTS_PHPUNIT_POLYFILLS_PATH=/var/www/html/wp-content/plugins/git-updater/vendor/yoast/phpunit-polyfills /var/www/html/wp-content/plugins/git-updater/vendor/bin/phpunit --config=/var/www/html/wp-content/plugins/git-updater/phpunit.xml"
+		"wp-env": "PATH=$PWD/bin:$PATH wp-env",
+		"wp-env:start": "PATH=$PWD/bin:$PATH WP_ENV_PORT=7778 WP_ENV_TESTS_PORT=7779 wp-env start --xdebug=coverage",
+		"test": "PATH=$PWD/bin:$PATH wp-env run tests-cli env WP_TESTS_PHPUNIT_POLYFILLS_PATH=/var/www/html/wp-content/plugins/git-updater/vendor/yoast/phpunit-polyfills /var/www/html/wp-content/plugins/git-updater/vendor/bin/phpunit --config=/var/www/html/wp-content/plugins/git-updater/phpunit.xml",
+		"test:multisite": "PATH=$PWD/bin:$PATH wp-env run tests-cli env WP_MULTISITE=1 WP_TESTS_PHPUNIT_POLYFILLS_PATH=/var/www/html/wp-content/plugins/git-updater/vendor/yoast/phpunit-polyfills /var/www/html/wp-content/plugins/git-updater/vendor/bin/phpunit --config=/var/www/html/wp-content/plugins/git-updater/phpunit.xml",
+		"test:coverage": "PATH=$PWD/bin:$PATH wp-env run tests-cli env WP_TESTS_PHPUNIT_POLYFILLS_PATH=/var/www/html/wp-content/plugins/git-updater/vendor/yoast/phpunit-polyfills /var/www/html/wp-content/plugins/git-updater/vendor/bin/phpunit --config=/var/www/html/wp-content/plugins/git-updater/phpunit.xml --coverage-text --colors=never",
+		"test:php80": "PATH=$PWD/bin:$PATH wp-env run tests-cli env WP_TESTS_PHPUNIT_POLYFILLS_PATH=/var/www/html/wp-content/plugins/git-updater/vendor/yoast/phpunit-polyfills /var/www/html/wp-content/plugins/git-updater/vendor/bin/phpunit --config=/var/www/html/wp-content/plugins/git-updater/phpunit.xml"
 	}
 }

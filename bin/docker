@@ -1,0 +1,9 @@
+#!/bin/sh
+# Translate wp-env's `docker` CLI calls into Podman so wp-env runs without Docker Desktop.
+# wp-env invokes `docker info`, `docker compose up/exec`, and `docker volume rm`.
+if [ "$1" = "compose" ]; then
+	shift
+	exec podman compose "$@"
+else
+	exec podman "$@"
+fi
