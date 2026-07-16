@@ -888,6 +888,51 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 		}
 	}
 
+	private const COMPLETE_RAN = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
+
+	/**
+	 * Force the live repo list to a single known repo so the null branch's
+	 * config merge is deterministic (the fixture plugin is not always present
+	 * in the live Plugin/Theme config in this environment).
+	 *
+	 * @return array<int, stdClass>
+	 */
+	private function force_config_with_repo( string $slug ): array {
+		add_filter(
+			'gu_config_pre_process',
+			static function ( $repos ) use ( $slug ) {
+				return [ (object) [ 'slug' => $slug ] ];
+			}
+		);
+		return [];
+	}
+
+	public function test_waiting_for_background_update_with_null_waiting_when_repo_has_no_row(): void {
+		$this->force_config_with_repo( 'test-plugin' );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, null );
+		$this->assertTrue( $result );
+	}
+
+	public function test_waiting_for_background_update_with_null_not_waiting_when_ran_complete(): void {
+		$this->force_config_with_repo( 'test-plugin' );
+		$this->seed_cache( [ 'ran' => self::COMPLETE_RAN ] );
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, null );
+		$this->assertFalse( $result );
+	}
+
+	public function test_waiting_for_background_update_with_null_waiting_when_ran_incomplete(): void {
+		$this->force_config_with_repo( 'test-plugin' );
+		// Limited data: a row exists but the fetch cycle never completed.
+		$this->seed_cache( [ 'ran' => [ 'tags' ] ] );
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, null );
+		$this->assertTrue( $result );
+	}
+
 	// -------------------------------------------------------------------------
 	// is_heartbeat()
 	// -------------------------------------------------------------------------
@@ -1021,20 +1066,20 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 	}
 
 	public function test_waiting_for_background_update_with_null_iterates_repos_when_config_not_empty(): void {
-		// No gu_config_pre_process filter — fixture plugin IS in Plugin config with
-		// empty cache, so $waiting is non-empty → returns true. Lines 571 and 576.
+		// Forced config with a repo that has no cache row → waiting → true.
+		$this->force_config_with_repo( 'test-plugin' );
 		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
 		$result = $rm->invoke( $this->api, null );
-		// Result is true (fixture plugin cache empty) or false (config empty in this env).
-		$this->assertIsBool( $result );
+		$this->assertTrue( $result );
 	}
 
 	public function test_waiting_for_background_update_with_null_processes_batch_cache(): void {
-		// Seed a ghu-* option so the batch loading loop executes.
+		// Forced config + seeded data but no complete `ran` → still waiting.
+		$this->force_config_with_repo( 'test-plugin' );
 		$this->seed_cache( [ 'meta' => [ 'Version' => '1.0.0' ] ] );
 		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
 		$result = $rm->invoke( $this->api, null );
-		$this->assertIsBool( $result );
+		$this->assertTrue( $result );
 	}
 
 	// -------------------------------------------------------------------------

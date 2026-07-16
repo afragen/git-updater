@@ -325,6 +325,39 @@ abstract class Abstract_Cache_Table {
 	}
 
 	/**
+	 * Return a map of slug => unserialized `ran` column for every cached repo.
+	 *
+	 * Projects only the `slug` and `ran` columns (not the full LONGTEXT payload),
+	 * so per-repo readme/changes/contents/meta are never read or unserialized.
+	 * Used to decide fetch-cycle completeness without materializing full rows.
+	 *
+	 * @return array<string, array<int, string>|null>
+	 */
+	public function get_cached_ran(): array {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = (array) $wpdb->get_results(
+			$wpdb->prepare( 'SELECT slug, ran FROM %i', $this->table_name() ),
+			ARRAY_A
+		);
+
+		$map = [];
+		foreach ( $rows as $row ) {
+			$slug = (string) ( $row['slug'] ?? '' );
+			if ( '' === $slug ) {
+				continue;
+			}
+			$ran = isset( $row['ran'] ) && is_string( $row['ran'] )
+				? maybe_unserialize( $row['ran'] )
+				: null;
+			$map[ $slug ] = is_array( $ran ) ? $ran : null;
+		}
+
+		return $map;
+	}
+
+	/**
 	 * Set the row timeout for a repository.
 	 *
 	 * @param string $slug    Repository slug.

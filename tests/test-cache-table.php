@@ -339,6 +339,30 @@ class Test_Cache_Table extends WP_UnitTestCase {
 		$this->assertSame( 0, $queries, 'get_all_rows() should warm the per-slug cache' );
 	}
 
+	public function test_get_cached_ran_returns_slug_to_ran_map(): void {
+		$complete = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
+		$partial  = [ 'tags', 'branches' ];
+
+		$this->table->add_entry( 'plugin-a', 'ran', $complete );
+		$this->table->add_entry( 'plugin-b', 'ran', $partial );
+		$this->table->add_entry( 'plugin-c', 'tags', [ '1.0.0' ] ); // no ran column
+
+		$map = $this->table->get_cached_ran();
+
+		$this->assertSame( $complete, $map['plugin-a'] );
+		$this->assertSame( $partial, $map['plugin-b'] );
+		$this->assertNull( $map['plugin-c'] );
+	}
+
+	public function test_get_cached_ran_omits_absent_repo(): void {
+		$this->table->add_entry( 'plugin-a', 'ran', [ 'tags' ] );
+
+		$map = $this->table->get_cached_ran();
+
+		$this->assertArrayHasKey( 'plugin-a', $map );
+		$this->assertArrayNotHasKey( 'plugin-missing', $map );
+	}
+
 	public function test_delete_all_repos_flushes_row_cache(): void {
 		$this->table->add_entry( 'plugin-a', 'tags', [ '1.0.0' ] );
 		$this->table->add_entry( 'plugin-b', 'tags', [ '2.0.0' ] );
