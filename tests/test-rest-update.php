@@ -313,10 +313,10 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 	private const PLUGIN_SLUG = 'test-gu-plugin';
 	private const THEME_SLUG  = 'test-gu-theme';
 
-	private ?string $zip_path           = null;
-	private ?string $theme_zip_path     = null;
-	private ?string $plugin_file_backup = null;
-	private ?string $theme_file_backup  = null;
+	private ?string $zip_path            = null;
+	private ?string $theme_zip_path      = null;
+	private ?string $plugin_file_backup  = null;
+	private array   $theme_file_backups  = [];
 	private array   $saved_request;
 
 	public function set_up(): void {
@@ -346,9 +346,21 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 		if ( file_exists( $plugin_path ) ) {
 			$this->plugin_file_backup = file_get_contents( $plugin_path );
 		}
-		$theme_path = get_theme_root() . '/' . self::THEME_SLUG . '/style.css';
-		if ( file_exists( $theme_path ) ) {
-			$this->theme_file_backup = file_get_contents( $theme_path );
+		// Back up every file in the fixture theme directory (e.g. style.css and index.php),
+		// not just style.css. The upgrader's move_dir/cleanup can delete any file in the
+		// bind-mounted theme, so a whole-directory backup is required to fully restore it.
+		$theme_dir = get_theme_root() . '/' . self::THEME_SLUG;
+		if ( is_dir( $theme_dir ) && $handle = opendir( $theme_dir ) ) {
+			while ( false !== ( $entry = readdir( $handle ) ) ) {
+				if ( '.' === $entry || '..' === $entry ) {
+					continue;
+				}
+				$entry_path = $theme_dir . '/' . $entry;
+				if ( is_file( $entry_path ) ) {
+					$this->theme_file_backups[ $entry ] = file_get_contents( $entry_path );
+				}
+			}
+			closedir( $handle );
 		}
 	}
 
@@ -377,12 +389,14 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 			}
 			file_put_contents( $dir . '/' . self::PLUGIN_SLUG . '.php', $this->plugin_file_backup );
 		}
-		if ( null !== $this->theme_file_backup ) {
+		if ( ! empty( $this->theme_file_backups ) ) {
 			$dir = get_theme_root() . '/' . self::THEME_SLUG;
 			if ( ! is_dir( $dir ) ) {
 				mkdir( $dir, 0755, true );
 			}
-			file_put_contents( $dir . '/style.css', $this->theme_file_backup );
+			foreach ( $this->theme_file_backups as $entry => $contents ) {
+				file_put_contents( $dir . '/' . $entry, $contents );
+			}
 		}
 
 		$_REQUEST = $this->saved_request;
