@@ -429,8 +429,8 @@ class API {
 	 * @return bool|int|mixed|string|WP_Error
 	 */
 	protected function get_dot_org_data() {
-		$cache    = $this->get_repo_cache( $this->type->slug, false );
-		$response = $cache['dot_org'] ?? false;
+		$cache    = $this->get_repo_cache( $this->type->slug, false, 'dot_org' );
+		$response = $cache ?? false;
 
 		/**
 		 * Filter hook to set an API domain for updating.

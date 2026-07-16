@@ -190,7 +190,7 @@ class Branch {
 		$config     = $this->get_class_vars( 'Fragen\Git_Updater\Plugin', 'config' );
 		$plugin     = $this->get_repo_slugs( dirname( $plugin_file ), $plugin_obj );
 
-		$cache = $this->get_repo_cache( $plugin['slug'] );
+		$cache = $this->get_repo_cache( $plugin['slug'], false, 'ran' );
 		if ( ! $cache ) {
 			$this->base->get_remote_repo_meta( $config[ $plugin['slug'] ] );
 		}

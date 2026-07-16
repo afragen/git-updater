@@ -187,9 +187,8 @@ class Plugin {
 			$repo_slug = $git_plugin['slug'] ?? $header['repo'];
 
 			// Resolve the active branch from the cache table, falling back to the header's primary branch.
-			$cache_row     = $this->get_repo_cache( $repo_slug ?? '', false );
-			$cache_branch  = is_array( $cache_row ) ? ( $cache_row['current_branch'] ?? null ) : null;
-			$cache_primary = is_array( $cache_row ) ? ( $cache_row['primary_branch'] ?? null ) : null;
+			$cache_branch  = $this->get_repo_cache( $repo_slug ?? '', false, 'current_branch' );
+			$cache_primary = $this->get_repo_cache( $repo_slug ?? '', false, 'primary_branch' );
 			$branch        = $cache_branch ?: $header['primary_branch'];
 
 			$git_plugin['type']           = 'plugin';

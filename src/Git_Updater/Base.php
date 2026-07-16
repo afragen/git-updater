@@ -415,8 +415,8 @@ class Base {
 	 * @return void
 	 */
 	public function add_assets( $repo ) {
-		$cache  = $this->get_repo_cache( $repo->type->slug ?? false, false );
-		$assets = $cache['assets'] ?? false;
+		$cache  = $this->get_repo_cache( $repo->type->slug ?? false, false, 'assets' );
+		$assets = $cache ?? false;
 
 		if ( ! $assets || is_object( $assets ) ) {
 			return;

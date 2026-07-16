@@ -162,10 +162,28 @@ trait GU_Trait {
 	 *
 	 * @return array<string, mixed>|false The repo cache. False if expired.
 	 */
-	final public function get_repo_cache( $repo = false, $timeout = true ) {
+	final public function get_repo_cache( $repo = false, $timeout = true, ?string $column = null ) {
 		$slug  = $this->get_cache_key( $repo );
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
-		$row   = $table->get_repo( $slug );
+
+		if ( null !== $column ) {
+			$value = $table->get_repo( $slug, $column );
+			if ( null === $value ) {
+				return false;
+			}
+			// A single column has no timeout of its own; honor the row timeout
+			// unless the caller opted out. The timeout column is tiny and memoized.
+			if ( $timeout ) {
+				$row_timeout = (int) ( $table->get_repo( $slug, 'timeout' ) ?? 0 );
+				if ( ! $this->is_cache_timeout_valid( $row_timeout ) ) {
+					return false;
+				}
+			}
+
+			return $value;
+		}
+
+		$row = $table->get_repo( $slug );
 
 		if ( null === $row ) {
 			return false;

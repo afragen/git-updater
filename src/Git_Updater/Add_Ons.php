@@ -188,10 +188,8 @@ class Add_Ons {
 	 * @return array<string, mixed> An array of API results.
 	 */
 	public function get_addon_api_results() {
-		$cache          = $this->get_repo_cache( 'gu_addon_api_results' );
-		$cached_results = ( false !== $cache && isset( $cache['addon_api_results'] ) )
-			? $cache['addon_api_results']
-			: [];
+		$cache          = $this->get_repo_cache( 'gu_addon_api_results', false, 'addon_api_results' );
+		$cached_results = false !== $cache ? $cache : [];
 
 		if ( count( $cached_results ) === count( self::$addons ) ) {
 			return $cached_results;

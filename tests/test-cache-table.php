@@ -67,6 +67,26 @@ class Test_Cache_Table extends WP_UnitTestCase {
 		$this->assertFalse( $this->table->delete_repo( 'no-such-slug' ) );
 	}
 
+	public function test_get_repo_with_column_returns_single_value(): void {
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ] );
+		$this->table->add_entry( 'test-plugin', 'readme', 'readme body' );
+
+		$this->assertSame( [ '1.0.0' ], $this->table->get_repo( 'test-plugin', 'tags' ) );
+
+		// A later full read still returns the complete row (row_cache merged).
+		$full = $this->table->get_repo( 'test-plugin' );
+		$this->assertSame( [ '1.0.0' ], $full['tags'] );
+		$this->assertSame( 'readme body', $full['readme'] );
+	}
+
+	public function test_get_repo_with_column_missing_returns_null(): void {
+		$this->assertNull( $this->table->get_repo( 'no-such-slug', 'tags' ) );
+
+		// A present row but absent column → null (not the full row).
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ] );
+		$this->assertNull( $this->table->get_repo( 'test-plugin', 'readme' ) );
+	}
+
 	public function test_delete_repo_is_isolated(): void {
 		$this->table->add_entry( 'plugin-a', 'tags', [ '1.0.0' ] );
 		$this->table->add_entry( 'plugin-b', 'tags', [ '2.0.0' ] );

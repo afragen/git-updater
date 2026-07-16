@@ -274,6 +274,33 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 		$this->assertFalse( $result );
 	}
 
+	public function test_get_repo_cache_with_column_returns_scalar(): void {
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'current_branch',
+			'develop',
+			strtotime( '+12 hours' )
+		);
+
+		$result = $this->api->get_repo_cache( 'test-plugin', false, 'current_branch' );
+		$this->assertSame( 'develop', $result );
+	}
+
+	public function test_get_repo_cache_with_column_returns_false_when_no_row(): void {
+		$result = $this->api->get_repo_cache( 'test-plugin', false, 'current_branch' );
+		$this->assertFalse( $result );
+	}
+
+	public function test_get_repo_cache_with_column_respects_timeout(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'current_branch', 'develop', strtotime( '-1 hour' ) );
+
+		// With timeout check, the expired row yields false even for a single column.
+		$this->assertFalse( $this->api->get_repo_cache( 'test-plugin', true, 'current_branch' ) );
+		// Without timeout check, the scalar is returned.
+		$this->assertSame( 'develop', $this->api->get_repo_cache( 'test-plugin', false, 'current_branch' ) );
+	}
+
 	public function test_get_repo_cache_returns_false_when_timeout_expired(): void {
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
 			'test-plugin',

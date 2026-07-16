@@ -416,8 +416,8 @@ class Rest_Update {
 	 * @return string
 	 */
 	private function get_primary_branch( $slug ) {
-		$cache          = $this->get_repo_cache( $slug, false );
-		$primary_branch = $cache['primary_branch'] ?? 'master';
+		$cache          = $this->get_repo_cache( $slug, false, 'primary_branch' );
+		$primary_branch = $cache ?: 'master';
 
 		return $primary_branch;
 	}

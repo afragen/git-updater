@@ -270,16 +270,48 @@ abstract class Abstract_Cache_Table {
 	/**
 	 * Get a single repo row, with columns unserialized.
 	 *
-	 * @param string $slug Repository slug.
+	 * When `$column` is given, only that one column is read from the DB and
+	 * unserialized — avoiding a full `SELECT *` + unserialize of all 22 LONGTEXT
+	 * columns when a caller needs a single value. The column is validated against
+	 * the whitelist so the interpolated identifier is safe.
 	 *
-	 * @return array<string, mixed>|null
+	 * @param string      $slug    Repository slug.
+	 * @param string|null $column  Optional single column to project. null = full row.
+	 *
+	 * @return array<string, mixed>|mixed|null For a full row: the row array (or null).
+	 *                                         For a projected column: the unserialized
+	 *                                         value (or null if missing/no row).
 	 */
-	public function get_repo( string $slug ) {
+	public function get_repo( string $slug, ?string $column = null ) {
 		if ( array_key_exists( $slug, $this->row_cache ) ) {
-			return $this->row_cache[ $slug ];
+			$cached = $this->row_cache[ $slug ];
+			if ( null === $column ) {
+				return $cached;
+			}
+			return null === $cached ? null : ( $cached[ $column ] ?? null );
 		}
 
 		global $wpdb;
+
+		if ( null !== $column ) {
+			$column = $this->whitelist( $column );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$value = $wpdb->get_var(
+				$wpdb->prepare( "SELECT %i FROM %i WHERE slug = %s", $column, $this->table_name(), $slug )
+			);
+
+			if ( null === $value ) {
+				// No row, or the column is NULL. Remember the miss so we don't re-query.
+				$this->row_cache[ $slug ] = null;
+				return null;
+			}
+
+			// A projected read returns only this column and does NOT populate
+			// $row_cache: doing so would store a partial row that a later full
+			// read would wrongly treat as complete. A later full read re-queries
+			// the DB; projected re-reads of the same column are cheap (one column).
+			return maybe_unserialize( $value );
+		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE slug = %s', $this->table_name(), $slug ), ARRAY_A );
