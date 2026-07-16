@@ -1,9 +1,21 @@
 #!/bin/sh
-# Translate wp-env's `docker` CLI calls into Podman so wp-env runs without Docker Desktop.
-# wp-env invokes `docker info`, `docker compose up/exec`, and `docker volume rm`.
-if [ "$1" = "compose" ]; then
-	shift
-	exec podman compose "$@"
-else
-	exec podman "$@"
-fi
+# Translate wp-env's `docker` CLI calls into Podman so wp-env runs
+# without Docker Desktop.
+#
+# wp-env invokes: `docker info`, `docker compose up/exec`, `docker volume rm`.
+backend="${GU_DOCKER_BACKEND:-podman}"
+
+case "$backend" in
+	podman)
+		if [ "$1" = "compose" ]; then
+			shift
+			exec podman compose "$@"
+		else
+			exec podman "$@"
+		fi
+		;;
+	*)
+		echo "bin/docker: unknown GU_DOCKER_BACKEND='$backend' (use 'podman')" >&2
+		exit 1
+		;;
+esac

@@ -468,7 +468,7 @@ class REST_API {
 		add_filter( 'gu_disable_wpcron', '__return_false' );
 		$repo_data = Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->get_remote_repo_meta( $gu_repos[ $slug ] );
 
-		$channel    = null !== $request->get_param( 'channel' );
+		$channel = null !== $request->get_param( 'channel' );
 		$channel = apply_filters( 'gu_dev_release_asset', false, $repo_data ) ?: $channel;
 
 		if ( ! is_object( $repo_data ) || '0.0.0' === $repo_data->remote_version ) {
