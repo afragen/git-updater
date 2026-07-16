@@ -66,10 +66,8 @@ class Branch {
 	 * @return mixed
 	 */
 	public function get_current_branch( $repo ) {
-		$cache          = $this->get_repo_cache( $repo->slug, false );
-		$current_branch = ! empty( $cache['current_branch'] )
-			? $cache['current_branch']
-			: $repo->branch;
+		$cache          = $this->get_repo_cache( $repo->slug, false, 'current_branch' );
+		$current_branch = ! empty( $cache ) ? $cache : $repo->branch;
 
 		return $current_branch;
 	}
@@ -130,7 +128,7 @@ class Branch {
 	 * @return void
 	 */
 	public function set_branch_on_switch( $repo ) {
-		$cache = $this->get_repo_cache( $repo, false );
+		$cache = $this->get_repo_cache( $repo, false, [ 'tags', 'repo_headers', 'branches' ] );
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized

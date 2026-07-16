@@ -301,6 +301,28 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 		$this->assertSame( 'develop', $this->api->get_repo_cache( 'test-plugin', false, 'current_branch' ) );
 	}
 
+	public function test_get_repo_cache_with_columns_returns_partial_row(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ], strtotime( '+12 hours' ) );
+		$table->add_entry( 'test-plugin', 'readme', 'body', strtotime( '+12 hours' ) );
+
+		$result = $this->api->get_repo_cache( 'test-plugin', false, [ 'tags', 'readme' ] );
+
+		$this->assertSame( [ 'tags' => [ '1.0.0' ], 'readme' => 'body' ], $result );
+	}
+
+	public function test_get_repo_cache_with_columns_false_when_no_row(): void {
+		$this->assertFalse( $this->api->get_repo_cache( 'test-plugin', false, [ 'tags', 'readme' ] ) );
+	}
+
+	public function test_get_repo_cache_with_columns_respects_timeout(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ], strtotime( '-1 hour' ) );
+
+		$this->assertFalse( $this->api->get_repo_cache( 'test-plugin', true, [ 'tags' ] ) );
+		$this->assertSame( [ 'tags' => [ '1.0.0' ] ], $this->api->get_repo_cache( 'test-plugin', false, [ 'tags' ] ) );
+	}
+
 	public function test_get_repo_cache_returns_false_when_timeout_expired(): void {
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
 			'test-plugin',

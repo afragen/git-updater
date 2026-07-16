@@ -682,7 +682,7 @@ class API {
 		if ( ! $asset ) {
 			return false;
 		}
-		$cache = $this->get_repo_cache( $this->type->slug ?? false, false );
+		$cache = $this->get_repo_cache( $this->type->slug ?? false, false, [ 'timeout', 'release_asset', 'release_asset_redirect', 'repo' ] ) ?: [];
 
 		// Unset release asset url if older than 5 min to account for AWS expiration.
 		if ( $aws && ( time() - strtotime( "-{$this->hours} hours", $cache['timeout'] ) ) >= 300 ) {

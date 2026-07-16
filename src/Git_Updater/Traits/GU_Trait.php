@@ -157,27 +157,30 @@ trait GU_Trait {
 	 *
 	 * @access protected
 	 *
-	 * @param string|bool $repo Repo name or false.
-	 * @param bool        $timeout false to always return cache, true to use timeout.
+	 * @param string|bool       $repo Repo name or false.
+	 * @param bool              $timeout false to always return cache, true to use timeout.
+	 * @param array|string|null $column  Columns to project. null = full row.
 	 *
-	 * @return array<string, mixed>|false The repo cache. False if expired.
+	 * @return array<string, mixed>|mixed|false The repo cache (full or partial row),
+	 *                                          or a single unserialized value, or false
+	 *                                          if expired/missing.
 	 */
-	final public function get_repo_cache( $repo = false, $timeout = true, ?string $column = null ) {
+	final public function get_repo_cache( $repo = false, $timeout = true, $column = null ) {
 		$slug  = $this->get_cache_key( $repo );
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 
 		if ( null !== $column ) {
-			$value = $table->get_repo( $slug, $column );
-			if ( null === $value ) {
-				return false;
-			}
-			// A single column has no timeout of its own; honor the row timeout
+			// A projected read has no timeout of its own; honor the row timeout
 			// unless the caller opted out. The timeout column is tiny and memoized.
 			if ( $timeout ) {
 				$row_timeout = (int) ( $table->get_repo( $slug, 'timeout' ) ?? 0 );
 				if ( ! $this->is_cache_timeout_valid( $row_timeout ) ) {
 					return false;
 				}
+			}
+			$value = $table->get_repo( $slug, $column );
+			if ( null === $value ) {
+				return false;
 			}
 
 			return $value;
@@ -382,7 +385,11 @@ trait GU_Trait {
 	 * @return stdClass
 	 */
 	final public function populate_api_data( $repo, $repo_api ) {
-		$cache             = $this->get_repo_cache( $repo->slug, false );
+		$cache             = $this->get_repo_cache(
+			$repo->slug,
+			false,
+			[ 'tags', 'changes', 'readme', 'meta', 'branches', 'release_asset', 'release_assets' ]
+		);
 		$validate_response = $this->get_reflection_method( $repo_api, 'validate_response' );
 		$cached_data       = [
 			'tags'           => $cache['tags'] ?? false,

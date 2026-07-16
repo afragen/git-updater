@@ -87,6 +87,28 @@ class Test_Cache_Table extends WP_UnitTestCase {
 		$this->assertNull( $this->table->get_repo( 'test-plugin', 'readme' ) );
 	}
 
+	public function test_get_repo_with_columns_returns_partial_row(): void {
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ] );
+		$this->table->add_entry( 'test-plugin', 'readme', 'readme body' );
+		$this->table->add_entry( 'test-plugin', 'meta', [ 'foo' => 'bar' ] );
+
+		$partial = $this->table->get_repo( 'test-plugin', [ 'tags', 'readme' ] );
+
+		$this->assertSame( [ 'tags' => [ '1.0.0' ], 'readme' => 'readme body' ], $partial );
+		// Other columns are NOT present in the projection.
+		$this->assertArrayNotHasKey( 'meta', $partial );
+
+		// A later full read still returns the complete row (row_cache not polluted).
+		$full = $this->table->get_repo( 'test-plugin' );
+		$this->assertSame( [ '1.0.0' ], $full['tags'] );
+		$this->assertSame( 'readme body', $full['readme'] );
+		$this->assertSame( [ 'foo' => 'bar' ], $full['meta'] );
+	}
+
+	public function test_get_repo_with_columns_missing_row_returns_null(): void {
+		$this->assertNull( $this->table->get_repo( 'no-such-slug', [ 'tags', 'readme' ] ) );
+	}
+
 	public function test_delete_repo_is_isolated(): void {
 		$this->table->add_entry( 'plugin-a', 'tags', [ '1.0.0' ] );
 		$this->table->add_entry( 'plugin-b', 'tags', [ '2.0.0' ] );

@@ -71,6 +71,8 @@ abstract class Abstract_Cache_Table {
 		'addon_api_results',
 		'ran',
 		'error_cache',
+		'timeout',
+		'error_timeout',
 	];
 
 	/**
@@ -270,23 +272,40 @@ abstract class Abstract_Cache_Table {
 	/**
 	 * Get a single repo row, with columns unserialized.
 	 *
-	 * When `$column` is given, only that one column is read from the DB and
+	 * When `$column` is given, only the named column(s) are read from the DB and
 	 * unserialized — avoiding a full `SELECT *` + unserialize of all 22 LONGTEXT
-	 * columns when a caller needs a single value. The column is validated against
-	 * the whitelist so the interpolated identifier is safe.
+	 * columns when a caller needs a subset of values. `$column` may be:
+	 * - null: full row (SELECT *).
+	 * - string: a single column; the unserialized scalar value is returned.
+	 * - array: a list of columns; a partial row array keyed by column is returned.
+	 * Column names are validated against the whitelist so the interpolated
+	 * identifiers are safe.
 	 *
-	 * @param string      $slug    Repository slug.
-	 * @param string|null $column  Optional single column to project. null = full row.
+	 * @param string                 $slug    Repository slug.
+	 * @param array|string|null      $column  Columns to project. null = full row.
 	 *
 	 * @return array<string, mixed>|mixed|null For a full row: the row array (or null).
-	 *                                         For a projected column: the unserialized
-	 *                                         value (or null if missing/no row).
+	 *                                         For a single column: the unserialized value
+	 *                                         (or null if missing/no row).
+	 *                                         For multiple columns: partial row array.
 	 */
-	public function get_repo( string $slug, ?string $column = null ) {
+	public function get_repo( string $slug, $column = null ) {
 		if ( array_key_exists( $slug, $this->row_cache ) ) {
 			$cached = $this->row_cache[ $slug ];
 			if ( null === $column ) {
 				return $cached;
+			}
+			if ( is_array( $column ) ) {
+				if ( null === $cached ) {
+					return null;
+				}
+				$partial = [];
+				foreach ( $column as $col ) {
+					if ( array_key_exists( $col, $cached ) ) {
+						$partial[ $col ] = $cached[ $col ];
+					}
+				}
+				return $partial;
 			}
 			return null === $cached ? null : ( $cached[ $column ] ?? null );
 		}
@@ -294,6 +313,29 @@ abstract class Abstract_Cache_Table {
 		global $wpdb;
 
 		if ( null !== $column ) {
+			if ( is_array( $column ) ) {
+				$cols = array_map( [ $this, 'whitelist' ], $column );
+				$col_list = implode( ', ', array_map( static fn( $c ) => $wpdb->prepare( '%i', $c ), $cols ) );
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$row = $wpdb->get_row(
+					$wpdb->prepare( "SELECT {$col_list} FROM %i WHERE slug = %s", $this->table_name(), $slug ),
+					ARRAY_A
+				);
+
+				if ( ! is_array( $row ) ) {
+					$this->row_cache[ $slug ] = null;
+					return null;
+				}
+				foreach ( $row as $key => $value ) {
+					if ( is_string( $value ) ) {
+						$row[ $key ] = maybe_unserialize( $value );
+					}
+				}
+				// Partial row: do NOT populate $row_cache (same rationale as single-
+				// column projection); a later full read re-queries for the complete row.
+				return $row;
+			}
+
 			$column = $this->whitelist( $column );
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$value = $wpdb->get_var(

@@ -132,7 +132,7 @@ trait API_Common {
 		$response = is_array( $cache ) ? ( $cache['repo_headers'] ?? false ) : false;
 
 		// Capture old version before overwriting: use valid cache if available, else raw option.
-		$prior       = is_array( $cache ) ? $cache : $this->get_repo_cache( $this->type->slug, false );
+		$prior       = is_array( $cache ) ? $cache : $this->get_repo_cache( $this->type->slug, false, [ 'repo_headers' ] );
 		$old_version = is_array( $prior ) && isset( $prior['repo_headers']['Version'] )
 			? (string) $prior['repo_headers']['Version']
 			: '';
@@ -208,7 +208,7 @@ trait API_Common {
 	 */
 	final public function get_remote_api_changes( $git, $changes, $request ) {
 		$changelogs = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md', 'changelog.txt' ];
-		$cache      = $this->get_repo_cache( $this->type->slug ) ?: [];
+		$cache      = $this->get_repo_cache( $this->type->slug, true, [ 'contents' ] ) ?: [];
 		$changelogs = ! empty( $cache['contents'] ) ? array_intersect( $cache['contents']['files'], $changelogs ) : $changelogs;
 
 		$response     = false;
@@ -252,7 +252,7 @@ trait API_Common {
 	 */
 	final public function get_remote_api_readme( $git, $request ) {
 		$readmes = [ 'readme.txt', 'README.md', 'readme.md' ];
-		$cache   = $this->get_repo_cache( $this->type->slug ) ?: [];
+		$cache   = $this->get_repo_cache( $this->type->slug, true, [ 'contents' ] ) ?: [];
 		$readmes = ! empty( $cache['contents'] ) ? array_intersect( $cache['contents']['files'], $readmes ) : $readmes;
 
 		// Use readme.txt if it exists.
@@ -427,8 +427,8 @@ trait API_Common {
 	 * @return string|array<string, mixed>|false $response Release asset URI.
 	 */
 	final public function get_api_release_asset( $git, $request ) {
-		$cache    = $this->get_repo_cache( $this->type->slug );
-		$response = $cache['release_asset'] ?? false;
+		$cache    = $this->get_repo_cache( $this->type->slug, true, [ 'release_asset' ] );
+		$response = is_array( $cache ) ? ( $cache['release_asset'] ?? false ) : false;
 
 		if ( ! $response ) {
 			self::$method = 'release_asset';
