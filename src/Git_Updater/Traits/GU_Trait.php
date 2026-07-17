@@ -29,9 +29,14 @@ trait GU_Trait {
 	 * Fetch steps recorded in the `ran` cache column. A repo is considered
 	 * fully cached only when its `ran` set contains every step here.
 	 *
-	 * @var string[]
+	 * Declared as a method (not a trait constant) because PHPStan flags
+	 * constants inside traits as PHP 8.2-only (classConstant.inTrait).
+	 *
+	 * @return array<int, string>
 	 */
-	private const EXPECTED_RAN_STEPS = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
+	private static function expected_ran_steps(): array {
+		return [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
+	}
 
 	/**
 	 * Holds the Base class instance.
@@ -157,9 +162,9 @@ trait GU_Trait {
 	 *
 	 * @access protected
 	 *
-	 * @param string|bool       $repo Repo name or false.
-	 * @param bool              $timeout false to always return cache, true to use timeout.
-	 * @param array|string|null $column  Columns to project. null = full row.
+	 * @param string|bool               $repo Repo name or false.
+	 * @param bool                      $timeout false to always return cache, true to use timeout.
+	 * @param array<string>|string|null $column  Columns to project. null = full row.
 	 *
 	 * @return array<string, mixed>|mixed|false The repo cache (full or partial row),
 	 *                                          or a single unserialized value, or false
@@ -340,7 +345,7 @@ trait GU_Trait {
 
 		return null !== $row
 			&& isset( $row['ran'] )
-			&& [] === array_diff( self::EXPECTED_RAN_STEPS, (array) $row['ran'] );
+			&& [] === array_diff( self::expected_ran_steps(), (array) $row['ran'] );
 	}
 
 	/**
