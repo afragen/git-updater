@@ -210,6 +210,15 @@ class Test_Repo_List_Table_Extended extends WP_UnitTestCase {
 		parent::tear_down();
 	}
 
+	private function make_admin(): int {
+		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		// On multisite only super admins pass the manage_network_options check.
+		if ( is_multisite() ) {
+			grant_super_admin( $user_id );
+		}
+		return $user_id;
+	}
+
 	private function make_item( array $overrides = [] ): array {
 		return array_merge(
 			[
@@ -259,7 +268,7 @@ class Test_Repo_List_Table_Extended extends WP_UnitTestCase {
 	}
 
 	public function test_process_bulk_action_deletes_matching_entry(): void {
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		wp_set_current_user( $this->make_admin() );
 
 		$id     = md5( 'test-plugin/test-plugin.php' );
 		$option = $this->make_item( [ 'ID' => $id ] );
@@ -275,7 +284,7 @@ class Test_Repo_List_Table_Extended extends WP_UnitTestCase {
 	}
 
 	public function test_process_bulk_action_edit_action_dies(): void {
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		wp_set_current_user( $this->make_admin() );
 
 		$_REQUEST['_wpnonce_row_action_delete'] = wp_create_nonce( 'delete_row_item' );
 		$_REQUEST['action']                     = 'edit';
@@ -285,7 +294,7 @@ class Test_Repo_List_Table_Extended extends WP_UnitTestCase {
 	}
 
 	public function test_process_bulk_action_returns_on_invalid_nonce(): void {
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		wp_set_current_user( $this->make_admin() );
 
 		$_REQUEST['_wpnonce_row_action_delete'] = 'not-a-valid-nonce';
 		$_REQUEST['slug']                       = 'some-id';
@@ -308,7 +317,7 @@ class Test_Repo_List_Table_Extended extends WP_UnitTestCase {
 	}
 
 	public function test_process_bulk_action_deletes_array_of_slugs(): void {
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		wp_set_current_user( $this->make_admin() );
 
 		$id_one = md5( 'plugin-one/plugin-one.php' );
 		$id_two = md5( 'plugin-two/plugin-two.php' );
