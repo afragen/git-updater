@@ -22,4 +22,13 @@ class CLI_Common {
 	public function delete_all_cached_data() {
 		return \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_all_repos();
 	}
+
+	/**
+	 * Reset cache table.
+	 *
+	 * @return bool
+	 */
+	public function reset_cache() {
+		return \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
+	}
 }

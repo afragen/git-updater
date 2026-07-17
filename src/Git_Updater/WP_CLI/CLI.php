@@ -29,12 +29,13 @@ class CLI extends WP_CLI_Command {
 	 *
 	 * ## OPTIONS
 	 *
-	 * <delete>
-	 * : delete the cache
+	 * <delete|reset>
+	 * : The action to perform on the cache. delete|reset
 	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp git-updater cache delete
+	 *     wp git-updater cache reset
 	 *
 	 * @param array<int, string> $args Array of arguments.
 	 *
@@ -43,11 +44,17 @@ class CLI extends WP_CLI_Command {
 	 */
 	public function cache( $args ) {
 		list($action) = $args;
-		if ( 'delete' === $action ) {
-			Singleton::get_instance( 'CLI_Common', $this )->delete_all_cached_data();
-			WP_CLI::success( 'Git Updater cache has been cleared.' );
-		} else {
-			WP_CLI::error( sprintf( 'Incorrect command syntax, see %s for proper syntax.', '`wp help git-updater cache`' ) );
+		switch ( true ) {
+			case 'delete' === $action:
+				Singleton::get_instance( 'CLI_Common', $this )->delete_all_cached_data();
+				WP_CLI::success( 'Git Updater cache has been cleared.' );
+				break;
+			case 'reset' === $action:
+				Singleton::get_instance( 'CLI_Common', $this )->reset_cache();
+				WP_CLI::success( 'Git Updater cache table has been reset.' );
+				break;
+			default:
+				WP_CLI::error( sprintf( 'Incorrect command syntax, see %s for proper syntax.', '`wp help git-updater cache`' ) );
 		}
 		WP_CLI::success( 'WP-Cron is now running.' );
 		WP_CLI::runcommand( 'cron event run --due-now' );
