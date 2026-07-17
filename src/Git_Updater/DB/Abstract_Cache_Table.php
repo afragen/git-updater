@@ -432,6 +432,39 @@ abstract class Abstract_Cache_Table {
 	}
 
 	/**
+	 * Return a map of slug => whether the repo currently has a non-empty error_cache.
+	 *
+	 * Projects only `slug` and `error_cache` (not the full LONGTEXT payload) so per-repo
+	 * data is never materialized. A non-empty error_cache means a fetch step errored and is
+	 * still pending a retry (see set_error_cache()'s independent short timeout).
+	 *
+	 * @return array<string, bool>
+	 */
+	public function get_cached_error_flags(): array {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = (array) $wpdb->get_results(
+			$wpdb->prepare( 'SELECT slug, error_cache FROM %i', $this->table_name() ),
+			ARRAY_A
+		);
+
+		$map = [];
+		foreach ( $rows as $row ) {
+			$slug = (string) ( $row['slug'] ?? '' );
+			if ( '' === $slug ) {
+				continue;
+			}
+			$err          = isset( $row['error_cache'] ) && is_string( $row['error_cache'] )
+				? maybe_unserialize( $row['error_cache'] )
+				: null;
+			$map[ $slug ] = ! empty( $err );
+		}
+
+		return $map;
+	}
+
+	/**
 	 * Set the row timeout for a repository.
 	 *
 	 * @param string $slug    Repository slug.

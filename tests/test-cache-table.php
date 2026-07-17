@@ -405,6 +405,19 @@ class Test_Cache_Table extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( 'plugin-missing', $map );
 	}
 
+	public function test_get_cached_error_flags_maps_slug_to_bool(): void {
+		$this->table->add_entry( 'plugin-a', 'ran', [ 'tags' ] );
+		$this->table->set_error_cache( 'plugin-a', [ 'http_code' => 500 ], 300 );
+		$this->table->add_entry( 'plugin-b', 'ran', [ 'tags' ] ); // no error_cache
+		$this->table->add_entry( 'plugin-c', 'tags', [ '1.0.0' ] ); // no row relevant
+
+		$map = $this->table->get_cached_error_flags();
+
+		$this->assertTrue( $map['plugin-a'] );
+		$this->assertFalse( $map['plugin-b'] );
+		$this->assertArrayNotHasKey( 'plugin-missing', $map );
+	}
+
 	public function test_delete_all_repos_flushes_row_cache(): void {
 		$this->table->add_entry( 'plugin-a', 'tags', [ '1.0.0' ] );
 		$this->table->add_entry( 'plugin-b', 'tags', [ '2.0.0' ] );

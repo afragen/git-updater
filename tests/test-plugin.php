@@ -593,6 +593,9 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 
 	public function test_returns_result_when_dot_org_on_primary_branch(): void {
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
+		// A fetched repo has a `ran` row; without it waiting_for_background_update()
+		// treats the repo as still pending and the API response is not populated.
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
 		$plugin_obj = $this->make_plugin_obj( [
 			'dot_org'        => true,
 			'branch'         => 'main',
@@ -607,6 +610,9 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 
 	public function test_populates_response_for_git_plugin(): void {
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
+		// A fetched repo has a `ran` row; without it waiting_for_background_update()
+		// treats the repo as still pending and the API response is not populated.
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
 		$plugin_obj = $this->make_plugin_obj( [ 'dot_org' => false ] );
 		$plugin     = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
 		$response   = new stdClass();
@@ -621,6 +627,9 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 
 	public function test_response_version_falls_back_to_local_version(): void {
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
+		// A fetched repo has a `ran` row; without it waiting_for_background_update()
+		// treats the repo as still pending and the API response is not populated.
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
 		$plugin_obj = $this->make_plugin_obj( [
 			'dot_org'        => false,
 			'remote_version' => '',
@@ -635,6 +644,9 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 
 	public function test_response_short_description_is_truncated(): void {
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
+		// A fetched repo has a `ran` row; without it waiting_for_background_update()
+		// treats the repo as still pending and the API response is not populated.
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
 		$long_desc  = str_repeat( 'A', 200 );
 		$plugin_obj = $this->make_plugin_obj( [
 			'dot_org'  => false,
@@ -650,6 +662,9 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 	public function test_dot_org_on_non_primary_branch_returns_response(): void {
 		// dot_org = true but branch != primary_branch → should NOT skip (returns populated response).
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
+		// A fetched repo has a `ran` row; without it waiting_for_background_update()
+		// treats the repo as still pending and the API response is not populated.
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
 		$plugin_obj = $this->make_plugin_obj( [
 			'dot_org'        => true,
 			'branch'         => 'develop',
@@ -1068,8 +1083,8 @@ class Test_Plugin_Get_Remote_Plugin_Meta extends WP_UnitTestCase {
 		wp_cache_delete( 'cron', 'options' );
 		wp_unschedule_hook( 'gu_get_remote_plugin' );
 
-		// Seed a non-empty cache so waiting_for_background_update($plugin) returns false.
-		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( 'test-plugin', 'dot_org', false, strtotime( '+12 hours' ) );
+		// Seed a `ran` row so waiting_for_background_update($plugin) returns false.
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( 'test-plugin', 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
 
 		// Mock HTTP to prevent outbound calls and error-cache contamination.
 		add_filter(

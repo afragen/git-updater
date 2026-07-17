@@ -206,7 +206,11 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	}
 
 	private function seed_cache(): void {
-		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( 'test-gu-theme', 'repo', '', strtotime( '+12 hours' ) );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-gu-theme', 'repo', '', strtotime( '+12 hours' ) );
+		// A fetched repo has a `ran` row; without it waiting_for_background_update()
+		// treats the repo as still pending and the API response is not populated.
+		$table->add_entry( 'test-gu-theme', 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
 	}
 
 	public function test_returns_result_for_non_theme_information_action(): void {
@@ -1280,9 +1284,8 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		wp_cache_delete( 'cron', 'options' );
 		wp_unschedule_hook( 'gu_get_remote_theme' );
 
-		// Seed a non-empty cache so waiting_for_background_update($repo) → get_repo_cache(slug, false)
-		// returns a non-empty array, making empty($cache) === false → not waiting → direct fetch.
-		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( 'test-gu-theme', 'dot_org', false, strtotime( '+12 hours' ) );
+		// Seed a `ran` row so waiting_for_background_update($repo) returns false.
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( 'test-gu-theme', 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
 
 		// Mock HTTP to prevent outbound calls and error-cache contamination.
 		add_filter(

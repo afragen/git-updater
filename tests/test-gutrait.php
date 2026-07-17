@@ -928,12 +928,12 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 		return $type;
 	}
 
-	private function seed_cache( array $data ): void {
+	private function seed_cache( array $data, string $slug = 'test-plugin' ): void {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
-		$table->delete_repo( 'test-plugin' );
-		$table->add_entry( 'test-plugin', 'repo_headers', '', strtotime( '+12 hours' ) );
+		$table->delete_repo( $slug );
+		$table->add_entry( $slug, 'repo_headers', '', strtotime( '+12 hours' ) );
 		foreach ( $data as $column => $value ) {
-			$table->add_entry( 'test-plugin', $column, $value );
+			$table->add_entry( $slug, $column, $value );
 		}
 	}
 
@@ -973,12 +973,71 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 		$this->assertFalse( $result );
 	}
 
-	public function test_waiting_for_background_update_with_null_waiting_when_ran_incomplete(): void {
+	public function test_waiting_for_background_update_with_null_not_waiting_when_ran_partial_and_no_error(): void {
 		$this->force_config_with_repo( 'test-plugin' );
-		// Limited data: a row exists but the fetch cycle never completed.
+		// Legitimately absent optional files: a partial `ran` with no error means done.
 		$this->seed_cache( [ 'ran' => [ 'tags' ] ] );
 		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
 		$result = $rm->invoke( $this->api, null );
+		$this->assertFalse( $result );
+	}
+
+	public function test_waiting_for_background_update_with_null_waiting_when_error_cache_present(): void {
+		$this->force_config_with_repo( 'test-plugin' );
+		// A step errored and is still pending a retry → must stay waiting.
+		$this->seed_cache( [ 'ran' => self::COMPLETE_RAN ] );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->set_error_cache( 'test-plugin', [ 'http_code' => 500 ], 300 );
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, null );
+		$this->assertTrue( $result );
+	}
+
+	public function test_waiting_for_background_update_with_null_not_waiting_when_all_done(): void {
+		$this->force_config_with_repo( 'test-plugin' );
+		$this->force_config_with_repo( 'test-theme' );
+		// One complete `ran`, one partial `ran`, neither with an error → all done.
+		$this->seed_cache( [ 'ran' => self::COMPLETE_RAN ], 'test-plugin' );
+		$this->seed_cache( [ 'ran' => [ 'tags' ] ], 'test-theme' );
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, null );
+		$this->assertFalse( $result );
+	}
+
+	public function test_waiting_for_background_update_with_repo_true_when_no_ran_row(): void {
+		$this->force_config_with_repo( 'test-plugin' );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$rp = new ReflectionProperty( $this->api, 'base' );
+		$rp->setAccessible( true );
+		$rp->setValue( $this->api, Singleton::get_instance( 'Fragen\Git_Updater\Base', $this->api ) );
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, (object) [ 'slug' => 'test-plugin', 'git' => 'github' ] );
+		$this->assertTrue( $result );
+	}
+
+	public function test_waiting_for_background_update_with_repo_false_when_ran_present_no_error(): void {
+		$this->force_config_with_repo( 'test-plugin' );
+		$this->seed_cache( [ 'ran' => [ 'tags' ] ] );
+		$rp = new ReflectionProperty( $this->api, 'base' );
+		$rp->setAccessible( true );
+		$rp->setValue( $this->api, Singleton::get_instance( 'Fragen\Git_Updater\Base', $this->api ) );
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, (object) [ 'slug' => 'test-plugin', 'git' => 'github' ] );
+		$this->assertFalse( $result );
+	}
+
+	public function test_waiting_for_background_update_with_repo_true_when_error_cache_present(): void {
+		$this->force_config_with_repo( 'test-plugin' );
+		// Passed repo has a `ran` row but a non-empty `error_cache` → still waiting.
+		$this->seed_cache( [ 'ran' => self::COMPLETE_RAN ] );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->set_error_cache( 'test-plugin', [ 'http_code' => 500 ], 300 );
+		$rp = new ReflectionProperty( $this->api, 'base' );
+		$rp->setAccessible( true );
+		$rp->setValue( $this->api, Singleton::get_instance( 'Fragen\Git_Updater\Base', $this->api ) );
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, (object) [ 'slug' => 'test-plugin', 'git' => 'github' ] );
 		$this->assertTrue( $result );
 	}
 
@@ -1082,24 +1141,16 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 		$this->assertTrue( $rm->invoke( $this->api, $repo ) );
 	}
 
-	public function test_waiting_for_background_update_returns_false_when_repo_has_cached_data(): void {
-		// A complete 'ran' list means the background fetch cycle finished.
-		$this->seed_cache( [ 'ran' => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ] ] );
+	public function test_waiting_for_background_update_returns_false_when_repo_has_ran_row(): void {
+		// Any `ran` row (even partial) with no error means the cycle ran → not waiting.
+		$this->seed_cache( [ 'ran' => [ 'tags' ] ] );
 		$rm   = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
 		$repo = (object) [ 'slug' => 'test-plugin' ]; // no 'git' property, skips Singleton
 		$this->assertFalse( $rm->invoke( $this->api, $repo ) );
 	}
 
-	public function test_waiting_for_background_update_returns_true_when_ran_incomplete(): void {
-		// A partial 'ran' list (interrupted/failed fetch) means still waiting.
-		$this->seed_cache( [ 'ran' => [ 'contents', 'assets' ] ] );
-		$rm   = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
-		$repo = (object) [ 'slug' => 'test-plugin' ]; // no 'git' property, skips Singleton
-		$this->assertTrue( $rm->invoke( $this->api, $repo ) );
-	}
-
-	public function test_waiting_for_background_update_returns_true_when_cache_has_data_but_no_ran(): void {
-		// Cached data without a complete 'ran' key is not a finished fetch.
+	public function test_waiting_for_background_update_returns_true_when_repo_has_cache_but_no_ran(): void {
+		// A cache row without a `ran` row means the fetch cycle hasn't completed → waiting.
 		$this->seed_cache( [ 'meta' => [ 'Version' => '1.0.0' ] ] );
 		$rm   = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
 		$repo = (object) [ 'slug' => 'test-plugin' ]; // no 'git' property, skips Singleton
@@ -1333,7 +1384,7 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	public function test_waiting_for_background_update_instantiates_git_api_when_repo_has_git(): void {
-		$this->seed_cache( [ 'ran' => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ] ] );
+		$this->seed_cache( [ 'ran' => self::COMPLETE_RAN ] );
 		// $this->base is not set on GitHub_API; inject via reflection so the
 		// $this->base::$git_servers lookup on line 547 does not throw.
 		$rp = new ReflectionProperty( $this->api, 'base' );

@@ -682,18 +682,27 @@ trait GU_Trait {
 	 * @return bool true when waiting for background job to finish.
 	 */
 	final protected function waiting_for_background_update( $repo = null ) {
-		$caches = [];
 		if ( null !== $repo ) {
-
 			// Getting class instance also runs API::settings_hook().
 			if ( isset( $repo->git ) ) {
 				$git_class = 'Fragen\\Git_Updater\\API\\' . $this->base::$git_servers[ $repo->git ] . '_API';
 				Singleton::get_instance( $git_class, $this );
 			}
 
-			$cache = isset( $repo->slug ) ? $this->get_repo_cache( $repo->slug, false ) : [];
+			// Probably not managed by Git Updater if we can't identify the repo.
+			if ( ! isset( $repo->slug ) ) {
+				return true;
+			}
 
-			return ! $this->is_repo_cache_complete( $cache );
+			$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+			$ran   = $table->get_entry( $repo->slug, 'ran' );
+
+			// No `ran` row yet, OR a pending error → still waiting on an API response.
+			if ( null === $ran ) {
+				return true;
+			}
+
+			return ! empty( $table->get_error_cache( $repo->slug ) );
 		}
 
 		$repos = array_merge(
@@ -709,17 +718,18 @@ trait GU_Trait {
 		 */
 		$repos = apply_filters( 'gu_config_pre_process', $repos );
 
-		// Existence + completeness check: which live repos still need a (full)
-		// cache. Uses a slug+ran projection (no LONGTEXT read / unserialize of
+		// A repo is "waiting" if its fetch cycle hasn't run yet (no `ran` row) or a
+		// step errored and is still pending a retry (non-empty `error_cache`). Uses a
+		// slug+ran / slug+error_cache projection (no LONGTEXT read / unserialize of
 		// payloads) so the full per-repo data is never materialized into memory.
-		// A repo is "waiting" if it has no row or its `ran` set is incomplete.
-		$table   = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
-		$ran_map = $table->get_cached_ran();
+		$table       = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$ran_map     = $table->get_cached_ran();
+		$error_flags = $table->get_cached_error_flags();
 
 		$waiting = false;
 		foreach ( $repos as $git_repo ) {
-			$ran = $ran_map[ $git_repo->slug ] ?? null;
-			if ( null === $ran || [] !== array_diff( self::EXPECTED_RAN_STEPS, $ran ) ) {
+			$slug = $git_repo->slug;
+			if ( ! isset( $ran_map[ $slug ] ) || ! empty( $error_flags[ $slug ] ) ) {
 				$waiting = true;
 				break;
 			}
