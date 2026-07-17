@@ -26,9 +26,9 @@ class CLI_Common {
 	/**
 	 * Reset cache table.
 	 *
-	 * @return bool
+	 * @return void
 	 */
 	public function reset_cache() {
-		return \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 	}
 }
