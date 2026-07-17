@@ -259,6 +259,8 @@ class Test_Repo_List_Table_Extended extends WP_UnitTestCase {
 	}
 
 	public function test_process_bulk_action_deletes_matching_entry(): void {
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+
 		$id     = md5( 'test-plugin/test-plugin.php' );
 		$option = $this->make_item( [ 'ID' => $id ] );
 		$table  = new Repo_List_Table( [ $option ] );
@@ -278,6 +280,49 @@ class Test_Repo_List_Table_Extended extends WP_UnitTestCase {
 
 		$this->expectException( WPDieException::class );
 		$this->table->process_bulk_action();
+	}
+
+	public function test_process_bulk_action_dies_without_capability(): void {
+		// Subscriber lacks the required capability; the delete action must be forbidden.
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'subscriber' ] ) );
+
+		$_REQUEST['_wpnonce_row_action_delete'] = wp_create_nonce( 'delete_row_item' );
+		$_REQUEST['slug']                       = 'some-id';
+
+		$this->expectException( WPDieException::class );
+		$this->table->process_bulk_action();
+	}
+
+	public function test_process_bulk_action_deletes_array_of_slugs(): void {
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+
+		$id_one = md5( 'plugin-one/plugin-one.php' );
+		$id_two = md5( 'plugin-two/plugin-two.php' );
+		$keep   = md5( 'plugin-keep/plugin-keep.php' );
+		$options = [
+			$this->make_item( [ 'ID' => $id_one, 'slug' => 'plugin-one/plugin-one.php' ] ),
+			$this->make_item( [ 'ID' => $id_two, 'slug' => 'plugin-two/plugin-two.php' ] ),
+			$this->make_item( [ 'ID' => $keep, 'slug' => 'plugin-keep/plugin-keep.php' ] ),
+		];
+		$table = new Repo_List_Table( $options );
+		update_site_option( 'git_updater_additions', $options );
+
+		$_REQUEST['_wpnonce_row_action_delete'] = wp_create_nonce( 'delete_row_item' );
+		$_REQUEST['slug']                       = [ $id_one, $id_two ];
+
+		$table->process_bulk_action();
+
+		$saved = get_site_option( 'git_updater_additions' );
+		$saved = array_values( $saved );
+		$this->assertCount( 1, $saved );
+		$this->assertSame( $keep, $saved[0]['ID'] );
+	}
+
+	public function test_render_list_table_omits_orphan_nonce(): void {
+		ob_start();
+		$this->table->render_list_table();
+		$output = ob_get_clean();
+		$this->assertStringNotContainsString( '_wpnonce_list', $output );
 	}
 
 	public function test_prepare_items_sets_items_to_array(): void {
