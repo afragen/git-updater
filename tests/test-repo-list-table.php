@@ -275,11 +275,25 @@ class Test_Repo_List_Table_Extended extends WP_UnitTestCase {
 	}
 
 	public function test_process_bulk_action_edit_action_dies(): void {
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+
 		$_REQUEST['_wpnonce_row_action_delete'] = wp_create_nonce( 'delete_row_item' );
 		$_REQUEST['action']                     = 'edit';
 
 		$this->expectException( WPDieException::class );
 		$this->table->process_bulk_action();
+	}
+
+	public function test_process_bulk_action_returns_on_invalid_nonce(): void {
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+
+		$_REQUEST['_wpnonce_row_action_delete'] = 'not-a-valid-nonce';
+		$_REQUEST['slug']                       = 'some-id';
+
+		$this->table->process_bulk_action();
+
+		// Invalid nonce must short-circuit without deleting anything.
+		$this->assertFalse( get_site_option( 'git_updater_additions' ) );
 	}
 
 	public function test_process_bulk_action_dies_without_capability(): void {
