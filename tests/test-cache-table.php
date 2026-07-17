@@ -418,6 +418,28 @@ class Test_Cache_Table extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( 'plugin-missing', $map );
 	}
 
+	public function test_get_cached_ran_skips_empty_slug_rows(): void {
+		// A row with an empty slug must be skipped (the `continue` guard),
+		// so it never appears in the returned map.
+		$this->table->add_entry( '', 'ran', [ 'tags' ] );
+		$this->table->add_entry( 'plugin-a', 'ran', [ 'tags' ] );
+
+		$map = $this->table->get_cached_ran();
+
+		$this->assertArrayHasKey( 'plugin-a', $map );
+		$this->assertArrayNotHasKey( '', $map );
+	}
+
+	public function test_get_cached_error_flags_skips_empty_slug_rows(): void {
+		$this->table->add_entry( '', 'error_cache', [ 'http_code' => 500 ] );
+		$this->table->set_error_cache( 'plugin-a', [ 'http_code' => 500 ], 300 );
+
+		$map = $this->table->get_cached_error_flags();
+
+		$this->assertArrayHasKey( 'plugin-a', $map );
+		$this->assertArrayNotHasKey( '', $map );
+	}
+
 	public function test_delete_all_repos_flushes_row_cache(): void {
 		$this->table->add_entry( 'plugin-a', 'tags', [ '1.0.0' ] );
 		$this->table->add_entry( 'plugin-b', 'tags', [ '2.0.0' ] );
