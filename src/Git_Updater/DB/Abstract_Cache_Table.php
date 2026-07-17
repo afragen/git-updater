@@ -281,8 +281,8 @@ abstract class Abstract_Cache_Table {
 	 * Column names are validated against the whitelist so the interpolated
 	 * identifiers are safe.
 	 *
-	 * @param string                 $slug    Repository slug.
-	 * @param array|string|null      $column  Columns to project. null = full row.
+	 * @param string            $slug    Repository slug.
+	 * @param array|string|null $column  Columns to project. null = full row.
 	 *
 	 * @return array<string, mixed>|mixed|null For a full row: the row array (or null).
 	 *                                         For a single column: the unserialized value
@@ -314,7 +314,7 @@ abstract class Abstract_Cache_Table {
 
 		if ( null !== $column ) {
 			if ( is_array( $column ) ) {
-				$cols = array_map( [ $this, 'whitelist' ], $column );
+				$cols     = array_map( [ $this, 'whitelist' ], $column );
 				$col_list = implode( ', ', array_map( static fn( $c ) => $wpdb->prepare( '%i', $c ), $cols ) );
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 				$row = $wpdb->get_row(
@@ -339,7 +339,7 @@ abstract class Abstract_Cache_Table {
 			$column = $this->whitelist( $column );
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$value = $wpdb->get_var(
-				$wpdb->prepare( "SELECT %i FROM %i WHERE slug = %s", $column, $this->table_name(), $slug )
+				$wpdb->prepare( 'SELECT %i FROM %i WHERE slug = %s', $column, $this->table_name(), $slug )
 			);
 
 			if ( null === $value ) {
@@ -422,7 +422,7 @@ abstract class Abstract_Cache_Table {
 			if ( '' === $slug ) {
 				continue;
 			}
-			$ran = isset( $row['ran'] ) && is_string( $row['ran'] )
+			$ran          = isset( $row['ran'] ) && is_string( $row['ran'] )
 				? maybe_unserialize( $row['ran'] )
 				: null;
 			$map[ $slug ] = is_array( $ran ) ? $ran : null;
