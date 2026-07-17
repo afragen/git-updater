@@ -14,6 +14,7 @@
 - Use tiered approach: address High priority issues first, then Medium, then Low. Confidence: 0.80
 - When taste files are modified, omit them from any commit rather than reverting them with git checkout. Confidence: 0.70
 - Create a CHANGES.md entry before committing, unless the user explicitly specifies to commit without changelog entries. Confidence: 0.85
+- When adding third-party tools that replace system components (e.g., container runtimes), test the add-on/plugin against the existing system first before replacing the system runtime. Confidence: 0.65
 
 # Testing
 - Achieve 100% line test coverage with zero test failures for all modifications. Confidence: 0.94
@@ -24,8 +25,8 @@
 # Wordpress
 - Use `$wpdb->prepare()` with `%i` placeholders for table names (SQL identifiers) in `$wpdb->query()` DDL calls instead of raw concatenation with `phpcs:ignore`. Confidence: 0.65
 
-# Workflow
-- When adding third-party tools that replace system components (e.g., container runtimes), test the add-on/plugin against the existing system first before replacing the system runtime. Confidence: 0.65
+# PHPStan
+- When fixing PHPStan return type errors, update the `@return` docblock to match the actual return type of the underlying method call, instead of changing the calling code's return behavior. Confidence: 0.75
 
 # architecture
 See [architecture/taste.md](architecture/taste.md)
