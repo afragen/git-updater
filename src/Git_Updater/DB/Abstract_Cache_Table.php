@@ -281,8 +281,8 @@ abstract class Abstract_Cache_Table {
 	 * Column names are validated against the whitelist so the interpolated
 	 * identifiers are safe.
 	 *
-	 * @param string            $slug    Repository slug.
-	 * @param array|string|null $column  Columns to project. null = full row.
+	 * @param string                    $slug    Repository slug.
+	 * @param array<string>|string|null $column  Columns to project. null = full row.
 	 *
 	 * @return array<string, mixed>|mixed|null For a full row: the row array (or null).
 	 *                                         For a single column: the unserialized value
