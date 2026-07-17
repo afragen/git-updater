@@ -13,6 +13,7 @@
 
 use Fragen\Git_Updater\Bootstrap;
 use Fragen\Git_Updater\Base;
+use Fragen\Git_Updater\DB\Repo_Cache_Table;
 
 // =============================================================================
 // Shared helper trait
@@ -199,6 +200,89 @@ class Test_Bootstrap_Rename_On_Activation extends WP_UnitTestCase {
 		$this->fire_activation( $this->bootstrap );
 
 		$this->assertTrue( true );
+	}
+}
+
+// =============================================================================
+// cache_table_setup()
+// =============================================================================
+
+class Test_Bootstrap_Cache_Table_Setup extends WP_UnitTestCase {
+	use Bootstrap_Test_Helper;
+
+	private Bootstrap $bootstrap;
+
+	private const CACHE_KEY = 'git_updater_cache_table_exists';
+	private const CACHE_GROUP = 'git-updater';
+
+	public function set_up(): void {
+		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		$this->bootstrap = new Bootstrap();
+		wp_cache_delete( self::CACHE_KEY, self::CACHE_GROUP );
+		Repo_Cache_Table::instance()->uninstall_table();
+	}
+
+	public function tear_down(): void {
+		wp_cache_delete( self::CACHE_KEY, self::CACHE_GROUP );
+		Repo_Cache_Table::instance()->uninstall_table();
+		parent::tear_down();
+	}
+
+	public function test_setup_installs_table_when_missing(): void {
+		$table = Repo_Cache_Table::instance()->table_name();
+
+		// Simulate a missing table: rewrite the SHOW TABLES target to a
+		// nonexistent name so get_var() returns null and install_table() runs.
+		// (The WP test transaction rolls back DDL, so we can't truly drop it.)
+		$missing = $table . '_missing';
+		add_filter( 'query', static function ( $sql ) use ( $table, $missing ) {
+			return str_replace( "LIKE '{$table}'", "LIKE '{$missing}'", $sql );
+		} );
+
+		$this->bootstrap->cache_table_setup();
+
+		remove_all_filters( 'query' );
+
+		// The install branch does NOT set the cache key (only the exists branch does).
+		$this->assertFalse( wp_cache_get( self::CACHE_KEY, self::CACHE_GROUP ) );
+	}
+
+	public function test_setup_skips_query_when_cache_key_present(): void {
+		wp_cache_set( self::CACHE_KEY, true, self::CACHE_GROUP, DAY_IN_SECONDS );
+
+		$queries = [];
+		add_filter( 'query', static function ( $sql ) use ( &$queries ) {
+			$queries[] = $sql;
+			return $sql;
+		} );
+
+		$this->bootstrap->cache_table_setup();
+
+		$hit_show_tables = false;
+		foreach ( $queries as $sql ) {
+			if ( false !== strpos( $sql, 'SHOW TABLES' ) ) {
+				$hit_show_tables = true;
+			}
+		}
+		$this->assertFalse( $hit_show_tables, 'cache_table_setup() must not query when the cache key is set' );
+	}
+
+	public function test_setup_caches_existence_when_table_already_installed(): void {
+		Repo_Cache_Table::instance()->install_table();
+
+		$before = get_num_queries();
+		$this->bootstrap->cache_table_setup();
+		$after = get_num_queries();
+
+		// First call issues SHOW TABLES, then sets the cache.
+		$this->assertGreaterThan( $before, $after );
+		$this->assertNotFalse( wp_cache_get( self::CACHE_KEY, self::CACHE_GROUP ) );
+
+		// Second call hits the cache and issues no SHOW TABLES.
+		$before_second = get_num_queries();
+		$this->bootstrap->cache_table_setup();
+		$this->assertSame( $before_second, get_num_queries() );
 	}
 }
 

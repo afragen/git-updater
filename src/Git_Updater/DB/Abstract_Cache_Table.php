@@ -318,6 +318,7 @@ abstract class Abstract_Cache_Table {
 				$col_list = implode( ', ', array_map( static fn( $c ) => $wpdb->prepare( '%i', $c ), $cols ) );
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 				$row = $wpdb->get_row(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					$wpdb->prepare( "SELECT {$col_list} FROM %i WHERE slug = %s", $this->table_name(), $slug ),
 					ARRAY_A
 				);
