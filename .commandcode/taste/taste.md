@@ -24,6 +24,8 @@
 
 # Wordpress
 - Use `$wpdb->prepare()` with `%i` placeholders for table names (SQL identifiers) in `$wpdb->query()` DDL calls instead of raw concatenation with `phpcs:ignore`. Confidence: 0.65
+- Fix WPCS errors properly by restructuring code rather than silencing them with `phpcs:ignore` comments. Confidence: 0.75
+- Place `phpcs:ignore` comments on the line preceding the suppressed code, not trailing on the same line. Confidence: 0.72
 
 # PHPStan
 - When fixing PHPStan return type errors, update the `@return` docblock to match the actual return type of the underlying method call, instead of changing the calling code's return behavior. Confidence: 0.75
