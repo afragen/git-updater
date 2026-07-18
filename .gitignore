@@ -2,6 +2,9 @@
 .idea
 .vscode
 .claude
+.commandcode/plans/
+.commandcode/config.json
+.commandcode/cmd-add-dirs.sh
 
 vendor/bin
 vendor/dealerdirect
