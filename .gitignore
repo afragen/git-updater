@@ -2,27 +2,16 @@
 .idea
 .vscode
 .claude
-.commandcode/plans/
-.commandcode/config.json
-.commandcode/cmd-add-dirs.sh
 
-vendor/bin
-vendor/dealerdirect
-vendor/squizlabs
-vendor/wp-coding-standards
-vendor/phpcsstandards
-vendor/mcaskill
-vendor/phpunit
-vendor/yoast
-vendor/sebastian
-vendor/phar-io
-vendor/myclabs
-vendor/theseer
-vendor/doctrine
-vendor/phpstan
-vendor/nikic
-vendor/szepeviktor
-vendor/php-stubs
+.commandcode/
+!.commandcode/taste
+
+vendor/
+!vendor/autoload.php
+!vendor/composer
+!vendor/afragen
+!vendor/erusev
+!vendor/freemius
 
 node_modules/
 package-lock.json
