@@ -17,3 +17,9 @@ node_modules/
 package-lock.json
 .phpunit.result.cache
 coverage-html/
+
+# wp-env-opossum
+.env
+.opossum-home/
+docker/
+compose.yaml
