@@ -7,7 +7,7 @@
 	},
 	"scripts": {
 		"wp-env": "PATH=$PWD/bin:$PATH wp-env",
-		"wp-env:start": "PATH=$PWD/bin:$PATH WP_ENV_PORT=7778 WP_ENV_TESTS_PORT=7779 wp-env start --xdebug=coverage",
+		"wp-env:start": "PATH=$PWD/bin:$PATH wp-env start --xdebug=coverage",
 		"test": "wp-env-opossum test",
 		"test:multisite": "wp-env-opossum test:multisite",
 		"test:coverage": "wp-env-opossum test:coverage",
