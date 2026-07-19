@@ -4,7 +4,7 @@
 	"private": true,
 	"devDependencies": {
 		"@wordpress/env": "^11.11.0",
-		"wp-env-opossum": "file:../wp-env-opossum"
+		"wp-env-opossum": "^1.0.6"
 	},
 	"scripts": {
 		"wp-env": "PATH=$PWD/bin:$PATH wp-env",
