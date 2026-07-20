@@ -12,7 +12,7 @@ Do not make any changes until you have 95% confidence in what you need to build.
 # Install PHP dependencies
 composer install
 
-# Install JS dependencies (required for wp-env)
+# Install JS dependencies (required for wp-env-opossum / mac-env)
 npm install
 
 # Lint (PHPCS)
@@ -27,31 +27,32 @@ composer phpstan
 # Regenerate PHPStan baseline (after intentional changes that add new errors)
 composer phpstan-baseline
 
-# Run PHPUnit tests via wp-env (single site)
+# Run PHPUnit tests via mac-env / opossum (single site)
 composer test          # delegates to: npm test
 npm test
 
-# Run PHPUnit tests via wp-env (multisite)
+# Run PHPUnit tests via mac-env / opossum (multisite)
 composer test-ms       # delegates to: npm run test:multisite
 npm run test:multisite
 
-# Run PHPUnit tests with code coverage (requires Xdebug — installed automatically on wp-env start)
+# Run PHPUnit tests with code coverage (requires Xdebug — compiled into the CLI image by mac-env)
 npm run test:coverage
 
-# Start/stop wp-env Docker environment
-# Note: afterStart lifecycle script installs Xdebug into the tests-cli container
-npm run wp-env start
-npm run wp-env stop
+# Start/stop the dev/test stack (Apple container via opossum; Xdebug baked into the image)
+npm run env:start
+npm run env:stop
 
 # Run a single test class or method
 # Use npm test with --filter so WP_TESTS_PHPUNIT_POLYFILLS_PATH is set automatically.
-# Direct wp-env invocations omit this env var and will fail with a polyfills error.
+# Direct mac-env invocations omit this env var and will fail with a polyfills error.
 npm test -- --filter=Test_API
 ```
 
 ## Testing Environment
 
-Tests use `@wordpress/env` (wp-env) — a Docker-based WordPress environment. The plugin is mounted inside the `tests-cli` container at `/var/www/html/wp-content/plugins/git-updater/`. The WordPress test library is pre-provisioned by wp-env at `/tmp/wordpress-tests-lib` inside the container. `tests/bootstrap.php` falls back to that path automatically when `WP_TESTS_DIR` is unset.
+**CI (GitHub Actions):** uses the standard WordPress PHPUnit setup — `bin/install-wp-tests.sh` provisions the test library at `/tmp/wordpress-tests-lib` inside the container, and `tests/bootstrap.php` falls back to that path automatically when `WP_TESTS_DIR` is unset.
+
+**Local dev:** the test stack runs on Apple's native `container` runtime via [wp-env-opossum](https://www.npmjs.com/package/wp-env-opossum) (`mac-env`), which brings up the same two-site layout (dev + tests) on Apple silicon macOS 26+. Seed the cache once with `mac-env install-wp-tests`, then `npm run env:start`. The plugin is mounted inside the `tests-cli` container at `/var/www/html/wp-content/plugins/git-updater/`.
 
 The `WP_TESTS_PHPUNIT_POLYFILLS_PATH` is passed explicitly in the npm scripts to point to the vendored `yoast/phpunit-polyfills`.
 
