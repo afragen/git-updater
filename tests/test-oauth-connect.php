@@ -640,6 +640,29 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->assertStringContainsString( '_wpnonce', $url );
 	}
 
+	/**
+	 * Test get_callback_url uses admin_url on single-site (the : branch of
+	 * the is_multisite() ternary). Skipped under multisite, where the
+	 * ? branch (network_admin_url) runs instead.
+	 *
+	 * @group ms-excluded
+	 */
+	public function test_get_callback_url_uses_admin_on_single_site(): void {
+		if ( is_multisite() ) {
+			$this->markTestSkipped( 'Single-site only test' );
+		}
+
+		$method = new ReflectionMethod( OAuth_Connect::class, 'get_callback_url' );
+		$method->setAccessible( true );
+
+		$url = $method->invoke( $this->oauth, 'github' );
+
+		$this->assertStringContainsString( 'admin-post.php', $url );
+		$this->assertStringNotContainsString( 'network/', $url );
+		$this->assertStringContainsString( 'action=gu_oauth_callback', $url );
+		$this->assertStringContainsString( '_wpnonce', $url );
+	}
+
 	// -------------------------------------------------------------------------
 	// is_token_expired() tests
 	// -------------------------------------------------------------------------

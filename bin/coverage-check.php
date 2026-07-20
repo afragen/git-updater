@@ -2,14 +2,29 @@
 /**
  * Concise coverage gate. Parses clover.xml and reports only the gaps.
  *
- * Usage: php bin/coverage-check.php [path/to/clover.xml]
+ * Usage: php bin/coverage-check.php [--multisite] [path/to/clover.xml]
  *   - prints one line per file with <100% line coverage (path:uncovered-line ...)
- *   - exits 0 when every file is 100% lines covered, 1 otherwise.
+ *   - exits 0 when every reachable line is covered, 1 otherwise.
+ *
+ * Some lines are reachable only in one environment (guarded by is_multisite()).
+ * They are covered by skip-guarded tests in the environment where they run,
+ * and are structurally unreachable in the other. When run under multisite
+ * (--multisite), those single-site-only lines are excluded from the gap
+ * check instead of being blanket-ignored in the source.
  *
  * @package Git_Updater
  */
 
-$clover = $argv[1] ?? __DIR__ . '/../clover.xml';
+$env        = in_array( '--multisite', $argv, true ) ? 'multisite' : 'singlesite';
+$clover    = $argv[1] ?? __DIR__ . '/../clover.xml';
+$clover    = in_array( $clover, [ '--multisite', '--singlesite' ], true ) ? __DIR__ . '/../clover.xml' : $clover;
+
+// Lines reachable only on single-site: covered by skip-guarded tests
+// there, unreachable under multisite (is_multisite() === true).
+$single_site_only = [
+	'src/Git_Updater/Theme.php'            => [ 315 ],
+	'src/Git_Updater/OAuth/OAuth_Connect.php' => [ 339 ],
+];
 
 if ( ! is_file( $clover ) ) {
 	fwrite( STDERR, "coverage-check: clover.xml not found at '$clover'\n" );
@@ -17,7 +32,11 @@ if ( ! is_file( $clover ) ) {
 }
 
 $xml  = simplexml_load_file( $clover );
-$root = dirname( __DIR__ ) . '/';
+// clover.xml is written inside the container but read on the host, so paths may
+// be container paths (/var/www/html/wp-content/plugins/<slug>/...) or host
+// paths. Normalize both to a repo-relative path.
+$root        = dirname( __DIR__ ) . '/';
+$container_root = '/var/www/html/wp-content/plugins/git-updater/';
 
 $xpath = $xml->xpath( '//file' );
 $files  = $xpath ? $xpath : [];
@@ -26,15 +45,24 @@ $file_count = 0;
 
 foreach ( $files as $file ) {
 	$path = (string) $file['name'];
-	if ( str_starts_with( $path, $root ) ) {
+	if ( str_starts_with( $path, $container_root ) ) {
+		$path = substr( $path, strlen( $container_root ) );
+	} elseif ( str_starts_with( $path, $root ) ) {
 		$path = substr( $path, strlen( $root ) );
 	}
 	++$file_count;
 
+	$excluded = ( 'multisite' === $env && isset( $single_site_only[ $path ] ) )
+		? $single_site_only[ $path ]
+		: [];
+
 	$lines = [];
 	foreach ( $file->line as $line ) {
 		if ( (string) $line['type'] === 'stmt' && (int) $line['count'] === 0 ) {
-			$lines[] = (int) $line['num'];
+			$num = (int) $line['num'];
+			if ( ! in_array( $num, $excluded, true ) ) {
+				$lines[] = $num;
+			}
 		}
 	}
 
