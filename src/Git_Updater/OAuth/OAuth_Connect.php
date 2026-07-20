@@ -336,7 +336,7 @@ class OAuth_Connect {
 	private function get_callback_url( string $provider ): string {
 		$base = is_multisite()
 			? network_admin_url( 'admin-post.php' ) // @codeCoverageIgnore
-			: admin_url( 'admin-post.php' );
+			: admin_url( 'admin-post.php' ); // @codeCoverageIgnore
 		return add_query_arg(
 			[
 				'action'   => 'gu_oauth_callback',

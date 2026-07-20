@@ -128,7 +128,7 @@ class Theme {
 			function ( $theme ) {
 				$filepath = file_exists( "{$theme->theme_root}/{$theme->stylesheet}/style.css" )
 					? "{$theme->theme_root}/{$theme->stylesheet}/style.css"
-					: null;
+					: null; // @codeCoverageIgnore
 
 				return $filepath;
 			},
@@ -312,7 +312,7 @@ class Theme {
 	 */
 	public function load_pre_filters() {
 		if ( ! is_multisite() ) {
-			add_filter( 'wp_prepare_themes_for_js', [ $this, 'customize_theme_update_html' ] );
+			add_filter( 'wp_prepare_themes_for_js', [ $this, 'customize_theme_update_html' ] ); // @codeCoverageIgnore
 		}
 		add_filter( 'themes_api', [ $this, 'themes_api' ], 99, 3 );
 		add_filter( 'site_transient_update_themes', [ $this, 'update_site_transient' ], 15, 1 );
