@@ -256,22 +256,20 @@ class Test_Language_Pack_Update_Site_Transient extends GU_Test_Case {
 		parent::set_up();
 		new Base();
 
-		// WP_LANG_DIR may be undefined this early in the phpunit run, which makes
-		// wp_get_installed_translations() short-circuit at is_dir() and return [].
-		// Define it (derived from __DIR__; the test file lives in tests/, so the
-		// plugin root is dirname(__DIR__) and wp-content is dirname(dirname(__DIR__)))
-		// so the installed-translation fixtures below are actually scanned.
-		if ( ! defined( 'WP_LANG_DIR' ) ) {
-			define( 'WP_LANG_DIR', dirname( dirname( __DIR__ ) ) . '/languages' );
-		}
+		// WP_LANG_DIR is defined in tests/bootstrap.php (before WordPress loads)
+		// to a writable path inside the plugin tree, so it is reliably available
+		// here and scanned by wp_get_installed_translations().
+		// Resolve __DIR__ so the fixture source paths are correct regardless of
+		// how the plugin is mounted into the test WordPress.
+		$real_dir = realpath( __DIR__ );
 		// Seed installed-translation fixtures into WP_LANG_DIR/{plugins,themes} so
 		// wp_get_installed_translations() returns real entries for intl-cover-plugin
 		// (en_US) and intl-cover-theme (en_US). This covers the ternary's true
 		// branch (line 119) in update_site_transient for both plugins and themes.
 		// Cleaned up in tear_down().
 		self::$lang_fixtures = [
-			'plugins' => __DIR__ . '/fixtures/languages/plugins/intl-cover-plugin-en_US',
-			'themes'  => __DIR__ . '/fixtures/languages/themes/intl-cover-theme-en_US',
+			'plugins' => $real_dir . '/fixtures/languages/plugins/intl-cover-plugin-en_US',
+			'themes'  => $real_dir . '/fixtures/languages/themes/intl-cover-theme-en_US',
 		];
 		foreach ( self::$lang_fixtures as $dir => $base ) {
 			wp_mkdir_p( WP_LANG_DIR . "/$dir" );

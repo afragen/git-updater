@@ -668,6 +668,8 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 		);
 
 		// Corrupt the plugin file after installation so activate_plugin() returns WP_Error.
+		// A PHP file without a valid Plugin Name header must not be identified as a
+		// plugin, so validate_plugin() returns a WP_Error and the reactivation is reported.
 		add_filter(
 			'upgrader_post_install',
 			function ( $result ) {
