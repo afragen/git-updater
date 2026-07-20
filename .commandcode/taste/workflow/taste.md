@@ -1,11 +1,6 @@
 # Workflow
 - Commit changes after completing each distinct work phase. Confidence: 0.90
-- For auto-discovering opossum/container gu-env wrappers that replace wp-env: include a command to run `env:install` (e.g., `npm run env:install`) to set up a WordPress site instance after provisioning the stack. Confidence: 0.65
 - Run tests before committing changes to verify nothing is broken. Confidence: 0.80
 - Use tiered approach: address High priority issues first, then Medium, then Low. Confidence: 0.80
 - When taste files are modified, omit them from any commit rather than reverting them with git checkout. Confidence: 0.70
 - Create a CHANGES.md entry before committing, unless the user explicitly specifies to commit without changelog entries. Confidence: 0.85
-- When adding third-party tools that replace system components (e.g., container runtimes), test the add-on/plugin against the existing system first before replacing the system runtime. Confidence: 0.65
-- Avoid workflows that require sudo for setup steps (e.g., DNS domain creation, container runtime configuration). Confidence: 0.65
-- Bundle dev environment setups (e.g., opossum/container compose stacks with wrappers) as reusable templates that can be ported to other projects. Confidence: 0.60
-- Have `init` append the correct npm scripts (env:start, env:stop, test, etc.) to a project's package.json automatically, rather than requiring manual editing. Confidence: 0.70
