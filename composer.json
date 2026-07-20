@@ -74,7 +74,7 @@
 		"wp-env-stop": "npm run env:stop",
 		"test": "npm test",
 		"test-ms": "npm run test:multisite",
-		"test-coverage": "npm run test:coverage && open coverage-html/index.html",
+		"test-coverage": "npm run test:coverage && open coverage/html/index.html",
 		"phpstan": "@php ./vendor/bin/phpstan analyse --memory-limit=2G",
 		"phpstan-baseline": "@php ./vendor/bin/phpstan analyse --generate-baseline --memory-limit=2G"
 	}
