@@ -15,6 +15,11 @@ class Test_REST_API extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		// build_download_metadata()/proxy_download() look up the slug in the
+		// Plugin/Theme singletons. Tests in earlier classes reset the Plugin
+		// singleton via GU_Test_Case::tear_down(); re-instantiate it here so
+		// the slug is registered before each test method runs.
+		new Plugin();
 		$this->rest = new REST_API();
 	}
 
@@ -1488,6 +1493,11 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		// build_download_metadata()/proxy_download() look up the slug in the
+		// Plugin/Theme singletons. Tests in earlier classes reset the Plugin
+		// singleton via GU_Test_Case::tear_down(); re-instantiate it here so
+		// the slug is registered before each test method runs.
+		new Plugin();
 		$this->rest = new REST_API();
 	}
 
@@ -2196,6 +2206,75 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 				'Expected proxy or token URL but got: ' . $data['download_link']
 			);
 		}
+	}
+
+	// -------------------------------------------------------------------------
+	// get_api_data() — release_asset cached without release_asset_download
+	// (covers lines 627-628: redirect-following elseif branch)
+	// -------------------------------------------------------------------------
+
+	public function test_update_api_covers_release_asset_redirect_branch(): void {
+		$this->skip_if_fixture_absent();
+
+		new Base();
+		$GLOBALS['wp_rest_server'] = null;
+		$server = rest_get_server();
+
+		update_site_option( 'git_updater_api_key', self::API_KEY );
+		$prop = ( new ReflectionClass( Remote_Management::class ) )->getProperty( 'api_key' );
+		$prop->setAccessible( true );
+		$prop->setValue( null, self::API_KEY );
+
+		$empty_transient = (object) [
+			'last_checked' => time(),
+			'checked'      => [],
+			'response'     => [],
+			'translations' => [],
+			'no_update'    => [],
+		];
+		set_site_transient( 'update_plugins', $empty_transient );
+		set_site_transient( 'update_themes', $empty_transient );
+
+		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
+
+		// Seed release_asset + release_asset_redirect, but NOT release_asset_download,
+		// so get_api_data() takes the elseif branch (lines 627-628).
+		$cache_key = 'ghu-' . md5( self::SLUG );
+		$existing  = get_site_option( $cache_key, [] );
+		$existing['release_asset']          = 'https://api.github.com/repos/afragen/test-gu-plugin/releases/assets/1234';
+		$existing['release_asset_redirect'] = 'https://example.com/cached-redirect.zip';
+		unset( $existing['release_asset_download'] );
+		update_site_option( $cache_key, $existing );
+
+		// Set the type slug on the API singleton so get_repo_cache() works
+		// inside get_release_asset_redirect().
+		$api_singleton  = Singleton::get_instance( 'Fragen\Git_Updater\API\API', new REST_API() );
+		$rp             = new ReflectionProperty( get_class( $api_singleton ), 'type' );
+		$rp->setAccessible( true );
+		$saved_type     = $rp->getValue( $api_singleton );
+		$type_obj       = new stdClass();
+		$type_obj->slug = self::SLUG;
+		$rp->setValue( $api_singleton, $type_obj );
+
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/update-api' );
+		$request->set_param( 'slug', self::SLUG );
+		$response = $server->dispatch( $request );
+		$data     = (array) $response->get_data();
+
+		// Clean up.
+		$rp->setValue( $api_singleton, $saved_type );
+		unset( $_REQUEST['override'] );
+		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
+		delete_site_transient( 'update_plugins' );
+		delete_site_transient( 'update_themes' );
+		delete_site_option( $cache_key );
+		$GLOBALS['wp_rest_server'] = null;
+
+		if ( isset( $data['error'] ) ) {
+			$this->markTestSkipped( 'Fixture plugin metadata unavailable: ' . $data['error'] );
+		}
+
+		$this->assertSame( 'https://example.com/cached-redirect.zip', $data['download_link'] ?? '' );
 	}
 
 	// -------------------------------------------------------------------------

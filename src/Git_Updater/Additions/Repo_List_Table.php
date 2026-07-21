@@ -121,7 +121,7 @@ class Repo_List_Table extends WP_List_Table {
 			case 'release_asset':
 			case 'private_package':
 			case 'uses_lite':
-				return wp_kses_post( $item[ $column_name ] );
+				return empty( $item[ $column_name ] ) ? false : wp_kses_post( $item[ $column_name ] );
 			case 'uri':
 			case 'slug':
 			case 'primary_branch':

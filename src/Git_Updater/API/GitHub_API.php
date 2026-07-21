@@ -174,7 +174,9 @@ class GitHub_API extends API implements API_Interface {
 				}
 			}
 
-			$this->set_repo_cache( 'release_asset_download', $release_asset );
+			if ( $release_asset ) {
+				$this->set_repo_cache( 'release_asset_download', $release_asset );
+			}
 			return $release_asset;
 		}
 

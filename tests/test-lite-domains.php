@@ -99,10 +99,7 @@ class Test_Lite_Domains extends WP_UnitTestCase {
 	public function test_add_settings_tabs_registers_tab(): void {
 		$this->lite_domains->add_settings_tabs();
 
-		do_action( 'init' );
-
-		global $wp_filter;
-		$this->assertArrayHasKey( 'gu_add_settings_tabs', $wp_filter );
+		$this->assertNotFalse( has_filter( 'gu_add_settings_tabs' ) );
 	}
 
 	/**

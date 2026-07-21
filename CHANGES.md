@@ -1,4 +1,8 @@
 #### [unreleased]
+* fix `GitHub_API::construct_download_link()` clobbering a valid cached `release_asset_download` with `false` when no release assets are returned — only cache a resolved asset URL
+* fix `REST_API::build_download_metadata()` to build auth headers after the final download link is resolved, so release asset and redirect overrides get correct headers
+* add `: bool` return type declaration to `GU_Trait::use_release_asset()`
+* fix `Repo_List_Table::column_default()` to return `false` for empty `release_asset`/`private_package`/`uses_lite` columns
 * implement two-step download flow for `git-updater-lite` to resolve cache mismatch between signed URL TTL and 6-hour client cache
 * add REST endpoint for generating fresh 60-second signed URLs for lite updates
 * isolate token URL generation strictly to the `update-api` route; main plugin continues to receive 12-hour signed URLs

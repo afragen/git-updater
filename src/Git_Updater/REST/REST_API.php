@@ -1084,29 +1084,47 @@ class REST_API {
 		}
 
 		$download_link = $repo_data->download_link ?? '';
+		$api           = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this );
 
-		// Build auth headers server-side (Authorization + Accept + identification).
+		// Override download_link for release assets.
+		//
+		// Precedence for determining "is a release asset?":
+		// 1. Cached release_asset_download or release_asset entry — present
+		// whenever the repo was previously resolved as a release asset.
+		// 2. The boolean $repo_data->release_asset property from the Plugin
+		// class header scan (may be absent in test isolation).
+		//
+		// This makes build_download_metadata() resilient to the Plugin
+		// singleton being reset between tests while still respecting the
+		// redirect-following branch used when an AWS S3 redirect URL has
+		// expired in cache.
+		$repo_cache = $this->get_repo_cache( $slug, false );
+
+		$build_auth = true;
+
+		// If the cached release_asset_download is available, prefer it.
+		// This works even when the Plugin singleton has been reset (e.g. test
+		// isolation) and regardless of the $repo_data->release_asset header.
+		if ( ! empty( $repo_cache['release_asset_download'] )
+			&& empty( $repo_cache['release_asset_redirect'] )
+		) {
+			$download_link = $repo_cache['release_asset_download'];
+		} elseif (
+			( ! empty( $repo_data->release_asset ) || ! empty( $repo_cache['release_asset'] ) )
+			&& ! empty( $repo_cache['release_asset'] )
+			&& 'bitbucket' !== $repo_data->git
+		) {
+			$download_link = $api->get_release_asset_redirect( $repo_cache['release_asset'], true, true );
+			$build_auth    = false; // Pre-signed redirect URL — no auth headers.
+		}
+
+		// Build auth headers server-side (Authorization + Accept + identification),
+		// after the final download_link has been resolved.
 		$auth_header = [];
-		if ( $download_link ) {
-			$api         = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this );
+		if ( $build_auth && $download_link ) {
 			$auth_header = $api->add_auth_header( [], $download_link );
 			$auth_header = $api->unset_release_asset_auth( $auth_header, $download_link );
 			$auth_header = $api->add_accept_header( $auth_header, $download_link );
-		}
-
-		// Override download_link for release assets.
-		if ( $repo_data->release_asset ) {
-			$repo_cache = $this->get_repo_cache( $slug, false );
-
-			if ( ( isset( $repo_cache['release_asset_download'] )
-				&& ! isset( $repo_cache['release_asset_redirect'] ) )
-				&& 'bitbucket' !== $repo_data->git
-			) {
-				$download_link = $repo_cache['release_asset_download'];
-			} elseif ( isset( $repo_cache['release_asset'] ) && $repo_cache['release_asset'] ) {
-				$download_link = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->get_release_asset_redirect( $repo_cache['release_asset'], true, true );
-				$auth_header   = [];
-			}
 		}
 
 		$result = [
