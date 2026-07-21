@@ -120,6 +120,7 @@ class Repo_List_Table extends WP_List_Table {
 		switch ( $column_name ) {
 			case 'release_asset':
 			case 'private_package':
+			case 'uses_lite':
 				return wp_kses_post( $item[ $column_name ] );
 			case 'uri':
 			case 'slug':
