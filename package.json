@@ -3,7 +3,7 @@
 	"description": "A plugin to automatically update GitHub, Bitbucket, GitLab, or Gitea hosted plugins, themes, and language packs.",
 	"private": true,
 	"devDependencies": {
-		"wp-env-opossum": "^1.0.25"
+		"wp-env-opossum": "^1.0.33"
 	},
 	"scripts": {
 		"test": "wp-env-opossum test",
