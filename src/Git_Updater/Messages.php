@@ -138,7 +138,7 @@ class Messages {
 		}
 
 		?>
-		<div data-dismissible="license-5" class="notice-info notice is-dismissible">
+		<div data-dismissible="license-3" class="notice-info notice is-dismissible">
 			<p>
 				<?php esc_html_e( 'Please consider purchasing a Git Updater license for authenticated API requests and to support continued development.', 'git-updater' ); ?>
 				<br>

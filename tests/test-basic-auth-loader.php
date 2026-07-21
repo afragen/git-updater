@@ -12,6 +12,8 @@
 use Fragen\Git_Updater\API\GitHub_API;
 use Fragen\Git_Updater\API\Language_Pack_API;
 use Fragen\Git_Updater\Base;
+use Fragen\Git_Updater\OAuth\OAuth_Connect;
+use Fragen\Singleton;
 
 class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 
@@ -555,5 +557,114 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 
 		$this->assertArrayNotHasKey( 'Accept', $result['headers'] );
 		$this->assertArrayNotHasKey( 'github', $result['headers'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// add_auth_header() — proactive token refresh
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When a token is expired and a refresh token is available,
+	 * add_auth_header() must proactively refresh and use the new token.
+	 */
+	public function test_add_auth_header_refreshes_expired_token_proactively(): void {
+		// Store an expired token with refresh token.
+		update_site_option( 'git_updater', [
+			'github_access_token'       => 'old_expired_token',
+			'github_refresh_token'      => 'refresh_token_value',
+			'github_token_expires_in'   => 7200,
+			'github_token_acquired_at'  => time() - 7201, // Expired.
+		] );
+		$_REQUEST['slug'] = 'test-plugin';
+
+		// Mock the connector refresh endpoint.
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return [
+						'response' => [ 'code' => 200 ],
+						'body'     => wp_json_encode( [ 'access_token' => 'refreshed_token', 'expires_in' => 7200 ] ),
+						'headers'  => [],
+					];
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		// Set connector URL on the OAuth singleton.
+		$oauth = Singleton::get_instance( OAuth_Connect::class, $this->api );
+		$oauth->connector_url = 'https://connector.example.com/';
+
+		$result = $this->api->add_auth_header(
+			[ 'headers' => [] ],
+			'https://api.github.com/repos/test-owner/test-plugin/contents/readme.txt'
+		);
+
+		$this->assertSame( 'Bearer refreshed_token', $result['headers']['Authorization'] );
+		$this->assertSame( 'test-plugin', $result['headers']['github'] );
+	}
+
+	/**
+	 * When a token is not expired, add_auth_header() must not attempt refresh.
+	 */
+	public function test_add_auth_header_skips_refresh_when_token_fresh(): void {
+		update_site_option( 'git_updater', [
+			'github_access_token'       => 'fresh_token',
+			'github_refresh_token'      => 'refresh_token_value',
+			'github_token_expires_in'   => 7200,
+			'github_token_acquired_at'  => time(), // Just acquired, not expired.
+		] );
+		$_REQUEST['slug'] = 'test-plugin';
+
+		// Track if refresh endpoint is called.
+		$refresh_called = false;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$refresh_called ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					$refresh_called = true;
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$oauth = Singleton::get_instance( OAuth_Connect::class, $this->api );
+		$oauth->connector_url = 'https://connector.example.com/';
+
+		$result = $this->api->add_auth_header(
+			[ 'headers' => [] ],
+			'https://api.github.com/repos/test-owner/test-plugin/contents/readme.txt'
+		);
+
+		$this->assertFalse( $refresh_called );
+		$this->assertSame( 'Bearer fresh_token', $result['headers']['Authorization'] );
+	}
+
+	/**
+	 * When a token is expired but no refresh token is stored,
+	 * add_auth_header() must use the existing (expired) token without error.
+	 */
+	public function test_add_auth_header_skips_refresh_when_no_refresh_token(): void {
+		update_site_option( 'git_updater', [
+			'github_access_token'       => 'expired_token',
+			'github_token_expires_in'   => 7200,
+			'github_token_acquired_at'  => time() - 7201,
+		] );
+		$_REQUEST['slug'] = 'test-plugin';
+
+		$oauth = Singleton::get_instance( OAuth_Connect::class, $this->api );
+		$oauth->connector_url = 'https://connector.example.com/';
+
+		$result = $this->api->add_auth_header(
+			[ 'headers' => [] ],
+			'https://api.github.com/repos/test-owner/test-plugin/contents/readme.txt'
+		);
+
+		$this->assertSame( 'Bearer expired_token', $result['headers']['Authorization'] );
 	}
 }

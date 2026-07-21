@@ -70,6 +70,14 @@ abstract class GU_Test_Case extends WP_UnitTestCase {
 		// Wipe the singleton cache so next test gets fresh instances.
 		Singleton::reset();
 
+		// Clear the cached theme list so each test re-scans the installed
+		// themes (including the test-gu-theme fixture). Without this, a stale
+		// `wp_get_themes()` cache from a prior test can hide the fixture theme
+		// from Git Updater's get_theme_meta().
+		if ( function_exists( 'wp_clean_themes_cache' ) ) {
+			wp_clean_themes_cache();
+		}
+
 		parent::tear_down();
 	}
 

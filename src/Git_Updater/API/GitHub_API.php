@@ -150,7 +150,6 @@ class GitHub_API extends API implements API_Interface {
 		self::$method       = 'download_link';
 		$download_link_base = $this->get_api_url( '/repos/:owner/:repo/zipball/', true );
 		$endpoint           = '';
-		$cache              = $this->get_repo_cache( $this->type->slug ?? false, false );
 
 		// Release asset.
 		if ( $this->use_release_asset( $branch_switch ) ) {
@@ -175,14 +174,8 @@ class GitHub_API extends API implements API_Interface {
 				}
 			}
 
-			if ( empty( $cache['release_asset_download'] ) ) {
-				$this->set_repo_cache( 'release_asset_download', $release_asset );
-			}
-			if ( ! empty( $cache['release_asset_download'] ) ) {
-				return $cache['release_asset_download'];
-			}
-
-			return $this->get_release_asset_redirect( $release_asset, true );
+			$this->set_repo_cache( 'release_asset_download', $release_asset );
+			return $release_asset;
 		}
 
 		/*
@@ -456,21 +449,60 @@ class GitHub_API extends API implements API_Interface {
 	public function add_settings( $auth_required ) {
 		add_settings_section(
 			'github_access_token',
-			esc_html__( 'GitHub Personal Access Token', 'git-updater' ),
+			esc_html__( 'GitHub Token', 'git-updater' ),
 			[ $this, 'print_section_github_access_token' ],
 			'git_updater_github_install_settings'
 		);
 
+		$token_args  = [
+			'id'    => 'github_access_token',
+			'token' => true,
+			'class' => '',
+		];
+		$oauth_args  = [
+			'provider' => 'github',
+			'class'    => '',
+		];
+		$remove_args = [
+			'provider' => 'github',
+			'class'    => '',
+		];
+		$oauth       = Singleton::get_instance( 'OAuth\OAuth_Connect', $this );
+		if ( $oauth->is_oauth_token( 'github' ) ) {
+			$token_args['class'] = trim( $token_args['class'] . ' hidden' );
+		}
+		if ( ! empty( static::$options['github_access_token'] ) && ! $oauth->is_oauth_token( 'github' ) ) {
+			$oauth_args['class'] = trim( $oauth_args['class'] . ' hidden' );
+		}
+		if ( empty( static::$options['github_access_token'] ) || $oauth->is_oauth_token( 'github' ) ) {
+			$remove_args['class'] = trim( $remove_args['class'] . ' hidden' );
+		}
+
 		add_settings_field(
 			'github_access_token',
-			esc_html__( 'GitHub.com Access Token', 'git-updater' ),
+			esc_html__( 'GitHub Access Token', 'git-updater' ),
 			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'git_updater_github_install_settings',
 			'github_access_token',
-			[
-				'id'    => 'github_access_token',
-				'token' => true,
-			]
+			$token_args
+		);
+
+		add_settings_field(
+			'github_oauth_connect',
+			esc_html__( 'GitHub OAuth', 'git-updater' ),
+			[ $oauth, 'render_connect_field' ],
+			'git_updater_github_install_settings',
+			'github_access_token',
+			$oauth_args
+		);
+
+		add_settings_field(
+			'github_remove_token',
+			esc_html__( 'Remove Token', 'git-updater' ),
+			[ $oauth, 'render_remove_token_field' ],
+			'git_updater_github_install_settings',
+			'github_access_token',
+			$remove_args
 		);
 
 		/*
@@ -517,7 +549,8 @@ class GitHub_API extends API implements API_Interface {
 	 * @return void
 	 */
 	public function print_section_github_access_token() {
-		esc_html_e( 'Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits.', 'git-updater' );
+		esc_html_e( 'Click the "Connect GitHub" button for an OAuth connection or enter your GitHub Access Token to avoid API access limits.', 'git-updater' );
+		printf( '<p class="description">%s</p>', esc_html__( 'Access tokens are stored in this site\'s options table. Database backups contain them in cleartext — handle backup files accordingly.', 'git-updater' ) );
 		$icon = plugin_dir_url( dirname( __DIR__, 2 ) ) . 'assets/github-logo.svg';
 		printf( '<img class="git-oauth-icon" src="%s" alt="GitHub logo" />', esc_attr( $icon ) );
 	}

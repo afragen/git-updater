@@ -11,6 +11,7 @@
 namespace Fragen\Git_Updater\API;
 
 use Fragen\Singleton;
+use Fragen\Git_Updater\OAuth\OAuth_Connect;
 use Fragen\Git_Updater\Traits\API_Common;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
@@ -43,7 +44,7 @@ class API {
 	 *
 	 * @var array<string, mixed>
 	 */
-	protected static $options;
+	public static $options;
 
 	/**
 	 * Holds extra headers.
@@ -189,6 +190,10 @@ class API {
 		$cached      = isset( $error_cache['error_cache'] );
 		$response    = false;
 		if ( ! $cached ) {
+			if ( apply_filters( 'gu_debug_api_requests', false ) ) {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				error_log( 'Git Updater: API request to ' . $url ); // @codeCoverageIgnore
+			}
 			$response = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
 
 			$code          = (int) wp_remote_retrieve_response_code( $response );
@@ -200,10 +205,36 @@ class API {
 				return $response;
 			}
 
-			// Cache HTTP API error code for 60 minutes.
+			// Reactive token refresh on 401/403.
+			if ( in_array( $code, [ 401, 403 ], true ) ) {
+				$provider = $this->detect_provider_from_url( $url );
+				if ( $provider ) {
+					$new_token = Singleton::get_instance( OAuth_Connect::class, $this )->refresh_token( $provider );
+					if ( $new_token ) {
+						$auth_header = $this->add_auth_header( [], $url );
+						$response    = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
+						if ( is_wp_error( $response ) ) {
+							Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
+
+							return $response;
+						}
+						$code = (int) wp_remote_retrieve_response_code( $response );
+					}
+				}
+			}
+
+			// Cache HTTP API error code. Transient errors get shorter timeout.
 			if ( ! in_array( $code, $allowed_codes, true ) ) {
-				$timeout = 60;
-				$this->set_repo_cache( 'error_cache', [ 'timeout' => $timeout ], $this->type->slug . '_error', "+{$timeout} minutes" );
+				$timeout = in_array( $code, [ 404, 410 ], true ) ? 60 : 5;
+				$this->set_repo_cache(
+					'error_cache',
+					[
+						'timeout'   => $timeout,
+						'http_code' => $code,
+					],
+					$this->type->slug . '_error',
+					"+{$timeout} minutes"
+				);
 			}
 
 			$response = [
@@ -581,18 +612,15 @@ class API {
 	}
 
 	/**
-	 * Return the redirect download link for a release asset.
-	 * AWS download link sets a link expiration of ONLY 5 minutes.
+	 * Get release asset redirect URL.
 	 *
-	 * @since 6.1.0
-	 * @uses  Requests, requires WP 4.6
+	 * @param string $asset    Release asset URL.
+	 * @param bool   $aws      Whether to check for AWS expiration.
+	 * @param bool   $override Whether to override the cache.
 	 *
-	 * @param string $asset Release asset URI from git host.
-	 * @param bool   $aws   Release asset hosted on AWS.
-	 *
-	 * @return string|bool|stdClass Release asset URI from AWS.
+	 * @return false|string
 	 */
-	public function get_release_asset_redirect( $asset, $aws = false ) {
+	public function get_release_asset_redirect( $asset, $aws = false, $override = false ) {
 		$rest = false;
 		if ( ! $asset ) {
 			return false;
@@ -600,7 +628,7 @@ class API {
 		$cache = $this->get_repo_cache( $this->type->slug ?? false, false );
 
 		// Unset release asset url if older than 5 min to account for AWS expiration.
-		if ( $aws && ( time() - strtotime( '-12 hours', $cache['timeout'] ) ) >= 300 ) {
+		if ( $aws && ( time() - strtotime( "-{$this->hours} hours", $cache['timeout'] ) ) >= 300 ) {
 			unset( $cache['release_asset'] );
 			unset( $cache['release_asset_redirect'] );
 		}
@@ -613,18 +641,18 @@ class API {
 			$slug = ! $slug && isset( $_REQUEST['theme'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['theme'] ) ) : $slug;
 			$rest = $slug === $cache['repo'];
 		}
+		$override = $override || isset( $_REQUEST['override'] );
 		// phpcs:enable
 
 		if ( ! $response && $this->exit_no_update( $response )
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			&& ! isset( $_REQUEST['override'] ) && ! isset( $_REQUEST['rollback'] )
+			&& ! $override && ! isset( $_REQUEST['rollback'] )
 			&& ! $rest
 		) {
 			return false;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( ! $response || isset( $_REQUEST['override'] ) ) {
+		if ( ! $response || $override ) {
 			$args = $this->add_auth_header( [], $asset );
 			if ( empty( $args ) ) { // @codeCoverageIgnore
 				return false; // @codeCoverageIgnore
@@ -654,5 +682,29 @@ class API {
 	 */
 	public function set_redirect( $location ) {
 		$this->redirect = $location;
+	}
+
+	/**
+	 * Detect the git provider from a URL.
+	 *
+	 * @param string $url API URL to inspect.
+	 * @return string|null Provider slug or null if not detected.
+	 */
+	private function detect_provider_from_url( string $url ): ?string {
+		if ( str_contains( $url, 'api.github.com' ) || str_contains( $url, 'github.com/api' ) ) {
+			return 'github';
+		}
+		if ( str_contains( $url, 'api.bitbucket.org' ) || str_contains( $url, 'bitbucket.org' ) ) {
+			return 'bitbucket';
+		}
+		// Check Gitea before GitLab since Gitea URLs may also contain /api/v.
+		$options = get_site_option( 'git_updater', [] );
+		if ( ! empty( $options['gitea_server'] ) && str_contains( $url, $options['gitea_server'] ) ) {
+			return 'gitea';
+		}
+		if ( str_contains( $url, 'gitlab.com/api' ) || str_contains( $url, '/api/v' ) ) {
+			return 'gitlab';
+		}
+		return null;
 	}
 }

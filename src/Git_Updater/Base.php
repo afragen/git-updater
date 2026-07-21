@@ -241,7 +241,7 @@ class Base {
 
 		if ( ! empty( $config ) ) {
 			$config        = $this->sanitize( $config );
-			self::$options = array_merge( get_site_option( 'git_updater' ), $config );
+			self::$options = array_merge( get_site_option( 'git_updater', [] ), $config );
 			update_site_option( 'git_updater', self::$options );
 		}
 	}
@@ -385,7 +385,6 @@ class Base {
 		$this->$type->download_link  = '';
 		$this->$type->tags           = [];
 		$this->$type->branches       = [];
-		$this->$type->requires       = '';
 		$this->$type->tested         = '';
 		$this->$type->donate_link    = '';
 		$this->$type->contributors   = [];

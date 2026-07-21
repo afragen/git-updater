@@ -2,27 +2,24 @@
 .idea
 .vscode
 .claude
-.commandcode
 
-vendor/bin
-vendor/dealerdirect
-vendor/squizlabs
-vendor/wp-coding-standards
-vendor/phpcsstandards
-vendor/mcaskill
-vendor/phpunit
-vendor/yoast
-vendor/sebastian
-vendor/phar-io
-vendor/myclabs
-vendor/theseer
-vendor/doctrine
-vendor/phpstan
-vendor/nikic
-vendor/szepeviktor
-vendor/php-stubs
+.commandcode/
+!.commandcode/taste
+
+vendor/
+!vendor/autoload.php
+!vendor/composer
+!vendor/afragen
+!vendor/erusev
+!vendor/freemius
 
 node_modules/
 package-lock.json
 .phpunit.result.cache
-coverage-html/
+coverage/
+
+# wp-env-opossum
+.env
+.opossum-home/
+docker/
+compose.yaml

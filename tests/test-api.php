@@ -75,8 +75,12 @@ class Test_API extends WP_UnitTestCase {
 	public function tear_down(): void {
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'gu_post_api_response_body' );
+		remove_all_filters( 'gu_always_fetch_update' );
+		remove_all_actions( 'requests-requests.before_redirect' );
 		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
 		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
+		delete_site_option( 'git_updater' );
+		unset( $_REQUEST['key'], $_REQUEST['plugin'], $_REQUEST['theme'], $_REQUEST['override'], $_REQUEST['rollback'] );
 		parent::tear_down();
 	}
 
@@ -1265,216 +1269,6 @@ class Test_API_Local_Info extends WP_UnitTestCase {
 	}
 }
 
-class Test_API_Release_Asset_Redirect extends WP_UnitTestCase {
-
-	/**
-	 * @var GitHub_API
-	 */
-	private GitHub_API $api;
-
-	/**
-	 * @var stdClass
-	 */
-	private stdClass $type;
-
-	public function set_up(): void {
-		parent::set_up();
-		new Base();
-		$this->type = api_make_type();
-		$this->api  = new GitHub_API( $this->type );
-	}
-
-	public function tear_down(): void {
-		remove_all_filters( 'pre_http_request' );
-		remove_all_filters( 'gu_always_fetch_update' );
-		remove_all_actions( 'requests-requests.before_redirect' );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
-		unset( $_REQUEST['key'], $_REQUEST['plugin'], $_REQUEST['theme'], $_REQUEST['override'], $_REQUEST['rollback'] );
-		parent::tear_down();
-	}
-
-
-	private function seed_cache( array $data ): void {
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin' ),
-			array_merge( [ 'timeout' => strtotime( '+12 hours' ) ], $data )
-		);
-	}
-
-	// -------------------------------------------------------------------------
-	// !$asset early return
-	// -------------------------------------------------------------------------
-
-	public function test_get_release_asset_redirect_returns_false_when_asset_is_false(): void {
-		$result = $this->api->get_release_asset_redirect( false );
-		$this->assertFalse( $result );
-	}
-
-	public function test_get_release_asset_redirect_returns_false_when_asset_is_empty_string(): void {
-		$result = $this->api->get_release_asset_redirect( '' );
-		$this->assertFalse( $result );
-	}
-
-	// -------------------------------------------------------------------------
-	// AWS timeout unset path (lines 637-640)
-	// -------------------------------------------------------------------------
-
-	public function test_get_release_asset_redirect_clears_aws_cache_when_older_than_5_min(): void {
-		// Seed cache with future timeout (so AWS time check fires: time() - strtotime('-12h', future_timeout) > 300).
-		$this->seed_cache(
-			[
-				'release_asset'          => 'https://github.com/owner/repo/releases/download/v1.0.0/plugin.zip',
-				'release_asset_redirect' => 'https://s3.amazonaws.com/something/plugin.zip?token=old',
-				'timeout'                => strtotime( '+6 hours' ),
-			]
-		);
-
-		// $aws=true triggers the unset block.
-		// After clearing, response is false, exit_no_update fires → return false.
-		$result = $this->api->get_release_asset_redirect(
-			'https://github.com/owner/repo/releases/download/v1.0.0/plugin.zip',
-			true
-		);
-
-		$this->assertFalse( $result );
-	}
-
-	// -------------------------------------------------------------------------
-	// $_REQUEST['key'] slug matching (lines 645-649)
-	// -------------------------------------------------------------------------
-
-	public function test_get_release_asset_redirect_matches_plugin_slug_from_request(): void {
-		// Seed cache with repo = 'test-plugin' and no release_asset_redirect.
-		$this->seed_cache( [ 'repo' => 'test-plugin' ] );
-
-		// Set request context.
-		$_REQUEST['key']    = 'some-api-key';
-		$_REQUEST['plugin'] = 'test-plugin/test-plugin.php'; // WordPress plugin file format.
-
-		// Mock HTTP to prevent real request.
-		add_filter( 'pre_http_request', fn() => new WP_Error( 'blocked', 'no real HTTP' ), 10, 3 );
-		add_filter( 'gu_always_fetch_update', '__return_true' ); // bypass exit_no_update gate
-
-		$result = $this->api->get_release_asset_redirect(
-			'https://github.com/owner/repo/releases/download/v1.0.0/plugin.zip'
-		);
-
-		// No redirect was set (mocked request), response is false → return false.
-		$this->assertFalse( $result );
-	}
-
-	public function test_get_release_asset_redirect_matches_theme_slug_from_request(): void {
-		$this->seed_cache( [ 'repo' => 'test-plugin' ] );
-
-		$_REQUEST['key']   = 'some-api-key';
-		$_REQUEST['theme'] = 'test-plugin';
-
-		add_filter( 'pre_http_request', fn() => new WP_Error( 'blocked', 'no real HTTP' ), 10, 3 );
-		add_filter( 'gu_always_fetch_update', '__return_true' );
-
-		$result = $this->api->get_release_asset_redirect(
-			'https://github.com/owner/repo/releases/download/v1.0.0/plugin.zip'
-		);
-
-		$this->assertFalse( $result );
-	}
-
-	// -------------------------------------------------------------------------
-	// exit_no_update gate → return false
-	// -------------------------------------------------------------------------
-
-	public function test_get_release_asset_redirect_returns_false_when_exit_no_update_fires(): void {
-		// No cache, no override, no rollback, no $rest — exit_no_update returns true.
-		$result = $this->api->get_release_asset_redirect(
-			'https://github.com/owner/repo/releases/download/v1.0.0/plugin.zip'
-		);
-
-		$this->assertFalse( $result );
-	}
-
-	// -------------------------------------------------------------------------
-	// HTTP call path — no redirect
-	// -------------------------------------------------------------------------
-
-	public function test_get_release_asset_redirect_returns_false_when_http_call_produces_no_redirect(): void {
-		// Bypass exit_no_update so we reach the HTTP call.
-		add_filter( 'gu_always_fetch_update', '__return_true' );
-
-		// Mock HTTP — pre_http_request prevents real request; redirect action won't fire.
-		add_filter(
-			'pre_http_request',
-			fn() => [ 'response' => [ 'code' => 200 ], 'body' => '', 'headers' => [] ],
-			10,
-			3
-		);
-
-		$result = $this->api->get_release_asset_redirect(
-			'https://github.com/owner/repo/releases/download/v1.0.0/plugin.zip'
-		);
-
-		// $this->redirect is empty (no real redirect), $response is false → return false.
-		$this->assertFalse( $result );
-	}
-
-	// -------------------------------------------------------------------------
-	// Cached release_asset_redirect → return cached URL
-	// -------------------------------------------------------------------------
-
-	public function test_get_release_asset_redirect_returns_cached_redirect_url(): void {
-		$cached_url = 'https://s3.amazonaws.com/downloads/plugin.zip?token=abc';
-		$this->seed_cache( [ 'release_asset_redirect' => $cached_url ] );
-
-		$result = $this->api->get_release_asset_redirect(
-			'https://github.com/owner/repo/releases/download/v1.0.0/plugin.zip'
-		);
-
-		$this->assertSame( $cached_url, $result );
-	}
-
-	// -------------------------------------------------------------------------
-	// HTTP call path — redirect set (lines 673, 675)
-	// -------------------------------------------------------------------------
-
-	public function test_get_release_asset_redirect_caches_and_returns_redirect_when_set(): void {
-		$redirect_url = 'https://s3.amazonaws.com/bucket/plugin.zip?token=abc';
-		$api          = $this->api;
-
-		add_filter( 'gu_always_fetch_update', '__return_true' );
-
-		// Call set_redirect() inside the HTTP mock to simulate the redirect action firing.
-		add_filter(
-			'pre_http_request',
-			function () use ( $api, $redirect_url ) {
-				$api->set_redirect( $redirect_url );
-				return [ 'response' => [ 'code' => 200 ], 'body' => '', 'headers' => [] ];
-			},
-			10,
-			3
-		);
-
-		$result = $this->api->get_release_asset_redirect(
-			'https://github.com/owner/repo/releases/download/v1.0.0/plugin.zip'
-		);
-
-		$this->assertSame( $redirect_url, $result );
-	}
-
-	// -------------------------------------------------------------------------
-	// set_redirect()
-	// -------------------------------------------------------------------------
-
-	public function test_set_redirect_stores_location_on_redirect_property(): void {
-		$location = 'https://s3.amazonaws.com/bucket/plugin.zip?token=xyz';
-
-		$this->api->set_redirect( $location );
-
-		$rp = new ReflectionProperty( $this->api, 'redirect' );
-		$rp->setAccessible( true );
-		$this->assertSame( $location, $rp->getValue( $this->api ) );
-	}
-}
-
 class Test_API_Hooks extends WP_UnitTestCase {
 
 	/**
@@ -1601,3 +1395,695 @@ class Test_API_Hooks extends WP_UnitTestCase {
  *
  * Covers all settings output and registration methods in GitHub_API.
  */
+
+class Test_API_Detect_Provider extends WP_UnitTestCase {
+
+	/**
+	 * @var GitHub_API
+	 */
+	private GitHub_API $api;
+
+	/**
+	 * @var stdClass
+	 */
+	private stdClass $type;
+
+	/**
+	 * @var string
+	 */
+	private string $endpoint = '/repos/:owner/:repo';
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->type = api_make_type();
+		$this->api  = new GitHub_API( $this->type );
+	}
+
+	public function tear_down(): void {
+		delete_site_option( 'git_updater' );
+		parent::tear_down();
+	}
+
+	private function call_detect_provider_from_url( string $url ): ?string {
+		$rm = new ReflectionMethod( $this->api, 'detect_provider_from_url' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+		return $rm->invoke( $this->api, $url );
+	}
+
+	public function test_detect_provider_from_url_returns_github_for_api_github(): void {
+		$this->assertSame( 'github', $this->call_detect_provider_from_url( 'https://api.github.com/repos/owner/repo' ) );
+	}
+
+	public function test_detect_provider_from_url_returns_github_for_github_com_api(): void {
+		$this->assertSame( 'github', $this->call_detect_provider_from_url( 'https://github.com/api/v3/repos/owner/repo' ) );
+	}
+
+	public function test_detect_provider_from_url_returns_bitbucket_for_api_bitbucket(): void {
+		$this->assertSame( 'bitbucket', $this->call_detect_provider_from_url( 'https://api.bitbucket.org/2.0/repos/owner/repo' ) );
+	}
+
+	public function test_detect_provider_from_url_returns_bitbucket_for_bitbucket_org(): void {
+		$this->assertSame( 'bitbucket', $this->call_detect_provider_from_url( 'https://bitbucket.org/owner/repo' ) );
+	}
+
+	public function test_detect_provider_from_url_returns_gitlab_for_gitlab_api(): void {
+		$this->assertSame( 'gitlab', $this->call_detect_provider_from_url( 'https://gitlab.com/api/v4/projects/123' ) );
+	}
+
+	public function test_detect_provider_from_url_returns_gitlab_for_generic_api_v(): void {
+		$this->assertSame( 'gitlab', $this->call_detect_provider_from_url( 'https://custom-gitlab.example.com/api/v4/projects' ) );
+	}
+
+	public function test_detect_provider_from_url_returns_gitea_when_server_configured(): void {
+		update_site_option( 'git_updater', [ 'gitea_server' => 'https://gitea.example.com' ] );
+		$this->assertSame( 'gitea', $this->call_detect_provider_from_url( 'https://gitea.example.com/api/v1/repos/owner/repo' ) );
+	}
+
+	public function test_detect_provider_from_url_returns_null_for_unknown_url(): void {
+		$this->assertNull( $this->call_detect_provider_from_url( 'https://example.com/something' ) );
+	}
+
+	public function test_detect_provider_from_url_returns_gitlab_for_gitea_url_without_server(): void {
+		// Without gitea_server configured, a Gitea URL with /api/v matches the GitLab heuristic.
+		$this->assertSame( 'gitlab', $this->call_detect_provider_from_url( 'https://gitea.example.com/api/v1/repos' ) );
+	}
+
+	// -------------------------------------------------------------------------
+	// Reactive refresh in api()
+	// -------------------------------------------------------------------------
+
+	public function test_api_retries_on_401_after_successful_refresh(): void {
+		$api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$api_call_count ) {
+				// Don't count refresh calls.
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return $preempt;
+				}
+				$api_call_count++;
+				// First API call returns 401, second (retry) returns 200.
+				if ( 1 === $api_call_count ) {
+					return [
+						'response' => [ 'code' => 401, 'message' => 'Unauthorized' ],
+						'body'     => wp_json_encode( [ 'message' => 'Bad credentials' ] ),
+						'headers'  => [],
+					];
+				}
+				return [
+					'response' => [ 'code' => 200, 'message' => 'OK' ],
+					'body'     => wp_json_encode( [ 'name' => 'test-plugin' ] ),
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		// Mock refresh_token to succeed.
+		$oauth = \Fragen\Singleton::get_instance( \Fragen\Git_Updater\OAuth\OAuth_Connect::class, $this->api );
+		$oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'github_access_token'  => 'old_tok',
+			'github_refresh_token' => 'ref',
+		] );
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return [
+						'response' => [ 'code' => 200 ],
+						'body'     => wp_json_encode( [ 'access_token' => 'new_tok', 'expires_in' => 7200 ] ),
+						'headers'  => [],
+					];
+				}
+				return $preempt;
+			},
+			20,
+			3
+		);
+
+		$result = $this->api->api( $this->endpoint );
+
+		$this->assertSame( 2, $api_call_count );
+		$this->assertIsObject( $result );
+		$this->assertSame( 'test-plugin', $result->name );
+	}
+
+	public function test_api_retries_on_403_after_successful_refresh(): void {
+		$api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$api_call_count ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return $preempt;
+				}
+				$api_call_count++;
+				if ( 1 === $api_call_count ) {
+					return [
+						'response' => [ 'code' => 403, 'message' => 'Forbidden' ],
+						'body'     => wp_json_encode( [ 'message' => 'rate limit' ] ),
+						'headers'  => [],
+					];
+				}
+				return [
+					'response' => [ 'code' => 200, 'message' => 'OK' ],
+					'body'     => wp_json_encode( [ 'name' => 'test-plugin' ] ),
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		$oauth = \Fragen\Singleton::get_instance( \Fragen\Git_Updater\OAuth\OAuth_Connect::class, $this->api );
+		$oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'github_access_token'  => 'old_tok',
+			'github_refresh_token' => 'ref',
+		] );
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return [
+						'response' => [ 'code' => 200 ],
+						'body'     => wp_json_encode( [ 'access_token' => 'new_tok' ] ),
+						'headers'  => [],
+					];
+				}
+				return $preempt;
+			},
+			20,
+			3
+		);
+
+		$result = $this->api->api( $this->endpoint );
+
+		$this->assertSame( 2, $api_call_count );
+		$this->assertIsObject( $result );
+	}
+
+	public function test_api_does_not_retry_when_refresh_fails(): void {
+		$api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$api_call_count ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return $preempt;
+				}
+				$api_call_count++;
+				return [
+					'response' => [ 'code' => 401, 'message' => 'Unauthorized' ],
+					'body'     => wp_json_encode( [ 'message' => 'Bad credentials' ] ),
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		$oauth = \Fragen\Singleton::get_instance( \Fragen\Git_Updater\OAuth\OAuth_Connect::class, $this->api );
+		$oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'github_access_token'  => 'old_tok',
+			'github_refresh_token' => 'ref',
+		] );
+
+		// Mock refresh to return error.
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return [
+						'response' => [ 'code' => 401 ],
+						'body'     => wp_json_encode( [ 'error' => 'invalid_grant' ] ),
+						'headers'  => [],
+					];
+				}
+				return $preempt;
+			},
+			20,
+			3
+		);
+
+		$this->api->api( $this->endpoint );
+
+		// Only 1 API call — no retry after failed refresh.
+		$this->assertSame( 1, $api_call_count );
+	}
+
+	public function test_api_does_not_retry_when_no_refresh_token(): void {
+		$api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$api_call_count ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return $preempt;
+				}
+				$api_call_count++;
+				return [
+					'response' => [ 'code' => 401, 'message' => 'Unauthorized' ],
+					'body'     => wp_json_encode( [ 'message' => 'Bad credentials' ] ),
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		// No refresh token stored.
+		update_site_option( 'git_updater', [ 'github_access_token' => 'old_tok' ] );
+
+		$this->api->api( $this->endpoint );
+
+		$this->assertSame( 1, $api_call_count );
+	}
+
+	public function test_api_does_not_retry_for_non_auth_errors(): void {
+		$api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$api_call_count ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return $preempt;
+				}
+				$api_call_count++;
+				return [
+					'response' => [ 'code' => 500, 'message' => 'Server Error' ],
+					'body'     => wp_json_encode( [ 'message' => 'Internal error' ] ),
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		$this->api->api( $this->endpoint );
+
+		$this->assertSame( 1, $api_call_count );
+	}
+
+	public function test_api_does_not_retry_when_provider_not_detected(): void {
+		$api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$api_call_count ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return $preempt;
+				}
+				$api_call_count++;
+				return [
+					'response' => [ 'code' => 401, 'message' => 'Unauthorized' ],
+					'body'     => wp_json_encode( [ 'message' => 'Bad credentials' ] ),
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		// Use a URL that doesn't match any provider pattern.
+		$this->type->enterprise_api = 'https://unknown.example.com/api';
+		$this->api->api( $this->endpoint );
+
+		$this->assertSame( 1, $api_call_count );
+	}
+
+	public function test_api_returns_wp_error_when_retry_fails(): void {
+		$api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$api_call_count ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return $preempt;
+				}
+				$api_call_count++;
+				// First call returns 401 to trigger retry.
+				if ( 1 === $api_call_count ) {
+					return [
+						'response' => [ 'code' => 401, 'message' => 'Unauthorized' ],
+						'body'     => wp_json_encode( [ 'message' => 'Bad credentials' ] ),
+						'headers'  => [],
+					];
+				}
+				// Retry returns WP_Error.
+				return new \WP_Error( 'http_request_failed', 'cURL error 28: Connection timed out' );
+			},
+			10,
+			3
+		);
+
+		// Mock refresh_token to succeed.
+		$oauth = \Fragen\Singleton::get_instance( \Fragen\Git_Updater\OAuth\OAuth_Connect::class, $this->api );
+		$oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'github_access_token'  => 'old_tok',
+			'github_refresh_token' => 'ref',
+		] );
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return [
+						'response' => [ 'code' => 200 ],
+						'body'     => wp_json_encode( [ 'access_token' => 'new_tok', 'expires_in' => 7200 ] ),
+						'headers'  => [],
+					];
+				}
+				return $preempt;
+			},
+			20,
+			3
+		);
+
+		$result = $this->api->api( $this->endpoint );
+
+		$this->assertSame( 2, $api_call_count );
+		$this->assertWPError( $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_release_asset_redirect() — full coverage
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When called with a falsy asset value, get_release_asset_redirect()
+	 * returns false immediately.
+	 */
+	public function test_get_release_asset_redirect_returns_false_when_no_asset(): void {
+		$result = $this->api->get_release_asset_redirect( false );
+
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * When release_asset_redirect is already in the cache and no override is
+	 * requested, the cached URL is returned without making an HTTP request.
+	 */
+	public function test_get_release_asset_redirect_returns_cached_redirect_url(): void {
+		$cache_key = $this->api->get_cache_key( 'test-plugin' );
+		update_site_option(
+			$cache_key,
+			[
+				'release_asset_redirect' => 'https://objects.githubusercontent.com/download.zip',
+			]
+		);
+
+		$result = $this->api->get_release_asset_redirect( 'https://api.github.com/repos/owner/repo/releases/assets/1' );
+
+		$this->assertSame( 'https://objects.githubusercontent.com/download.zip', $result );
+	}
+
+	/**
+	 * When no cached redirect exists, no override is set, and no update is
+	 * available (exit_no_update returns true), the method returns false.
+	 */
+	public function test_get_release_asset_redirect_returns_false_when_no_update(): void {
+		// Ensure no cache entry for release_asset_redirect.
+		$cache_key = $this->api->get_cache_key( 'test-plugin' );
+		delete_site_option( $cache_key );
+
+		$result = $this->api->get_release_asset_redirect( 'https://api.github.com/repos/owner/repo/releases/assets/1' );
+
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * When no cached redirect exists and gu_always_fetch_update is true
+	 * (making exit_no_update return false), the method follows the redirect,
+	 * caches the resulting URL, and returns it.
+	 */
+	public function test_get_release_asset_redirect_follows_redirect_and_caches_url(): void {
+		$redirect_url = 'https://objects.githubusercontent.com/download-v2.zip';
+		$asset_url    = 'https://api.github.com/repos/owner/repo/releases/assets/42';
+
+		// Bypass exit_no_update so the redirect block is entered.
+		add_filter( 'gu_always_fetch_update', '__return_true' );
+
+		// Set a token so add_auth_header returns non-empty headers.
+		update_site_option( 'git_updater', [ 'github_access_token' => 'test-token' ] );
+
+		// Ensure no cached redirect.
+		$cache_key = $this->api->get_cache_key( 'test-plugin' );
+		delete_site_option( $cache_key );
+
+		$http_called = false;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( $redirect_url, &$http_called ) {
+				$http_called = true;
+
+				// Fire the redirect hook to simulate GitHub's 302 flow.
+				do_action( 'requests-requests.before_redirect', $redirect_url );
+
+				return [
+					'response' => [ 'code' => 302, 'message' => 'Found' ],
+					'headers'  => [ 'location' => $redirect_url ],
+					'body'     => '',
+				];
+			},
+			10,
+			3
+		);
+
+		$result = $this->api->get_release_asset_redirect( $asset_url, false, true );
+
+		$this->assertTrue( $http_called, 'HTTP request should have been made.' );
+		$this->assertSame( $redirect_url, $result );
+
+		// Verify the redirect URL was cached.
+		$cache = get_site_option( $cache_key, [] );
+		$this->assertSame( $redirect_url, $cache['release_asset_redirect'] );
+	}
+
+	/**
+	 * When $aws is true and the cache timeout is more than 5 minutes old,
+	 * the cached release_asset and release_asset_redirect entries are
+	 * cleared, so the redirect is fetched anew even with a cached value.
+	 */
+	public function test_get_release_asset_redirect_aws_expiration_clears_old_cache(): void {
+		$redirect_url = 'https://aws-cdn.example.com/download.zip';
+		$asset_url    = 'https://api.github.com/repos/owner/repo/releases/assets/99';
+
+		// Bypass exit_no_update.
+		add_filter( 'gu_always_fetch_update', '__return_true' );
+
+		// Auth header token.
+		update_site_option( 'git_updater', [ 'github_access_token' => 'test-token' ] );
+
+		// Seed cache with a release_asset_redirect and a timeout well in the past
+		// (older than 5 minutes relative to -12 hours) so the AWS branch fires.
+		$cache_key = $this->api->get_cache_key( 'test-plugin' );
+		update_site_option(
+			$cache_key,
+			[
+				'release_asset'          => 'https://api.github.com/repos/owner/repo/releases/assets/99',
+				'release_asset_redirect' => 'https://stale-cached-url.example.com/old.zip',
+				'timeout'                => time() - 3600, // 1 hour ago
+			]
+		);
+
+		$http_called = false;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( $redirect_url, &$http_called ) {
+				$http_called = true;
+				do_action( 'requests-requests.before_redirect', $redirect_url );
+				return [
+					'response' => [ 'code' => 302, 'message' => 'Found' ],
+					'headers'  => [ 'location' => $redirect_url ],
+					'body'     => '',
+				];
+			},
+			10,
+			3
+		);
+
+		// With $aws=true the old cached redirect should be cleared and the
+		// redirect followed. Without $aws the cached value would be returned.
+		$result = $this->api->get_release_asset_redirect( $asset_url, true );
+
+		$this->assertTrue( $http_called, 'HTTP request should have been made after AWS expiration cleared cache.' );
+		$this->assertSame( $redirect_url, $result );
+	}
+
+	/**
+	 * When $_REQUEST['key'] is set and $_REQUEST['plugin'] matches the
+	 * cache's 'repo' slug, the $rest flag prevents exit_no_update from
+	 * short-circuiting, even without gu_always_fetch_update.
+	 */
+	public function test_get_release_asset_redirect_rest_key_bypasses_exit_no_update(): void {
+		$redirect_url = 'https://objects.githubusercontent.com/rest-download.zip';
+		$asset_url    = 'https://api.github.com/repos/owner/repo/releases/assets/7';
+
+		// Auth header token.
+		update_site_option( 'git_updater', [ 'github_access_token' => 'test-token' ] );
+
+		// Seed cache with a matching 'repo' slug.
+		$cache_key = $this->api->get_cache_key( 'test-plugin' );
+		update_site_option(
+			$cache_key,
+			[
+				'repo'                    => 'test-plugin',
+				'release_asset_redirect'  => false,
+			]
+		);
+
+		// Simulate a REST request by setting $_REQUEST.
+		$_REQUEST['key']    = 'some-api-key';
+		$_REQUEST['plugin'] = 'test-plugin';
+
+		$http_called = false;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( $redirect_url, &$http_called ) {
+				$http_called = true;
+				do_action( 'requests-requests.before_redirect', $redirect_url );
+				return [
+					'response' => [ 'code' => 302, 'message' => 'Found' ],
+					'headers'  => [ 'location' => $redirect_url ],
+					'body'     => '',
+				];
+			},
+			10,
+			3
+		);
+
+		// Without gu_always_fetch_update, exit_no_update would return true.
+		// But $rest=true should bypass that guard and enter the redirect block.
+		$result = $this->api->get_release_asset_redirect( $asset_url );
+
+		$this->assertTrue( $http_called, 'HTTP request should have been made when $rest bypasses exit_no_update.' );
+		$this->assertSame( $redirect_url, $result );
+
+		// Clean up superglobals.
+		unset( $_REQUEST['key'], $_REQUEST['plugin'] );
+	}
+}
+
+class Test_API_Debug_Filters extends WP_UnitTestCase {
+
+	/**
+	 * @var GitHub_API
+	 */
+	private GitHub_API $api;
+
+	/**
+	 * @var stdClass
+	 */
+	private stdClass $type;
+
+	/**
+	 * Endpoint passed to api().
+	 *
+	 * @var string
+	 */
+	private string $endpoint = '/repos/:owner/:repo';
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->type = api_make_type();
+		$this->api  = new GitHub_API( $this->type );
+	}
+
+	public function tear_down(): void {
+		remove_all_filters( 'gu_debug_api_requests' );
+		remove_all_filters( 'pre_http_request' );
+		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
+		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
+		parent::tear_down();
+	}
+
+	/**
+	 * Redirect error_log to a temp file, run a callback, return captured output.
+	 *
+	 * @param callable $callback Code to execute while capturing error_log.
+	 * @return string Captured error_log output.
+	 */
+	private function with_error_log_capture( callable $callback ): string {
+		$tmp_file = tempnam( sys_get_temp_dir(), 'gu_err_' );
+		$original = ini_get( 'error_log' );
+		ini_set( 'error_log', $tmp_file );
+
+		try {
+			$callback();
+		} finally {
+			ini_set( 'error_log', $original );
+			$contents = file_get_contents( $tmp_file );
+			unlink( $tmp_file );
+		}
+
+		return $contents ?: '';
+	}
+
+	public function test_gu_debug_api_requests_filter_is_applied(): void {
+		$filter_applied = false;
+		add_filter(
+			'gu_debug_api_requests',
+			function () use ( &$filter_applied ) {
+				$filter_applied = true;
+				return false;
+			}
+		);
+
+		add_filter(
+			'pre_http_request',
+			fn() => [
+				'response' => [ 'code' => 200, 'message' => 'OK' ],
+				'body'     => wp_json_encode( [ 'name' => 'test-plugin' ] ),
+				'headers'  => [],
+			],
+			10,
+			3
+		);
+
+		$this->api->api( $this->endpoint );
+
+		$this->assertTrue( $filter_applied, 'gu_debug_api_requests filter callback should be invoked.' );
+	}
+
+	public function test_gu_debug_api_requests_no_log_when_filter_false(): void {
+		add_filter( 'gu_debug_api_requests', '__return_false' );
+
+		add_filter(
+			'pre_http_request',
+			fn() => [
+				'response' => [ 'code' => 200, 'message' => 'OK' ],
+				'body'     => wp_json_encode( [ 'name' => 'test-plugin' ] ),
+				'headers'  => [],
+			],
+			10,
+			3
+		);
+
+		$log = $this->with_error_log_capture( fn() => $this->api->api( $this->endpoint ) );
+
+		$this->assertStringNotContainsString( 'Git Updater: API request to', $log );
+	}
+
+	public function test_gu_debug_api_requests_logs_url_when_filter_true(): void {
+		add_filter( 'gu_debug_api_requests', '__return_true' );
+
+		add_filter(
+			'pre_http_request',
+			fn() => [
+				'response' => [ 'code' => 200, 'message' => 'OK' ],
+				'body'     => wp_json_encode( [ 'name' => 'test-plugin' ] ),
+				'headers'  => [],
+			],
+			10,
+			3
+		);
+
+		$log = $this->with_error_log_capture( fn() => $this->api->api( $this->endpoint ) );
+
+		$this->assertStringContainsString( 'Git Updater: API request to', $log );
+		$this->assertStringContainsString( 'api.github.com', $log );
+	}
+}

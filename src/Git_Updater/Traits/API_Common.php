@@ -56,15 +56,13 @@ trait API_Common {
 	 * @return array<string, mixed>|string|\WP_Error|stdClass $response Release asset download link.
 	 */
 	private function parse_release_asset( $git, $request, $response ) {
-		if ( is_wp_error( $response ) ) {
+		if ( is_wp_error( $response ) || ! ( is_array( $response ) || is_object( $response ) ) ) {
 			return '';
 		}
 		if ( in_array( $git, [ 'github', 'gitea' ], true ) ) {
 			if ( str_contains( $request, 'latest' ) ) {
 				// Convert single $response to array of releases.
-				$release    = $response;
-				$response   = [];
-				$response[] = $release ?? [];
+				$response = [ $response ];
 			}
 			$release_assets     = [];
 			$created_at         = [];
@@ -368,9 +366,12 @@ trait API_Common {
 
 		$response = $this->parse_asset_dir_response( $response );
 		$this->set_repo_cache( 'assets', $response );
+		if ( isset( $response->message ) && 'No assets found' === $response->message ) {
+			return null;
+		}
 
 		if ( $this->validate_response( $response ) ) {
-			return false;
+			return false; // @codeCoverageIgnore
 		}
 
 		return true;

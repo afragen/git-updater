@@ -3946,7 +3946,7 @@
 
             $this->_storage->connectivity_test = array(
                 'is_connected' => $is_connected,
-                'host'         => $_SERVER['HTTP_HOST'],
+                'host'         => isset( $_SERVER['HTTP_HOST'] ) ? $_SERVER['HTTP_HOST'] : '',
                 'server_ip'    => WP_FS__REMOTE_ADDR,
                 'is_active'    => $is_active,
                 'timestamp'    => WP_FS__SCRIPT_START_TIME,
@@ -17653,6 +17653,31 @@
         /**
          * Install plugin with new user.
          *
+         * You can use this method to sync activation with the Freemius WP SDK where the activation happened outside of the regular opt-in flow, for example if you're using an external licensing server with our api:
+         *
+         * https://docs.freemius.com/api/licenses/activate
+         *
+         * In that case you can call this method like following:
+         *
+         * ```
+         *
+         * my_fs()->install_with_new_user(
+         *     $result['user_id'],
+         *     $result['user_public_key'],
+         *     $result['user_secret_key'],
+         *     $result['is_marketing_allowed'],
+         *     null,
+         *     true,
+         *     $result['install_id'],
+         *     $result['install_public_key'],
+         *     $result['install_secret_key'],
+         *     false
+         * );
+         *
+         * ```
+         *
+         * Here `$result` represents the object returned by the API endpoint.
+         *
          * @author Vova Feldman (@svovaf)
          * @since  1.1.7.4
          *
@@ -17670,7 +17695,7 @@
          *
          * @return string If redirect is `false`, returns the next page the user should be redirected to.
          */
-        private function install_with_new_user(
+        public function install_with_new_user(
             $user_id,
             $user_public_key,
             $user_secret_key,

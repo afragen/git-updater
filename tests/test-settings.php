@@ -247,6 +247,7 @@ class Test_Settings_Load_Hooks extends GU_Test_Case {
 		set_current_screen( is_multisite() ? 'settings-network' : 'options-general' );
 		do_action( 'admin_enqueue_scripts' );
 		$this->assertTrue( wp_style_is( 'git-updater-settings', 'enqueued' ) );
+		$this->assertTrue( wp_script_is( 'git-updater-settings', 'enqueued' ) );
 		$pagenow = '';
 	}
 
@@ -492,6 +493,70 @@ class Test_Settings_Admin_Page_Notices_Multisite extends GU_Test_Case {
 		$this->settings->create_admin_page();
 		$output = ob_get_clean();
 		$this->assertStringContainsString( 'Settings saved.', $output );
+	}
+
+	/**
+	 * Test OAuth connected notice is displayed.
+	 */
+	public function test_admin_page_notices_shows_oauth_connected(): void {
+		$_GET['_wpnonce']     = wp_create_nonce( 'gu_settings' );
+		$_GET['tab']          = 'git_updater_settings';
+		$_GET['subtab']       = 'git_updater';
+		$_GET['oauth_connected'] = '1';
+		add_filter( 'gu_config_pre_process', '__return_empty_array' );
+		ob_start();
+		$this->settings->create_admin_page();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( 'Connected successfully.', $output );
+		$this->assertStringContainsString( 'updated', $output );
+	}
+
+	/**
+	 * Test OAuth disconnected notice is displayed.
+	 */
+	public function test_admin_page_notices_shows_oauth_disconnected(): void {
+		$_GET['_wpnonce']     = wp_create_nonce( 'gu_settings' );
+		$_GET['tab']          = 'git_updater_settings';
+		$_GET['subtab']       = 'git_updater';
+		$_GET['oauth_disconnected'] = '1';
+		add_filter( 'gu_config_pre_process', '__return_empty_array' );
+		ob_start();
+		$this->settings->create_admin_page();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( 'Disconnected.', $output );
+		$this->assertStringContainsString( 'updated', $output );
+	}
+
+	/**
+	 * Test OAuth error notice is displayed.
+	 */
+	public function test_admin_page_notices_shows_oauth_error(): void {
+		$_GET['_wpnonce']     = wp_create_nonce( 'gu_settings' );
+		$_GET['tab']          = 'git_updater_settings';
+		$_GET['subtab']       = 'git_updater';
+		$_GET['oauth_error']  = '1';
+		add_filter( 'gu_config_pre_process', '__return_empty_array' );
+		ob_start();
+		$this->settings->create_admin_page();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( 'OAuth connection failed. Please try again.', $output );
+		$this->assertStringContainsString( 'error', $output );
+	}
+
+	/**
+	 * Test token removed notice is displayed.
+	 */
+	public function test_admin_page_notices_shows_token_removed(): void {
+		$_GET['_wpnonce']     = wp_create_nonce( 'gu_settings' );
+		$_GET['tab']          = 'git_updater_settings';
+		$_GET['subtab']       = 'git_updater';
+		$_GET['token_removed']  = '1';
+		add_filter( 'gu_config_pre_process', '__return_empty_array' );
+		ob_start();
+		$this->settings->create_admin_page();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( 'Token removed.', $output );
+		$this->assertStringContainsString( 'updated', $output );
 	}
 }
 
@@ -755,6 +820,28 @@ class Test_Settings_Unset_Stale_Options extends GU_Test_Case {
 		remove_all_filters( 'gu_running_git_servers' );
 	}
 
+	public function test_unset_stale_options_preserves_oauth_metadata_keys(): void {
+		add_filter( 'gu_running_git_servers', fn( $gits ) => array_merge( $gits, [ 'github' ] ) );
+		Base::$options = [
+			'github_access_token'      => 'tok',
+			'github_refresh_token'     => 'ref',
+			'github_token_expires_in'  => 7200,
+			'github_token_acquired_at' => time(),
+			'github_is_oauth_token'    => 'oauth',
+			'stale'                    => 'val',
+		];
+		update_site_option( 'git_updater', Base::$options );
+		$this->settings->unset_stale_options( [], [] );
+		$saved = get_site_option( 'git_updater', [] );
+		$this->assertArrayHasKey( 'github_access_token', $saved );
+		$this->assertArrayHasKey( 'github_refresh_token', $saved );
+		$this->assertArrayHasKey( 'github_token_expires_in', $saved );
+		$this->assertArrayHasKey( 'github_token_acquired_at', $saved );
+		$this->assertSame( 'oauth', $saved['github_is_oauth_token'] );
+		$this->assertArrayNotHasKey( 'stale', $saved );
+		remove_all_filters( 'gu_running_git_servers' );
+	}
+
 	public function test_unset_stale_options_preserves_current_branch_for_existing_repo(): void {
 		$slug   = 'my-plugin';
 		$plugin = $this->make_plugin_obj( [ 'slug' => $slug ] );
@@ -897,7 +984,7 @@ class Test_Settings_Token_Callbacks extends GU_Test_Case {
 
 	public function test_token_callback_text_outputs_placeholder_when_set(): void {
 		ob_start();
-		$this->settings->token_callback_text( [ 'id' => 'some_field', 'placeholder' => true ] );
+		$this->settings->token_callback_text( [ 'id' => 'some_field', 'placeholder' => 'username:password' ] );
 		$output = ob_get_clean();
 		$this->assertStringContainsString( 'username:password', $output );
 	}
@@ -1340,6 +1427,25 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		$this->call_private( 'display_gu_repos', [ 'github' ] );
 		ob_get_clean();
 		$this->assertTrue( $filtered );
+	}
+
+	public function test_display_gu_repos_renders_flush_button_with_rest_url(): void {
+		$plugin = $this->make_plugin_obj();
+		update_site_option( 'git_updater_api_key', 'test-api-key' );
+		$this->inject_plugin_config( [ 'test-plugin' => $plugin ] );
+		$this->inject_theme_config( [] );
+		ob_start();
+		$this->call_private( 'display_gu_repos', [ 'github' ] );
+		$output = ob_get_clean();
+		$this->assertStringContainsString( '<button type="button"', $output );
+		$this->assertStringContainsString( 'gu-flush-repo', $output );
+		$this->assertStringContainsString( 'data-flush-url="', $output );
+		$this->assertStringContainsString( 'flush-repo-cache', $output );
+		$this->assertStringContainsString( 'slug=test-plugin', $output );
+		$this->assertStringContainsString( 'key=test-api-key', $output );
+		// Broken indicator is rendered (hidden) so JS can reveal it after a flush.
+		$this->assertStringContainsString( 'gu-repo-broken', $output );
+		$this->assertStringContainsString( 'display:none', $output );
 	}
 }
 

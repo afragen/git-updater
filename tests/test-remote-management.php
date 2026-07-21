@@ -76,7 +76,9 @@ class Test_Remote_Management extends GU_Test_Case {
 		$result = $rm->reset_api_key();
 
 		$this->assertTrue( $result );
-		$this->assertFalse( get_site_option( 'git_updater_api_key', false ) );
+		$new_key = get_site_option( 'git_updater_api_key', false );
+		$this->assertIsString( $new_key );
+		$this->assertSame( 64, strlen( $new_key ) );
 	}
 
 	public function test_add_settings_tabs_registers_remote_management_tab(): void {

@@ -10,7 +10,6 @@
  *          Copyright 2015, GPL2
  *
  * @phpcs:disable Squiz.Commenting.InlineComment.InvalidEndChar
- * @phpcs:disable WordPress.Security.ValidatedSanitizedInput
  */
 
 namespace Fragen\Git_Updater\Additions;
@@ -118,16 +117,16 @@ class Repo_List_Table extends WP_List_Table {
 	 **************************************************************************/
 	public function column_default( $item, $column_name ) {
 		switch ( $column_name ) {
+			case 'release_asset':
+			case 'private_package':
+				return wp_kses_post( $item[ $column_name ] );
 			case 'uri':
 			case 'slug':
 			case 'primary_branch':
-			case 'release_asset':
 			case 'type':
-			case 'private_package':
-				return $item[ $column_name ];
+				return esc_html( $item[ $column_name ] );
 			default:
-				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
-				return print_r( $item, true ); // Show the whole array for troubleshooting purposes.
+				return esc_html( (string) wp_json_encode( $item ) );
 		}
 	}
 
@@ -147,8 +146,10 @@ class Repo_List_Table extends WP_List_Table {
 	 * @return string Text to be placed inside the column <td> (site title only)
 	 **************************************************************************/
 	public function column_slug( $item ) {
-		$page     = isset( $_REQUEST['page'] ) ? sanitize_title_with_dashes( wp_slash( $_REQUEST['page'] ) ) : null;
-		$tab      = isset( $_REQUEST['tab'] ) ? sanitize_title_with_dashes( wp_slash( $_REQUEST['tab'] ) ) : null;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$page = isset( $_REQUEST['page'] ) ? sanitize_title_with_dashes( wp_unslash( $_REQUEST['page'] ) ) : null;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$tab      = isset( $_REQUEST['tab'] ) ? sanitize_title_with_dashes( wp_unslash( $_REQUEST['tab'] ) ) : null;
 		$location = add_query_arg(
 			[
 				'page' => $page,
@@ -168,9 +169,9 @@ class Repo_List_Table extends WP_List_Table {
 			/* translators: 1: title, 2: ID, 3: row actions */
 			'%1$s <span style="color:silver">(id:%2$s)</span>%3$s',
 			/*$1%s*/
-			$item['slug'],
+			esc_html( (string) $item['slug'] ),
 			/*$2%s*/
-			$item['ID'],
+			esc_html( (string) $item['ID'] ),
 			/*$3%s*/
 			$this->row_actions( $actions )
 		);
@@ -278,14 +279,27 @@ class Repo_List_Table extends WP_List_Table {
 	 * @return void
 	 **************************************************************************/
 	public function process_bulk_action() {
-		// Detect when a bulk action is being triggered...
-		if ( ! isset( $_REQUEST['_wpnonce_row_action_delete'] )
-				|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['_wpnonce_row_action_delete'] ) ), 'delete_row_item' )
-			) {
+		// Only enforce capability/nonce when a delete action is actually requested.
+		if ( ! isset( $_REQUEST['_wpnonce_row_action_delete'] ) ) {
 			return;
 		}
-		$slugs = isset( $_REQUEST['slug'] ) ? sanitize_key( wp_unslash( $_REQUEST['slug'] ) ) : null;
-		$slugs = (array) $slugs;
+
+		// Capability check (matches menu registration in Settings.php).
+		if ( ! current_user_can( is_multisite() ? 'manage_network_options' : 'manage_options' ) ) {
+			wp_die( esc_html__( 'Forbidden', 'git-updater' ) );
+		}
+
+		if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['_wpnonce_row_action_delete'] ) ), 'delete_row_item' ) ) {
+			return;
+		}
+
+		$slugs = [];
+		if ( isset( $_REQUEST['slug'] ) ) {
+			$raw = wp_unslash( $_REQUEST['slug'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			// Bulk checkboxes arrive as an array; a row action arrives as a string.
+			$raw   = is_array( $raw ) ? $raw : [ $raw ];
+			$slugs = array_map( 'sanitize_key', $raw );
+		}
 		foreach ( $slugs as $slug ) {
 			foreach ( self::$options as $key => $option ) {
 				if ( in_array( $slug, $option, true ) ) {
@@ -429,9 +443,11 @@ class Repo_List_Table extends WP_List_Table {
 	 * @return int Sort order, either 1 or -1.
 	 */
 	public function usort_reorder( $a, $b ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$orderby = ( ! empty( $_REQUEST['orderby'] ) ) ? sanitize_text_field( wp_unslash( $_REQUEST['orderby'] ) ) : 'slug'; // If no sort, default to site.
-		$order   = ( ! empty( $_REQUEST['order'] ) ) ? sanitize_text_field( wp_unslash( $_REQUEST['order'] ) ) : 'asc'; // If no order, default to asc.
-		$result  = strcmp( $a[ $orderby ], $b[ $orderby ] ); // Determine sort order.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$order  = ( ! empty( $_REQUEST['order'] ) ) ? sanitize_text_field( wp_unslash( $_REQUEST['order'] ) ) : 'asc'; // If no order, default to asc.
+		$result = strcmp( $a[ $orderby ], $b[ $orderby ] ); // Determine sort order.
 
 		return ( 'asc' === $order ) ? $result : -$result; // Send final sort direction to usort.
 	}
@@ -451,9 +467,9 @@ class Repo_List_Table extends WP_List_Table {
 
 		// Forms are NOT created automatically, so you need to wrap the table in one to use features like bulk actions.
 		echo '<form id="sites-list" method="get">';
-		wp_nonce_field( 'process-items', '_wpnonce_list' );
 
 		// For plugins, we also need to ensure that the form posts back to our current page.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$current_page = isset( $_REQUEST['page'] ) ? sanitize_title_with_dashes( wp_unslash( $_REQUEST['page'] ) ) : null;
 		echo '<input type="hidden" name="page" value="' . esc_attr( $current_page ) . '" />';
 

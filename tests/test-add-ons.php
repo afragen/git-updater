@@ -164,7 +164,12 @@ class Test_Add_Ons_Api_Results extends WP_UnitTestCase {
 	}
 
 	public function test_get_addon_api_results_returns_cached_data_without_http(): void {
-		$data = [ 'git-updater-gist' => [ 'name' => 'Git Updater Gist' ] ];
+		$data = [
+			'git-updater-gist'      => [ 'name' => 'Git Updater Gist' ],
+			'git-updater-bitbucket' => [ 'name' => 'Git Updater Bitbucket' ],
+			'git-updater-gitlab'    => [ 'name' => 'Git Updater GitLab' ],
+			'git-updater-gitea'     => [ 'name' => 'Git Updater Gitea' ],
+		];
 		update_site_option(
 			$this->cache_key,
 			[ 'gu_addon_api_results' => $data, 'timeout' => strtotime( '+7 days' ) ]
@@ -233,7 +238,7 @@ class Test_Add_Ons_Api_Results extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'gu_addon_api_results', $cache );
 	}
 
-	public function test_get_addon_api_results_does_not_write_cache_for_partial_results(): void {
+	public function test_get_addon_api_results_caches_partial_results_on_failure(): void {
 		$n = 0;
 		add_filter(
 			'pre_http_request',
@@ -251,7 +256,9 @@ class Test_Add_Ons_Api_Results extends WP_UnitTestCase {
 
 		$this->addons->get_addon_api_results();
 
-		$this->assertFalse( get_site_option( $this->cache_key, false ) );
+		$cache = get_site_option( $this->cache_key );
+		$this->assertIsArray( $cache );
+		$this->assertArrayHasKey( 'gu_addon_api_results', $cache );
 	}
 
 	public function test_plugins_api_returns_original_result_for_addon_slug_with_no_cached_data(): void {

@@ -127,6 +127,13 @@ class Settings {
 				function () {
 					wp_register_style( 'git-updater-settings', plugins_url( basename( dirname( __DIR__, 2 ) ) ) . '/css/git-updater-settings.css', [], $this->get_plugin_version() );
 					wp_enqueue_style( 'git-updater-settings' );
+					wp_enqueue_script(
+						'git-updater-settings',
+						plugins_url( basename( dirname( __DIR__, 2 ) ) ) . '/js/gu-settings.js',
+						[],
+						$this->get_plugin_version(),
+						true
+					);
 				}
 			);
 		}
@@ -297,7 +304,7 @@ class Settings {
 		?>
 		<div class="wrap git-updater-settings">
 			<h1>
-				<a href="https://github.com/afragen/git-updater" target="_blank"><img src="<?php echo esc_attr( $logo ); ?>" alt="Git Updater logo" /></a><br>
+				<a href="https://github.com/afragen/git-updater" target="_blank"><img src="<?php echo esc_url( $logo ); ?>" alt="Git Updater logo" /></a><br>
 				<?php esc_html_e( 'Git Updater', 'git-updater' ); ?>
 				<span class="description"><?php echo esc_html( ' v' . $this->get_plugin_version() ); ?></span>
 			</h1>
@@ -352,15 +359,28 @@ class Settings {
 			return;
 		}
 		$display = ( isset( $_GET['updated'] ) && is_multisite() )
-			|| isset( $_GET['refresh_transients'] );
+			|| isset( $_GET['refresh_transients'] )
+			|| isset( $_GET['oauth_connected'] )
+			|| isset( $_GET['oauth_disconnected'] )
+			|| isset( $_GET['oauth_error'] )
+			|| isset( $_GET['token_removed'] );
 
+		$class = isset( $_GET['oauth_error'] ) && '1' === $_GET['oauth_error'] ? 'error' : 'updated';
 		if ( $display ) {
-			echo '<div class="updated"><p>';
+			echo '<div class="' . esc_attr( $class ) . '"><p>';
 		}
 		if ( ( isset( $_GET['updated'] ) && '1' === $_GET['updated'] ) && is_multisite() ) {
 			esc_html_e( 'Settings saved.', 'git-updater' ); // @codeCoverageIgnore
 		} elseif ( isset( $_GET['refresh_transients'] ) && '1' === $_GET['refresh_transients'] ) {
 			esc_html_e( 'Cache refreshed.', 'git-updater' );
+		} elseif ( isset( $_GET['oauth_connected'] ) && '1' === $_GET['oauth_connected'] ) {
+			esc_html_e( 'Connected successfully.', 'git-updater' );
+		} elseif ( isset( $_GET['oauth_disconnected'] ) && '1' === $_GET['oauth_disconnected'] ) {
+			esc_html_e( 'Disconnected.', 'git-updater' );
+		} elseif ( isset( $_GET['oauth_error'] ) && '1' === $_GET['oauth_error'] ) {
+			esc_html_e( 'OAuth connection failed. Please try again.', 'git-updater' );
+		} elseif ( isset( $_GET['token_removed'] ) && '1' === $_GET['token_removed'] ) {
+			esc_html_e( 'Token removed.', 'git-updater' );
 		}
 		if ( $display ) {
 			echo '</p></div>';
@@ -492,7 +512,7 @@ class Settings {
 					'id'          => $setting_field['callback'],
 					'token'       => true,
 					'title'       => $setting_field['title'],
-					'placeholder' => isset( $setting_field['placeholder'] ) ? true : null,
+					'placeholder' => $setting_field['placeholder'] ?? null,
 				]
 			);
 		}
@@ -523,7 +543,18 @@ class Settings {
 		];
 
 		foreach ( $running_servers as $server ) {
-			$always_unset = array_merge( $always_unset, [ "{$server}_access_token" ] );
+			$always_unset = array_merge(
+				$always_unset,
+				[
+					"{$server}_access_token",
+					"{$server}_server",
+					"{$server}_client_id",
+					"{$server}_refresh_token",
+					"{$server}_token_expires_in",
+					"{$server}_token_acquired_at",
+					"{$server}_is_oauth_token",
+				]
+			);
 			$always_unset = array_unique( $always_unset );
 		}
 
@@ -625,10 +656,10 @@ class Settings {
 		$options     = $this->get_class_vars( 'Base', 'options' );
 		$name        = isset( $options[ $args['id'] ] ) ? esc_attr( $options[ $args['id'] ] ) : '';
 		$type        = isset( $args['token'] ) ? 'password' : 'text';
-		$placeholder = isset( $args['placeholder'] ) ? 'username:password' : null;
+		$placeholder = $args['placeholder'] ?? null;
 		?>
-		<label for="<?php esc_attr( $args['id'] ); ?>">
-			<input class="gu-callback-text" type="<?php echo esc_attr( $type ); ?>" id="<?php esc_attr( $args['id'] ); ?>" name="git_updater[<?php echo esc_attr( $args['id'] ); ?>]" value="<?php echo esc_attr( $name ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>">
+		<label for="<?php echo esc_attr( $args['id'] ); ?>">
+			<input class="gu-callback-text" type="<?php echo esc_attr( $type ); ?>" id="<?php echo esc_attr( $args['id'] ); ?>" name="git_updater[<?php echo esc_attr( $args['id'] ); ?>]" value="<?php echo esc_attr( $name ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>">
 		</label>
 		<?php
 	}
@@ -824,6 +855,7 @@ class Settings {
 		$broken_title  = esc_html__( 'This repository has not connected to the API or was unable to connect.', 'git-updater' );
 		$dot_org_title = esc_html__( 'This repository is hosted on WordPress.org.', 'git-updater' );
 		$dismiss_title = esc_html__( 'This repository has been ignored and does not connect to the API.', 'git-updater' );
+		$api_key       = get_site_option( 'git_updater_api_key', '' );
 
 		$plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
 		$themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
@@ -864,20 +896,31 @@ class Settings {
 		);
 
 		$lock    = '&nbsp;<span title="' . $lock_title . '" class="dashicons dashicons-lock"></span>';
-		$broken  = '&nbsp;<span title="' . $broken_title . '" style="color:#f00;" class="dashicons dashicons-warning"></span>';
 		$dot_org = '&nbsp;<span title="' . $dot_org_title . '" class="dashicons dashicons-wordpress"></span></span>';
 		$dismiss = '&nbsp;<span title="' . $dismiss_title . '" class="dashicons dashicons-dismiss"></span></span>';
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'git-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
-			$dashicon     = str_contains( $data['type'], 'theme' )
-			? '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;'
-			: '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
-			$is_private   = $data['private'] ? $lock : null;
-			$is_broken    = $data['broken'] ? $broken : null;
-			$override     = $this->override_dot_org( $data['type'], $data );
-			$is_dot_org   = $data['dot_org'] && ! $override ? $dot_org : null;
-			$is_dismissed = $data['dismiss'] ? $dismiss : null;
-			printf( '<p>' . wp_kses_post( $dashicon . $data['name'] . $is_private . $is_dot_org . $is_broken . $is_dismissed ) . '</p>' );
+			$dashicon      = str_contains( $data['type'], 'theme' )
+			? '<span class="dashicons dashicons-admin-appearance dashicons-no-decoration"></span>&nbsp;&nbsp;'
+			: '<span class="dashicons dashicons-admin-plugins dashicons-no-decoration"></span>&nbsp;&nbsp;';
+			$is_private    = $data['private'] ? $lock : null;
+			$broken_hidden = $data['broken'] ? '' : 'display:none;';
+			$is_broken     = '&nbsp;<span title="' . $broken_title . '" class="dashicons dashicons-warning gu-repo-broken" style="color:#f00;' . $broken_hidden . '"></span>';
+			$override      = $this->override_dot_org( $data['type'], $data );
+			$is_dot_org    = $data['dot_org'] && ! $override ? $dot_org : null;
+			$is_dismissed  = $data['dismiss'] ? $dismiss : null;
+
+			$flush_endpoint = add_query_arg(
+				[
+					'key'  => $api_key,
+					'slug' => $data['slug'],
+				],
+				home_url( 'wp-json/' . $this->get_class_vars( 'REST\REST_API', 'namespace' ) . '/flush-repo-cache/' )
+			);
+			/* translators: %s is the name of the plugin or theme. */
+			$tooltip        = __( sprintf( 'Flush %s cache', $data['name'] ), 'git-updater' );
+			$dashicon_flush = '<button type="button" class="button-link gu-flush-repo dashicons-no-decoration" data-flush-url="' . esc_url( $flush_endpoint ) . '" title="' . esc_attr__( $tooltip ) . '">' . $dashicon . '</button>';
+			printf( '<p>' . wp_kses_post( $dashicon_flush . $data['name'] . $is_private . $is_dot_org . $is_broken . $is_dismissed ) . '</p>' );
 		}
 	}
 }

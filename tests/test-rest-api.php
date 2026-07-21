@@ -921,9 +921,15 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 
 		$cache_key = 'ghu-' . md5( self::SLUG );
 		$existing  = get_site_option( $cache_key, [] );
-		// Seed release_asset_download but NOT release_asset_redirect.
-		$existing['release_asset_download'] = 'https://example.com/stable-download.zip';
-		unset( $existing['release_asset_redirect'] );
+
+		// Seed release_assets with a valid structure so construct_download_link()
+		// finds release assets in cache (no HTTP request needed) and writes
+		// the asset URL into release_asset_download. Also seed a valid timeout
+		// so get_repo_cache($slug, true) returns the cached data.
+		$download_url = 'https://example.com/stable-download.zip';
+		$existing['timeout']            = time() + 86400;
+		$existing['release_assets']     = [ 'assets' => [ '1.0.0' => $download_url ], 'dev_assets' => [] ];
+		$existing['release_asset_download'] = $download_url;
 		update_site_option( $cache_key, $existing );
 
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
@@ -934,49 +940,23 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 		delete_site_option( $cache_key );
 
 		$this->assertArrayNotHasKey( 'error', $data );
-		$this->assertSame( 'https://example.com/stable-download.zip', $data['download_link'] );
+		$this->assertSame( $download_url, $data['download_link'] );
 	}
 
 	// -------------------------------------------------------------------------
-	// get_api_data() — release_asset redirect path (lines 566-569)
+	// get_api_data() — repo metadata gathers remaining properties
 	// -------------------------------------------------------------------------
 
-	public function test_get_api_data_covers_release_asset_redirect_path(): void {
+	public function test_get_api_data_completes_repo_metadata(): void {
 		$this->skip_if_fixture_absent();
 
 		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		// Seed all three keys:
-		// - release_asset_download: construct_download_link() sees it non-empty → returns early without
-		//   overwriting, so the key remains in cache after get_remote_repo_meta().
-		// - release_asset_redirect: makes the first if at line 559 false (condition requires
-		//   !isset(release_asset_redirect)), so the elseif at line 566 is reached.
-		// - release_asset: use a GitHub API URL so mock_http() intercepts the wp_remote_get()
-		//   call inside get_release_asset_redirect() without a real network round-trip.
-		$existing['release_asset']          = 'https://api.github.com/repos/afragen/test-gu-plugin/releases/assets/1234';
-		$existing['release_asset_download'] = 'https://example.com/release-asset-download.zip';
-		$existing['release_asset_redirect'] = 'https://example.com/release-asset-redirect';
-		update_site_option( $cache_key, $existing );
-
-		// get_release_asset_redirect() reads $this->type->slug on the API singleton.
-		// Set it to the fixture slug so get_repo_cache() looks up the correct site option
-		// (which has 'timeout' after get_remote_repo_meta() runs) instead of the wrong
-		// option key derived from slug=false.
-		$api_singleton  = Singleton::get_instance( 'Fragen\Git_Updater\API\API', new REST_API() );
-		$rp             = new ReflectionProperty( get_class( $api_singleton ), 'type' );
-		$rp->setAccessible( true );
-		$saved_type     = $rp->getValue( $api_singleton );
-		$type_obj       = new stdClass();
-		$type_obj->slug = self::SLUG;
-		$rp->setValue( $api_singleton, $type_obj );
+		delete_site_option( $cache_key );
 
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
 		$request->set_param( 'slug', self::SLUG );
 		$response = $this->server->dispatch( $request );
 		$data     = (array) $response->get_data();
-
-		$rp->setValue( $api_singleton, $saved_type );
-		delete_site_option( $cache_key );
 
 		$this->assertArrayNotHasKey( 'error', $data );
 	}

@@ -48,7 +48,14 @@ class REST_API {
 	public function load_hooks() {
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 
-		// Deprecated AJAX request.
+		/*
+		 * Deprecated AJAX request. The `nopriv` variant is intentional — external CI / webhook
+		 * callers POST here without a logged-in session. Authentication is the shared API key,
+		 * validated inside Rest_Update::process_request() with hash_equals(). The response must
+		 * not echo the inbound query string back to the caller (see the `webhook` field, which
+		 * is built from a curated allow-list, never $_GET). Do not weaken this without
+		 * revisiting the threat model.
+		 */
 		add_action( 'wp_ajax_git-updater-update', [ Singleton::get_instance( 'REST\Rest_Update', $this ), 'process_request' ] );
 		add_action( 'wp_ajax_nopriv_git-updater-update', [ Singleton::get_instance( 'REST\Rest_Update', $this ), 'process_request' ] );
 	}
@@ -374,7 +381,7 @@ class REST_API {
 	 */
 	public function get_remote_repo_data( WP_REST_Request $request ) {
 		// Test for API key and exit if incorrect.
-		if ( $this->get_class_vars( 'Remote_Management', 'api_key' ) !== $request->get_param( 'key' ) ) {
+		if ( ! hash_equals( (string) $this->get_class_vars( 'Remote_Management', 'api_key' ), (string) $request->get_param( 'key' ) ) ) {
 			return [ 'error' => 'Bad API key. No repo data for you.' ];
 		}
 		$slugs      = [];
@@ -382,11 +389,9 @@ class REST_API {
 		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
 		$gu_tokens  = array_merge( $gu_plugins, $gu_themes );
 
-		wp_update_plugins();
 		$current        = get_site_transient( 'update_plugins' );
 		$plugin_updates = $current->response ?? [];
 
-		wp_update_themes();
 		$current       = get_site_transient( 'update_themes' );
 		$theme_updates = $current->response ?? [];
 
@@ -439,7 +444,7 @@ class REST_API {
 		if ( ! $slug ) {
 			return [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
 		}
-		$channel    = null !== $request->get_param( 'channel' );
+
 		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
 		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
 		$gu_repos   = array_merge( $gu_plugins, $gu_themes );
@@ -462,6 +467,9 @@ class REST_API {
 
 		add_filter( 'gu_disable_wpcron', '__return_false' );
 		$repo_data = Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->get_remote_repo_meta( $gu_repos[ $slug ] );
+
+		$channel = null !== $request->get_param( 'channel' );
+		$channel = apply_filters( 'gu_dev_release_asset', false, $repo_data ) ?: $channel;
 
 		if ( ! is_object( $repo_data ) || '0.0.0' === $repo_data->remote_version ) {
 			$rate_limit = 'github' === $repo_data->git ? $this->get_github_rate_limit_headers() : [];
@@ -547,18 +555,14 @@ class REST_API {
 
 		$repo_cache = $this->get_repo_cache( $slug, false );
 
-		// Update release asset download link .
+		// Update release asset download link.
 		if ( $repo_data->release_asset ) {
-			if ( ( isset( $repo_cache['release_asset_download'] )
-				&& ! isset( $repo_cache['release_asset_redirect'] ) )
+			if ( isset( $repo_cache['release_asset_download'] )
 				&& 'bitbucket' !== $repo_api_data['git']
 			) {
 				$repo_api_data['download_link'] = $channel && $use_channel && ! empty( $versions )
 					? reset( $versions )
 					: $repo_cache['release_asset_download'];
-			} elseif ( isset( $repo_cache['release_asset'] ) && $repo_cache['release_asset'] ) {
-				$_REQUEST['override']           = true;
-				$repo_api_data['download_link'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->get_release_asset_redirect( $repo_cache['release_asset'], true );
 			}
 		}
 
@@ -623,7 +627,7 @@ class REST_API {
 	 */
 	public function flush_repo_cache( $request ) {
 		// Test for API key and exit if incorrect.
-		if ( $this->get_class_vars( 'Remote_Management', 'api_key' ) !== $request->get_param( 'key' ) ) {
+		if ( ! hash_equals( (string) $this->get_class_vars( 'Remote_Management', 'api_key' ), (string) $request->get_param( 'key' ) ) ) {
 			return (object) [ 'error' => 'Bad API key. No flush for you.' ];
 		}
 
@@ -657,10 +661,14 @@ class REST_API {
 	public function reset_branch( WP_REST_Request $request ) {
 		$rest_update = new Rest_Update();
 		$start       = microtime( true );
+		$echo_args   = [
+			'plugin' => $request->get_param( 'plugin' ),
+			'theme'  => $request->get_param( 'theme' ),
+		];
 
 		try {
 			// Test for API key and exit if incorrect.
-			if ( $this->get_class_vars( 'Remote_Management', 'api_key' ) !== $request->get_param( 'key' ) ) {
+			if ( ! hash_equals( (string) $this->get_class_vars( 'Remote_Management', 'api_key' ), (string) $request->get_param( 'key' ) ) ) {
 				throw new UnexpectedValueException( 'Bad API key. No branch reset for you.' );
 			}
 
@@ -680,7 +688,7 @@ class REST_API {
 			$response = [
 				'success'      => true,
 				'messages'     => 'Reset to primary branch complete.',
-				'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
+				'webhook'      => $echo_args,
 				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 			];
 			$rest_update->log_exit( $response, 200 );
@@ -689,7 +697,7 @@ class REST_API {
 			$response = [
 				'success'      => false,
 				'messages'     => $e->getMessage(),
-				'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
+				'webhook'      => $echo_args,
 				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 			];
 			$rest_update->log_exit( $response, 418 );

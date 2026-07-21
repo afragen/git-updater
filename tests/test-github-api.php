@@ -18,6 +18,7 @@
  * @package Git_Updater
  */
 
+use Fragen\Git_Updater\API\API;
 use Fragen\Git_Updater\API\GitHub_API;
 use Fragen\Git_Updater\Base;
 
@@ -762,18 +763,17 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 	}
 
 	/**
-	 * When the cache already has a release_asset_download URL,
-	 * construct_download_link() returns it immediately.
+	 * When release_assets has a single asset entry,
+	 * construct_download_link() returns its URL.
 	 */
-	public function test_construct_download_link_returns_cached_release_asset_download(): void {
+	public function test_construct_download_link_returns_release_asset_url(): void {
 		$cached_url = 'https://github.com/test-owner/test-plugin/releases/download/v1.0.0/plugin.zip';
 		$this->seed_cache(
 			[
-				'release_assets'         => [
+				'release_assets' => [
 					'assets'     => [ '1.0.0' => $cached_url ],
 					'dev_assets' => [],
 				],
-				'release_asset_download' => $cached_url,
 			]
 		);
 
@@ -784,8 +784,7 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 	/**
 	 * When release_assets is in cache but release_asset_download is not,
-	 * construct_download_link() falls through to get_release_asset_redirect().
-	 * With asset=false (empty assets array), get_release_asset_redirect returns false.
+	 * construct_download_link() returns false (no download URL available).
 	 */
 	public function test_construct_download_link_calls_redirect_when_no_cached_download(): void {
 		$this->seed_cache(
@@ -799,14 +798,13 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 		$result = $this->api->construct_download_link();
 
-		// get_release_asset_redirect(false, true) returns false when !$asset.
 		$this->assertFalse( $result );
 	}
 
 	/**
 	 * When gu_dev_release_asset filter returns true and the dev asset version is
 	 * newer than the stable asset version, the dev asset URL is selected (lines 171-174).
-	 * The call ultimately returns false because get_release_asset_redirect() exits
+	 * The call ultimately returns false because construct_download_link exits
 	 * via exit_no_update (no gu_always_fetch_update filter set).
 	 */
 	public function test_construct_download_link_uses_dev_asset_when_dev_release_asset_filter_true(): void {
@@ -826,8 +824,10 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 		$result = $this->api->construct_download_link();
 
-		// exit_no_update fires inside get_release_asset_redirect() → returns false.
-		$this->assertFalse( $result );
+		$this->assertSame(
+			'https://github.com/test-owner/test-plugin/releases/download/v2.0.0-beta1/plugin-beta.zip',
+			$result
+		);
 	}
 }
 
@@ -843,6 +843,8 @@ class Test_GitHub_API_Settings extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		Base::$options = [];
+		delete_site_option( 'git_updater' );
 		new Base();
 		$this->type = github_api_make_type();
 		$this->api  = new GitHub_API( $this->type );
@@ -853,6 +855,8 @@ class Test_GitHub_API_Settings extends WP_UnitTestCase {
 		remove_all_filters( 'gu_add_repo_setting_field' );
 		remove_all_actions( 'gu_add_settings' );
 		remove_all_actions( 'gu_add_install_settings_fields' );
+		Base::$options = [];
+		delete_site_option( 'git_updater' );
 		parent::tear_down();
 	}
 
@@ -887,6 +891,92 @@ class Test_GitHub_API_Settings extends WP_UnitTestCase {
 		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
 
 		$this->assertArrayNotHasKey( 'github_id', $wp_settings_sections['git_updater_github_install_settings'] ?? [] );
+	}
+
+	public function test_github_oauth_connect_field_visible_when_no_access_token(): void {
+		global $wp_settings_fields;
+
+		delete_site_option( 'git_updater' );
+		Base::$options = [];
+		API::$options  = [];
+
+		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$field = $wp_settings_fields['git_updater_github_install_settings']['github_access_token']['github_oauth_connect'] ?? null;
+		$this->assertNotNull( $field );
+		$class = $field['args']['class'] ?? '';
+		$this->assertStringNotContainsString( 'hidden', $class );
+	}
+
+	public function test_github_oauth_connect_field_hidden_when_pat_only(): void {
+		global $wp_settings_fields;
+
+		$options = [ 'github_access_token' => 'manual_pat' ];
+		update_site_option( 'git_updater', $options );
+		Base::$options = $options;
+		API::$options  = $options;
+
+		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$field = $wp_settings_fields['git_updater_github_install_settings']['github_access_token']['github_oauth_connect'] ?? null;
+		$this->assertNotNull( $field );
+		$this->assertArrayHasKey( 'class', $field['args'] );
+		$this->assertStringContainsString( 'hidden', $field['args']['class'] );
+	}
+
+	public function test_github_oauth_connect_field_visible_when_oauth_token_set(): void {
+		global $wp_settings_fields;
+
+		$options = [ 'github_access_token' => 'oauth_tok', 'github_is_oauth_token' => 'oauth' ];
+		update_site_option( 'git_updater', $options );
+		Base::$options = $options;
+		API::$options  = $options;
+
+		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$field = $wp_settings_fields['git_updater_github_install_settings']['github_access_token']['github_oauth_connect'] ?? null;
+		$this->assertNotNull( $field );
+		$class = $field['args']['class'] ?? '';
+		$this->assertStringNotContainsString( 'hidden', $class );
+
+		delete_site_option( 'git_updater' );
+		Base::$options = [];
+		API::$options  = [];
+	}
+
+	public function test_github_access_token_field_hidden_when_oauth_token_set(): void {
+		global $wp_settings_fields;
+
+		$options = [ 'github_access_token' => 'oauth_tok', 'github_is_oauth_token' => 'oauth' ];
+		update_site_option( 'git_updater', $options );
+		Base::$options = $options;
+		API::$options  = $options;
+
+		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$field = $wp_settings_fields['git_updater_github_install_settings']['github_access_token']['github_access_token'] ?? null;
+		$this->assertNotNull( $field );
+		$this->assertArrayHasKey( 'class', $field['args'] );
+		$this->assertStringContainsString( 'hidden', $field['args']['class'] );
+
+		delete_site_option( 'git_updater' );
+		Base::$options = [];
+		API::$options  = [];
+	}
+
+	public function test_github_access_token_field_visible_when_no_oauth_token(): void {
+		global $wp_settings_fields;
+
+		delete_site_option( 'git_updater' );
+		Base::$options = [];
+		API::$options  = [];
+
+		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$field = $wp_settings_fields['git_updater_github_install_settings']['github_access_token']['github_access_token'] ?? null;
+		$this->assertNotNull( $field );
+		$class = $field['args']['class'] ?? '';
+		$this->assertStringNotContainsString( 'hidden', $class );
 	}
 
 	public function test_add_repo_setting_field_returns_correct_page(): void {
@@ -933,5 +1023,57 @@ class Test_GitHub_API_Settings extends WP_UnitTestCase {
 		$output = ob_get_clean();
 		$this->assertStringContainsString( 'github_access_token', $output );
 		$this->assertStringContainsString( 'type="password"', $output );
+	}
+
+	public function test_github_remove_token_field_hidden_when_no_token(): void {
+		global $wp_settings_fields;
+
+		delete_site_option( 'git_updater' );
+		Base::$options = [];
+		API::$options  = [];
+
+		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$field = $wp_settings_fields['git_updater_github_install_settings']['github_access_token']['github_remove_token'] ?? null;
+		$this->assertNotNull( $field );
+		$this->assertStringContainsString( 'hidden', $field['args']['class'] );
+	}
+
+	public function test_github_remove_token_field_hidden_when_oauth_token(): void {
+		global $wp_settings_fields;
+
+		$options = [ 'github_access_token' => 'oauth_tok', 'github_is_oauth_token' => 'oauth' ];
+		update_site_option( 'git_updater', $options );
+		Base::$options = $options;
+		API::$options  = $options;
+
+		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$field = $wp_settings_fields['git_updater_github_install_settings']['github_access_token']['github_remove_token'] ?? null;
+		$this->assertNotNull( $field );
+		$this->assertStringContainsString( 'hidden', $field['args']['class'] );
+
+		delete_site_option( 'git_updater' );
+		Base::$options = [];
+		API::$options  = [];
+	}
+
+	public function test_github_remove_token_field_visible_when_pat_only(): void {
+		global $wp_settings_fields;
+
+		$options = [ 'github_access_token' => 'manual_pat' ];
+		update_site_option( 'git_updater', $options );
+		Base::$options = $options;
+		API::$options  = $options;
+
+		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$field = $wp_settings_fields['git_updater_github_install_settings']['github_access_token']['github_remove_token'] ?? null;
+		$this->assertNotNull( $field );
+		$this->assertStringNotContainsString( 'hidden', $field['args']['class'] );
+
+		delete_site_option( 'git_updater' );
+		Base::$options = [];
+		API::$options  = [];
 	}
 }

@@ -193,7 +193,10 @@ class Branch {
 		$config     = $this->get_class_vars( 'Fragen\Git_Updater\Plugin', 'config' );
 		$plugin     = $this->get_repo_slugs( dirname( $plugin_file ), $plugin_obj );
 
-		$this->base->get_remote_repo_meta( $config[ $plugin['slug'] ] );
+		$cache = $this->get_repo_cache( $plugin['slug'] );
+		if ( ! $cache ) {
+			$this->base->get_remote_repo_meta( $config[ $plugin['slug'] ] );
+		}
 
 		$enclosure         = $this->base->update_row_enclosure( $plugin_file, 'plugin', true );
 		$nonced_update_url = wp_nonce_url(

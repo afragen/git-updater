@@ -124,6 +124,20 @@ class Test_Repo_List_Table_Methods extends WP_UnitTestCase {
 		$this->assertSame( '<span>yes</span>', $this->table->column_default( $item, 'release_asset' ) );
 	}
 
+	public function test_column_default_escapes_html_in_field_values(): void {
+		$item = $this->make_item( [ 'uri' => '<script>alert(1)</script>' ] );
+		$result = $this->table->column_default( $item, 'uri' );
+		$this->assertStringNotContainsString( '<script>', $result );
+		$this->assertStringContainsString( '&lt;script&gt;', $result );
+	}
+
+	public function test_column_slug_escapes_html_in_slug(): void {
+		$item   = $this->make_item( [ 'slug' => '<img src=x onerror=alert(1)>', 'ID' => md5( 'xss-test' ) ] );
+		$result = $this->table->column_slug( $item );
+		$this->assertStringNotContainsString( '<img', $result );
+		$this->assertStringContainsString( '&lt;img', $result );
+	}
+
 	// -------------------------------------------------------------------------
 	// column_cb()
 	// -------------------------------------------------------------------------
@@ -196,6 +210,15 @@ class Test_Repo_List_Table_Extended extends WP_UnitTestCase {
 		parent::tear_down();
 	}
 
+	private function make_admin(): int {
+		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		// On multisite only super admins pass the manage_network_options check.
+		if ( is_multisite() ) {
+			grant_super_admin( $user_id );
+		}
+		return $user_id;
+	}
+
 	private function make_item( array $overrides = [] ): array {
 		return array_merge(
 			[
@@ -245,6 +268,8 @@ class Test_Repo_List_Table_Extended extends WP_UnitTestCase {
 	}
 
 	public function test_process_bulk_action_deletes_matching_entry(): void {
+		wp_set_current_user( $this->make_admin() );
+
 		$id     = md5( 'test-plugin/test-plugin.php' );
 		$option = $this->make_item( [ 'ID' => $id ] );
 		$table  = new Repo_List_Table( [ $option ] );
@@ -259,11 +284,68 @@ class Test_Repo_List_Table_Extended extends WP_UnitTestCase {
 	}
 
 	public function test_process_bulk_action_edit_action_dies(): void {
+		wp_set_current_user( $this->make_admin() );
+
 		$_REQUEST['_wpnonce_row_action_delete'] = wp_create_nonce( 'delete_row_item' );
 		$_REQUEST['action']                     = 'edit';
 
 		$this->expectException( WPDieException::class );
 		$this->table->process_bulk_action();
+	}
+
+	public function test_process_bulk_action_returns_on_invalid_nonce(): void {
+		wp_set_current_user( $this->make_admin() );
+
+		$_REQUEST['_wpnonce_row_action_delete'] = 'not-a-valid-nonce';
+		$_REQUEST['slug']                       = 'some-id';
+
+		$this->table->process_bulk_action();
+
+		// Invalid nonce must short-circuit without deleting anything.
+		$this->assertFalse( get_site_option( 'git_updater_additions' ) );
+	}
+
+	public function test_process_bulk_action_dies_without_capability(): void {
+		// Subscriber lacks the required capability; the delete action must be forbidden.
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'subscriber' ] ) );
+
+		$_REQUEST['_wpnonce_row_action_delete'] = wp_create_nonce( 'delete_row_item' );
+		$_REQUEST['slug']                       = 'some-id';
+
+		$this->expectException( WPDieException::class );
+		$this->table->process_bulk_action();
+	}
+
+	public function test_process_bulk_action_deletes_array_of_slugs(): void {
+		wp_set_current_user( $this->make_admin() );
+
+		$id_one = md5( 'plugin-one/plugin-one.php' );
+		$id_two = md5( 'plugin-two/plugin-two.php' );
+		$keep   = md5( 'plugin-keep/plugin-keep.php' );
+		$options = [
+			$this->make_item( [ 'ID' => $id_one, 'slug' => 'plugin-one/plugin-one.php' ] ),
+			$this->make_item( [ 'ID' => $id_two, 'slug' => 'plugin-two/plugin-two.php' ] ),
+			$this->make_item( [ 'ID' => $keep, 'slug' => 'plugin-keep/plugin-keep.php' ] ),
+		];
+		$table = new Repo_List_Table( $options );
+		update_site_option( 'git_updater_additions', $options );
+
+		$_REQUEST['_wpnonce_row_action_delete'] = wp_create_nonce( 'delete_row_item' );
+		$_REQUEST['slug']                       = [ $id_one, $id_two ];
+
+		$table->process_bulk_action();
+
+		$saved = get_site_option( 'git_updater_additions' );
+		$saved = array_values( $saved );
+		$this->assertCount( 1, $saved );
+		$this->assertSame( $keep, $saved[0]['ID'] );
+	}
+
+	public function test_render_list_table_omits_orphan_nonce(): void {
+		ob_start();
+		$this->table->render_list_table();
+		$output = ob_get_clean();
+		$this->assertStringNotContainsString( '_wpnonce_list', $output );
 	}
 
 	public function test_prepare_items_sets_items_to_array(): void {

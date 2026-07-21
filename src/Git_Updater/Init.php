@@ -76,6 +76,9 @@ class Init {
 	 * @return void
 	 */
 	protected function load_hooks() {
+		// Load OAuth Connect hooks.
+		Singleton::get_instance( 'OAuth\OAuth_Connect', $this )->load_hooks();
+
 		add_action( 'init', [ $this->base, 'load' ] );
 		add_action( 'init', [ $this->base, 'background_update' ] );
 		add_action( 'init', [ $this->base, 'set_options_filter' ] );

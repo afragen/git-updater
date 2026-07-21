@@ -313,10 +313,10 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 	private const PLUGIN_SLUG = 'test-gu-plugin';
 	private const THEME_SLUG  = 'test-gu-theme';
 
-	private ?string $zip_path           = null;
-	private ?string $theme_zip_path     = null;
-	private ?string $plugin_file_backup = null;
-	private ?string $theme_file_backup  = null;
+	private ?string $zip_path            = null;
+	private ?string $theme_zip_path      = null;
+	private ?string $plugin_file_backup  = null;
+	private array   $theme_file_backups  = [];
 	private array   $saved_request;
 
 	public function set_up(): void {
@@ -346,9 +346,21 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 		if ( file_exists( $plugin_path ) ) {
 			$this->plugin_file_backup = file_get_contents( $plugin_path );
 		}
-		$theme_path = get_theme_root() . '/' . self::THEME_SLUG . '/style.css';
-		if ( file_exists( $theme_path ) ) {
-			$this->theme_file_backup = file_get_contents( $theme_path );
+		// Back up every file in the fixture theme directory (e.g. style.css and index.php),
+		// not just style.css. The upgrader's move_dir/cleanup can delete any file in the
+		// bind-mounted theme, so a whole-directory backup is required to fully restore it.
+		$theme_dir = get_theme_root() . '/' . self::THEME_SLUG;
+		if ( is_dir( $theme_dir ) && $handle = opendir( $theme_dir ) ) {
+			while ( false !== ( $entry = readdir( $handle ) ) ) {
+				if ( '.' === $entry || '..' === $entry ) {
+					continue;
+				}
+				$entry_path = $theme_dir . '/' . $entry;
+				if ( is_file( $entry_path ) ) {
+					$this->theme_file_backups[ $entry ] = file_get_contents( $entry_path );
+				}
+			}
+			closedir( $handle );
 		}
 	}
 
@@ -377,12 +389,14 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 			}
 			file_put_contents( $dir . '/' . self::PLUGIN_SLUG . '.php', $this->plugin_file_backup );
 		}
-		if ( null !== $this->theme_file_backup ) {
+		if ( ! empty( $this->theme_file_backups ) ) {
 			$dir = get_theme_root() . '/' . self::THEME_SLUG;
 			if ( ! is_dir( $dir ) ) {
 				mkdir( $dir, 0755, true );
 			}
-			file_put_contents( $dir . '/style.css', $this->theme_file_backup );
+			foreach ( $this->theme_file_backups as $entry => $contents ) {
+				file_put_contents( $dir . '/' . $entry, $contents );
+			}
 		}
 
 		$_REQUEST = $this->saved_request;
@@ -629,6 +643,57 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 		// Reactivation appends a message if activate_plugin() returns null (success).
 		$messages = $rest->get_messages();
 		$this->assertContains( 'Plugin reactivated successfully.', $messages );
+	}
+
+	/**
+	 * When activate_plugin() returns a WP_Error after upgrade,
+	 * update_plugin() should append a failure message instead of silently ignoring it.
+	 *
+	 * Covers the is_wp_error($activate) branch (line 149).
+	 */
+	public function test_update_plugin_reports_reactivation_failure(): void {
+		$this->skip_if_plugin_absent();
+
+		$plugin_file = self::PLUGIN_SLUG . '/' . self::PLUGIN_SLUG . '.php';
+		activate_plugin( $plugin_file );
+
+		$zip_path = $this->create_plugin_zip();
+		add_filter(
+			'upgrader_pre_download',
+			function ( $result ) use ( $zip_path ) {
+				return $zip_path;
+			},
+			15,
+			3
+		);
+
+		// Corrupt the plugin file after installation so activate_plugin() returns WP_Error.
+		// A PHP file without a valid Plugin Name header must not be identified as a
+		// plugin, so validate_plugin() returns a WP_Error and the reactivation is reported.
+		add_filter(
+			'upgrader_post_install',
+			function ( $result ) {
+				$plugin_path = WP_PLUGIN_DIR . '/' . self::PLUGIN_SLUG . '/' . self::PLUGIN_SLUG . '.php';
+				file_put_contents( $plugin_path, '<?php // not a valid plugin' );
+				return $result;
+			},
+			10,
+			1
+		);
+
+		$_REQUEST = [];
+		$rest     = new Rest_Update();
+		$rest->update_plugin( self::PLUGIN_SLUG, 'main' );
+
+		$messages = $rest->get_messages();
+		$has_failure = false;
+		foreach ( $messages as $msg ) {
+			if ( str_contains( $msg, 'Plugin reactivation failed' ) ) {
+				$has_failure = true;
+				break;
+			}
+		}
+		$this->assertTrue( $has_failure, 'Expected reactivation failure message in: ' . implode( '; ', $messages ) );
 	}
 
 	// -------------------------------------------------------------------------

@@ -53,3 +53,29 @@ div.hide-git-updater-settings {
 .git-updater-addons .plugin-card-bottom .column-downloaded {
 	display: none;
 }
+
+button.gu-flush-repo.dashicons-no-decoration {
+	color: inherit;
+	text-decoration: none;
+	box-shadow: none;
+	outline: none;
+}
+
+button.gu-flush-repo.dashicons-no-decoration:hover,
+button.gu-flush-repo.dashicons-no-decoration:focus {
+	color: inherit;
+	text-decoration: none;
+	box-shadow: none;
+}
+
+button.gu-flush-repo.dashicons-no-decoration {
+	background: none;
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+}
+
+.gu-flush-disabled {
+	opacity: 0.5;
+	pointer-events: none;
+}

@@ -110,6 +110,15 @@
 					// If add-on isn't activated assume the premium version isn't installed.
 					$is_premium = false;
 				}
+
+                // Override the checkout context with the add-on's purchase details so the checkout flow is initialized for the selected add-on instead of the parent product.
+				$context_params['plugin_id'] = $plugin_id;
+
+				foreach ( array( 'plan_id', 'pricing_id', 'billing_cycle', 'is_trial' ) as $param ) {
+					if ( fs_request_has( $param ) ) {
+						$context_params[ $param ] = fs_request_get( $param );
+					}
+				}
 			}
 
 			// Get site context secure params.
@@ -187,7 +196,7 @@
             // Allowlist only allowed query params.
             $filtered_params = array_intersect_key($filtered_params, $this->_allowed_custom_params);
 
-            return array_merge( $context_params, $filtered_params, $_GET, array(
+			return array_merge( $_GET, $context_params, $filtered_params, array(
 				// Current plugin version.
 				'plugin_version' => $fs->get_plugin_version(),
 				'sdk_version'    => WP_FS__SDK_VERSION,

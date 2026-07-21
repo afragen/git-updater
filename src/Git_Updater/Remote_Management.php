@@ -40,7 +40,7 @@ class Remote_Management {
 	 */
 	public function ensure_api_key_is_set() {
 		if ( ! self::$api_key ) {
-			update_site_option( 'git_updater_api_key', md5( uniqid( (string) wp_rand(), true ) ) );
+			update_site_option( 'git_updater_api_key', bin2hex( random_bytes( 32 ) ) );
 		}
 	}
 
@@ -225,7 +225,9 @@ class Remote_Management {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$_POST['_wp_http_referer'] = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : null;
 			// phpcs:enable
-			delete_site_option( 'git_updater_api_key' );
+			$new_key = bin2hex( random_bytes( 32 ) );
+			update_site_option( 'git_updater_api_key', $new_key );
+			self::$api_key = $new_key;
 
 			return true;
 		}

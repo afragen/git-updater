@@ -126,11 +126,13 @@ class Plugin {
 			$repos_arr[ $slug ] = get_file_data( $path, $all_headers, 'plugin' );
 		}
 
-		$plugins = array_filter(
+		$extra_header_keys = array_keys( self::$extra_headers );
+		$options_modified  = false;
+		$plugins           = array_filter(
 			$repos_arr,
-			function ( $repo ) {
+			function ( $repo ) use ( $extra_header_keys ) {
 				foreach ( $repo as $key => $value ) {
-					if ( in_array( $key, array_keys( self::$extra_headers ), true ) && false !== stripos( $key, 'plugin' ) && ! empty( $value ) ) {
+					if ( in_array( $key, $extra_header_keys, true ) && false !== stripos( $key, 'plugin' ) && ! empty( $value ) ) {
 						return (bool) $this->get_file_headers( $repo, 'plugin' );
 					}
 				}
@@ -172,7 +174,7 @@ class Plugin {
 			&& ( 'master' === self::$options[ $current_branch ] && 'master' !== $header['primary_branch'] )
 			) {
 				unset( self::$options[ $current_branch ] );
-				update_site_option( 'git_updater', self::$options );
+				$options_modified = true;
 			}
 			$branch = self::$options[ $current_branch ] ?? $header['primary_branch'];
 
@@ -212,8 +214,11 @@ class Plugin {
 
 			// Fix branch for .git VCS.
 			if ( isset( $git_plugin['local_path'] ) && file_exists( $git_plugin['local_path'] . '.git/HEAD' ) ) {
-				$git_branch           = implode( '/', array_slice( explode( '/', file_get_contents( $git_plugin['local_path'] . '.git/HEAD' ) ), 2 ) );
-				$git_plugin['branch'] = preg_replace( "/\r|\n/", '', $git_branch );
+				$contents = file_get_contents( $git_plugin['local_path'] . '.git/HEAD' );
+				if ( false !== $contents ) {
+					$git_branch           = implode( '/', array_slice( explode( '/', $contents ), 2 ) );
+					$git_plugin['branch'] = preg_replace( "/\r|\n/", '', $git_branch );
+				}
 			}
 
 			/**
@@ -226,6 +231,10 @@ class Plugin {
 			$git_plugin = apply_filters( 'gu_fix_repo_slug', $git_plugin );
 
 			$git_plugins[ $git_plugin['slug'] ] = (object) $git_plugin;
+		}
+
+		if ( $options_modified ) {
+			update_site_option( 'git_updater', self::$options );
 		}
 
 		return $git_plugins;

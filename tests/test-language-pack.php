@@ -249,15 +249,43 @@ class Test_Language_Pack_Constructor_And_Run extends GU_Test_Case {
 class Test_Language_Pack_Update_Site_Transient extends GU_Test_Case {
 	use Language_Pack_Helper;
 
+	/** @var array<string,string> Seeded installed-translation fixture bases, keyed by type. */
+	private static array $lang_fixtures = [];
+
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
+
+		// WP_LANG_DIR is defined in tests/bootstrap.php (before WordPress loads)
+		// to a writable path inside the plugin tree, so it is reliably available
+		// here and scanned by wp_get_installed_translations().
+		// Resolve __DIR__ so the fixture source paths are correct regardless of
+		// how the plugin is mounted into the test WordPress.
+		$real_dir = realpath( __DIR__ );
+		// Seed installed-translation fixtures into WP_LANG_DIR/{plugins,themes} so
+		// wp_get_installed_translations() returns real entries for intl-cover-plugin
+		// (en_US) and intl-cover-theme (en_US). This covers the ternary's true
+		// branch (line 119) in update_site_transient for both plugins and themes.
+		// Cleaned up in tear_down().
+		self::$lang_fixtures = [
+			'plugins' => $real_dir . '/fixtures/languages/plugins/intl-cover-plugin-en_US',
+			'themes'  => $real_dir . '/fixtures/languages/themes/intl-cover-theme-en_US',
+		];
+		foreach ( self::$lang_fixtures as $dir => $base ) {
+			wp_mkdir_p( WP_LANG_DIR . "/$dir" );
+			copy( "$base.mo", WP_LANG_DIR . "/$dir/" . basename( "$base.mo" ) );
+			copy( "$base.po", WP_LANG_DIR . "/$dir/" . basename( "$base.po" ) );
+		}
 
 		// Force get_available_languages() to return ['en_US'] so $locales is predictable.
 		add_filter( 'get_available_languages', fn() => [ 'en_US' ] );
 	}
 
 	public function tear_down(): void {
+		foreach ( self::$lang_fixtures as $dir => $base ) {
+			@unlink( WP_LANG_DIR . "/$dir/" . basename( "$base.mo" ) );
+			@unlink( WP_LANG_DIR . "/$dir/" . basename( "$base.po" ) );
+		}
 		remove_all_filters( 'get_available_languages' );
 		remove_all_filters( 'locale' );
 		parent::tear_down();
@@ -461,25 +489,21 @@ class Test_Language_Pack_Update_Site_Transient extends GU_Test_Case {
 	/**
 	 * When wp_get_installed_translations() returns data for the slug+locale,
 	 * $translation_mod is set from strtotime(PO-Revision-Date), covering line 119.
-	 * Uses the pre-seeded 'internationalized-plugin' fixture (de_DE, updated 2020)
-	 * so no .po file writing is needed.
+	 * Uses the seeded 'intl-cover-plugin' fixture (en_US, PO-Revision-Date 2020)
+	 * placed into WP_LANG_DIR by set_up, so no manual .po/.mo writing is needed.
 	 * The language pack's updated time (2030) is newer than the installed (2020),
 	 * so the entry is still appended.
 	 */
 	public function test_installed_translation_sets_translation_mod(): void {
-		$slug   = 'internationalized-plugin';
-		$locale = 'de_DE';
-
-		// Override available languages so the loop iterates ['de_DE'].
-		// (set_up already added ['en_US']; this callback wins as the last registered.)
-		add_filter( 'get_available_languages', fn() => [ $locale ] );
+		$slug   = 'intl-cover-plugin';
+		$locale = 'en_US';
 
 		$repo = $this->make_plugin_repo_with_packs(
 			$slug,
 			[
 				$locale => [
 					'updated'  => '2030-01-01 00:00:00',
-					'package'  => 'https://example.com/de_DE.zip',
+					'package'  => 'https://example.com/en_US.zip',
 					'language' => $locale,
 					'type'     => 'plugin',
 					'slug'     => $slug,
@@ -492,7 +516,73 @@ class Test_Language_Pack_Update_Site_Transient extends GU_Test_Case {
 		$transient = $this->make_transient();
 		$result    = $this->run_as_plugin_filter( $transient );
 
-		// lang_pack_mod (2030) > translation_mod (2020 from pre-seeded fixture) → appended.
+		// lang_pack_mod (2030) > translation_mod (2020 from seeded fixture) → appended.
+		$this->assertCount( 1, $result->translations );
+		$this->assertSame( $locale, $result->translations[0]['language'] );
+	}
+
+	/**
+	 * Theme branch equivalent: the seeded 'intl-cover-theme' fixture (en_US, 2020)
+	 * makes wp_get_installed_translations('themes') return a PO-Revision-Date, so
+	 * the ternary true branch on line 119 is covered for the theme filter too.
+	 */
+	public function test_installed_translation_sets_translation_mod_theme(): void {
+		$slug   = 'intl-cover-theme';
+		$locale = 'en_US';
+
+		$repo = $this->make_theme_repo_with_packs(
+			$slug,
+			[
+				$locale => [
+					'updated'  => '2030-01-01 00:00:00',
+					'package'  => 'https://example.com/en_US.zip',
+					'language' => $locale,
+					'type'     => 'theme',
+					'slug'     => $slug,
+					'version'  => '1.0.0',
+				],
+			]
+		);
+		$this->inject_theme_config( [ $slug => $repo ] );
+
+		$transient = $this->make_transient();
+		$result    = $this->run_as_theme_filter( $transient );
+
+		// lang_pack_mod (2030) > translation_mod (2020 from seeded fixture) → appended.
+		$this->assertCount( 1, $result->translations );
+		$this->assertSame( $locale, $result->translations[0]['language'] );
+	}
+
+	/**
+	 * When wp_get_installed_translations() returns a PO-Revision-Date for the
+	 * repo slug+locale, $translation_mod is derived from it (true branch of the
+	 * ternary on line 119). The seeded 'intl-cover-plugin' fixture (en_US, 2020)
+	 * provides that installed translation. The language pack (updated 2030) is
+	 * newer, so the entry is appended.
+	 */
+	public function test_installed_translation_sets_translation_mod_true_branch(): void {
+		$slug   = 'intl-cover-plugin';
+		$locale = 'en_US';
+
+		$repo = $this->make_plugin_repo_with_packs(
+			$slug,
+			[
+				$locale => [
+					'updated'  => '2030-01-01 00:00:00',
+					'package'  => 'https://example.com/en_US.zip',
+					'language' => $locale,
+					'type'     => 'plugin',
+					'slug'     => $slug,
+					'version'  => '1.0.0',
+				],
+			]
+		);
+		$this->inject_plugin_config( [ $slug => $repo ] );
+
+		$transient = $this->make_transient();
+		$result    = $this->run_as_plugin_filter( $transient );
+
+		// translation_mod set from seeded PO-Revision-Date (2020); pack (2030) newer → appended.
 		$this->assertCount( 1, $result->translations );
 		$this->assertSame( $locale, $result->translations[0]['language'] );
 	}

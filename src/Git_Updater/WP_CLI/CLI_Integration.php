@@ -251,7 +251,7 @@ class CLI_Integration extends WP_CLI_Command {
 		$cli_config['branch']  = $assoc_args['branch'] ?? 'master';
 		$cli_config['slug']    = $assoc_args['slug'] ?? null;
 
-		switch ( $assoc_args ) {
+		switch ( true ) {
 			case isset( $assoc_args['github'] ):
 				$cli_config['git'] = 'github';
 				break;

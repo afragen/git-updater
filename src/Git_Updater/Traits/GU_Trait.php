@@ -196,7 +196,11 @@ trait GU_Trait {
 	 *
 	 * Companion to set_repo_cache(): per-entry writes preserve an existing 'timeout'
 	 * via `??`, so without this an expired timeout from the prior cycle would linger
-	 * and force the next pass to re-fetch. No-op if 'ran' bookkeeping is incomplete.
+	 * and force the next pass to re-fetch.
+	 *
+	 * When the 'ran' bookkeeping is incomplete (e.g. a transient API failure), a
+	 * fallback timeout is applied so the cache remains valid for a short interval
+	 * instead of triggering an immediate re-fetch on the next page load.
 	 *
 	 * @param string $slug Repo slug.
 	 *
@@ -208,6 +212,20 @@ trait GU_Trait {
 		$expected  = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
 
 		if ( ! isset( $cache['ran'] ) || array_diff( $expected, $cache['ran'] ) ) {
+			/**
+			 * Filter the fallback cache timeout duration (in hours) for an
+			 * incomplete fetch cycle.  Prevents infinite re-fetching by setting
+			 * a short timeout so the next retry happens after this interval
+			 * instead of on every page load.
+			 *
+			 * @since 11.0.0
+			 *
+			 * @param int    $hours Number of hours. Default 1.
+			 * @param string $slug  Repository slug.
+			 */
+			$fallback_hours   = (int) apply_filters( 'gu_repo_cache_timeout_fallback', 1, $slug );
+			$cache['timeout'] = strtotime( "+{$fallback_hours} hours" );
+			update_site_option( $cache_key, $cache );
 			return;
 		}
 
@@ -369,15 +387,30 @@ trait GU_Trait {
 	 * @return mixed
 	 */
 	final public function get_class_vars( $class_name, $name ) {
-		$class          = Singleton::get_instance( $class_name, $this );
-		$reflection_obj = new ReflectionObject( $class );
-		if ( ! $reflection_obj->hasProperty( $name ) ) {
+		static $reflection_cache = [];
+		$cache_key               = $class_name . '.' . $name;
+		if ( ! isset( $reflection_cache[ $cache_key ] ) ) {
+			$class          = Singleton::get_instance( $class_name, $this );
+			$reflection_obj = new ReflectionObject( $class );
+			if ( ! $reflection_obj->hasProperty( $name ) ) {
+				$reflection_cache[ $cache_key ] = [
+					'instance' => $class,
+					'property' => false,
+				];
+			} else {
+				$property = $reflection_obj->getProperty( $name );
+				PHP_VERSION_ID < 80100 && $property->setAccessible( true );
+				$reflection_cache[ $cache_key ] = [
+					'instance' => $class,
+					'property' => $property,
+				];
+			}
+		}
+		$cached = $reflection_cache[ $cache_key ];
+		if ( ! $cached['property'] ) {
 			return false;
 		}
-		$property = $reflection_obj->getProperty( $name );
-		PHP_VERSION_ID < 80100 && $property->setAccessible( true );
-
-		return $property->getValue( $class );
+		return $cached['property']->getValue( $cached['instance'] );
 	}
 
 	/**
@@ -425,7 +458,6 @@ trait GU_Trait {
 
 		$table              = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
 		$column             = is_multisite() ? 'meta_key' : 'option_name';
-		$delete_string      = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
 		$get_options_string = 'SELECT * FROM ' . $table . ' WHERE ' . $column . ' LIKE %s';
 
 		$ghu_options = $wpdb->get_results( $wpdb->prepare( $get_options_string, [ '%ghu-%' ] ) ); // phpcs:ignore
@@ -433,8 +465,6 @@ trait GU_Trait {
 			$option_name = is_multisite() ? $option->meta_key : $option->option_name;
 			delete_site_option( $option_name );
 		}
-
-		$wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) ); // phpcs:ignore
 
 		if ( ! is_multisite() || is_main_site() ) {
 			wp_cron();
@@ -586,8 +616,22 @@ trait GU_Trait {
 		 */
 		$repos = apply_filters( 'gu_config_pre_process', $repos );
 
+		// Batch-load all ghu-* cache options in a single query.
+		global $wpdb;
+		$table        = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
+		$column       = is_multisite() ? 'meta_key' : 'option_name';
+		$value_column = is_multisite() ? 'meta_value' : 'option_value';
+		$all_ghu       = $wpdb->get_results( $wpdb->prepare( "SELECT {$column}, {$value_column} FROM {$table} WHERE {$column} LIKE %s", [ '%ghu-%' ] ), OBJECT_K ); // phpcs:ignore
+		$ghu_lookup   = [];
+		foreach ( (array) $all_ghu as $row ) {
+			$key                = is_multisite() ? $row->meta_key : $row->option_name;
+			$val                = is_multisite() ? $row->meta_value : $row->option_value;
+			$ghu_lookup[ $key ] = maybe_unserialize( $val );
+		}
+
 		foreach ( $repos as $git_repo ) {
-			$caches[ $git_repo->slug ] = $this->get_repo_cache( $git_repo->slug, false );
+			$cache_key                 = $this->get_cache_key( $git_repo->slug );
+			$caches[ $git_repo->slug ] = $ghu_lookup[ $cache_key ] ?? [];
 		}
 		$waiting = array_filter(
 			$caches,
@@ -607,7 +651,10 @@ trait GU_Trait {
 	 * @return array<string, string|null>
 	 */
 	final protected function parse_header_uri( $repo_header ) {
-		$header_parts         = parse_url( $repo_header );
+		$header_parts = parse_url( $repo_header );
+		if ( ! $header_parts || ! isset( $header_parts['path'] ) ) {
+			return [];
+		}
 		$header_path          = pathinfo( $header_parts['path'] );
 		$header['original']   = $repo_header;
 		$header['scheme']     = $header_parts['scheme'] ?? null;
@@ -881,6 +928,9 @@ trait GU_Trait {
 	 * @return void
 	 */
 	final protected function merge_and_reschedule_cron_batch( string $hook, array $new_args ): void {
+		if ( wp_next_scheduled( $hook ) ) {
+			return;
+		}
 		wp_cache_delete( 'cron', 'options' );
 		$cron = _get_cron_array();
 		foreach ( (array) $cron as $hooks ) {

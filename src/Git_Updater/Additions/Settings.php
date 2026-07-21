@@ -320,7 +320,7 @@ class Settings {
 		$placeholder = $args['placeholder'] ?? null;
 		?>
 		<label for="<?php echo esc_attr( $args['id'] ); ?>">
-			<input type="text" style="width:50%;" id="<?php esc_attr( $args['id'] ); ?>" name="git_updater_additions[<?php echo esc_attr( $args['setting'] ); ?>]" value="" placeholder="<?php echo esc_attr( $placeholder ); ?>">
+			<input type="text" style="width:50%;" id="<?php echo esc_attr( $args['id'] ); ?>" name="git_updater_additions[<?php echo esc_attr( $args['setting'] ); ?>]" value="" placeholder="<?php echo esc_attr( $placeholder ); ?>">
 			<br>
 			<span class="description">
 				<?php echo esc_attr( $args['title'] ); ?>

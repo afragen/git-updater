@@ -15,7 +15,8 @@
 			<file>./src/Git_Updater/GU_Freemius.php</file>
 		</exclude>
 		<report>
-			<html outputDirectory="coverage-html"/>
+			<clover outputFile="coverage/clover.xml"/>
+			<html outputDirectory="coverage/html"/>
 		</report>
 	</coverage>
 

@@ -145,7 +145,9 @@ class Rest_Update {
 
 		if ( $is_plugin_active ) {
 			$activate = is_multisite() ? activate_plugin( $plugin->file, '', true ) : activate_plugin( $plugin->file );
-			if ( ! $activate ) {
+			if ( is_wp_error( $activate ) ) {
+				$this->upgrader_skin->messages[] = 'Plugin reactivation failed: ' . $activate->get_error_message();
+			} else {
 				$this->upgrader_skin->messages[] = 'Plugin reactivated successfully.';
 			}
 		}
@@ -163,12 +165,7 @@ class Rest_Update {
 	public function update_theme( $theme_slug, $tag = 'master' ) {
 		$theme = null;
 
-		foreach ( (array) Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs() as $config_entry ) {
-			if ( $config_entry->slug === $theme_slug ) {
-				$theme = $config_entry;
-				break;
-			}
-		}
+		$theme = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs()[ $theme_slug ] ?? null;
 
 		if ( ! $theme ) {
 			throw new UnexpectedValueException( 'Theme not found or not updatable with Git Updater: ' . esc_html( $theme_slug ) );
@@ -259,11 +256,21 @@ class Rest_Update {
 		$override   = $args['override'] ?? false;
 		$deprecated = $args['deprecated'] ?? '';
 
+		// Curated echo for the response. Never include the API key.
+		$echo_args = [
+			'plugin'     => $plugin,
+			'theme'      => $theme,
+			'tag'        => $tag,
+			'branch'     => $branch,
+			'committish' => $committish,
+			'override'   => (bool) $override,
+		];
+
 		$start          = microtime( true );
 		$current_branch = 'master';
 		try {
 			if ( ! $key
-				|| get_site_option( 'git_updater_api_key' ) !== $key
+				|| ! hash_equals( (string) get_site_option( 'git_updater_api_key' ), (string) $key )
 			) {
 				throw new UnexpectedValueException( 'Bad API key.' );
 			}
@@ -305,7 +312,7 @@ class Rest_Update {
 			$http_response = [
 				'success'      => false,
 				'messages'     => $e->getMessage(),
-				'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
+				'webhook'      => $echo_args,
 				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 				'deprecated'   => $deprecated,
 			];
@@ -332,7 +339,7 @@ class Rest_Update {
 		$response = [
 			'success'      => true,
 			'messages'     => $this->get_messages(),
-			'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
+			'webhook'      => $echo_args,
 			'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 			'deprecated'   => $deprecated,
 		];
@@ -428,7 +435,7 @@ class Rest_Update {
 	 * @return void
 	 */
 	private function get_webhook_source() {
-		switch ( $_SERVER ) {
+		switch ( true ) {
 			case isset( $_SERVER['HTTP_X_GITHUB_EVENT'] ):
 				$webhook_source = 'GitHub webhook';
 				break;
@@ -461,8 +468,10 @@ class Rest_Update {
 	public function log_exit( $response, $code ) {
 		$json_encode_flags = 128 | 64;
 
-		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-		error_log( json_encode( $response, $json_encode_flags ) );
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			error_log( json_encode( $response, $json_encode_flags ) ); // @codeCoverageIgnore
+		}
 
 		/**
 		 * Action hook after processing REST process.
