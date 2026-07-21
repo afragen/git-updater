@@ -11,6 +11,7 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Git_Updater\Additions\Bootstrap as Additions_Bootstrap;
+use Fragen\Git_Updater\Lite_Domains;
 use Fragen\Git_Updater\REST\REST_API;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use WP_Dismiss_Notice;
@@ -61,6 +62,7 @@ class Bootstrap {
 		( new GU_Freemius() )->init();
 		( new REST_API() )->load_hooks();
 		( new Additions_Bootstrap() )->run();
+		( new Lite_Domains() )->load_hooks();
 		( new Init() )->run();
 		( new Messages() )->create_error_message( 'get_license' );
 
