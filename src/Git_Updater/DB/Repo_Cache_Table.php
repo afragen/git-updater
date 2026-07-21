@@ -151,12 +151,6 @@ final class Repo_Cache_Table extends Abstract_Cache_Table {
 	 * @return mixed
 	 */
 	public function get_entry( string $slug, string $column ) {
-		$row = $this->get_repo( $slug );
-
-		if ( null === $row || ! isset( $row[ $column ] ) ) {
-			return null;
-		}
-
-		return $row[ $column ];
+		return $this->get_repo( $slug, $column );
 	}
 }

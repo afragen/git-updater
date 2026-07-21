@@ -128,11 +128,11 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_info( $git, $request ): bool {
-		$cache    = $this->get_repo_cache( $this->type->slug );
-		$response = is_array( $cache ) ? ( $cache['repo_headers'] ?? false ) : false;
+		$cache    = $this->get_repo_cache( $this->type->slug, true, 'repo_headers' );
+		$response = false !== $cache ? $cache : false;
 
 		// Capture old version before overwriting: use valid cache if available, else raw option.
-		$prior       = is_array( $cache ) ? $cache : $this->get_repo_cache( $this->type->slug, false, [ 'repo_headers' ] );
+		$prior       = false !== $cache ? [ 'repo_headers' => $cache ] : $this->get_repo_cache( $this->type->slug, false, [ 'repo_headers' ] );
 		$old_version = is_array( $prior ) && isset( $prior['repo_headers']['Version'] )
 			? (string) $prior['repo_headers']['Version']
 			: '';
@@ -338,8 +338,8 @@ trait API_Common {
 	 */
 	final public function get_remote_api_assets( $git, $request ) {
 		$assets       = [ '.wordpress-org', 'assets' ];
-		$cache        = $this->get_repo_cache( $this->type->slug ) ?: [];
-		$assets       = ! empty( $cache['contents'] ) ? array_intersect( (array) $cache['contents']['dirs'], $assets ) : $assets;
+		$contents     = $this->get_repo_cache( $this->type->slug, true, 'contents' );
+		$assets       = ! empty( $contents ) ? array_intersect( (array) $contents['dirs'], $assets ) : $assets;
 		$response     = false;
 		self::$method = 'assets';
 
@@ -461,8 +461,8 @@ trait API_Common {
 	 * @return array<string, mixed>|false $response Release asset URI.
 	 */
 	final public function get_api_release_assets( $git, $request ) {
-		$cache    = $this->get_repo_cache( $this->type->slug );
-		$response = $cache['release_assets'] ?? false;
+		$cache    = $this->get_repo_cache( $this->type->slug, true, 'release_assets' );
+		$response = false !== $cache ? $cache : false;
 
 		if ( ! $response ) {
 			self::$method = 'release_asset';
@@ -475,7 +475,7 @@ trait API_Common {
 			}
 		}
 
-		if ( $response && ! isset( $cache['release_assets'] ) ) {
+		if ( $response && false === $cache ) {
 			$this->set_repo_cache( 'release_assets', $response );
 		}
 

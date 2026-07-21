@@ -309,11 +309,11 @@ trait GU_Trait {
 			return;
 		}
 
-		$row   = $table->get_repo( $slug );
+		$ran   = $table->get_repo( $slug, 'ran' );
 		$hours = $this->get_class_vars( 'API\\API', 'hours' );
 		$table->set_repo_timeout(
 			$slug,
-			strtotime( apply_filters( 'gu_repo_cache_timeout', '+' . $hours . ' hours', 'ran', $row['ran'], $slug ) )
+			strtotime( apply_filters( 'gu_repo_cache_timeout', '+' . $hours . ' hours', 'ran', $ran, $slug ) )
 		);
 	}
 
@@ -341,11 +341,10 @@ trait GU_Trait {
 	 * @return bool
 	 */
 	final public function is_fetch_complete( string $slug ): bool {
-		$row = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $slug );
+		$ran = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $slug, 'ran' );
 
-		return null !== $row
-			&& isset( $row['ran'] )
-			&& [] === array_diff( self::expected_ran_steps(), (array) $row['ran'] );
+		return null !== $ran
+			&& [] === array_diff( self::expected_ran_steps(), (array) $ran );
 	}
 
 	/**
@@ -362,14 +361,14 @@ trait GU_Trait {
 	 * @return bool
 	 */
 	final public function maybe_extend_repo_cache( $remote_headers, $repo, string $old_version = '' ): bool {
-		$return = false;
-		$slug   = $this->get_cache_key( $repo->slug ?? false );
-		$table  = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
-		$cache  = $table->get_repo( $slug );
+		$return  = false;
+		$slug    = $this->get_cache_key( $repo->slug ?? false );
+		$table   = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$timeout = (int) ( $table->get_repo( $slug, 'timeout' ) ?? 0 );
 
 		if ( $this->is_fetch_complete( $slug ) ) {
 			if ( version_compare( $remote_headers['Version'], $old_version, '==' ) ) {
-				if ( ! $this->is_cache_timeout_valid( (int) ( $cache['timeout'] ?? 0 ) ) ) {
+				if ( ! $this->is_cache_timeout_valid( $timeout ) ) {
 					$table->set_repo_timeout( $slug, strtotime( '+6 hours' ) );
 				}
 				$return = true;

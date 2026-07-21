@@ -187,7 +187,7 @@ class API {
 
 		// Use cached API failure data to avoid hammering the API.
 		// The error cache has its own expiry in the `error_timeout` column.
-		$error_cache = $this->get_repo_cache( $this->type->slug . '_error', false );
+		$error_cache = $this->get_repo_cache( $this->type->slug . '_error', false, [ 'error_cache', 'error_timeout' ] );
 		$cached      = isset( $error_cache['error_cache'] )
 			&& ! empty( $error_cache['error_timeout'] )
 			&& time() < (int) $error_cache['error_timeout'];

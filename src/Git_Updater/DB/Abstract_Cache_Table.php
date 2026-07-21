@@ -339,21 +339,23 @@ abstract class Abstract_Cache_Table {
 
 			$column = $this->whitelist( $column );
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$value = $wpdb->get_var(
-				$wpdb->prepare( 'SELECT %i FROM %i WHERE slug = %s', $column, $this->table_name(), $slug )
+			$row = $wpdb->get_row(
+				$wpdb->prepare( 'SELECT %i FROM %i WHERE slug = %s', $column, $this->table_name(), $slug ),
+				ARRAY_N
 			);
 
-			if ( null === $value ) {
-				// No row, or the column is NULL. Remember the miss so we don't re-query.
+			if ( ! is_array( $row ) ) {
+				// No row. Remember the miss so we don't re-query.
 				$this->row_cache[ $slug ] = null;
 				return null;
 			}
 
-			// A projected read returns only this column and does NOT populate
-			// $row_cache: doing so would store a partial row that a later full
-			// read would wrongly treat as complete. A later full read re-queries
-			// the DB; projected re-reads of the same column are cheap (one column).
-			return maybe_unserialize( $value );
+			// get_row( ARRAY_N ) distinguishes NULL from '' — get_var() coerces
+			// empty-string column values to null, losing legitimate '' values.
+			// A NULL column returns null (miss); '' returns the empty string.
+			// Projected reads do NOT populate $row_cache: doing so would store a
+			// partial row that a later full read would wrongly treat as complete.
+			return null === $row[0] ? null : maybe_unserialize( $row[0] );
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -492,9 +494,7 @@ abstract class Abstract_Cache_Table {
 	 * @return mixed
 	 */
 	public function get_error_cache( string $slug ) {
-		$row = $this->get_repo( $slug );
-
-		return ( null === $row || ! isset( $row['error_cache'] ) ) ? null : $row['error_cache'];
+		return $this->get_repo( $slug, 'error_cache' );
 	}
 
 	/**

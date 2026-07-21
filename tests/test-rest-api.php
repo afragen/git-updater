@@ -998,8 +998,7 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 	public function test_get_api_data_completes_repo_metadata(): void {
 		$this->skip_if_fixture_absent();
 
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		delete_site_option( $cache_key );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG );
 
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
 		$request->set_param( 'slug', self::SLUG );
@@ -1285,7 +1284,7 @@ class Test_REST_API_Reset_Branch extends WP_UnitTestCase {
 		remove_all_filters( 'wp_die_ajax_handler' );
 		delete_site_option( 'git_updater_api_key' );
 		delete_site_option( 'git_updater' );
-		delete_site_option( 'ghu-' . md5( self::SLUG ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG );
 		remove_all_actions( 'gu_post_rest_process_request' );
 		parent::tear_down();
 	}
@@ -1382,8 +1381,8 @@ class Test_REST_API_Zero_Version extends WP_UnitTestCase {
 		new Base();
 
 		// Clear all caches for the fixture plugin so no cached version pollutes the test.
-		delete_site_option( 'ghu-' . md5( self::SLUG ) );
-		delete_site_option( 'ghu-' . md5( self::SLUG . '_error' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG . '_error' );
 		// The per-request row cache on Repo_Cache_Table lives on the singleton
 		// and survives DB transaction rollbacks, so an earlier test in this
 		// process can leave stale repo_headers behind. Flush so the mock_http_zero
@@ -1419,8 +1418,8 @@ class Test_REST_API_Zero_Version extends WP_UnitTestCase {
 		delete_site_transient( 'update_themes' );
 		$GLOBALS['wp_rest_server'] = null;
 		delete_site_option( 'git_updater_api_key' );
-		delete_site_option( 'ghu-' . md5( self::SLUG ) );
-		delete_site_option( 'ghu-' . md5( self::SLUG . '_error' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG . '_error' );
 		parent::tear_down();
 	}
 
@@ -2080,11 +2079,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
 
 		// Seed a release_asset_download so the download_link is populated.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset_download'] = 'https://github.com/afragen/test-gu-plugin/archive/refs/tags/2.0.0.zip';
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://github.com/afragen/test-gu-plugin/archive/refs/tags/2.0.0.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_redirect' );
 
 		$method = new ReflectionMethod( REST_API::class, 'build_download_metadata' );
 		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
@@ -2093,7 +2090,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$result = $method->invoke( $this->rest, self::SLUG );
 
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		if ( is_wp_error( $result ) ) {
 			$this->markTestSkipped( 'Fixture plugin metadata unavailable.' );
@@ -2112,11 +2109,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
 
 		// Seed release_asset_download in cache.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset_download'] = 'https://example.com/release-download.zip';
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://example.com/release-download.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_redirect' );
 
 		$method = new ReflectionMethod( REST_API::class, 'build_download_metadata' );
 		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
@@ -2125,7 +2120,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$result = $method->invoke( $this->rest, self::SLUG );
 
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		if ( is_wp_error( $result ) ) {
 			$this->markTestSkipped( 'Fixture plugin metadata unavailable.' );
@@ -2141,12 +2136,10 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
 
 		// Seed release_asset + release_asset_download + release_asset_redirect.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset']          = 'https://api.github.com/repos/afragen/test-gu-plugin/releases/assets/1234';
-		$existing['release_asset_download'] = 'https://example.com/release-asset-download.zip';
-		$existing['release_asset_redirect'] = 'https://example.com/release-asset-redirect';
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset', 'https://api.github.com/repos/afragen/test-gu-plugin/releases/assets/1234', strtotime( '+12 hours' ) );
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://example.com/release-asset-download.zip', strtotime( '+12 hours' ) );
+		$table->add_entry( self::SLUG, 'release_asset_redirect', 'https://example.com/release-asset-redirect', strtotime( '+12 hours' ) );
 
 		// Set the type slug on the API singleton so get_repo_cache() works.
 		$api_singleton  = Singleton::get_instance( 'Fragen\Git_Updater\API\API', new REST_API() );
@@ -2165,7 +2158,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 		$rp->setValue( $api_singleton, $saved_type );
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		if ( is_wp_error( $result ) ) {
 			$this->markTestSkipped( 'Fixture plugin metadata unavailable.' );
@@ -2210,11 +2203,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
 
 		// Seed a release_asset_download so the download_link is populated.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset_download'] = 'https://github.com/afragen/test-gu-plugin/archive/refs/tags/2.0.0.zip';
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://github.com/afragen/test-gu-plugin/archive/refs/tags/2.0.0.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_redirect' );
 
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/update-api' );
 		$request->set_param( 'slug', self::SLUG );
@@ -2227,7 +2218,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
 		delete_site_transient( 'update_plugins' );
 		delete_site_transient( 'update_themes' );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 		$GLOBALS['wp_rest_server'] = null;
 
 		if ( isset( $data['error'] ) ) {
@@ -2278,12 +2269,10 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 		// Seed release_asset + release_asset_redirect, but NOT release_asset_download,
 		// so get_api_data() takes the elseif branch (lines 627-628).
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset']          = 'https://api.github.com/repos/afragen/test-gu-plugin/releases/assets/1234';
-		$existing['release_asset_redirect'] = 'https://example.com/cached-redirect.zip';
-		unset( $existing['release_asset_download'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset', 'https://api.github.com/repos/afragen/test-gu-plugin/releases/assets/1234', strtotime( '+12 hours' ) );
+		$table->add_entry( self::SLUG, 'release_asset_redirect', 'https://example.com/cached-redirect.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_download' );
 
 		// Set the type slug on the API singleton so get_repo_cache() works
 		// inside get_release_asset_redirect().
@@ -2306,7 +2295,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
 		delete_site_transient( 'update_plugins' );
 		delete_site_transient( 'update_themes' );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 		$GLOBALS['wp_rest_server'] = null;
 
 		if ( isset( $data['error'] ) ) {
@@ -2383,11 +2372,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		new Base();
 
 		// Seed a release_asset_download so build_download_metadata returns a download link.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset_download'] = 'https://example.com/release.zip';
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://example.com/release.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_redirect' );
 
 		// Use a subclass that captures the file path instead of calling exit.
 		$rest = new class() extends REST_API {
@@ -2421,7 +2408,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$result = $rest->proxy_download( $request );
 
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_for_streaming' ], 10 );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		if ( ! $rest->send_file_called && is_wp_error( $result ) ) {
 			$this->markTestSkipped( 'Fixture metadata unavailable: ' . $result->get_error_message() );
@@ -2451,11 +2438,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		new Base();
 
 		// Seed cache with a download link so build_download_metadata returns it.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset_download'] = 'https://example.com/download.zip';
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://example.com/download.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_redirect' );
 
 		$sign = new ReflectionMethod( REST_API::class, 'sign_download_url' );
 		PHP_VERSION_ID < 80100 && $sign->setAccessible( true );
@@ -2472,7 +2457,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$result = $this->rest->proxy_download( $request );
 
 		remove_all_filters( 'pre_http_request' );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		if ( ! is_wp_error( $result ) ) {
 			$this->markTestSkipped( 'Fixture metadata unavailable or download link not set.' );
@@ -2505,11 +2490,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 		new Base();
 
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset_download'] = 'https://example.com/forbidden.zip';
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://example.com/forbidden.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_redirect' );
 
 		$sign = new ReflectionMethod( REST_API::class, 'sign_download_url' );
 		PHP_VERSION_ID < 80100 && $sign->setAccessible( true );
@@ -2526,7 +2509,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$result = $this->rest->proxy_download( $request );
 
 		remove_all_filters( 'pre_http_request' );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		if ( ! is_wp_error( $result ) ) {
 			$this->markTestSkipped( 'Fixture metadata unavailable or download link not set.' );
@@ -2544,11 +2527,8 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		new Base();
 
 		// Clear any cached download link.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		unset( $existing['release_asset_download'] );
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( self::SLUG );
 
 		$sign = new ReflectionMethod( REST_API::class, 'sign_download_url' );
 		PHP_VERSION_ID < 80100 && $sign->setAccessible( true );
@@ -2565,7 +2545,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$result = $this->rest->proxy_download( $request );
 
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		// If metadata resolved successfully but download_link is empty, we get 404.
 		if ( is_wp_error( $result ) && 'gu_no_download_link' === $result->get_error_code() ) {
@@ -2619,11 +2599,8 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
 
 		// Clear any cached download link.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		unset( $existing['release_asset_download'] );
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( self::SLUG );
 
 		$method = new ReflectionMethod( REST_API::class, 'build_download_metadata' );
 		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
@@ -2632,7 +2609,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$result = $method->invoke( $this->rest, self::SLUG );
 
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		if ( is_wp_error( $result ) ) {
 			$this->markTestSkipped( 'Fixture plugin metadata unavailable.' );
@@ -2726,11 +2703,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
 
 		// Seed a release_asset_download so the download_link is populated.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset_download'] = 'https://github.com/afragen/test-gu-plugin/archive/refs/tags/2.0.0.zip';
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://github.com/afragen/test-gu-plugin/archive/refs/tags/2.0.0.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_redirect' );
 
 		// Hit plugins-api (not update-api) with the private repo.
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
@@ -2742,7 +2717,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		unset( $options[ self::SLUG ] );
 		update_site_option( 'git_updater', $options );
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		if ( isset( $data['error'] ) ) {
 			$this->markTestSkipped( 'Fixture metadata unavailable: ' . $data['error'] );
@@ -2780,11 +2755,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
 
 		// Seed a release_asset_download so build_download_metadata succeeds.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset_download'] = 'https://github.com/afragen/test-gu-plugin/archive/refs/tags/2.0.0.zip';
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://github.com/afragen/test-gu-plugin/archive/refs/tags/2.0.0.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_redirect' );
 
 		$rest    = new REST_API();
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/' . self::SLUG );
@@ -2793,7 +2766,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 		// Clean up.
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		if ( is_wp_error( $response ) ) {
 			$this->markTestSkipped( 'Fixture metadata unavailable: ' . $response->get_error_message() );

@@ -612,16 +612,20 @@ class REST_API {
 		];
 		uksort( $repo_api_data['versions'], fn ( $a, $b ) => version_compare( $b, $a ) );
 
-		$repo_cache = $this->get_repo_cache( $slug, false, 'release_asset_download' );
+		$repo_cache = $this->get_repo_cache( $slug, false, [ 'release_asset_download', 'release_asset' ] );
+		$api        = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this );
 
 		// Update release asset download link.
 		if ( $repo_data->release_asset ) {
-			if ( ! empty( $repo_cache )
+			if ( ! empty( $repo_cache['release_asset_download'] )
 				&& 'bitbucket' !== $repo_api_data['git']
 			) {
 				$repo_api_data['download_link'] = $channel && $use_channel && ! empty( $versions )
 					? reset( $versions )
-					: $repo_cache;
+					: $repo_cache['release_asset_download'];
+			} elseif ( isset( $repo_cache['release_asset'] ) && $repo_cache['release_asset'] ) {
+				$_REQUEST['override']           = true;
+				$repo_api_data['download_link'] = $api->get_release_asset_redirect( $repo_cache['release_asset'], true );
 			}
 		}
 
@@ -1092,7 +1096,7 @@ class REST_API {
 		// singleton being reset between tests while still respecting the
 		// redirect-following branch used when an AWS S3 redirect URL has
 		// expired in cache.
-		$repo_cache = $this->get_repo_cache( $slug, false );
+		$repo_cache = $this->get_repo_cache( $slug, false, [ 'release_asset_download', 'release_asset_redirect', 'release_asset' ] );
 
 		$build_auth = true;
 

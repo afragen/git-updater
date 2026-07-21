@@ -296,8 +296,9 @@ class Test_Cache_Table extends WP_UnitTestCase {
 	}
 
 	public function test_get_repo_cache_survives_get_entry(): void {
-		// get_entry() routes through get_repo(); both reads of the same slug
-		// in one request must share a single DB hit.
+		// get_entry() issues a projected (single-column) read: on a cold row
+		// cache, each distinct column is its own small DB hit instead of one
+		// shared full-row SELECT *.
 		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ] );
 
 		$queries = $this->count_cache_table_queries( function () {
@@ -305,7 +306,21 @@ class Test_Cache_Table extends WP_UnitTestCase {
 			$this->table->get_entry( 'test-plugin', 'meta' );
 		} );
 
-		$this->assertSame( 1, $queries );
+		$this->assertSame( 2, $queries );
+	}
+
+	public function test_get_entry_adds_no_queries_when_row_is_warm(): void {
+		// Once get_repo() has memoized the full row, get_entry() slices from
+		// the memoized row without querying again.
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ] );
+		$this->table->get_repo( 'test-plugin' );
+
+		$queries = $this->count_cache_table_queries( function () {
+			$this->assertSame( [ '1.0.0' ], $this->table->get_entry( 'test-plugin', 'tags' ) );
+			$this->table->get_entry( 'test-plugin', 'meta' );
+		} );
+
+		$this->assertSame( 0, $queries );
 	}
 
 	public function test_add_entry_invalidates_row_cache(): void {
