@@ -248,7 +248,7 @@ class API {
 		}
 
 		// @codeCoverageIgnoreStart
-		if ( 'file' === self::$method && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		if ( 'file' === self::$method ) {
 			$response_body = json_decode( wp_remote_retrieve_body( $response ) );
 			if ( null !== $response_body && is_object( $response_body ) && property_exists( $response_body, 'message' ) ) {
 				$name        = $this->type->name ?? '';
