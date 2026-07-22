@@ -15,8 +15,9 @@
 * add comprehensive documentation in `docs/lite-update-flow.md` explaining the new download flow and security features
 * add 100% test coverage for new `Lite_Domains` class, `get_download_token` endpoint, and `uses_lite` UI elements
 
-#### 14.0.1 / 2026-07-22
+#### 14.0.2 / 2026-07-22
 * always show API errors in error log
+* flush cache on update to 14.0.2
 
 #### 14.0.0 / 2026-07-21
 * fix `Additions/Repo_List_Table` security — remove blanket `WordPress.Security.ValidatedSanitizedInput` suppression; add capability check (`manage_options`/`manage_network_options`) and proper nonce verification on the delete path; sanitize bulk `slug` array so checkbox deletions actually work; fix `wp_slash`→`wp_unslash` on `page`/`tab` reads; remove orphaned unverified `_wpnonce_list` field
