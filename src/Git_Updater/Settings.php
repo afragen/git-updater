@@ -68,8 +68,25 @@ class Settings {
 	 */
 	public function __construct() {
 		self::$options = $this->get_class_vars( 'Base', 'options' );
+		$this->refresh_caches();
 		$this->load_options();
 		$this->load_api_subtabs();
+	}
+
+	/**
+	 * Check for cache refresh.
+	 *
+	 * @return void
+	 */
+	protected function refresh_caches() {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
+			return;
+		}
+
+		if ( isset( $_POST['gu_refresh_cache'] ) ) {
+			$this->delete_all_cached_data();
+			set_site_transient( 'gu_refresh_cache', true, 90 );
+		}
 	}
 
 	/**
@@ -310,6 +327,13 @@ class Settings {
 					submit_button();
 					?>
 				</form>
+				<?php if ( 'git_updater' === $subtab ) : ?>
+					<?php $refresh_transients = add_query_arg( [ 'git_updater_refresh_transients' => true ], $action ); ?>
+					<form class="settings" method="post" action="<?php echo esc_attr( $refresh_transients ); ?>">
+						<?php wp_nonce_field( 'gu_refresh_cache' ); ?>
+						<?php submit_button( esc_html__( 'Refresh Cache', 'git-updater' ), 'primary', 'gu_refresh_cache' ); ?>
+					</form>
+				<?php endif; ?>
 			<?php endif; ?>
 
 			<?php
@@ -725,9 +749,10 @@ class Settings {
 	 * @return void
 	 */
 	protected function redirect_on_save() {
-		$update        = false;
-		$reset_api_key = false;
-		$reset_api_key = Singleton::get_instance( 'Fragen\Git_Updater\Remote_Management', $this )->reset_api_key();
+		$update             = false;
+		$refresh_transients = $this->refresh_transients();
+		$reset_api_key      = false;
+		$reset_api_key      = Singleton::get_instance( 'Fragen\Git_Updater\Remote_Management', $this )->reset_api_key();
 
 		/**
 		 * Filter to add to $option_page array.
@@ -746,7 +771,7 @@ class Settings {
 
 		$redirect_url = is_multisite() ? network_admin_url( 'settings.php' ) : admin_url( 'options-general.php' );
 
-		if ( $is_option_page || $reset_api_key ) {
+		if ( $is_option_page || $refresh_transients || $reset_api_key ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$query = isset( $_POST['_wp_http_referer'] ) ? parse_url( html_entity_decode( esc_url_raw( wp_unslash( $_POST['_wp_http_referer'] ) ) ), PHP_URL_QUERY ) : '';
 			parse_str( (string) $query, $arr );
@@ -755,11 +780,12 @@ class Settings {
 
 			$location = add_query_arg(
 				[
-					'page'    => 'git-updater',
-					'tab'     => $arr['tab'],
-					'subtab'  => $arr['subtab'],
-					'reset'   => $reset_api_key,
-					'updated' => $update,
+					'page'               => 'git-updater',
+					'tab'                => $arr['tab'],
+					'subtab'             => $arr['subtab'],
+					'refresh_transients' => $refresh_transients,
+					'reset'              => $reset_api_key,
+					'updated'            => $update,
 				],
 				$redirect_url
 			);
@@ -767,6 +793,24 @@ class Settings {
 			wp_safe_redirect( $location );
 			exit; // @codeCoverageIgnore
 		}
+	}
+
+	/**
+	 * Clear Git Updater transients.
+	 *
+	 * @return bool
+	 */
+	private function refresh_transients() {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
+			return false;
+		}
+		if ( isset( $_REQUEST['git_updater_refresh_transients'] ) ) {
+			$_POST = $_REQUEST;
+
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

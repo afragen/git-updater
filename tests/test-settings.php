@@ -1436,7 +1436,6 @@ class Test_Settings_Subtabs_Gitlabce extends GU_Test_Case {
 		$this->assertArrayHasKey( 'gitlab', $result );
 	}
 }
-
 // =============================================================================
 // Test_Settings_OAuth_Revocation_Notice
 //
@@ -1496,3 +1495,176 @@ class Test_Settings_OAuth_Revocation_Notice extends GU_Test_Case {
 		$this->assertStringContainsString( 'access was revoked', $output );
 	}
 }
+
+// =============================================================================
+// Test_Settings_Refresh_Caches  — refresh_caches() and refresh_transients()
+// =============================================================================
+
+class Test_Settings_Refresh_Caches extends GU_Test_Case {
+	use Settings_Test_Helper;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->settings = new Settings();
+	}
+
+	public function tear_down(): void {
+		delete_site_transient( 'gu_refresh_cache' );
+		unset( $_POST['_wpnonce'], $_POST['gu_refresh_cache'] );
+		$this->settings_tear_down();
+		parent::tear_down();
+	}
+
+	public function test_refresh_caches_returns_early_without_nonce(): void {
+		unset( $_POST['_wpnonce'] );
+		$_POST['gu_refresh_cache'] = '1';
+		$this->call_private( 'refresh_caches' );
+		$this->assertFalse( get_site_transient( 'gu_refresh_cache' ) );
+	}
+
+	public function test_refresh_caches_returns_early_with_invalid_nonce(): void {
+		$_POST['_wpnonce']        = 'bad_nonce';
+		$_POST['gu_refresh_cache'] = '1';
+		$this->call_private( 'refresh_caches' );
+		$this->assertFalse( get_site_transient( 'gu_refresh_cache' ) );
+	}
+
+	public function test_refresh_caches_returns_early_without_gu_refresh_cache(): void {
+		$_POST['_wpnonce'] = wp_create_nonce( 'gu_refresh_cache' );
+		$this->call_private( 'refresh_caches' );
+		$this->assertFalse( get_site_transient( 'gu_refresh_cache' ) );
+	}
+
+	public function test_refresh_caches_deletes_cache_and_sets_transient_when_valid(): void {
+		$_POST['_wpnonce']        = wp_create_nonce( 'gu_refresh_cache' );
+		$_POST['gu_refresh_cache'] = '1';
+		$this->call_private( 'refresh_caches' );
+		$this->assertTrue( get_site_transient( 'gu_refresh_cache' ) );
+	}
+
+	public function test_refresh_transients_returns_false_without_nonce(): void {
+		unset( $_POST['_wpnonce'] );
+		$_REQUEST['git_updater_refresh_transients'] = '1';
+		$result = $this->call_private( 'refresh_transients' );
+		$this->assertFalse( $result );
+	}
+
+	public function test_refresh_transients_returns_false_with_invalid_nonce(): void {
+		$_POST['_wpnonce']                        = 'bad_nonce';
+		$_REQUEST['git_updater_refresh_transients'] = '1';
+		$result = $this->call_private( 'refresh_transients' );
+		$this->assertFalse( $result );
+	}
+
+	public function test_refresh_transients_returns_false_without_request_key(): void {
+		$_POST['_wpnonce'] = wp_create_nonce( 'gu_refresh_cache' );
+		unset( $_REQUEST['git_updater_refresh_transients'] );
+		$result = $this->call_private( 'refresh_transients' );
+		$this->assertFalse( $result );
+	}
+
+	public function test_refresh_transients_returns_true_when_valid(): void {
+		$_POST['_wpnonce']                        = wp_create_nonce( 'gu_refresh_cache' );
+		$_REQUEST['git_updater_refresh_transients'] = '1';
+		$result = $this->call_private( 'refresh_transients' );
+		$this->assertTrue( $result );
+	}
+}
+
+
+// =============================================================================
+// Test_Settings_Create_Admin_Page_Refresh_Button  — Refresh Cache button
+// =============================================================================
+
+class Test_Settings_Create_Admin_Page_Refresh_Button extends GU_Test_Case {
+	use Settings_Test_Helper;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->settings = new Settings();
+		$this->settings->run();
+		include_once ABSPATH . 'wp-admin/includes/template.php';
+	}
+
+	public function tear_down(): void {
+		$this->settings_tear_down();
+		parent::tear_down();
+	}
+
+	public function test_create_admin_page_renders_refresh_cache_button_on_settings_tab(): void {
+		$_GET['_wpnonce'] = wp_create_nonce( 'gu_settings' );
+		$_GET['tab']      = 'git_updater_settings';
+		$_GET['subtab']   = 'git_updater';
+		add_filter( 'gu_config_pre_process', '__return_empty_array' );
+		ob_start();
+		$this->settings->create_admin_page();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( 'Refresh Cache', $output );
+		$this->assertStringContainsString( 'gu_refresh_cache', $output );
+	}
+
+	public function test_create_admin_page_does_not_render_refresh_cache_button_on_other_tab(): void {
+		$_GET['_wpnonce'] = wp_create_nonce( 'gu_settings' );
+		$_GET['tab']      = 'git_updater_additions';
+		$_GET['subtab']   = 'git_updater';
+		add_filter( 'gu_config_pre_process', '__return_empty_array' );
+		ob_start();
+		$this->settings->create_admin_page();
+		$output = ob_get_clean();
+		$this->assertStringNotContainsString( 'Refresh Cache', $output );
+	}
+
+	public function test_create_admin_page_does_not_render_refresh_cache_button_on_settings_with_other_subtab(): void {
+		$_GET['_wpnonce'] = wp_create_nonce( 'gu_settings' );
+		$_GET['tab']      = 'git_updater_settings';
+		$_GET['subtab']   = 'github';
+		add_filter( 'gu_config_pre_process', '__return_empty_array' );
+		ob_start();
+		$this->settings->create_admin_page();
+		$output = ob_get_clean();
+		$this->assertStringNotContainsString( 'Refresh Cache', $output );
+	}
+}
+
+
+// =============================================================================
+// Test_Settings_Redirect_Refresh_Transients  — redirect_on_save with refresh
+// =============================================================================
+
+class Test_Settings_Redirect_Refresh_Transients extends GU_Test_Case {
+	use Settings_Test_Helper;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->settings = new Settings();
+	}
+
+	public function tear_down(): void {
+		delete_site_option( 'git_updater' );
+		unset( $_POST['_wpnonce'], $_REQUEST['git_updater_refresh_transients'] );
+		$this->settings_tear_down();
+		parent::tear_down();
+	}
+
+	public function test_redirect_on_save_includes_refresh_transients_in_url(): void {
+		$_POST['_wpnonce']                        = wp_create_nonce( 'gu_refresh_cache' );
+		$_REQUEST['git_updater_refresh_transients'] = '1';
+		add_filter(
+			'wp_redirect',
+			static fn( $url ) => throw new RuntimeException( 'redirect:' . $url ),
+			1
+		);
+		$rm = new ReflectionMethod( Settings::class, 'redirect_on_save' );
+		$rm->setAccessible( true );
+		try {
+			$rm->invoke( $this->settings );
+			$this->fail( 'Expected redirect exception' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( 'refresh_transients=1', $e->getMessage() );
+		}
+	}
+}
+
