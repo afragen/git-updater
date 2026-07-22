@@ -3,7 +3,7 @@
 .vscode
 .claude
 
-.commandcode/
+.commandcode/*
 !.commandcode/taste
 
 vendor/
