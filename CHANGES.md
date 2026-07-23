@@ -1,4 +1,7 @@
 #### [unreleased]
+* add body-based "Bad Credentials" detection to API error handling — when a response (200 or 4xx) contains this message, Git Updater now automatically attempts a token refresh and retries the request, improving recovery from invalid/expired tokens that aren't signaled by 401/403 status codes
+* refactor `API::api()` method — extracted token refresh retry logic into `maybe_refresh_token_and_retry()`, `should_attempt_token_refresh()`, and `has_bad_credentials_message()` for improved readability and testability
+* add comprehensive tests for new token refresh scenarios including 200/4xx with "Bad Credentials", ensuring correct behavior with and without refresh tokens
 * fix `GitHub_API::construct_download_link()` clobbering a valid cached `release_asset_download` with `false` when no release assets are returned — only cache a resolved asset URL
 * fix `REST_API::build_download_metadata()` to build auth headers after the final download link is resolved, so release asset and redirect overrides get correct headers
 * add `: bool` return type declaration to `GU_Trait::use_release_asset()`

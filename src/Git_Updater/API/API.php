@@ -189,6 +189,7 @@ class API {
 		$error_cache = $this->get_repo_cache( $this->type->slug . '_error' );
 		$cached      = isset( $error_cache['error_cache'] );
 		$response    = false;
+		$code        = 0;
 		if ( ! $cached ) {
 			if ( apply_filters( 'gu_debug_api_requests', false ) ) {
 				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
@@ -196,35 +197,26 @@ class API {
 			}
 			$response = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
 
-			$code          = (int) wp_remote_retrieve_response_code( $response );
-			$allowed_codes = [ 200 ];
-
 			if ( is_wp_error( $response ) ) {
 				Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
 
 				return $response;
 			}
 
-			// Reactive token refresh on 401/403.
-			if ( in_array( $code, [ 401, 403 ], true ) ) {
-				$provider = $this->detect_provider_from_url( $url );
-				if ( $provider ) {
-					$new_token = Singleton::get_instance( OAuth_Connect::class, $this )->refresh_token( $provider );
-					if ( $new_token ) {
-						$auth_header = $this->add_auth_header( [], $url );
-						$response    = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
-						if ( is_wp_error( $response ) ) {
-							Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
+			$code = (int) wp_remote_retrieve_response_code( $response );
 
-							return $response;
-						}
-						$code = (int) wp_remote_retrieve_response_code( $response );
-					}
+			// Determine if we should attempt token refresh.
+			if ( $this->should_attempt_token_refresh( $code, $response ) ) {
+				list( $response, $code ) = $this->maybe_refresh_token_and_retry( $url, $response, $code );
+				if ( is_wp_error( $response ) ) {
+					Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
+
+					return $response;
 				}
 			}
 
 			// Cache HTTP API error code. Transient errors get shorter timeout.
-			if ( ! in_array( $code, $allowed_codes, true ) ) {
+			if ( ! in_array( $code, [ 200 ], true ) ) {
 				$timeout = in_array( $code, [ 404, 410 ], true ) ? 60 : 5;
 				$this->set_repo_cache(
 					'error_cache',
@@ -274,6 +266,74 @@ class API {
 		$body = wp_remote_retrieve_body( $response );
 
 		return is_null( json_decode( $body ) ) ? $body : json_decode( $body );
+	}
+
+	/**
+	 * Determine if a token refresh should be attempted based on HTTP status and response body.
+	 *
+	 * @param int        $code     HTTP response code.
+	 * @param mixed      $response The raw WP_HTTP response or array.
+	 * @return bool True if refresh should be attempted.
+	 */
+	protected function should_attempt_token_refresh( int $code, $response ): bool {
+		// Always attempt refresh on 401/403.
+		if ( in_array( $code, [ 401, 403 ], true ) ) {
+			return true;
+		}
+
+		// For success (200) or other 4xx client errors, check body for 'Bad Credentials'.
+		if ( $code >= 200 && $code < 500 ) {
+			return $this->has_bad_credentials_message( $response );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if the response body contains a 'Bad Credentials' message.
+	 *
+	 * @param mixed $response The raw WP_HTTP response array.
+	 * @return bool True if body message contains 'Bad Credentials' (case-insensitive).
+	 */
+	protected function has_bad_credentials_message( $response ): bool {
+		// Use WordPress function to safely extract body.
+		$body = wp_remote_retrieve_body( $response );
+		if ( empty( $body ) ) {
+			return false;
+		}
+
+		$decoded = json_decode( $body );
+		if ( null === $decoded || ! is_object( $decoded ) || ! property_exists( $decoded, 'message' ) ) {
+			return false;
+		}
+
+		return false !== stripos( $decoded->message, 'Bad Credentials' );
+	}
+
+	/**
+	 * Attempt a token refresh and retry the original request once.
+	 *
+	 * @param string $url    The original request URL.
+	 * @param mixed  $response The original response.
+	 * @param int    $code    The original HTTP status code.
+	 * @return array{0: mixed, 1: int} Array containing [ new_response, new_code ].
+	 */
+	protected function maybe_refresh_token_and_retry( string $url, $response, int $code ): array {
+		$provider = $this->detect_provider_from_url( $url );
+		if ( ! $provider ) {
+			return [ $response, $code ];
+		}
+
+		$new_token = Singleton::get_instance( OAuth_Connect::class, $this )->refresh_token( $provider );
+		if ( ! $new_token ) {
+			return [ $response, $code ];
+		}
+
+		$auth_header = $this->add_auth_header( [], $url );
+		$new_response = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
+		$new_code = (int) wp_remote_retrieve_response_code( $new_response );
+
+		return [ $new_response, $new_code ];
 	}
 
 	/**
