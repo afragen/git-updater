@@ -22,9 +22,13 @@ See [workflow/taste.md](workflow/taste.md)
 - Use `$wpdb->prepare()` with `%i` placeholders for table names (SQL identifiers) in `$wpdb->query()` DDL calls instead of raw concatenation with `phpcs:ignore`. Confidence: 0.65
 - Fix WPCS errors properly by restructuring code rather than silencing them with `phpcs:ignore` comments. Confidence: 0.82
 - Place `phpcs:ignore` comments on the line preceding the suppressed code, not trailing on the same line. Confidence: 0.72
+- Use `wp_remote_retrieve_body()` to extract the response body from WordPress HTTP API calls rather than manually accessing the array. Confidence: 0.95
 
 # PHPStan
 - When fixing PHPStan return type errors, update the `@return` docblock to match the actual return type of the underlying method call, instead of changing the calling code's return behavior. Confidence: 0.75
+- When adding new error handling or authentication recovery logic, extract complex inline sections into focused, well-named protected/private helper methods (e.g., `should_attempt_token_refresh()`, `has_bad_credentials_message()`, `maybe_refresh_token_and_retry()`) to improve readability, testability, and separation of concerns. Confidence: 0.90
+- For string matching of error messages from external services, use case-insensitive comparison (e.g., `stripos()`) to be robust against provider variations. Confidence: 0.90
+- When implementing automatic retry mechanisms for API authentication, trigger token refresh on HTTP 401/403 OR when the response body contains auth error indicators (like "Bad Credentials") on 200 or 4xx codes, but never retry on 5xx server errors. Confidence: 0.85
 
 # architecture
 See [architecture/taste.md](architecture/taste.md)

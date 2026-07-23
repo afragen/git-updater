@@ -5,3 +5,4 @@
 - Use tiered approach: address High priority issues first, then Medium, then Low. Confidence: 0.80
 - When taste files are modified, omit them from any commit rather than reverting them with git checkout. Confidence: 0.70
 - Create a CHANGES.md entry before committing, unless the user explicitly specifies to commit without changelog entries. Confidence: 0.85
+- Use Apple Container and opossum via wp-env-opossum for container operations instead of running Docker directly. Confidence: 0.90
