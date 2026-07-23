@@ -56,7 +56,7 @@ trait API_Common {
 	 * @return array<string, mixed>|string|\WP_Error|stdClass $response Release asset download link.
 	 */
 	private function parse_release_asset( $git, $request, $response ) {
-		if ( is_wp_error( $response ) || ! ( is_array( $response ) || is_object( $response ) ) || null === $response ) {
+		if ( is_wp_error( $response ) || is_scalar( $response ) ) {
 			return '';
 		}
 		if ( in_array( $git, [ 'github', 'gitea' ], true ) ) {
@@ -73,7 +73,7 @@ trait API_Common {
 					continue;
 				}
 				// Ignore leading 'v' and skip anything with dash or words.
-				if ( isset( $release->assets ) && ! preg_match( '/[^v]+[-a-z]+/', $release->tag_name ) ) {
+				if ( ! preg_match( '/[^v]+[-a-z]+/', $release->tag_name ) ) {
 					foreach ( $release->assets as $asset ) {
 						if ( str_starts_with( $asset->name, $this->type->slug ) ) {
 							$release_assets[ $release->tag_name ] = $asset->url;
