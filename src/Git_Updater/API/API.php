@@ -271,8 +271,8 @@ class API {
 	/**
 	 * Determine if a token refresh should be attempted based on HTTP status and response body.
 	 *
-	 * @param int        $code     HTTP response code.
-	 * @param mixed      $response The raw WP_HTTP response or array.
+	 * @param int   $code     HTTP response code.
+	 * @param mixed $response The raw WP_HTTP response or array.
 	 * @return bool True if refresh should be attempted.
 	 */
 	protected function should_attempt_token_refresh( int $code, $response ): bool {
@@ -329,9 +329,9 @@ class API {
 			return [ $response, $code ];
 		}
 
-		$auth_header = $this->add_auth_header( [], $url );
+		$auth_header  = $this->add_auth_header( [], $url );
 		$new_response = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
-		$new_code = (int) wp_remote_retrieve_response_code( $new_response );
+		$new_code     = (int) wp_remote_retrieve_response_code( $new_response );
 
 		return [ $new_response, $new_code ];
 	}

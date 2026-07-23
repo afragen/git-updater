@@ -728,6 +728,34 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->assertFalse( $this->oauth->is_token_expired( 'bitbucket', 60 ) );
 	}
 
+	public function test_is_token_expired_returns_false_when_github_token_is_fresh(): void {
+		update_site_option( 'git_updater', [
+			'github_access_token'       => 'ghu_tok',
+			'github_token_expires_in'   => 28800,
+			'github_token_acquired_at'  => time(),
+		] );
+		$this->assertFalse( $this->oauth->is_token_expired( 'github' ) );
+	}
+
+	public function test_is_token_expired_returns_true_when_github_token_is_expired(): void {
+		update_site_option( 'git_updater', [
+			'github_access_token'       => 'ghu_tok',
+			'github_token_expires_in'   => 28800,
+			'github_token_acquired_at'  => time() - 28801,
+		] );
+		$this->assertTrue( $this->oauth->is_token_expired( 'github' ) );
+	}
+
+	public function test_is_token_expired_returns_true_when_github_token_within_buffer(): void {
+		update_site_option( 'git_updater', [
+			'github_access_token'       => 'ghu_tok',
+			'github_token_expires_in'   => 28800,
+			'github_token_acquired_at'  => time() - 28600,
+		] );
+		// 200s remaining, buffer=300 → expired
+		$this->assertTrue( $this->oauth->is_token_expired( 'github' ) );
+	}
+
 	// -------------------------------------------------------------------------
 	// refresh_token() tests
 	// -------------------------------------------------------------------------
@@ -818,6 +846,74 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$options = get_site_option( 'git_updater' );
 		$this->assertSame( 'old_ref', $options['gitlab_refresh_token'] );
+	}
+
+	public function test_refresh_token_github_success_stores_rotated_refresh_token(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'github_access_token'       => 'ghu_old',
+			'github_refresh_token'      => 'ghr_old',
+			'github_token_expires_in'   => 28800,
+			'github_token_acquired_at'  => time() - 28801,
+		] );
+
+		add_filter( 'pre_http_request', static function ( $preempt, $args, $url ) {
+			if ( strpos( $url, '/git-updater/github/oauth/refresh' ) !== false ) {
+				return [
+					'response' => [ 'code' => 200 ],
+					'body'     => wp_json_encode( [
+						'access_token'  => 'ghu_new',
+						'refresh_token' => 'ghr_new',
+						'expires_in'    => 28800,
+					] ),
+					'headers'  => [],
+				];
+			}
+			return $preempt;
+		}, 10, 3 );
+
+		$result = $this->oauth->refresh_token( 'github' );
+		$this->assertSame( 'ghu_new', $result );
+
+		$options = get_site_option( 'git_updater' );
+		$this->assertSame( 'ghu_new', $options['github_access_token'] );
+		$this->assertSame( 'ghr_new', $options['github_refresh_token'] );
+		$this->assertSame( 28800, $options['github_token_expires_in'] );
+		$this->assertArrayHasKey( 'github_token_acquired_at', $options );
+		$this->assertSame( 'oauth', $options['github_is_oauth_token'] );
+		$this->assertSame( 'success', get_site_transient( 'gu_oauth_refresh_result_github' ) );
+	}
+
+	public function test_refresh_token_github_failure_preserves_options(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		$original                   = [
+			'github_access_token'       => 'ghu_old',
+			'github_refresh_token'      => 'ghr_old',
+			'github_token_expires_in'   => 28800,
+			'github_token_acquired_at'  => time() - 28801,
+		];
+		update_site_option( 'git_updater', $original );
+
+		add_filter( 'pre_http_request', static function ( $preempt, $args, $url ) {
+			if ( strpos( $url, '/git-updater/github/oauth/refresh' ) !== false ) {
+				return [
+					'response' => [ 'code' => 401 ],
+					'body'     => wp_json_encode( [
+						'error'             => 'bad_refresh_token',
+						'error_description' => 'The refresh token is invalid or expired.',
+					] ),
+					'headers'  => [],
+				];
+			}
+			return $preempt;
+		}, 10, 3 );
+
+		$this->assertNull( $this->oauth->refresh_token( 'github' ) );
+		$this->assertSame( 'failure', get_site_transient( 'gu_oauth_refresh_result_github' ) );
+
+		$options = get_site_option( 'git_updater' );
+		$this->assertSame( $original['github_access_token'], $options['github_access_token'] );
+		$this->assertSame( $original['github_refresh_token'], $options['github_refresh_token'] );
 	}
 
 	// -------------------------------------------------------------------------
