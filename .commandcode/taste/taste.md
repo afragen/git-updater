@@ -32,3 +32,6 @@ See [workflow/taste.md](workflow/taste.md)
 
 # architecture
 See [architecture/taste.md](architecture/taste.md)
+
+# Documentation
+- Place documentation files in the `docs/` directory. Confidence: 0.95
