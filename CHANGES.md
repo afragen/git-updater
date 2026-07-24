@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 14.1.0 / 2026-07-24
 * add body-based "Bad Credentials" detection to API error handling — when a response (200 or 4xx) contains this message, Git Updater now automatically attempts a token refresh and retries the request, improving recovery from invalid/expired tokens that aren't signaled by 401/403 status codes
 * refactor `API::api()` method — extracted token refresh retry logic into `maybe_refresh_token_and_retry()`, `should_attempt_token_refresh()`, and `has_bad_credentials_message()` for improved readability and testability
 * add comprehensive tests for new token refresh scenarios including 200/4xx with "Bad Credentials", ensuring correct behavior with and without refresh tokens
