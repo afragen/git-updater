@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-24T15:31:00+00:00\n"
+"POT-Creation-Date: 2026-07-24T15:44:48+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: git-updater\n"
@@ -148,45 +148,45 @@ msgstr ""
 msgid "Add-Ons"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:461
+#: src/Git_Updater/API/GitHub_API.php:455
 msgid "GitHub Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:492
-#: src/Git_Updater/API/GitHub_API.php:576
+#: src/Git_Updater/API/GitHub_API.php:486
+#: src/Git_Updater/API/GitHub_API.php:570
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:501
+#: src/Git_Updater/API/GitHub_API.php:495
 msgid "GitHub OAuth"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:510
+#: src/Git_Updater/API/GitHub_API.php:504
 #: src/Git_Updater/OAuth/OAuth_Connect.php:144
 msgid "Remove Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:523
+#: src/Git_Updater/API/GitHub_API.php:517
 msgid "GitHub Private Settings"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:552
+#: src/Git_Updater/API/GitHub_API.php:546
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:561
+#: src/Git_Updater/API/GitHub_API.php:555
 msgid "Click the \"Connect GitHub\" button for an OAuth connection or enter your GitHub Access Token to avoid API access limits."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:562
+#: src/Git_Updater/API/GitHub_API.php:556
 msgid "Access tokens are stored in this site's options table. Database backups contain them in cleartext — handle backup files accordingly."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:592
+#: src/Git_Updater/API/GitHub_API.php:586
 msgid "GitHub"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:608
+#: src/Git_Updater/API/GitHub_API.php:602
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
