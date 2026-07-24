@@ -1,5 +1,25 @@
 #### [unreleased]
 
+#### 14.1.0 / 2026-07-24
+* add body-based "Bad Credentials" detection to API error handling — when a response (200 or 4xx) contains this message, Git Updater now automatically attempts a token refresh and retries the request, improving recovery from invalid/expired tokens that aren't signaled by 401/403 status codes
+* refactor `API::api()` method — extracted token refresh retry logic into `maybe_refresh_token_and_retry()`, `should_attempt_token_refresh()`, and `has_bad_credentials_message()` for improved readability and testability
+* add comprehensive tests for new token refresh scenarios including 200/4xx with "Bad Credentials", ensuring correct behavior with and without refresh tokens
+* fix `GitHub_API::construct_download_link()` clobbering a valid cached `release_asset_download` with `false` when no release assets are returned — only cache a resolved asset URL
+* fix `REST_API::build_download_metadata()` to build auth headers after the final download link is resolved, so release asset and redirect overrides get correct headers
+* add `: bool` return type declaration to `GU_Trait::use_release_asset()`
+* fix `Repo_List_Table::column_default()` to return `false` for empty `release_asset`/`private_package`/`uses_lite` columns
+* implement two-step download flow for `git-updater-lite` to resolve cache mismatch between signed URL TTL and 6-hour client cache
+* add REST endpoint for generating fresh 60-second signed URLs for lite updates
+* isolate token URL generation strictly to the `update-api` route; main plugin continues to receive 12-hour signed URLs
+* add server-centric domain validation for private packages (optional, filterable via `git_updater_lite_authorized_domains`)
+* new `Lite_Domains` settings class and UI for managing authorized domains per slug with automatic subdomain matching
+* new "Uses Git Updater Lite" checkbox in Additions settings to manually flag packages for domain configuration
+* auto-detect private packages with `Update URI` header for domain configuration recommendations
+* client-side interception in `git-updater-lite` to fetch fresh download tokens via `upgrader_pre_download` hook
+* add domain header (`X-GU-Site-Domain`) to download token requests for server-side validation
+* add comprehensive documentation in `docs/lite-update-flow.md` explaining the new download flow and security features
+* add 100% test coverage for new `Lite_Domains` class, `get_download_token` endpoint, and `uses_lite` UI elements
+
 #### 14.0.2 / 2026-07-22
 * always show API errors in error log
 * flush cache on update to 14.0.2

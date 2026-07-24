@@ -174,7 +174,9 @@ class GitHub_API extends API implements API_Interface {
 				}
 			}
 
-			$this->set_repo_cache( 'release_asset_download', $release_asset );
+			if ( $release_asset ) {
+				$this->set_repo_cache( 'release_asset_download', $release_asset );
+			}
 			return $release_asset;
 		}
 
@@ -395,6 +397,7 @@ class GitHub_API extends API implements API_Interface {
 	protected function parse_contents_response( $response ) {
 		$files = [];
 		$dirs  = [];
+
 		foreach ( $response as $content ) {
 			$content = (object) $content;
 			if ( property_exists( $content, 'type' ) && 'file' === $content->type ) {

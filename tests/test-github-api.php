@@ -802,6 +802,30 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 	}
 
 	/**
+	 * When release_assets resolves to an empty assets array, a previously cached
+	 * release_asset_download must not be overwritten with a falsy value.
+	 */
+	public function test_construct_download_link_does_not_clobber_cached_release_asset_download(): void {
+		$cached_url = 'https://github.com/test-owner/test-plugin/releases/download/v1.0.0/plugin.zip';
+		$this->seed_cache(
+			[
+				'release_asset_download' => $cached_url,
+				'release_assets'         => [
+					'assets'     => [],
+					'dev_assets' => [],
+				],
+			]
+		);
+
+		$result = $this->api->construct_download_link();
+
+		$this->assertFalse( $result );
+
+		$cache = $this->api->get_repo_cache( 'test-plugin' );
+		$this->assertSame( $cached_url, $cache['release_asset_download'] );
+	}
+
+	/**
 	 * When gu_dev_release_asset filter returns true and the dev asset version is
 	 * newer than the stable asset version, the dev asset URL is selected (lines 171-174).
 	 * The call ultimately returns false because construct_download_link exits

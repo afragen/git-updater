@@ -385,6 +385,27 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 		$this->assertEmpty( $result['dev_assets'] );
 	}
 
+	/**
+	 * A release missing 'assets' or 'tag_name' (e.g. a draft/malformed entry) is
+	 * skipped via the `continue` at API_Common.php:73, while subsequent valid
+	 * releases are still processed normally.
+	 */
+	public function test_parse_release_asset_skips_release_without_assets_or_tag_name(): void {
+		$rm    = $this->api->get_reflection_method( $this->api, 'parse_release_asset' );
+		$asset = (object) [
+			'name'       => 'test-plugin-1.2.0.zip',
+			'url'        => 'https://example.com/test-plugin-1.2.0.zip',
+			'created_at' => '2024-07-01T00:00:00Z',
+		];
+		$malformed = (object) [ 'tag_name' => '0.9.0' ]; // No 'assets' key → hits line 73.
+		$release   = (object) [ 'tag_name' => '1.2.0', 'assets' => [ $asset ] ];
+		$result    = $rm->invoke( $this->api, 'github', '/repos/:owner/:repo/releases', [ $malformed, $release ] );
+
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( '1.2.0', $result['assets'] );
+		$this->assertSame( 'https://example.com/test-plugin-1.2.0.zip', $result['assets']['1.2.0'] );
+	}
+
 	// -------------------------------------------------------------------------
 	// get_remote_api_info() — maybe_extend_repo_cache() returns true (line 154)
 	// -------------------------------------------------------------------------

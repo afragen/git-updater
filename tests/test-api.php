@@ -1768,6 +1768,220 @@ class Test_API_Detect_Provider extends WP_UnitTestCase {
 	}
 
 	// -------------------------------------------------------------------------
+	// Body-based "Bad Credentials" detection and refresh
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When response body contains "Bad Credentials" message with a 200 status,
+	 * a token refresh is attempted and the request is retried on success.
+	 */
+	public function test_api_retries_on_200_with_bad_credentials_message_after_refresh(): void {
+		$api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$api_call_count ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return $preempt;
+				}
+				$api_call_count++;
+				if ( 1 === $api_call_count ) {
+					return [
+						'response' => [ 'code' => 200, 'message' => 'OK' ],
+						'body'     => wp_json_encode( [ 'message' => 'Bad Credentials' ] ),
+						'headers'  => [],
+					];
+				}
+				return [
+					'response' => [ 'code' => 200, 'message' => 'OK' ],
+					'body'     => wp_json_encode( [ 'name' => 'test-plugin' ] ),
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		$oauth = \Fragen\Singleton::get_instance( \Fragen\Git_Updater\OAuth\OAuth_Connect::class, $this->api );
+		$oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'github_access_token'  => 'old_tok',
+			'github_refresh_token' => 'ref',
+		] );
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return [
+						'response' => [ 'code' => 200 ],
+						'body'     => wp_json_encode( [ 'access_token' => 'new_tok', 'expires_in' => 7200 ] ),
+						'headers'  => [],
+					];
+				}
+				return $preempt;
+			},
+			20,
+			3
+		);
+
+		$result = $this->api->api( $this->endpoint );
+
+		$this->assertSame( 2, $api_call_count );
+		$this->assertIsObject( $result );
+		$this->assertSame( 'test-plugin', $result->name );
+	}
+
+	/**
+	 * When response body does NOT contain "Bad Credentials", no refresh is attempted.
+	 */
+	public function test_api_does_not_retry_on_200_without_bad_credentials(): void {
+		$api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$api_call_count ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return $preempt;
+				}
+				$api_call_count++;
+				return [
+					'response' => [ 'code' => 200, 'message' => 'OK' ],
+					'body'     => wp_json_encode( [ 'name' => 'test-plugin' ] ),
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		update_site_option( 'git_updater', [ 'github_access_token' => 'some_tok' ] );
+
+		$result = $this->api->api( $this->endpoint );
+
+		$this->assertSame( 1, $api_call_count );
+		$this->assertIsObject( $result );
+		$this->assertSame( 'test-plugin', $result->name );
+	}
+
+	/**
+	 * When a 4xx response contains "Bad Credentials", refresh is attempted.
+	 */
+	public function test_api_retries_on_4xx_with_bad_credentials_message_after_refresh(): void {
+		$api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$api_call_count ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return $preempt;
+				}
+				$api_call_count++;
+				if ( 1 === $api_call_count ) {
+					return [
+						'response' => [ 'code' => 422, 'message' => 'Unprocessable Entity' ],
+						'body'     => wp_json_encode( [ 'message' => 'Bad Credentials' ] ),
+						'headers'  => [],
+					];
+				}
+				return [
+					'response' => [ 'code' => 200, 'message' => 'OK' ],
+					'body'     => wp_json_encode( [ 'name' => 'test-plugin' ] ),
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		$oauth = \Fragen\Singleton::get_instance( \Fragen\Git_Updater\OAuth\OAuth_Connect::class, $this->api );
+		$oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'github_access_token'  => 'old_tok',
+			'github_refresh_token' => 'ref',
+		] );
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return [
+						'response' => [ 'code' => 200 ],
+						'body'     => wp_json_encode( [ 'access_token' => 'new_tok', 'expires_in' => 7200 ] ),
+						'headers'  => [],
+					];
+				}
+				return $preempt;
+			},
+			20,
+			3
+		);
+
+		$result = $this->api->api( $this->endpoint );
+
+		$this->assertSame( 2, $api_call_count );
+		$this->assertIsObject( $result );
+		$this->assertSame( 'test-plugin', $result->name );
+	}
+
+	/**
+	 * When a 5xx response contains "Bad Credentials", no refresh is attempted.
+	 */
+	public function test_api_does_not_retry_on_5xx_with_bad_credentials_message(): void {
+		$api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$api_call_count ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return $preempt;
+				}
+				$api_call_count++;
+				return [
+					'response' => [ 'code' => 500, 'message' => 'Internal Server Error' ],
+					'body'     => wp_json_encode( [ 'message' => 'Bad Credentials' ] ),
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		update_site_option( 'git_updater', [ 'github_access_token' => 'some_tok' ] );
+
+		$result = $this->api->api( $this->endpoint );
+
+		$this->assertSame( 1, $api_call_count );
+		// Result should be an object with properties from the error response or possibly cached error.
+		$this->assertIsObject( $result );
+	}
+
+	/**
+	 * When provider cannot be detected from URL, no refresh is attempted even with Bad Credentials.
+	 */
+	public function test_api_does_not_retry_when_provider_not_detected_with_bad_credentials_message(): void {
+		$api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$api_call_count ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return $preempt;
+				}
+				$api_call_count++;
+				return [
+					'response' => [ 'code' => 200, 'message' => 'OK' ],
+					'body'     => wp_json_encode( [ 'message' => 'Bad Credentials' ] ),
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		// Use a URL that doesn't match any provider pattern.
+		$this->type->enterprise_api = 'https://unknown.example.com/api';
+		$this->api->api( $this->endpoint );
+
+		$this->assertSame( 1, $api_call_count );
+	}
+
+	// -------------------------------------------------------------------------
 	// get_release_asset_redirect() — full coverage
 	// -------------------------------------------------------------------------
 
