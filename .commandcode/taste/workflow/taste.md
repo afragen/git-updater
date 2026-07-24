@@ -7,3 +7,8 @@
 - Never include taste files in code commits; user will commit taste files manually. Confidence: 0.95
 - Create a CHANGES.md entry before committing, unless the user explicitly specifies to commit without changelog entries. Confidence: 0.85
 - Use Apple Container and opossum via wp-env-opossum for container operations instead of running Docker directly. Confidence: 0.90
+- When the same bug affects multiple satellite plugin repos with an identical root cause, apply the same fix uniformly across every affected repo, and commit each repo separately using the same commit message (e.g., loop over the repos). Confidence: 0.80
+- Write detailed commit messages: a concise summary line, a body paragraph explaining the root cause, a bulleted list of the changes, and a `Co-authored-by: CommandCodeBot <noreply@commandcode.ai>` trailer. Confidence: 0.65
+- Once the root cause is understood and a fix is identified, proceed to implementation promptly rather than continuing to investigate; the user nudges when analysis drags on. Confidence: 0.75
+- After adding or changing a Composer dependency in `composer.json`, also update `composer.lock` (e.g., `composer update <package> --with-dependencies --no-interaction`) so the committed lock file stays in sync and CI installs the new dependency. Confidence: 0.65
+- In the API plugin repos (e.g., git-updater-bitbucket, git-updater-gitea, git-updater-gitlab), `.gitignore` should use an allowlist approach for `vendor/`: ignore everything except the minimal paths needed for CI autoloading — track only `vendor/composer` and `vendor/autoload.php` (`vendor/bin` and `vendor/afragen/singleton` are NOT tracked). Do not add per-package ignore entries for each installed dev dependency. Confidence: 0.90

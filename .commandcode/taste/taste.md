@@ -5,6 +5,9 @@
 # Plans
 - Create plans in the local `.commandcode/plans/` directory. Confidence: 0.70
 
+# Communication
+- User issues terse, single-word directives (e.g., "commit") and expects the assistant to infer the full scope of the action from the preceding context; also pastes raw CI/test failure output as the entire message, with no instructions, expecting the assistant to diagnose and fix it. Confidence: 0.70
+
 # Security
 - Proactively offer security reviews for codebase changes. Confidence: 0.85
 
