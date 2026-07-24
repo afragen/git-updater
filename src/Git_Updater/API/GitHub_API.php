@@ -397,12 +397,6 @@ class GitHub_API extends API implements API_Interface {
 	protected function parse_contents_response( $response ) {
 		$files = [];
 		$dirs  = [];
-		if ( is_scalar( $response ) ) {
-			return [
-				'files' => $files,
-				'dirs'  => $dirs,
-			];
-		}
 
 		foreach ( $response as $content ) {
 			$content = (object) $content;
