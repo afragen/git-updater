@@ -884,15 +884,14 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->assertSame( 'success', get_site_transient( 'gu_oauth_refresh_result_github' ) );
 	}
 
-	public function test_refresh_token_github_failure_preserves_options(): void {
+	public function test_refresh_token_github_failure_deletes_token(): void {
 		$this->oauth->connector_url = 'https://connector.example.com/';
-		$original                   = [
+		update_site_option( 'git_updater', [
 			'github_access_token'       => 'ghu_old',
 			'github_refresh_token'      => 'ghr_old',
 			'github_token_expires_in'   => 28800,
 			'github_token_acquired_at'  => time() - 28801,
-		];
-		update_site_option( 'git_updater', $original );
+		] );
 
 		add_filter( 'pre_http_request', static function ( $preempt, $args, $url ) {
 			if ( strpos( $url, '/git-updater/github/oauth/refresh' ) !== false ) {
@@ -909,11 +908,13 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		}, 10, 3 );
 
 		$this->assertNull( $this->oauth->refresh_token( 'github' ) );
-		$this->assertSame( 'failure', get_site_transient( 'gu_oauth_refresh_result_github' ) );
+		// Token is deleted so the user is prompted to re-authorize.
+		$this->assertSame( true, get_site_transient( 'gu_oauth_error_github' ) );
 
 		$options = get_site_option( 'git_updater' );
-		$this->assertSame( $original['github_access_token'], $options['github_access_token'] );
-		$this->assertSame( $original['github_refresh_token'], $options['github_refresh_token'] );
+		$this->assertArrayNotHasKey( 'github_access_token', $options );
+		$this->assertArrayNotHasKey( 'github_refresh_token', $options );
+		$this->assertArrayNotHasKey( 'github_is_oauth_token', $options );
 	}
 
 	// -------------------------------------------------------------------------
@@ -1048,6 +1049,32 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->assertNull( $result );
 		$this->assertFalse( get_site_transient( 'gu_oauth_refresh_lock_github' ), 'Lock should be cleared after failure.' );
 		$this->assertSame( 'failure', get_site_transient( 'gu_oauth_refresh_result_github' ) );
+
+		// Empty access_token means the token is dead: delete it and flag re-auth.
+		$options = get_site_option( 'git_updater' );
+		$this->assertArrayNotHasKey( 'github_access_token', $options );
+		$this->assertArrayNotHasKey( 'github_refresh_token', $options );
+		$this->assertSame( true, get_site_transient( 'gu_oauth_error_github' ) );
+	}
+
+	public function test_refresh_token_deletes_token_and_sets_error_cache_for_gitlab(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'gitlab_access_token' => 'tok', 'gitlab_refresh_token' => 'ref' ] );
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [ 'error' => 'invalid_grant' ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$this->assertNull( $this->oauth->refresh_token( 'gitlab' ) );
+
+		$options = get_site_option( 'git_updater' );
+		$this->assertArrayNotHasKey( 'gitlab_access_token', $options );
+		$this->assertArrayNotHasKey( 'gitlab_refresh_token', $options );
+		$this->assertSame( true, get_site_transient( 'gu_oauth_error_gitlab' ) );
 	}
 
 	public function test_delete_token_clears_refresh_transients(): void {
@@ -1277,6 +1304,70 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->assertEquals( 7200, $options['gitlab_token_expires_in'] );
 		$this->assertArrayHasKey( 'gitlab_token_acquired_at', $options );
 		$this->assertSame( 'oauth', $options['gitlab_is_oauth_token'] );
+	}
+
+	/**
+	 * A successful reconnect must clear the re-authorization error transient.
+	 */
+	public function test_handle_callback_clears_error_cache_on_success(): void {
+		if ( ! defined( 'GIT_UPDATER_OAUTH_CONNECTOR_URL' ) ) {
+			define( 'GIT_UPDATER_OAUTH_CONNECTOR_URL', 'https://connector.example.com' );
+		}
+
+		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->maybe_grant_super_admin( $user );
+		wp_set_current_user( $user );
+
+		set_site_transient( 'gu_oauth_error_github', true, 15 * MINUTE_IN_SECONDS );
+		set_site_transient( 'gu_oauth_state_github', 'test_state', 600 );
+		$_GET['provider']         = 'github';
+		$_GET['gu_exchange_code'] = 'test_exchange_code';
+		$_GET['_wpnonce']         = wp_create_nonce( 'gu_oauth_callback_github' );
+		$_GET['site_state']       = 'test_state';
+
+		add_filter( 'pre_http_request', static function ( $preempt, $args, $url ) {
+			if ( strpos( $url, '/token' ) !== false ) {
+				return [
+					'response' => [ 'code' => 200, 'message' => 'OK' ],
+					'body'     => wp_json_encode( [ 'access_token' => 'test_access_token' ] ),
+					'headers'  => [],
+				];
+			}
+			return $preempt;
+		}, 10, 3 );
+
+		add_filter( 'wp_redirect', static function () {
+			throw new RuntimeException( 'Redirect captured' );
+		} );
+
+		try {
+			$this->oauth->handle_callback();
+			$this->fail( 'Expected redirect to be captured' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( 'Redirect captured', $e->getMessage() );
+		}
+
+		$this->assertFalse( get_site_transient( 'gu_oauth_error_github' ), 'Error cache should be cleared after successful reconnect.' );
+	}
+
+	/**
+	 * The settings page must show the re-authorization notice while the error transient is set.
+	 */
+	public function test_settings_shows_oauth_revocation_notice(): void {
+		set_site_transient( 'gu_oauth_error_github', true, 15 * MINUTE_IN_SECONDS );
+
+		$settings = new Settings();
+		$method   = new ReflectionMethod( Settings::class, 'admin_page_notices' );
+		$method->setAccessible( true );
+
+		ob_start();
+		$method->invoke( $settings );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'access was revoked', $output );
+		$this->assertStringContainsString( 'Connect button', $output );
+
+		delete_site_transient( 'gu_oauth_error_github' );
 	}
 
 	// -------------------------------------------------------------------------

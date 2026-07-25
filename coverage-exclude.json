@@ -1,6 +1,6 @@
 {
 	"multisite": {
 		"src/Git_Updater/Theme.php": [315],
-		"src/Git_Updater/OAuth/OAuth_Connect.php": [339]
+		"src/Git_Updater/OAuth/OAuth_Connect.php": [347]
 	}
 }

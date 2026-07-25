@@ -1,4 +1,5 @@
 #### [unreleased]
+* delete a provider's OAuth token automatically when a token refresh returns an empty `access_token` — the Connect button reappears and a "access was revoked, please reconnect" notice is shown (via a short-term per-provider transient) so the user knows to re-authorize on the provider site
 
 #### 14.1.0 / 2026-07-24
 * add body-based "Bad Credentials" detection to API error handling — when a response (200 or 4xx) contains this message, Git Updater now automatically attempts a token refresh and retries the request, improving recovery from invalid/expired tokens that aren't signaled by 401/403 status codes

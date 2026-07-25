@@ -60,6 +60,12 @@ class OAuth_Connect {
 	private const REFRESH_RESULT_TTL = 60;
 
 	/**
+	 * TTL in seconds for the "needs re-authorization" error transient.
+	 * Short-lived: long enough for the admin to see the notice, not permanent.
+	 */
+	private const OAUTH_ERROR_TTL = 15 * MINUTE_IN_SECONDS;
+
+	/**
 	 * Override for connector URL. When set, bypasses the constant check.
 	 * Used for testing the "no connector" path.
 	 *
@@ -259,6 +265,8 @@ class OAuth_Connect {
 				$result['refresh_token'] ?? null,
 				$result['expires_in'] ?? null
 			);
+			// Clear any prior re-authorization notice now that we're reconnected.
+			delete_site_transient( $this->get_error_transient_name( $provider ) );
 			$this->redirect_with_status( $provider, 'oauth_connected' );
 		} else {
 			$this->redirect_with_status( $provider, 'oauth_error' );
@@ -510,6 +518,11 @@ class OAuth_Connect {
 
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 		if ( empty( $body['access_token'] ) ) {
+			// Provider rejected the refresh (e.g. revoked/rotated refresh token):
+			// drop the now-invalid token so the Connect button reappears.
+			$this->delete_token( $provider );
+			set_site_transient( $this->get_error_transient_name( $provider ), true, self::OAUTH_ERROR_TTL );
+
 			delete_site_transient( $this->get_lock_transient_name( $provider ) );
 			set_site_transient( $this->get_result_transient_name( $provider ), 'failure', self::REFRESH_RESULT_TTL );
 			if ( $debug ) {
@@ -599,6 +612,16 @@ class OAuth_Connect {
 	 */
 	private function get_result_transient_name( string $provider ): string {
 		return 'gu_oauth_refresh_result_' . $provider;
+	}
+
+	/**
+	 * Get the site transient name for the re-authorization error flag.
+	 *
+	 * @param string $provider Provider slug.
+	 * @return string Transient name.
+	 */
+	private function get_error_transient_name( string $provider ): string {
+		return 'gu_oauth_error_' . $provider;
 	}
 
 	/**
