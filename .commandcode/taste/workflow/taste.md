@@ -6,6 +6,7 @@
 - When taste files are modified, omit them from any commit rather than reverting them with git checkout. Confidence: 0.70
 - Never include taste files in code commits; user will commit taste files manually. Confidence: 0.95
 - Create a CHANGES.md entry before committing, unless the user explicitly specifies to commit without changelog entries. Confidence: 0.85
+- CHANGES.md entries should be concise — a short single-line summary of the change rather than a long description. Confidence: 0.80
 - Use Apple Container and opossum via wp-env-opossum for container operations instead of running Docker directly. Confidence: 0.90
 - When the same bug affects multiple satellite plugin repos with an identical root cause, apply the same fix uniformly across every affected repo, and commit each repo separately using the same commit message (e.g., loop over the repos). Confidence: 0.80
 - Write detailed commit messages: a concise summary line, a body paragraph explaining the root cause, a bulleted list of the changes, and a `Co-authored-by: CommandCodeBot <noreply@commandcode.ai>` trailer. Confidence: 0.65
