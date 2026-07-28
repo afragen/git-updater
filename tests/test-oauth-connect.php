@@ -909,7 +909,8 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$this->assertNull( $this->oauth->refresh_token( 'github' ) );
 		// Token is deleted so the user is prompted to re-authorize.
-		$this->assertSame( true, get_site_transient( 'gu_oauth_error_github' ) );
+		$persist_options = get_site_option( 'git_updater', [] );
+		$this->assertNotEmpty( $persist_options['gu_oauth_revoked_github'] );
 
 		$options = get_site_option( 'git_updater' );
 		$this->assertArrayNotHasKey( 'github_access_token', $options );
@@ -1054,7 +1055,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$options = get_site_option( 'git_updater' );
 		$this->assertArrayNotHasKey( 'github_access_token', $options );
 		$this->assertArrayNotHasKey( 'github_refresh_token', $options );
-		$this->assertSame( true, get_site_transient( 'gu_oauth_error_github' ) );
+		$this->assertNotEmpty( $options['gu_oauth_revoked_github'] );
 	}
 
 	public function test_refresh_token_deletes_token_and_sets_error_cache_for_gitlab(): void {
@@ -1074,7 +1075,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$options = get_site_option( 'git_updater' );
 		$this->assertArrayNotHasKey( 'gitlab_access_token', $options );
 		$this->assertArrayNotHasKey( 'gitlab_refresh_token', $options );
-		$this->assertSame( true, get_site_transient( 'gu_oauth_error_gitlab' ) );
+		$this->assertNotEmpty( $options['gu_oauth_revoked_gitlab'] );
 	}
 
 	public function test_delete_token_clears_refresh_transients(): void {
@@ -1318,7 +1319,9 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->maybe_grant_super_admin( $user );
 		wp_set_current_user( $user );
 
-		set_site_transient( 'gu_oauth_error_github', true, 15 * MINUTE_IN_SECONDS );
+		$persist_options                        = get_site_option( 'git_updater', [] );
+		$persist_options['gu_oauth_revoked_github'] = time();
+		update_site_option( 'git_updater', $persist_options );
 		set_site_transient( 'gu_oauth_state_github', 'test_state', 600 );
 		$_GET['provider']         = 'github';
 		$_GET['gu_exchange_code'] = 'test_exchange_code';
@@ -1347,14 +1350,17 @@ class Test_OAuth_Connect extends GU_Test_Case {
 			$this->assertStringContainsString( 'Redirect captured', $e->getMessage() );
 		}
 
-		$this->assertFalse( get_site_transient( 'gu_oauth_error_github' ), 'Error cache should be cleared after successful reconnect.' );
+		$persist_options = get_site_option( 'git_updater', [] );
+		$this->assertArrayNotHasKey( 'gu_oauth_revoked_github', $persist_options, 'Error flag should be cleared after successful reconnect.' );
 	}
 
 	/**
-	 * The settings page must show the re-authorization notice while the error transient is set.
+	 * The settings page must show the re-authorization notice while the persistent flag is set.
 	 */
 	public function test_settings_shows_oauth_revocation_notice(): void {
-		set_site_transient( 'gu_oauth_error_github', true, 15 * MINUTE_IN_SECONDS );
+		$persist_options                        = get_site_option( 'git_updater', [] );
+		$persist_options['gu_oauth_revoked_github'] = time();
+		update_site_option( 'git_updater', $persist_options );
 
 		$settings = new Settings();
 		$method   = new ReflectionMethod( Settings::class, 'admin_page_notices' );
@@ -1367,7 +1373,9 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->assertStringContainsString( 'access was revoked', $output );
 		$this->assertStringContainsString( 'Connect button', $output );
 
-		delete_site_transient( 'gu_oauth_error_github' );
+		$persist_options = get_site_option( 'git_updater', [] );
+		unset( $persist_options['gu_oauth_revoked_github'] );
+		update_site_option( 'git_updater', $persist_options );
 	}
 
 	// -------------------------------------------------------------------------

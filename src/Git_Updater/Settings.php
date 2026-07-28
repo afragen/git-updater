@@ -392,14 +392,16 @@ class Settings {
 
 	/**
 	 * Show a re-authorization notice for any provider whose token was revoked
-	 * (refresh returned no access_token). Driven by a short-term transient set
-	 * in OAuth_Connect, so it renders on any settings-page load while active.
+	 * (refresh returned no access_token). Uses a persistent flag in the
+	 * git_updater site option so the notice survives until reconnection.
 	 *
 	 * @return void
 	 */
 	private function maybe_show_oauth_revocation_notice(): void {
+		$persist_options = get_site_option( 'git_updater', [] );
+
 		foreach ( OAuth_Connect::PROVIDERS as $provider => $config ) {
-			if ( get_site_transient( 'gu_oauth_error_' . $provider ) ) {
+			if ( ! empty( $persist_options[ 'gu_oauth_revoked_' . $provider ] ) ) {
 				echo '<div class="error"><p>';
 				/* translators: %s is the provider label, e.g. "GitHub". */
 				echo esc_html( sprintf( __( '%s access was revoked. Please reconnect using the Connect button on the Git Updater settings page.', 'git-updater' ), $config['label'] ) );
