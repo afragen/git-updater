@@ -4,4 +4,6 @@
 - Use @codeCoverageIgnore annotation when appropriate for uncovered lines. Confidence: 0.75
 - Test on both single-site and multisite WordPress configurations before committing test changes. Confidence: 0.65
 - Remove dead code (unused methods) when they are no longer called, and update tests accordingly. Confidence: 0.70
+- Maintain `coverage-exclude.json` when triaging uncovered lines: add entries for lines that legitimately cannot be covered, and the file is consulted during coverage checks to skip those lines when measuring coverage completeness. Confidence: 0.70
+- When checking test coverage, examine the existing `coverage/clover.xml` and `coverage/clover-multisite.xml` reports first before rerunning tests; only regenerate coverage if existing reports already show 100% line coverage, since code edits may have introduced uncovered lines. Confidence: 0.85
 - Back up every file in fixture directories (not just style.css) when a test modifies bind-mounted theme files during upgrade tests; restore all files in tear_down() so the host working tree is left unchanged. Confidence: 0.80
