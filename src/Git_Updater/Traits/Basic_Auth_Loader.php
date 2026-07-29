@@ -71,11 +71,15 @@ trait Basic_Auth_Loader {
 					$new_token = $oauth->refresh_token( $provider );
 					if ( $new_token ) {
 						$credentials['token'] = $new_token;
+					} elseif ( null === ( get_site_option( 'git_updater', [] )[ OAuth_Connect::PROVIDERS[ $provider ]['option_key'] ] ?? null ) ) {
+						// Refresh failed and the token was deleted from storage.
+						// Clear the stale local token so we don't send a dead credential.
+						$credentials['token'] = null;
 					}
 				}
 			}
 
-			if ( 'github' === $credentials['type'] ) {
+			if ( null !== $credentials['token'] && 'github' === $credentials['type'] ) {
 				$args['headers']['Authorization'] = 'Bearer ' . $credentials['token'];
 				$args['headers']['github']        = $credentials['slug'];
 			}

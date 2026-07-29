@@ -259,6 +259,10 @@ class OAuth_Connect {
 				$result['refresh_token'] ?? null,
 				$result['expires_in'] ?? null
 			);
+			// Clear any prior re-authorization notice now that we're reconnected.
+			$persist_options                          = get_site_option( 'git_updater', [] );
+			unset( $persist_options[ 'gu_oauth_revoked_' . $provider ] );
+			update_site_option( 'git_updater', $persist_options );
 			$this->redirect_with_status( $provider, 'oauth_connected' );
 		} else {
 			$this->redirect_with_status( $provider, 'oauth_error' );
@@ -429,6 +433,7 @@ class OAuth_Connect {
 		unset( $options[ $provider . '_token_expires_in' ] );
 		unset( $options[ $provider . '_token_acquired_at' ] );
 		unset( $options[ $provider . '_is_oauth_token' ] );
+		unset( $options[ 'gu_oauth_revoked_' . $provider ] );
 		update_site_option( 'git_updater', $options );
 		Base::$options = $options;
 		API::$options  = $options;
@@ -510,6 +515,13 @@ class OAuth_Connect {
 
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 		if ( empty( $body['access_token'] ) ) {
+			// Provider rejected the refresh (e.g. revoked/rotated refresh token):
+			// drop the now-invalid token so the Connect button reappears.
+			$this->delete_token( $provider );
+			$persist_options                            = get_site_option( 'git_updater', [] );
+			$persist_options[ 'gu_oauth_revoked_' . $provider ] = time();
+			update_site_option( 'git_updater', $persist_options );
+
 			delete_site_transient( $this->get_lock_transient_name( $provider ) );
 			set_site_transient( $this->get_result_transient_name( $provider ), 'failure', self::REFRESH_RESULT_TTL );
 			if ( $debug ) {
