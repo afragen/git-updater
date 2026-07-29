@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 14.2.0 / 2026-07-29
 * delete a provider's OAuth token automatically when a token refresh returns an empty `access_token` — the Connect button reappears and a "access was revoked, please reconnect" notice is shown (via a persistent per-provider option flag) so the user knows to re-authorize on the provider site
 * switch OAuth revocation notice from a 15-minute transient to a persistent site option flag (`gu_oauth_revoked_{provider}`) so the notice survives until the admin reconnects
 * clear the local stale credential in `add_auth_header()` when a proactive refresh fails and deletes the token, avoiding a wasted 401 round-trip with the now-deleted token
