@@ -5,7 +5,7 @@ Donate link: https://thefragens.com/git-updater-donate
 Tags: packages, language pack, updater
 Requires at least: 5.9
 Requires PHP: 8.0
-Tested up to: 7.0
+Tested up to: 7.1
 Stable tag: master
 License: GPL-3.0-or-later
 
