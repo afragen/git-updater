@@ -424,6 +424,10 @@ trait GU_Trait {
 		if ( isset( $type->dev_release_assets ) && apply_filters( 'gu_dev_release_asset', false, $type ) ) {
 			$release_asset_version = array_key_first( $type->dev_release_assets ) ?? '';
 			$release_asset_version = ltrim( $release_asset_version, 'v' );
+
+			// Filter the dev release asset version for a repo. This allows for overriding the version number if needed.
+			$release_asset_version = apply_filters( 'gu_dev_release_asset_version', $release_asset_version, $type );
+
 			$type->remote_version  = $release_asset_version ?: $type->remote_version;
 		}
 		$wp_version_ok   = ! empty( $type->requires )
