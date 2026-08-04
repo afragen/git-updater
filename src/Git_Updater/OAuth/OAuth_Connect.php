@@ -260,7 +260,7 @@ class OAuth_Connect {
 				$result['expires_in'] ?? null
 			);
 			// Clear any prior re-authorization notice now that we're reconnected.
-			$persist_options                          = get_site_option( 'git_updater', [] );
+			$persist_options = get_site_option( 'git_updater', [] );
 			unset( $persist_options[ 'gu_oauth_revoked_' . $provider ] );
 			update_site_option( 'git_updater', $persist_options );
 			$this->redirect_with_status( $provider, 'oauth_connected' );
@@ -518,7 +518,7 @@ class OAuth_Connect {
 			// Provider rejected the refresh (e.g. revoked/rotated refresh token):
 			// drop the now-invalid token so the Connect button reappears.
 			$this->delete_token( $provider );
-			$persist_options                            = get_site_option( 'git_updater', [] );
+			$persist_options                                    = get_site_option( 'git_updater', [] );
 			$persist_options[ 'gu_oauth_revoked_' . $provider ] = time();
 			update_site_option( 'git_updater', $persist_options );
 
