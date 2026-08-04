@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 14.2.1 / 2026-08-04
 * add filter `gu_dev_release_asset_version` for devs who do it differently
 
 #### 14.2.0 / 2026-07-29
