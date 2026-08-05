@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 14.2.2 / 2026-08-05
+* remove filter `gu_dev_release_asset_version`
+* for dev release assets use actual remote version number if different from release asset version
+
 #### 14.2.1 / 2026-08-04
 * add filter `gu_dev_release_asset_version` for devs who do it differently
 
