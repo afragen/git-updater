@@ -737,6 +737,7 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 		remove_all_filters( 'gu_repo_cache_timeout' );
 		remove_all_filters( 'gu_running_git_servers' );
 		remove_all_filters( 'gu_dev_release_asset' );
+		remove_all_filters( 'gu_dev_release_asset_version' );
 		remove_all_filters( 'gu_remote_is_newer' );
 		remove_all_filters( 'gu_disable_wpcron' );
 		remove_all_filters( 'gu_config_pre_process' );
@@ -986,10 +987,42 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 	// can_update_repo() filter paths
 	// -------------------------------------------------------------------------
 
-	public function test_can_update_repo_gu_dev_release_asset_filter_overrides_remote_version(): void {
+	/**
+	 * When the gu_dev_release_asset filter is active and the dev release asset
+	 * version differs from the remote version, the actual remote version is used
+	 * (not the release asset version) per the dfe2c318 change.
+	 */
+	public function test_can_update_repo_gu_dev_release_asset_uses_remote_version_when_different(): void {
 		add_filter( 'gu_dev_release_asset', '__return_true' );
 		$type                     = clone $this->type;
 		$type->remote_version     = '1.0.0';
+		$type->local_version      = '2.0.0';
+		$type->dev_release_assets = [ '2.5.0' => 'url' ];
+		$this->assertFalse( $this->api->can_update_repo( $type ) );
+	}
+
+	/**
+	 * When the dev release asset key is a nightly like '23.8-nightly' but the
+	 * actual remote version is '23.8.20260808', the remote version is used for
+	 * the update check (never the nightly key, which sorts before it).
+	 */
+	public function test_can_update_repo_gu_dev_release_asset_nightly_uses_remote_version(): void {
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+		$type                     = clone $this->type;
+		$type->remote_version     = '23.8.20260808';
+		$type->local_version      = '23.8.20260801';
+		$type->dev_release_assets = [ '23.8-nightly' => 'url' ];
+		$this->assertTrue( $this->api->can_update_repo( $type ) );
+	}
+
+	/**
+	 * When the gu_dev_release_asset filter is active and the dev release asset
+	 * version matches the remote version, the remote version is unchanged.
+	 */
+	public function test_can_update_repo_gu_dev_release_asset_matching_version_keeps_remote_version(): void {
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+		$type                     = clone $this->type;
+		$type->remote_version     = '2.5.0';
 		$type->local_version      = '2.0.0';
 		$type->dev_release_assets = [ '2.5.0' => 'url' ];
 		$this->assertTrue( $this->api->can_update_repo( $type ) );
@@ -1000,6 +1033,20 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 		$type                 = clone $this->type;
 		$type->remote_version = '1.0.0';
 		$type->local_version  = '2.0.0';
+		$this->assertFalse( $this->api->can_update_repo( $type ) );
+	}
+
+	/**
+	 * The removed gu_dev_release_asset_version filter must no longer be applied;
+	 * the remote version wins regardless of any override.
+	 */
+	public function test_can_update_repo_gu_dev_release_asset_version_filter_is_ignored(): void {
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+		add_filter( 'gu_dev_release_asset_version', fn() => '9.9.9' );
+		$type                     = clone $this->type;
+		$type->remote_version     = '1.0.0';
+		$type->local_version      = '2.0.0';
+		$type->dev_release_assets = [ '2.5.0' => 'url' ];
 		$this->assertFalse( $this->api->can_update_repo( $type ) );
 	}
 
