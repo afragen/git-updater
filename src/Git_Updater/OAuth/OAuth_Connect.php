@@ -11,6 +11,7 @@ namespace Fragen\Git_Updater\OAuth;
 
 use Fragen\Git_Updater\API\API;
 use Fragen\Git_Updater\Base;
+use Fragen\Git_Updater\Traits\GU_Trait;
 
 /**
  * Class OAuth_Connect
@@ -18,6 +19,7 @@ use Fragen\Git_Updater\Base;
  * Handles OAuth connect/disconnect/callback for all git providers.
  */
 class OAuth_Connect {
+	use GU_Trait;
 
 	/**
 	 * Provider configurations.
@@ -76,6 +78,22 @@ class OAuth_Connect {
 		add_action( 'admin_post_gu_oauth_callback', [ $this, 'handle_callback' ] );
 		add_action( 'admin_post_gu_oauth_disconnect', [ $this, 'handle_disconnect' ] );
 		add_action( 'admin_post_gu_remove_token', [ $this, 'handle_remove_token' ] );
+		add_action( 'gu_oauth_revoke_notify', [ $this, 'remind_admin_of_token_revocation' ] );
+
+		// Custom 36-hour schedule for the revocation reminder.
+		add_filter(
+			'cron_schedules',
+			static function ( $schedules ) {
+				$schedules['gu_oauth_revoke_36h'] = [
+					'interval' => 36 * HOUR_IN_SECONDS,
+					'display'  => esc_html__( 'Every 36 hours', 'git-updater' ),
+				];
+				return $schedules;
+			}
+		);
+		if ( false === wp_next_scheduled( 'gu_oauth_revoke_notify' ) ) {
+			wp_schedule_event( time() + 36 * HOUR_IN_SECONDS, 'gu_oauth_revoke_36h', 'gu_oauth_revoke_notify' );
+		}
 	}
 
 	/**
@@ -262,6 +280,7 @@ class OAuth_Connect {
 			// Clear any prior re-authorization notice now that we're reconnected.
 			$persist_options = get_site_option( 'git_updater', [] );
 			unset( $persist_options[ 'gu_oauth_revoked_' . $provider ] );
+			unset( $persist_options[ 'gu_oauth_notified_' . $provider ] );
 			update_site_option( 'git_updater', $persist_options );
 			$this->redirect_with_status( $provider, 'oauth_connected' );
 		} else {
@@ -434,6 +453,7 @@ class OAuth_Connect {
 		unset( $options[ $provider . '_token_acquired_at' ] );
 		unset( $options[ $provider . '_is_oauth_token' ] );
 		unset( $options[ 'gu_oauth_revoked_' . $provider ] );
+		unset( $options[ 'gu_oauth_notified_' . $provider ] );
 		update_site_option( 'git_updater', $options );
 		Base::$options = $options;
 		API::$options  = $options;
@@ -521,6 +541,9 @@ class OAuth_Connect {
 			$persist_options                                    = get_site_option( 'git_updater', [] );
 			$persist_options[ 'gu_oauth_revoked_' . $provider ] = time();
 			update_site_option( 'git_updater', $persist_options );
+
+			// Notify the site admin that the token could not be refreshed and was revoked.
+			$this->notify_admin_of_token_revocation( $provider );
 
 			delete_site_transient( $this->get_lock_transient_name( $provider ) );
 			set_site_transient( $this->get_result_transient_name( $provider ), 'failure', self::REFRESH_RESULT_TTL );
@@ -638,5 +661,119 @@ class OAuth_Connect {
 
 		wp_safe_redirect( $location );
 		exit; // @codeCoverageIgnore
+	}
+
+	/**
+	 * Notify the site administrator via email that a provider's OAuth token
+	 * is missing (Connect button displayed). Message differs based on whether
+	 * the token was revoked by a failed refresh or is simply empty. Sends at
+	 * most once per 36-hour period.
+	 *
+	 * @param string $provider Provider slug.
+	 * @return void
+	 */
+	private function notify_admin_of_token_revocation( string $provider ): void {
+		if ( ! isset( self::PROVIDERS[ $provider ] ) ) {
+			return;
+		}
+		$config  = self::PROVIDERS[ $provider ];
+		$options = get_site_option( 'git_updater', [] );
+
+		// Only notify when the OAuth token is actually missing
+		// (Connect button displayed, same condition as render_connect_field()).
+		if ( ! empty( $options[ $config['option_key'] ] ) ) {
+			return;
+		}
+
+		// Skip if we already emailed within the last 36 hours.
+		$notified_at = (int) ( $options[ 'gu_oauth_notified_' . $provider ] ?? 0 );
+		if ( $notified_at > time() - 36 * HOUR_IN_SECONDS ) {
+			return;
+		}
+
+		// Tokens are network-scoped (site options), so use the network admin email on multisite.
+		$admin_email  = is_multisite() ? get_site_option( 'admin_email' ) : get_option( 'admin_email' );
+		$base_url     = is_multisite() ? network_admin_url( 'settings.php' ) : admin_url( 'options-general.php' );
+		$settings_url = add_query_arg(
+			[
+				'page'   => 'git-updater',
+				'tab'    => 'git_updater_settings',
+				'subtab' => $provider,
+			],
+			$base_url
+		);
+
+		$subject = sprintf(
+			/* translators: %s is the provider label, e.g. "GitHub". */
+			__( 'Git Updater: %s OAuth access has been revoked', 'git-updater' ),
+			$config['label']
+		);
+
+		// The revoked flag is only ever set by a failed token refresh, so it
+		// distinguishes "revoked by refresh failure" from "token simply empty"
+		// (removed via settings, Remove Token button, or never connected).
+		if ( ! empty( $options[ 'gu_oauth_revoked_' . $provider ] ) ) {
+			$message = sprintf(
+				/* translators: 1: provider label, 2: settings page URL. */
+				__( 'Git Updater was unable to refresh your %1$s OAuth access token, so the token has been revoked and removed. Please reconnect using the Connect button on the Git Updater settings page: %2$s', 'git-updater' ),
+				$config['label'],
+				$settings_url
+			);
+		} elseif ( function_exists( '\Fragen\Git_Updater\gu_fs' ) && \Fragen\Git_Updater\gu_fs()->can_use_premium_code() ) {
+			// Only premium license holders get the empty-token reminder.
+			$message = sprintf(
+				/* translators: 1: provider label, 2: settings page URL. */
+				__( 'Your %1$s OAuth access token is empty, so Git Updater cannot access your private repositories. Please reconnect using the Connect button on the Git Updater settings page: %2$s', 'git-updater' ),
+				$config['label'],
+				$settings_url
+			);
+		} else {
+			// Free users: no empty-token reminder email.
+			return;
+		}
+
+		if ( wp_mail( $admin_email, $subject, $message ) ) {
+			$options[ 'gu_oauth_notified_' . $provider ] = time();
+			update_site_option( 'git_updater', $options );
+		}
+	}
+
+	/**
+	 * Get the providers whose API is running. Uses the canonical
+	 * get_running_git_servers() list, which always includes GitHub (bundled
+	 * with git-updater) plus any provider registered via the
+	 * gu_running_git_servers filter by its API plugin.
+	 *
+	 * @return array<int, string> Active provider slugs.
+	 */
+	public function get_running_providers(): array {
+		$running   = $this->get_running_git_servers();
+		$providers = [];
+		foreach ( array_keys( self::PROVIDERS ) as $provider ) {
+			if ( in_array( $provider, $running, true ) ) {
+				$providers[] = $provider;
+			}
+		}
+		return $providers;
+	}
+
+	/**
+	 * Cron callback: re-notify the admin every 36 hours while any running
+	 * provider's Connect button is still displayed (no token stored).
+	 * Mirrors the condition in render_connect_field().
+	 *
+	 * @return void
+	 */
+	public function remind_admin_of_token_revocation(): void {
+		foreach ( $this->get_running_providers() as $provider ) {
+			$options   = get_site_option( 'git_updater', [] );
+			$config    = self::PROVIDERS[ $provider ];
+			$has_token = ! empty( $options[ $config['option_key'] ] );
+
+			// Only remind when the Connect button is actually displayed.
+			if ( ! $has_token ) {
+				$this->notify_admin_of_token_revocation( $provider );
+			}
+		}
 	}
 }

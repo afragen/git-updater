@@ -58,6 +58,11 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'wp_redirect' );
 		remove_all_filters( 'gu_debug_token_refresh' );
+		remove_all_filters( 'wp_mail' );
+		remove_all_filters( 'cron_schedules' );
+		remove_all_actions( 'gu_oauth_revoke_notify' );
+		wp_clear_scheduled_hook( 'gu_oauth_revoke_notify' );
+		unset( $GLOBALS['gu_fs'] );
 		parent::tear_down();
 	}
 
@@ -141,6 +146,21 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->assertNotFalse( has_action( 'admin_post_gu_oauth_callback', [ $this->oauth, 'handle_callback' ] ) );
 		$this->assertNotFalse( has_action( 'admin_post_gu_oauth_disconnect', [ $this->oauth, 'handle_disconnect' ] ) );
 		$this->assertNotFalse( has_action( 'admin_post_gu_remove_token', [ $this->oauth, 'handle_remove_token' ] ) );
+		$this->assertNotFalse( has_action( 'gu_oauth_revoke_notify', [ $this->oauth, 'remind_admin_of_token_revocation' ] ) );
+		$this->assertNotFalse( wp_next_scheduled( 'gu_oauth_revoke_notify' ) );
+	}
+
+	/**
+	 * Test load_hooks does not schedule a duplicate cron event.
+	 */
+	public function test_load_hooks_does_not_schedule_duplicate_cron(): void {
+		wp_clear_scheduled_hook( 'gu_oauth_revoke_notify' );
+		$this->oauth->load_hooks();
+		$first = wp_next_scheduled( 'gu_oauth_revoke_notify' );
+		$this->assertNotFalse( $first );
+
+		$this->oauth->load_hooks();
+		$this->assertSame( $first, wp_next_scheduled( 'gu_oauth_revoke_notify' ) );
 	}
 
 	/**
@@ -1791,5 +1811,390 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		} );
 
 		$this->assertStringNotContainsString( 'Token refresh failed', $log );
+	}
+
+	// -------------------------------------------------------------------------
+	// OAuth revocation email notification tests
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Register a wp_mail filter that captures send attempts.
+	 *
+	 * @param array<int, array<string, mixed>> $mails Captured mail args.
+	 * @return void
+	 */
+	private function capture_wp_mail( array &$mails ): void {
+		add_filter( 'wp_mail', static function ( $args ) use ( &$mails ) {
+			$mails[] = $args;
+			return true;
+		} );
+	}
+
+	/**
+	 * Stub gu_fs() so can_use_premium_code() returns the given value.
+	 *
+	 * @param bool $premium Whether the user can use premium code.
+	 * @return void
+	 */
+	private function stub_gu_fs( bool $premium ): void {
+		$GLOBALS['gu_fs'] = new class( $premium ) {
+			/** @var bool */
+			private $premium;
+
+			public function __construct( bool $premium ) {
+				$this->premium = $premium;
+			}
+
+			public function can_use_premium_code(): bool {
+				return $this->premium;
+			}
+		};
+	}
+
+	/**
+	 * Set access tokens for all providers except the given one, so the cron
+	 * reminder only acts on that provider.
+	 *
+	 * @param string $provider Provider slug to leave token-less.
+	 * @return void
+	 */
+	private function set_tokens_for_other_providers( string $provider ): void {
+		$options = get_site_option( 'git_updater', [] );
+		foreach ( array_keys( OAuth_Connect::PROVIDERS ) as $p ) {
+			if ( $p !== $provider ) {
+				$options[ $p . '_access_token' ] = 'tok_' . $p;
+			}
+		}
+		update_site_option( 'git_updater', $options );
+	}
+
+	/**
+	 * Test get_running_providers only returns GitHub in the test environment
+	 * (no API plugins active).
+	 */
+	public function test_get_running_providers_returns_github_only_in_tests(): void {
+		$this->assertSame( [ 'github' ], $this->oauth->get_running_providers() );
+	}
+
+	/**
+	 * Test notify_admin_of_token_revocation returns early for an unknown provider.
+	 */
+	public function test_notify_returns_early_for_unknown_provider(): void {
+		$mails = [];
+		$this->capture_wp_mail( $mails );
+
+		$method = new ReflectionMethod( OAuth_Connect::class, 'notify_admin_of_token_revocation' );
+		$method->setAccessible( true );
+		$method->invoke( $this->oauth, 'invalid_provider' );
+
+		$this->assertCount( 0, $mails );
+	}
+
+	/**
+	 * Test notify_admin_of_token_revocation returns early when a token is present.
+	 */
+	public function test_notify_returns_early_when_token_present(): void {
+		update_site_option( 'git_updater', [
+			'github_access_token'      => 'tok',
+			'gu_oauth_notified_github' => time() - 2 * DAY_IN_SECONDS,
+		] );
+		$this->stub_gu_fs( true );
+
+		$mails = [];
+		$this->capture_wp_mail( $mails );
+
+		$method = new ReflectionMethod( OAuth_Connect::class, 'notify_admin_of_token_revocation' );
+		$method->setAccessible( true );
+		$method->invoke( $this->oauth, 'github' );
+
+		$this->assertCount( 0, $mails );
+	}
+
+	/**
+	 * Test immediate email is sent when token refresh fails and deletes the token.
+	 */
+	public function test_refresh_failure_sends_immediate_email(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'github_access_token'      => 'ghu_old',
+			'github_refresh_token'     => 'ghr_old',
+			'github_token_expires_in'  => 28800,
+			'github_token_acquired_at' => time() - 28801,
+		] );
+
+		$mails = [];
+		$this->capture_wp_mail( $mails );
+
+		add_filter( 'pre_http_request', static function ( $preempt, $args, $url ) {
+			if ( strpos( $url, '/git-updater/github/oauth/refresh' ) !== false ) {
+				return [
+					'response' => [ 'code' => 401 ],
+					'body'     => wp_json_encode( [
+						'error'             => 'bad_refresh_token',
+						'error_description' => 'The refresh token is invalid or expired.',
+					] ),
+					'headers'  => [],
+				];
+			}
+			return $preempt;
+		}, 10, 3 );
+
+		$this->assertNull( $this->oauth->refresh_token( 'github' ) );
+
+		$this->assertCount( 1, $mails );
+		$mail = $mails[0];
+		$this->assertSame( get_option( 'admin_email' ), $mail['to'] );
+		$this->assertStringContainsString( 'GitHub OAuth', $mail['subject'] );
+		$this->assertStringContainsString( 'unable to refresh', $mail['message'] );
+		$this->assertStringContainsString( 'revoked', $mail['message'] );
+		$this->assertStringContainsString( 'subtab=github', $mail['message'] );
+
+		$options = get_site_option( 'git_updater', [] );
+		$this->assertNotEmpty( $options['gu_oauth_notified_github'] );
+	}
+
+	/**
+	 * Test no duplicate email on repeated failure within the 36h window.
+	 */
+	public function test_refresh_failure_does_not_send_duplicate_email(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'github_access_token'      => 'ghu_old',
+			'github_refresh_token'     => 'ghr_old',
+			'github_token_expires_in'  => 28800,
+			'github_token_acquired_at' => time() - 28801,
+		] );
+
+		$mails = [];
+		$this->capture_wp_mail( $mails );
+
+		add_filter( 'pre_http_request', static function ( $preempt, $args, $url ) {
+			if ( strpos( $url, '/git-updater/github/oauth/refresh' ) !== false ) {
+				return [
+					'response' => [ 'code' => 401 ],
+					'body'     => wp_json_encode( [ 'error' => 'bad_refresh_token' ] ),
+					'headers'  => [],
+				];
+			}
+			return $preempt;
+		}, 10, 3 );
+
+		$this->assertNull( $this->oauth->refresh_token( 'github' ) );
+		$this->assertCount( 1, $mails );
+
+		$this->set_tokens_for_other_providers( 'github' );
+
+		// Second call: token already deleted; direct reminder path is gated by 36h timestamp.
+		$this->oauth->remind_admin_of_token_revocation();
+		$this->assertCount( 1, $mails );
+	}
+
+	/**
+	 * Test cron reminder sends while Connect button displays (revoked flag set).
+	 */
+	public function test_cron_reminder_sends_while_revoked(): void {
+		$persist_options = [
+			'gu_oauth_revoked_github'   => time() - DAY_IN_SECONDS,
+			'gu_oauth_notified_github'  => time() - 2 * DAY_IN_SECONDS,
+		];
+		update_site_option( 'git_updater', $persist_options );
+		$this->set_tokens_for_other_providers( 'github' );
+
+		$mails = [];
+		$this->capture_wp_mail( $mails );
+
+		$this->oauth->remind_admin_of_token_revocation();
+
+		$this->assertCount( 1, $mails );
+		$this->assertStringContainsString( 'unable to refresh', $mails[0]['message'] );
+
+		$options = get_site_option( 'git_updater', [] );
+		$this->assertGreaterThan( $persist_options['gu_oauth_notified_github'], (int) $options['gu_oauth_notified_github'] );
+	}
+
+	/**
+	 * Test cron reminder skips when a token is present.
+	 */
+	public function test_cron_reminder_skips_when_token_present(): void {
+		update_site_option( 'git_updater', [
+			'github_access_token'          => 'tok',
+			'gu_oauth_notified_github'     => time() - 2 * DAY_IN_SECONDS,
+		] );
+		$this->set_tokens_for_other_providers( 'github' );
+
+		$mails = [];
+		$this->capture_wp_mail( $mails );
+
+		$this->oauth->remind_admin_of_token_revocation();
+
+		$this->assertCount( 0, $mails );
+	}
+
+	/**
+	 * Test cron reminder sends "token is empty" message to premium users.
+	 */
+	public function test_cron_reminder_sends_empty_token_message_to_premium_user(): void {
+		update_site_option( 'git_updater', [
+			'gu_oauth_notified_github' => time() - 2 * DAY_IN_SECONDS,
+		] );
+		$this->set_tokens_for_other_providers( 'github' );
+		$this->stub_gu_fs( true );
+
+		$mails = [];
+		$this->capture_wp_mail( $mails );
+
+		$this->oauth->remind_admin_of_token_revocation();
+
+		$this->assertCount( 1, $mails );
+		$this->assertStringContainsString( 'token is empty', $mails[0]['message'] );
+		$this->assertStringNotContainsString( 'unable to refresh', $mails[0]['message'] );
+
+		$options = get_site_option( 'git_updater', [] );
+		$this->assertArrayNotHasKey( 'gu_oauth_revoked_github', $options );
+	}
+
+	/**
+	 * Test cron reminder does NOT send empty-token message to free users.
+	 */
+	public function test_cron_reminder_does_not_send_empty_token_message_to_free_user(): void {
+		update_site_option( 'git_updater', [
+			'gu_oauth_notified_github' => time() - 2 * DAY_IN_SECONDS,
+		] );
+		$this->set_tokens_for_other_providers( 'github' );
+		$this->stub_gu_fs( false );
+
+		$mails = [];
+		$this->capture_wp_mail( $mails );
+
+		$this->oauth->remind_admin_of_token_revocation();
+
+		$this->assertCount( 0, $mails );
+	}
+
+	/**
+	 * Test cron reminder skips when notified within the last 36 hours.
+	 */
+	public function test_cron_reminder_skips_when_notified_recently(): void {
+		update_site_option( 'git_updater', [
+			'gu_oauth_notified_github' => time() - HOUR_IN_SECONDS,
+		] );
+		$this->set_tokens_for_other_providers( 'github' );
+		$this->stub_gu_fs( true );
+
+		$mails = [];
+		$this->capture_wp_mail( $mails );
+
+		$this->oauth->remind_admin_of_token_revocation();
+
+		$this->assertCount( 0, $mails );
+	}
+
+	/**
+	 * Test no email when token present even with a backdated notified timestamp.
+	 */
+	public function test_cron_reminder_skips_when_token_present_but_backdated(): void {
+		update_site_option( 'git_updater', [
+			'github_access_token'      => 'tok',
+			'gu_oauth_notified_github' => time() - 2 * DAY_IN_SECONDS,
+		] );
+		$this->set_tokens_for_other_providers( 'github' );
+		$this->stub_gu_fs( true );
+
+		$mails = [];
+		$this->capture_wp_mail( $mails );
+
+		$this->oauth->remind_admin_of_token_revocation();
+
+		$this->assertCount( 0, $mails );
+	}
+
+	/**
+	 * Test no email when token refresh succeeds.
+	 */
+	public function test_refresh_success_sends_no_email(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'github_access_token' => 'old_tok', 'github_refresh_token' => 'ref' ] );
+
+		$mails = [];
+		$this->capture_wp_mail( $mails );
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [ 'access_token' => 'new_tok' ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$this->assertSame( 'new_tok', $this->oauth->refresh_token( 'github' ) );
+		$this->assertCount( 0, $mails );
+	}
+
+	/**
+	 * Test no email on plain HTTP error (WP_Error) — token is not deleted.
+	 */
+	public function test_http_error_sends_no_email(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'github_access_token' => 'tok', 'github_refresh_token' => 'ref' ] );
+
+		$mails = [];
+		$this->capture_wp_mail( $mails );
+
+		add_filter( 'pre_http_request', static function () {
+			return new WP_Error( 'http_error', 'Connection failed' );
+		}, 10, 3 );
+
+		$this->assertNull( $this->oauth->refresh_token( 'github' ) );
+		$this->assertCount( 0, $mails );
+	}
+
+	/**
+	 * Test reconnect clears the notified timestamp.
+	 */
+	public function test_reconnect_clears_notified_timestamp(): void {
+		if ( ! defined( 'GIT_UPDATER_OAUTH_CONNECTOR_URL' ) ) {
+			define( 'GIT_UPDATER_OAUTH_CONNECTOR_URL', 'https://connector.example.com' );
+		}
+
+		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->maybe_grant_super_admin( $user );
+		wp_set_current_user( $user );
+
+		$persist_options                        = get_site_option( 'git_updater', [] );
+		$persist_options['gu_oauth_revoked_github']  = time();
+		$persist_options['gu_oauth_notified_github'] = time();
+		update_site_option( 'git_updater', $persist_options );
+
+		set_site_transient( 'gu_oauth_state_github', 'test_state', 600 );
+		$_GET['provider']         = 'github';
+		$_GET['gu_exchange_code'] = 'test_exchange_code';
+		$_GET['_wpnonce']         = wp_create_nonce( 'gu_oauth_callback_github' );
+		$_GET['site_state']       = 'test_state';
+
+		add_filter( 'pre_http_request', static function ( $preempt, $args, $url ) {
+			if ( strpos( $url, '/token' ) !== false ) {
+				return [
+					'response' => [ 'code' => 200, 'message' => 'OK' ],
+					'body'     => wp_json_encode( [ 'access_token' => 'test_access_token' ] ),
+					'headers'  => [],
+				];
+			}
+			return $preempt;
+		}, 10, 3 );
+
+		add_filter( 'wp_redirect', static function () {
+			throw new RuntimeException( 'Redirect captured' );
+		} );
+
+		try {
+			$this->oauth->handle_callback();
+			$this->fail( 'Expected redirect to be captured' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( 'Redirect captured', $e->getMessage() );
+		}
+
+		$options = get_site_option( 'git_updater', [] );
+		$this->assertArrayNotHasKey( 'gu_oauth_revoked_github', $options );
+		$this->assertArrayNotHasKey( 'gu_oauth_notified_github', $options );
 	}
 }

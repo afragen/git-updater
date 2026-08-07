@@ -1,4 +1,6 @@
 #### [unreleased]
+* email the site admin when a provider's OAuth token refresh fails and the token is deleted, with a 36-hour reminder cron while the token remains empty; a "token is empty" variant of the reminder email is sent only to premium license holders
+* show the OAuth revocation notice on the settings page whenever the Connect button is displayed (no token stored), not only when the revoked flag is set
 
 #### 14.2.3 / 2026-08-05
 * remove filter `gu_dev_release_asset_version`
