@@ -87,7 +87,7 @@ trait Theme_Mock_Helper {
 	private function theme_with_config( array $config ): Theme {
 		$theme = new Theme();
 		$ref   = new ReflectionProperty( Theme::class, 'config' );
-		$ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $ref->setAccessible( true );
 		$ref->setValue( $theme, $config );
 		return $theme;
 	}
@@ -434,7 +434,7 @@ class Test_Theme_Append_Theme_Actions_Content extends WP_UnitTestCase {
 	 */
 	private function invoke_append( Theme $theme, stdClass $theme_obj ): string {
 		$ref = new ReflectionMethod( Theme::class, 'append_theme_actions_content' );
-		$ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $ref->setAccessible( true );
 		return $ref->invoke( $theme, $theme_obj );
 	}
 
@@ -824,7 +824,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 	public function test_returns_array(): void {
 		$theme = $this->theme_with_config( [] );
 		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $theme );
 		$this->assertIsArray( $result );
 	}
@@ -844,7 +844,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 		// get_theme_meta() is called from new Theme() constructor path; invoke directly via Reflection.
 		$theme = $this->theme_with_config( [] );
 		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$rm->invoke( $theme );
 
 		$this->assertSame( 'theme', $captured_type );
@@ -857,7 +857,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 
 		$theme  = new Theme();
 		$rm     = new ReflectionMethod( $theme, 'get_theme_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $theme );
 
 		$this->assertArrayHasKey( 'test-gu-theme', $result );
@@ -883,7 +883,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 
 		$theme = new Theme();
 		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $theme );
 
 		// Injected theme must be absent — the loop hit `continue` for it.
@@ -903,7 +903,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 		new Theme();
 
 		$options_ref = new ReflectionProperty( Theme::class, 'options' );
-		$options_ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $options_ref->setAccessible( true );
 		$options = $options_ref->getValue( null );
 		$this->assertArrayNotHasKey( 'current_branch_test-gu-theme', $options );
 	}
@@ -929,7 +929,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 		try {
 			$theme = new Theme();
 			$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
-			$rm->setAccessible( true );
+			PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 			$result = $rm->invoke( $theme );
 
 			$this->assertArrayHasKey( 'test-gu-theme', $result );
@@ -964,7 +964,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 
 		$theme = new Theme();
 		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $theme );
 
 		$this->assertArrayNotHasKey( 'custom-theme', $result );
@@ -990,7 +990,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 
 		$theme = new Theme();
 		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $theme );
 
 		$this->assertArrayHasKey( 'no-name-theme', $result );
@@ -1019,7 +1019,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 
 		$theme = new Theme();
 		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $theme );
 
 		$this->assertArrayHasKey( 'did-theme', $result );
@@ -1063,7 +1063,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 
 		$theme = new Theme();
 		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $theme );
 
 		$this->assertArrayHasKey( $real_slug, $result );
@@ -1244,7 +1244,7 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 
 		// A truthy $tag suppresses the wp_theme_update_row action inside the multisite block.
 		$tag_ref = new ReflectionProperty( Theme::class, 'tag' );
-		$tag_ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $tag_ref->setAccessible( true );
 		$tag_ref->setValue( $theme, '1.0.0' );
 
 		$theme->get_remote_theme_meta();

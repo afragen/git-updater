@@ -30,7 +30,7 @@ trait Init_Test_Helper {
 
 	private function get_base_from_init( Init $init ): Base {
 		$rp = new ReflectionProperty( Init::class, 'base' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		return $rp->getValue( $init );
 	}
 }

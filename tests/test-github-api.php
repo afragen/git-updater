@@ -93,7 +93,7 @@ class Test_GitHub_API_Parse extends WP_UnitTestCase {
 	 */
 	private function call_protected( string $method, ...$args ) {
 		$rm = new ReflectionMethod( $this->api, $method );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		return $rm->invoke( $this->api, ...$args );
 	}
 
@@ -445,7 +445,7 @@ class Test_GitHub_API_Links extends WP_UnitTestCase {
 	 */
 	private function set_static_method( string $value ): void {
 		$rp = new ReflectionProperty( GitHub_API::class, 'method' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		$rp->setValue( null, $value );
 	}
 

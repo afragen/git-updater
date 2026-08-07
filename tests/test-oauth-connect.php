@@ -72,7 +72,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	public function test_fetch_token_from_connector_returns_null_without_config(): void {
 		$this->oauth->connector_url = '';
 		$method = new ReflectionMethod( OAuth_Connect::class, 'fetch_token_from_connector' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$result = $method->invoke( $this->oauth, 'github', 'test_code' );
 
@@ -95,7 +95,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	 */
 	public function test_fetch_token_from_connector_returns_null_on_empty_token_response(): void {
 		$method = new ReflectionMethod( OAuth_Connect::class, 'fetch_token_from_connector' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		add_filter( 'pre_http_request', static function () {
 			return [
@@ -651,7 +651,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		}
 
 		$method = new ReflectionMethod( OAuth_Connect::class, 'get_callback_url' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$url = $method->invoke( $this->oauth, 'github' );
 
@@ -673,7 +673,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		}
 
 		$method = new ReflectionMethod( OAuth_Connect::class, 'get_callback_url' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$url = $method->invoke( $this->oauth, 'github' );
 
@@ -1105,7 +1105,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		update_site_option( 'git_updater', [ 'github_access_token' => 'tok' ] );
 
 		$method = new ReflectionMethod( OAuth_Connect::class, 'delete_token' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 		$method->invoke( $this->oauth, 'github' );
 
 		$this->assertFalse( get_site_transient( 'gu_oauth_refresh_lock_github' ) );
@@ -1158,7 +1158,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		}, 10, 3 );
 
 		$method = new ReflectionMethod( OAuth_Connect::class, 'fetch_token_from_connector' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$result = $method->invoke( $this->oauth, 'github', 'code' );
 
@@ -1184,7 +1184,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		}, 10, 3 );
 
 		$method = new ReflectionMethod( OAuth_Connect::class, 'fetch_token_from_connector' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$result = $method->invoke( $this->oauth, 'gitlab', 'code' );
 
@@ -1200,7 +1200,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 	public function test_save_token_stores_refresh_token(): void {
 		$method = new ReflectionMethod( OAuth_Connect::class, 'save_token' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$method->invoke( $this->oauth, 'gitlab', 'tok', 'ref', null );
 
@@ -1212,7 +1212,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 	public function test_save_token_stores_expires_in_and_acquired_at(): void {
 		$method = new ReflectionMethod( OAuth_Connect::class, 'save_token' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$method->invoke( $this->oauth, 'gitlab', 'tok', 'ref', 7200 );
 
@@ -1224,7 +1224,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 	public function test_save_token_clears_refresh_token_when_null(): void {
 		$method = new ReflectionMethod( OAuth_Connect::class, 'save_token' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$method->invoke( $this->oauth, 'gitlab', 'tok', 'ref', null );
 		$method->invoke( $this->oauth, 'gitlab', 'tok', null, null );
@@ -1236,7 +1236,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 	public function test_save_token_clears_expiry_when_null(): void {
 		$method = new ReflectionMethod( OAuth_Connect::class, 'save_token' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$method->invoke( $this->oauth, 'gitlab', 'tok', 'ref', 7200 );
 		$method->invoke( $this->oauth, 'gitlab', 'tok', null, null );
@@ -1262,7 +1262,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		] );
 
 		$method = new ReflectionMethod( OAuth_Connect::class, 'delete_token' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 		$method->invoke( $this->oauth, 'github' );
 
 		$options = get_site_option( 'git_updater' );
@@ -1384,7 +1384,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$settings = new Settings();
 		$method   = new ReflectionMethod( Settings::class, 'admin_page_notices' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		ob_start();
 		$method->invoke( $settings );
@@ -1423,13 +1423,13 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 	public function test_is_oauth_token_true_after_save_token_then_false_after_delete_token(): void {
 		$save = new ReflectionMethod( OAuth_Connect::class, 'save_token' );
-		$save->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $save->setAccessible( true );
 		$save->invoke( $this->oauth, 'bitbucket', 'tok', null, null );
 
 		$this->assertTrue( $this->oauth->is_oauth_token( 'bitbucket' ) );
 
 		$delete = new ReflectionMethod( OAuth_Connect::class, 'delete_token' );
-		$delete->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $delete->setAccessible( true );
 		$delete->invoke( $this->oauth, 'bitbucket' );
 
 		$this->assertFalse( $this->oauth->is_oauth_token( 'bitbucket' ) );
@@ -1439,7 +1439,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		API::$options = [];
 
 		$save = new ReflectionMethod( OAuth_Connect::class, 'save_token' );
-		$save->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $save->setAccessible( true );
 		$save->invoke( $this->oauth, 'github', 'tok', null, null );
 
 		$this->assertSame( 'oauth', API::$options['github_is_oauth_token'] );
@@ -1451,7 +1451,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		update_site_option( 'git_updater', API::$options );
 
 		$delete = new ReflectionMethod( OAuth_Connect::class, 'delete_token' );
-		$delete->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $delete->setAccessible( true );
 		$delete->invoke( $this->oauth, 'github' );
 
 		$this->assertArrayNotHasKey( 'github_is_oauth_token', API::$options );
@@ -1467,11 +1467,11 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	 */
 	public function test_is_oauth_token_survives_two_settings_form_saves(): void {
 		$save = new ReflectionMethod( OAuth_Connect::class, 'save_token' );
-		$save->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $save->setAccessible( true );
 		$save->invoke( $this->oauth, 'github', 'tok', null, null );
 
 		$filter = new ReflectionMethod( Settings::class, 'filter_options' );
-		$filter->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $filter->setAccessible( true );
 
 		$run_save = function () use ( $filter ) {
 			$_POST['_wpnonce']    = wp_create_nonce( 'git_updater-options' );
@@ -1884,7 +1884,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->capture_wp_mail( $mails );
 
 		$method = new ReflectionMethod( OAuth_Connect::class, 'notify_admin_of_token_revocation' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 		$method->invoke( $this->oauth, 'invalid_provider' );
 
 		$this->assertCount( 0, $mails );
@@ -1904,7 +1904,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->capture_wp_mail( $mails );
 
 		$method = new ReflectionMethod( OAuth_Connect::class, 'notify_admin_of_token_revocation' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 		$method->invoke( $this->oauth, 'github' );
 
 		$this->assertCount( 0, $mails );

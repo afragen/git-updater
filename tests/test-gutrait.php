@@ -1106,7 +1106,7 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 		// $this->base is not set on GitHub_API; inject via reflection so the
 		// $this->base::$git_servers lookup on line 547 does not throw.
 		$rp = new ReflectionProperty( $this->api, 'base' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		$rp->setValue( $this->api, Singleton::get_instance( 'Fragen\Git_Updater\Base', $this->api ) );
 		$rm   = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
 		$repo = (object) [ 'slug' => 'test-plugin', 'git' => 'github' ];
@@ -1665,7 +1665,7 @@ class Test_GUTrait_Repo_Slugs extends WP_UnitTestCase {
 		// Inject a synthetic config so the test is independent of whether the
 		// fixture plugin is installed (CI runs without wp-env fixture mounts).
 		$ref      = new ReflectionProperty( get_class( $this->plugin_obj ), 'config' );
-		$ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $ref->setAccessible( true );
 		$original = $ref->getValue( $this->plugin_obj );
 		$ref->setValue(
 			$this->plugin_obj,
@@ -1692,7 +1692,7 @@ class Test_GUTrait_Repo_Slugs extends WP_UnitTestCase {
 		// Simulate a plugin installed in a 'my-plugin-master/' directory
 		// where the actual repo slug is 'my-plugin'.
 		$ref      = new ReflectionProperty( get_class( $this->plugin_obj ), 'config' );
-		$ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $ref->setAccessible( true );
 		$original = $ref->getValue( $this->plugin_obj );
 		$ref->setValue(
 			$this->plugin_obj,
@@ -1723,7 +1723,7 @@ class Test_GUTrait_Repo_Slugs extends WP_UnitTestCase {
 		// Inject a minimal theme config so the test is independent of whether
 		// the fixture theme is discovered by get_theme_meta() in the test env.
 		$ref      = new ReflectionProperty( get_class( $this->theme_obj ), 'config' );
-		$ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $ref->setAccessible( true );
 		$original = $ref->getValue( $this->theme_obj );
 		$ref->setValue(
 			$this->theme_obj,
@@ -1772,7 +1772,7 @@ class Test_GUTrait_Repo_Slugs extends WP_UnitTestCase {
 		// Inject synthetic config so the config-loop C1 match works on CI
 		// (where the fixture plugin is not installed).
 		$ref      = new ReflectionProperty( get_class( $this->plugin_obj ), 'config' );
-		$ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $ref->setAccessible( true );
 		$original = $ref->getValue( $this->plugin_obj );
 		$ref->setValue(
 			$this->plugin_obj,

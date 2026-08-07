@@ -148,7 +148,7 @@ class Test_Language_Pack_Constructor_And_Run extends GU_Test_Case {
 		$lp   = new Language_Pack( $repo, $api );
 
 		$ref = new ReflectionProperty( Language_Pack::class, 'repo' );
-		$ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $ref->setAccessible( true );
 		$this->assertNull( $ref->getValue( $lp ) );
 	}
 
@@ -164,9 +164,9 @@ class Test_Language_Pack_Constructor_And_Run extends GU_Test_Case {
 		$lp  = new Language_Pack( $repo, $api );
 
 		$ref_repo = new ReflectionProperty( Language_Pack::class, 'repo' );
-		$ref_repo->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $ref_repo->setAccessible( true );
 		$ref_api = new ReflectionProperty( Language_Pack::class, 'repo_api' );
-		$ref_api->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $ref_api->setAccessible( true );
 
 		$this->assertSame( $repo, $ref_repo->getValue( $lp ) );
 		$this->assertSame( $api, $ref_api->getValue( $lp ) );

@@ -80,7 +80,7 @@ trait Plugin_Mock_Helper {
 	private function plugin_with_config( array $config ): Plugin {
 		$plugin = new Plugin();
 		$ref    = new ReflectionProperty( Plugin::class, 'config' );
-		$ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $ref->setAccessible( true );
 		$ref->setValue( $plugin, $config );
 		return $plugin;
 	}
@@ -165,7 +165,7 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 	public function test_returns_array(): void {
 		$plugin = new Plugin();
 		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$this->assertIsArray( $rm->invoke( $plugin ) );
 	}
 
@@ -183,7 +183,7 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 
 		$plugin = new Plugin();
 		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$rm->invoke( $plugin );
 
 		$this->assertSame( 'plugin', $captured_type );
@@ -207,7 +207,7 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 
 		$plugin = new Plugin();
 		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $plugin );
 
 		// parse_header_uri would yield 'no-uri-plugin'; loop must have hit continue before that.
@@ -233,7 +233,7 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 
 		$plugin = new Plugin();
 		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $plugin );
 
 		$this->assertArrayNotHasKey( 'custom-plugin', $result );
@@ -259,7 +259,7 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 
 		$plugin = new Plugin();
 		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $plugin );
 
 		$this->assertArrayHasKey( 'no-name-plugin', $result );
@@ -288,7 +288,7 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 
 		$plugin = new Plugin();
 		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $plugin );
 
 		$this->assertArrayHasKey( 'did-plugin', $result );
@@ -319,7 +319,7 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 		new Plugin();
 
 		$options_ref = new ReflectionProperty( Plugin::class, 'options' );
-		$options_ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $options_ref->setAccessible( true );
 		$options = $options_ref->getValue( null );
 		$this->assertArrayNotHasKey( 'current_branch_branch-plugin', $options );
 	}
@@ -351,7 +351,7 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 
 		$plugin = new Plugin();
 		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $plugin );
 
 		$this->assertArrayNotHasKey( 'original-plugin', $result );
@@ -379,7 +379,7 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 		try {
 			$plugin = new Plugin();
 			$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
-			$rm->setAccessible( true );
+			PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 			$result = $rm->invoke( $plugin );
 
 			$this->assertArrayHasKey( 'test-gu-plugin', $result );

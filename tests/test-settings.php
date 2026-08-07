@@ -77,13 +77,13 @@ trait Settings_Test_Helper {
 
 	private function call_private( string $method, array $args = [] ) {
 		$rm = new ReflectionMethod( Settings::class, $method );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		return $rm->invokeArgs( $this->settings, $args );
 	}
 
 	private function set_settings_options( array $opts ): void {
 		$ref = new ReflectionProperty( Settings::class, 'options' );
-		$ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $ref->setAccessible( true );
 		$ref->setValue( null, $opts );
 	}
 
@@ -1081,7 +1081,7 @@ class Test_Settings_Update_Settings extends GU_Test_Case {
 	public function test_filter_options_returns_early_without_nonce(): void {
 		unset( $_POST['_wpnonce'] );
 		$rm     = new ReflectionMethod( Settings::class, 'filter_options' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $this->settings );
 		$this->assertNull( $result );
 	}
@@ -1091,7 +1091,7 @@ class Test_Settings_Update_Settings extends GU_Test_Case {
 		$_POST['git_updater'] = [ 'branch_switch' => '1' ];
 		Base::$options        = [ 'branch_switch' => '0', 'existing' => 'keep' ];
 		$rm                   = new ReflectionMethod( Settings::class, 'filter_options' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $this->settings );
 		$this->assertSame( '1', $result['branch_switch'] );
 	}
@@ -1101,7 +1101,7 @@ class Test_Settings_Update_Settings extends GU_Test_Case {
 		$_POST['git_updater'] = [];
 		$this->set_settings_options( [ 'branch_switch' => '1' ] );
 		$rm                   = new ReflectionMethod( Settings::class, 'filter_options' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $this->settings );
 		$this->assertArrayNotHasKey( 'branch_switch', $result );
 	}
@@ -1134,7 +1134,7 @@ class Test_Settings_Redirect_On_Save extends GU_Test_Case {
 	public function test_redirect_on_save_returns_without_redirect_when_no_conditions_met(): void {
 		unset( $_POST['option_page'], $_POST['action'] );
 		$rm = new ReflectionMethod( Settings::class, 'redirect_on_save' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$rm->invoke( $this->settings );
 		$this->assertTrue( true );
 	}
@@ -1152,7 +1152,7 @@ class Test_Settings_Redirect_On_Save extends GU_Test_Case {
 			1
 		);
 		$rm = new ReflectionMethod( Settings::class, 'redirect_on_save' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		try {
 			$rm->invoke( $this->settings );
 			$this->fail( 'Expected redirect exception' );
@@ -1170,7 +1170,7 @@ class Test_Settings_Redirect_On_Save extends GU_Test_Case {
 			1
 		);
 		$rm = new ReflectionMethod( Settings::class, 'redirect_on_save' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		try {
 			$rm->invoke( $this->settings );
 			$this->fail( 'Expected redirect exception' );
@@ -1189,7 +1189,7 @@ class Test_Settings_Redirect_On_Save extends GU_Test_Case {
 			1
 		);
 		$rm = new ReflectionMethod( Settings::class, 'redirect_on_save' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		try {
 			$rm->invoke( $this->settings );
 			$this->fail( 'Expected redirect exception' );
@@ -1208,7 +1208,7 @@ class Test_Settings_Redirect_On_Save extends GU_Test_Case {
 			1
 		);
 		$rm = new ReflectionMethod( Settings::class, 'redirect_on_save' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		try {
 			$rm->invoke( $this->settings );
 			$this->fail( 'Expected redirect exception' );

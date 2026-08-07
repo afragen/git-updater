@@ -151,7 +151,7 @@ class Test_Multisite_Cron_Guard extends \WP_UnitTestCase {
 	private function invoke_schedule_access_token_cleanup() {
 		$upgrade    = new Fragen\Git_Updater\GU_Upgrade();
 		$reflection = new ReflectionMethod( $upgrade, 'schedule_access_token_cleanup' );
-		$reflection->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $reflection->setAccessible( true );
 		$reflection->invoke( $upgrade );
 	}
 

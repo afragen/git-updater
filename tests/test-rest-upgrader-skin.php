@@ -75,7 +75,7 @@ class Test_Rest_Upgrader_Skin extends GU_Test_Case {
 
 	public function test_decrement_update_count_is_callable_no_op(): void {
 		$method = new ReflectionMethod( Rest_Upgrader_Skin::class, 'decrement_update_count' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 		$method->invoke( $this->skin, 'plugin' );
 		$this->assertTrue( true );
 	}

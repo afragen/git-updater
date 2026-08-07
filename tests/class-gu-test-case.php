@@ -152,7 +152,7 @@ abstract class GU_Test_Case extends WP_UnitTestCase {
 	private function read_static_property( string $class, string $prop ): mixed {
 		try {
 			$rp = new ReflectionProperty( $class, $prop );
-			$rp->setAccessible( true );
+			PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 			return $rp->getValue( null );
 		} catch ( ReflectionException ) {
 			return null;
@@ -167,7 +167,7 @@ abstract class GU_Test_Case extends WP_UnitTestCase {
 	private function write_static_property( string $class, string $prop, mixed $value ): void {
 		try {
 			$rp = new ReflectionProperty( $class, $prop );
-			$rp->setAccessible( true );
+			PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 			$rp->setValue( null, $value );
 		} catch ( ReflectionException ) {
 			// Property not found — skip.
@@ -182,7 +182,7 @@ abstract class GU_Test_Case extends WP_UnitTestCase {
 	private function read_property( object $obj, string $prop ): mixed {
 		try {
 			$rp = new ReflectionProperty( $obj, $prop );
-			$rp->setAccessible( true );
+			PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 			return $rp->getValue( $obj );
 		} catch ( ReflectionException ) {
 			return null;
@@ -197,7 +197,7 @@ abstract class GU_Test_Case extends WP_UnitTestCase {
 	private function write_property( object $obj, string $prop, mixed $value ): void {
 		try {
 			$rp = new ReflectionProperty( $obj, $prop );
-			$rp->setAccessible( true );
+			PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 			$rp->setValue( $obj, $value );
 		} catch ( ReflectionException ) {
 			// Property not found — skip.

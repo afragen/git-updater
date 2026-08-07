@@ -1,4 +1,5 @@
 #### [unreleased]
+* guard all remaining `ReflectionMethod::setAccessible()`/`ReflectionProperty::setAccessible()` calls in tests with `PHP_VERSION_ID < 80100` to avoid deprecation on PHP 8.5
 * email the site admin when a provider's OAuth token refresh fails and the token is deleted, with a 36-hour reminder cron while the token remains empty; a "token is empty" variant of the reminder email is sent only to premium license holders
 * show the OAuth revocation notice on the settings page whenever the Connect button is displayed (no token stored), not only when the revoked flag is set
 

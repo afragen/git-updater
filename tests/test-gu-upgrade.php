@@ -21,7 +21,7 @@ class Test_GU_Upgrade extends WP_UnitTestCase {
 
 	private function get_db_version(): string {
 		$rp = new \ReflectionProperty( GU_Upgrade::class, 'db_version' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		return $rp->getValue( $this->upgrade );
 	}
 
