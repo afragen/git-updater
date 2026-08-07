@@ -400,8 +400,12 @@ class Settings {
 	private function maybe_show_oauth_revocation_notice(): void {
 		$persist_options = get_site_option( 'git_updater', [] );
 
-		foreach ( OAuth_Connect::PROVIDERS as $provider => $config ) {
-			if ( ! empty( $persist_options[ 'gu_oauth_revoked_' . $provider ] ) ) {
+		foreach ( ( new OAuth_Connect() )->get_running_providers() as $provider ) {
+			$config   = OAuth_Connect::PROVIDERS[ $provider ];
+			$revoked  = ! empty( $persist_options[ 'gu_oauth_revoked_' . $provider ] );
+			$no_token = empty( $persist_options[ $config['option_key'] ] );
+
+			if ( $revoked || $no_token ) {
 				echo '<div class="error"><p>';
 				/* translators: %s is the provider label, e.g. "GitHub". */
 				echo esc_html( sprintf( __( '%s access was revoked. Please reconnect using the Connect button on the Git Updater settings page.', 'git-updater' ), $config['label'] ) );

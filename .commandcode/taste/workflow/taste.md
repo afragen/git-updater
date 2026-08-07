@@ -6,8 +6,11 @@
 - When taste files are modified, omit them from any commit rather than reverting them with git checkout. Confidence: 0.70
 - Never include taste files in code commits; user will commit taste files manually. Confidence: 0.95
 - Create a CHANGES.md entry before committing, unless the user explicitly specifies to commit without changelog entries. Confidence: 0.85
+- Document new user-visible behavior with a concise `[unreleased]` bullet in CHANGES.md (single line, lowercase, covering the change; e.g., email notification + reminder cadence). Confidence: 0.75
+- Verify a plan before implementation: the user reviews plans carefully and points out logic flaws (e.g., a dedupe guard that can never trigger because the flag is always cleared first), so re-check control flow against the actual code before finalizing. Confidence: 0.80
 - CHANGES.md entries should be concise — a short single-line summary of the change rather than a long description. Confidence: 0.80
-- Use Apple Container and opossum via wp-env-opossum for container operations instead of running Docker directly. Confidence: 0.90
+- Use Apple Container and opossum via wp-env-macos for container operations instead of running Docker directly. Confidence: 0.95
+- The wp-env binary was renamed from `wp-env-opossum` to `wp-env-macos` — the old name no longer exists; use `./node_modules/.bin/wp-env-macos` for both tests (`test`) and coverage checks (`coverage:check --exclude coverage-exclude.json`). The user corrected the assistant when it looked for the renamed binary. Confidence: 0.85
 - When the same bug affects multiple satellite plugin repos with an identical root cause, apply the same fix uniformly across every affected repo, and commit each repo separately using the same commit message (e.g., loop over the repos). Confidence: 0.80
 - Write commit messages with a concise summary line and a `Co-authored-by: CommandCodeBot <noreply@commandcode.ai>` trailer; for larger changes include a body paragraph explaining the root cause and a bulleted list of the changes — small, focused fixes can be a one-line summary plus the trailer. Confidence: 0.70
 - Once the root cause is understood and a fix is identified, proceed to implementation promptly rather than continuing to investigate; the user nudges when analysis drags on or when nothing visibly happens (e.g., an interrupted file write leaves no deliverable on disk). Confidence: 0.82

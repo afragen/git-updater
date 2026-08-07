@@ -1485,3 +1485,63 @@ class Test_Settings_Subtabs_Gitlabce extends GU_Test_Case {
 		$this->assertArrayHasKey( 'gitlab', $result );
 	}
 }
+
+// =============================================================================
+// Test_Settings_OAuth_Revocation_Notice
+//
+// maybe_show_oauth_revocation_notice() shows the notice when either the
+// revoked flag is set OR the provider's token is empty (Connect button
+// displayed).
+// =============================================================================
+
+/**
+ * Class Test_Settings_OAuth_Revocation_Notice
+ */
+class Test_Settings_OAuth_Revocation_Notice extends GU_Test_Case {
+	use Settings_Test_Helper;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->settings = new Settings();
+	}
+
+	public function tear_down(): void {
+		delete_site_option( 'git_updater' );
+		$this->settings_tear_down();
+		parent::tear_down();
+	}
+
+	public function test_notice_hidden_when_token_present_and_no_flag(): void {
+		update_site_option( 'git_updater', [ 'github_access_token' => 'tok' ] );
+
+		ob_start();
+		$this->call_private( 'maybe_show_oauth_revocation_notice' );
+		$output = ob_get_clean();
+
+		$this->assertSame( '', $output );
+	}
+
+	public function test_notice_shown_when_revoked_flag_set(): void {
+		update_site_option( 'git_updater', [
+			'github_access_token'     => 'tok',
+			'gu_oauth_revoked_github' => time(),
+		] );
+
+		ob_start();
+		$this->call_private( 'maybe_show_oauth_revocation_notice' );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'access was revoked', $output );
+	}
+
+	public function test_notice_shown_when_token_empty_and_no_flag(): void {
+		update_site_option( 'git_updater', [] );
+
+		ob_start();
+		$this->call_private( 'maybe_show_oauth_revocation_notice' );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'access was revoked', $output );
+	}
+}
