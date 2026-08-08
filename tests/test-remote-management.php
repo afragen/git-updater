@@ -28,6 +28,7 @@ class Test_Remote_Management extends GU_Test_Case {
 		$_REQUEST = $this->saved_request;
 		$_POST    = $this->saved_post;
 		$_GET     = $this->saved_get;
+		wp_set_current_user( 0 );
 		delete_site_option( 'git_updater_api_key' );
 		remove_all_filters( 'gu_add_settings_tabs' );
 		remove_all_actions( 'gu_add_admin_page' );
@@ -67,11 +68,16 @@ class Test_Remote_Management extends GU_Test_Case {
 	}
 
 	public function test_reset_api_key_returns_true_and_deletes_option_with_valid_request(): void {
+		$admin_id = $this->factory->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $admin_id );
+		grant_super_admin( $admin_id );
+
 		update_site_option( 'git_updater_api_key', 'key-to-delete' );
 		$rm = new Remote_Management();
 
-		$_REQUEST['tab']                      = 'git_updater_remote_management';
+		$_REQUEST['tab']                       = 'git_updater_remote_management';
 		$_REQUEST['git_updater_reset_api_key'] = '1';
+		$_REQUEST['_wpnonce']                  = wp_create_nonce( 'git_updater_reset_api_key' );
 
 		$result = $rm->reset_api_key();
 
@@ -79,6 +85,41 @@ class Test_Remote_Management extends GU_Test_Case {
 		$new_key = get_site_option( 'git_updater_api_key', false );
 		$this->assertIsString( $new_key );
 		$this->assertSame( 64, strlen( $new_key ) );
+	}
+
+	public function test_reset_api_key_returns_false_without_nonce(): void {
+		$admin_id = $this->factory->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $admin_id );
+		grant_super_admin( $admin_id );
+
+		update_site_option( 'git_updater_api_key', 'key-to-keep' );
+		$rm = new Remote_Management();
+
+		$_REQUEST['tab']                       = 'git_updater_remote_management';
+		$_REQUEST['git_updater_reset_api_key'] = '1';
+		unset( $_REQUEST['_wpnonce'] );
+
+		$result = $rm->reset_api_key();
+
+		$this->assertFalse( $result );
+		$this->assertSame( 'key-to-keep', get_site_option( 'git_updater_api_key' ) );
+	}
+
+	public function test_reset_api_key_returns_false_without_capability(): void {
+		$subscriber = $this->factory->user->create( [ 'role' => 'subscriber' ] );
+		wp_set_current_user( $subscriber );
+
+		update_site_option( 'git_updater_api_key', 'key-to-keep' );
+		$rm = new Remote_Management();
+
+		$_REQUEST['tab']                       = 'git_updater_remote_management';
+		$_REQUEST['git_updater_reset_api_key'] = '1';
+		$_REQUEST['_wpnonce']                  = wp_create_nonce( 'git_updater_reset_api_key' );
+
+		$result = $rm->reset_api_key();
+
+		$this->assertFalse( $result );
+		$this->assertSame( 'key-to-keep', get_site_option( 'git_updater_api_key' ) );
 	}
 
 	public function test_add_settings_tabs_registers_remote_management_tab(): void {

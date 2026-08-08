@@ -95,6 +95,7 @@ class Remote_Management {
 			</form>
 			<?php $reset_api_action = add_query_arg( [ 'git_updater_reset_api_key' => true ], $action ); ?>
 			<form class="settings no-sub-tabs" method="post" action="<?php echo esc_attr( $reset_api_action ); ?>">
+				<?php wp_nonce_field( 'git_updater_reset_api_key' ); ?>
 				<?php submit_button( esc_html__( 'Reset REST API key', 'git-updater' ) ); ?>
 			</form>
 			<?php
@@ -220,6 +221,11 @@ class Remote_Management {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_REQUEST['tab'], $_REQUEST['git_updater_reset_api_key'] )
 			&& 'git_updater_remote_management' === sanitize_title_with_dashes( wp_unslash( $_REQUEST['tab'] ) )
+			// Verify the nonce and capability: a minted nonce alone must not let a
+			// low-privilege user rotate the shared REST API key (availability DoS).
+			&& isset( $_REQUEST['_wpnonce'] )
+			&& wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['_wpnonce'] ) ), 'git_updater_reset_api_key' )
+			&& current_user_can( is_multisite() ? 'manage_network_options' : 'manage_options' )
 		) {
 			$_POST = $_REQUEST;
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
