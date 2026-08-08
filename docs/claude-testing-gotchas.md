@@ -223,14 +223,14 @@ public function set_up(): void {
     // ... other setup ...
     $singleton                 = Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $caller );
     $rp                        = new ReflectionProperty( Plugin::class, 'config' );
-    $rp->setAccessible( true );
+    PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
     $this->saved_plugin_config = $rp->getValue( $singleton ) ?? [];
 }
 
 public function tear_down(): void {
     $singleton = Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $caller );
     $rp        = new ReflectionProperty( Plugin::class, 'config' );
-    $rp->setAccessible( true );
+    PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
     $rp->setValue( $singleton, $this->saved_plugin_config );
     parent::tear_down();
 }
@@ -242,7 +242,7 @@ Alternatively, for a one-off injection inside a single test method, use a `try/f
 `Plugin::$config` and `Theme::$config` are both declared `private`. To inject a synthetic entry where `dirname($repo->file)` differs from `$repo->slug` (the `-master` suffix scenario), use `ReflectionProperty`:
 ```php
 $ref      = new ReflectionProperty( get_class( $obj ), 'config' );
-$ref->setAccessible( true );
+PHP_VERSION_ID < 80100 && $ref->setAccessible( true );
 $original = $ref->getValue( $obj );
 $ref->setValue( $obj, [ 'my-plugin' => (object) [ 'slug' => 'my-plugin', 'file' => 'my-plugin-master/my-plugin.php' ] ] );
 try {
@@ -275,7 +275,7 @@ To exercise the `in_array($key, get_running_git_servers())` branch, pass `['head
 The method reads `$this->base::$git_servers[$repo->git]` (line 547). `$this->base` is `null` on a bare `GitHub_API` instance because only `Plugin`, `Theme`, `Init`, and `Branch` constructors set it. To test the `$repo->git` branch from a `GitHub_API` instance, inject via `ReflectionProperty`:
 ```php
 $rp = new ReflectionProperty( $this->api, 'base' );
-$rp->setAccessible( true );
+PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 $rp->setValue( $this->api, Singleton::get_instance( 'Fragen\Git_Updater\Base', $this->api ) );
 ```
 
@@ -358,7 +358,7 @@ When `REST_API::get_api_data()` calls `get_release_asset_redirect($repo_cache['r
 ```php
 $api_singleton  = Singleton::get_instance( 'Fragen\Git_Updater\API\API', new REST_API() );
 $rp             = new ReflectionProperty( get_class( $api_singleton ), 'type' );
-$rp->setAccessible( true );
+PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 $saved_type     = $rp->getValue( $api_singleton );
 $type_obj       = new stdClass();
 $type_obj->slug = 'test-gu-plugin';

@@ -351,7 +351,7 @@ class Test_API extends WP_UnitTestCase {
 	 */
 	public function test_api_logs_debug_message_on_non_200_with_file_method(): void {
 		$rp = new ReflectionProperty( \Fragen\Git_Updater\API\GitHub_API::class, 'method' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		$original_method = $rp->getValue( null );
 		$rp->setValue( null, 'file' );
 
@@ -1023,7 +1023,7 @@ class Test_API_Exit_No_Update extends WP_UnitTestCase {
 
 	public function test_exit_no_update_returns_branch_switch_empty_when_branch_param_true(): void {
 		$rp = new ReflectionProperty( GitHub_API::class, 'options' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		$original = $rp->getValue( null );
 
 		$rp->setValue( null, [] ); // no branch_switch option

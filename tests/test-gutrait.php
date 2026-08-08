@@ -869,10 +869,27 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 	}
 
 	public function test_waiting_for_background_update_returns_false_when_repo_has_cached_data(): void {
-		$this->seed_cache( [ 'meta' => [ 'Version' => '1.0.0' ] ] );
+		// A complete 'ran' list means the background fetch cycle finished.
+		$this->seed_cache( [ 'ran' => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ] ] );
 		$rm   = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
 		$repo = (object) [ 'slug' => 'test-plugin' ]; // no 'git' property, skips Singleton
 		$this->assertFalse( $rm->invoke( $this->api, $repo ) );
+	}
+
+	public function test_waiting_for_background_update_returns_true_when_ran_incomplete(): void {
+		// A partial 'ran' list (interrupted/failed fetch) means still waiting.
+		$this->seed_cache( [ 'ran' => [ 'contents', 'assets' ] ] );
+		$rm   = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$repo = (object) [ 'slug' => 'test-plugin' ]; // no 'git' property, skips Singleton
+		$this->assertTrue( $rm->invoke( $this->api, $repo ) );
+	}
+
+	public function test_waiting_for_background_update_returns_true_when_cache_has_data_but_no_ran(): void {
+		// Cached data without a complete 'ran' key is not a finished fetch.
+		$this->seed_cache( [ 'meta' => [ 'Version' => '1.0.0' ] ] );
+		$rm   = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$repo = (object) [ 'slug' => 'test-plugin' ]; // no 'git' property, skips Singleton
+		$this->assertTrue( $rm->invoke( $this->api, $repo ) );
 	}
 
 	public function test_waiting_for_background_update_with_null_returns_false_when_repos_empty(): void {
@@ -1102,11 +1119,11 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	public function test_waiting_for_background_update_instantiates_git_api_when_repo_has_git(): void {
-		$this->seed_cache( [ 'meta' => [ 'Version' => '1.0.0' ] ] );
+		$this->seed_cache( [ 'ran' => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ] ] );
 		// $this->base is not set on GitHub_API; inject via reflection so the
 		// $this->base::$git_servers lookup on line 547 does not throw.
 		$rp = new ReflectionProperty( $this->api, 'base' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		$rp->setValue( $this->api, Singleton::get_instance( 'Fragen\Git_Updater\Base', $this->api ) );
 		$rm   = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
 		$repo = (object) [ 'slug' => 'test-plugin', 'git' => 'github' ];
@@ -1243,6 +1260,11 @@ class Test_GUTrait_Extended extends WP_UnitTestCase {
 		$this->type = $this->make_type();
 	}
 
+	public function tear_down(): void {
+		delete_site_option( $this->get_cache_key( 'test-plugin' ) );
+		parent::tear_down();
+	}
+
 	private function make_type(): stdClass {
 		$type                 = new stdClass();
 		$type->slug           = 'test-plugin';
@@ -1255,6 +1277,16 @@ class Test_GUTrait_Extended extends WP_UnitTestCase {
 		$type->enterprise_api = null;
 		$type->gist_id        = null;
 		return $type;
+	}
+
+	private function seed_release_assets_cache( array $release_assets ): void {
+		update_site_option(
+			$this->get_cache_key( 'test-plugin' ),
+			[
+				'timeout'        => strtotime( '+12 hours' ),
+				'release_assets' => $release_assets,
+			]
+		);
 	}
 
 	// -------------------------------------------------------------------------
@@ -1571,6 +1603,18 @@ class Test_GUTrait_Extended extends WP_UnitTestCase {
 		$this->assertFalse( $this->use_release_asset( 'develop' ) );
 	}
 
+	/**
+	 * First-run regression: with no release_assets cache yet populated, a
+	 * release-asset repo on its primary branch must still pass the gate so
+	 * construct_download_link() can fetch the asset list.
+	 */
+	public function test_use_release_asset_returns_true_on_first_run_with_empty_cache(): void {
+		$this->type->release_asset = true;
+		$this->type->newest_tag    = '1.0.0';
+		// No seed_release_assets_cache() — cache is empty, as on first run.
+		$this->assertTrue( $this->use_release_asset( false ) );
+	}
+
 	// -------------------------------------------------------------------------
 	// get_headers()
 	// -------------------------------------------------------------------------
@@ -1665,7 +1709,7 @@ class Test_GUTrait_Repo_Slugs extends WP_UnitTestCase {
 		// Inject a synthetic config so the test is independent of whether the
 		// fixture plugin is installed (CI runs without wp-env fixture mounts).
 		$ref      = new ReflectionProperty( get_class( $this->plugin_obj ), 'config' );
-		$ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $ref->setAccessible( true );
 		$original = $ref->getValue( $this->plugin_obj );
 		$ref->setValue(
 			$this->plugin_obj,
@@ -1692,7 +1736,7 @@ class Test_GUTrait_Repo_Slugs extends WP_UnitTestCase {
 		// Simulate a plugin installed in a 'my-plugin-master/' directory
 		// where the actual repo slug is 'my-plugin'.
 		$ref      = new ReflectionProperty( get_class( $this->plugin_obj ), 'config' );
-		$ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $ref->setAccessible( true );
 		$original = $ref->getValue( $this->plugin_obj );
 		$ref->setValue(
 			$this->plugin_obj,
@@ -1723,7 +1767,7 @@ class Test_GUTrait_Repo_Slugs extends WP_UnitTestCase {
 		// Inject a minimal theme config so the test is independent of whether
 		// the fixture theme is discovered by get_theme_meta() in the test env.
 		$ref      = new ReflectionProperty( get_class( $this->theme_obj ), 'config' );
-		$ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $ref->setAccessible( true );
 		$original = $ref->getValue( $this->theme_obj );
 		$ref->setValue(
 			$this->theme_obj,
@@ -1772,7 +1816,7 @@ class Test_GUTrait_Repo_Slugs extends WP_UnitTestCase {
 		// Inject synthetic config so the config-loop C1 match works on CI
 		// (where the fixture plugin is not installed).
 		$ref      = new ReflectionProperty( get_class( $this->plugin_obj ), 'config' );
-		$ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $ref->setAccessible( true );
 		$original = $ref->getValue( $this->plugin_obj );
 		$ref->setValue(
 			$this->plugin_obj,

@@ -343,7 +343,7 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 
 	private function force_api_key_static( string $key ): void {
 		$prop = ( new ReflectionClass( Remote_Management::class ) )->getProperty( 'api_key' );
-		$prop->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $prop->setAccessible( true );
 		$prop->setValue( null, $key );
 	}
 }
@@ -389,7 +389,7 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 		// Seed the API key.
 		update_site_option( 'git_updater_api_key', self::API_KEY );
 		$prop = ( new ReflectionClass( Remote_Management::class ) )->getProperty( 'api_key' );
-		$prop->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $prop->setAccessible( true );
 		$prop->setValue( null, self::API_KEY );
 
 		// Install the HTTP mock for GitHub and wordpress.org calls.
@@ -1295,7 +1295,7 @@ class Test_REST_API_Reset_Branch extends WP_UnitTestCase {
 
 	private function force_api_key_static( string $key ): void {
 		$prop = ( new ReflectionClass( Remote_Management::class ) )->getProperty( 'api_key' );
-		$prop->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $prop->setAccessible( true );
 		$prop->setValue( null, $key );
 	}
 
@@ -1401,7 +1401,7 @@ class Test_REST_API_Zero_Version extends WP_UnitTestCase {
 
 		update_site_option( 'git_updater_api_key', self::API_KEY );
 		$prop = ( new ReflectionClass( Remote_Management::class ) )->getProperty( 'api_key' );
-		$prop->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $prop->setAccessible( true );
 		$prop->setValue( null, self::API_KEY );
 
 		add_filter( 'pre_http_request', [ $this, 'mock_http_zero' ], 10, 3 );
@@ -1540,7 +1540,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 	public function test_sign_download_url_returns_url_with_correct_path(): void {
 		$method = new ReflectionMethod( REST_API::class, 'sign_download_url' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$url = $method->invoke( $this->rest, 'my-slug' );
 
@@ -1554,7 +1554,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 	public function test_sign_download_url_contains_expires_param(): void {
 		$method = new ReflectionMethod( REST_API::class, 'sign_download_url' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$url = $method->invoke( $this->rest, 'my-slug' );
 
@@ -1563,7 +1563,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 	public function test_sign_download_url_contains_signature_param(): void {
 		$method = new ReflectionMethod( REST_API::class, 'sign_download_url' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$url = $method->invoke( $this->rest, 'my-slug' );
 
@@ -1572,7 +1572,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 	public function test_sign_download_url_expires_in_future(): void {
 		$method = new ReflectionMethod( REST_API::class, 'sign_download_url' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$url     = $method->invoke( $this->rest, 'my-slug', 300 );
 		$expires = (int) ( preg_match( '/[?&]expires=(\d+)/', $url, $m ) ? $m[1] : 0 );
@@ -1583,7 +1583,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 	public function test_sign_download_url_expires_within_expected_range(): void {
 		$ttl     = 600;
 		$method  = new ReflectionMethod( REST_API::class, 'sign_download_url' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$url     = $method->invoke( $this->rest, 'my-slug', $ttl );
 		$expires = (int) ( preg_match( '/[?&]expires=(\d+)/', $url, $m ) ? $m[1] : 0 );
@@ -1594,7 +1594,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 	public function test_sign_download_url_custom_ttl(): void {
 		$method = new ReflectionMethod( REST_API::class, 'sign_download_url' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$url_default = $method->invoke( $this->rest, 'my-slug' );
 		$url_custom  = $method->invoke( $this->rest, 'my-slug', 60 );
@@ -1607,7 +1607,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 	public function test_sign_download_url_different_slugs_produce_different_signatures(): void {
 		$method = new ReflectionMethod( REST_API::class, 'sign_download_url' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$url1 = $method->invoke( $this->rest, 'slug-a' );
 		$url2 = $method->invoke( $this->rest, 'slug-b' );
@@ -1624,9 +1624,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 	public function test_verify_download_signature_accepts_valid_signature(): void {
 		$sign   = new ReflectionMethod( REST_API::class, 'sign_download_url' );
-		$sign->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $sign->setAccessible( true );
 		$verify = new ReflectionMethod( REST_API::class, 'verify_download_signature' );
-		$verify->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $verify->setAccessible( true );
 
 		$url = $sign->invoke( $this->rest, 'my-slug' );
 		preg_match( '/[?&]expires=(\d+)/', $url, $m_expires );
@@ -1644,7 +1644,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$signature = hash_hmac( 'sha256', $payload, $secret );
 
 		$verify = new ReflectionMethod( REST_API::class, 'verify_download_signature' );
-		$verify->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $verify->setAccessible( true );
 
 		$result = $verify->invoke( $this->rest, 'my-slug', $expires, $signature );
 
@@ -1653,9 +1653,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 	public function test_verify_download_signature_rejects_tampered_signature(): void {
 		$sign   = new ReflectionMethod( REST_API::class, 'sign_download_url' );
-		$sign->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $sign->setAccessible( true );
 		$verify = new ReflectionMethod( REST_API::class, 'verify_download_signature' );
-		$verify->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $verify->setAccessible( true );
 
 		$url = $sign->invoke( $this->rest, 'my-slug' );
 		preg_match( '/[?&]expires=(\d+)/', $url, $m_expires );
@@ -1670,9 +1670,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 	public function test_verify_download_signature_rejects_wrong_slug(): void {
 		$sign   = new ReflectionMethod( REST_API::class, 'sign_download_url' );
-		$sign->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $sign->setAccessible( true );
 		$verify = new ReflectionMethod( REST_API::class, 'verify_download_signature' );
-		$verify->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $verify->setAccessible( true );
 
 		$url = $sign->invoke( $this->rest, 'slug-a' );
 		preg_match( '/[?&]expires=(\d+)/', $url, $m_expires );
@@ -1686,7 +1686,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 	public function test_verify_download_signature_rejects_empty_signature(): void {
 		$verify = new ReflectionMethod( REST_API::class, 'verify_download_signature' );
-		$verify->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $verify->setAccessible( true );
 
 		$result = $verify->invoke( $this->rest, 'my-slug', time() + 300, '' );
 
@@ -1695,9 +1695,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 	public function test_verify_roundtrip_with_custom_ttl(): void {
 		$sign   = new ReflectionMethod( REST_API::class, 'sign_download_url' );
-		$sign->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $sign->setAccessible( true );
 		$verify = new ReflectionMethod( REST_API::class, 'verify_download_signature' );
-		$verify->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $verify->setAccessible( true );
 
 		$url = $sign->invoke( $this->rest, 'custom-ttl-slug', 120 );
 		preg_match( '/[?&]expires=(\d+)/', $url, $m_expires );
@@ -1742,7 +1742,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 	public function test_proxy_download_returns_error_for_nonexistent_slug(): void {
 		$sign = new ReflectionMethod( REST_API::class, 'sign_download_url' );
-		$sign->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $sign->setAccessible( true );
 
 		$url = $sign->invoke( $this->rest, 'nonexistent-slug-xyz' );
 		preg_match( '/[?&]expires=(\d+)/', $url, $m_expires );
@@ -1772,7 +1772,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		);
 
 		$sign = new ReflectionMethod( REST_API::class, 'sign_download_url' );
-		$sign->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $sign->setAccessible( true );
 
 		$url = $sign->invoke( $this->rest, 'private-proxy' );
 		preg_match( '/[?&]expires=(\d+)/', $url, $m_expires );
@@ -1797,7 +1797,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 	public function test_build_download_metadata_returns_error_for_nonexistent_slug(): void {
 		$method = new ReflectionMethod( REST_API::class, 'build_download_metadata' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$result = $method->invoke( $this->rest, 'nonexistent-build-slug-xyz' );
 
@@ -1818,7 +1818,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		);
 
 		$method = new ReflectionMethod( REST_API::class, 'build_download_metadata' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$result = $method->invoke( $this->rest, 'private-meta' );
 
@@ -1835,7 +1835,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
 
 		$method = new ReflectionMethod( REST_API::class, 'build_download_metadata' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		new Base();
 		$result = $method->invoke( $this->rest, self::SLUG );
@@ -1864,7 +1864,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 		update_site_option( 'git_updater_api_key', self::API_KEY );
 		$prop = ( new ReflectionClass( Remote_Management::class ) )->getProperty( 'api_key' );
-		$prop->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $prop->setAccessible( true );
 		$prop->setValue( null, self::API_KEY );
 
 		$empty_transient = (object) [
@@ -1901,7 +1901,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 		update_site_option( 'git_updater_api_key', self::API_KEY );
 		$prop = ( new ReflectionClass( Remote_Management::class ) )->getProperty( 'api_key' );
-		$prop->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $prop->setAccessible( true );
 		$prop->setValue( null, self::API_KEY );
 
 		$empty_transient = (object) [
@@ -2081,7 +2081,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		update_site_option( $cache_key, $existing );
 
 		$method = new ReflectionMethod( REST_API::class, 'build_download_metadata' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		new Base();
 		$result = $method->invoke( $this->rest, self::SLUG );
@@ -2113,7 +2113,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		update_site_option( $cache_key, $existing );
 
 		$method = new ReflectionMethod( REST_API::class, 'build_download_metadata' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		new Base();
 		$result = $method->invoke( $this->rest, self::SLUG );
@@ -2145,14 +2145,14 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		// Set the type slug on the API singleton so get_repo_cache() works.
 		$api_singleton  = Singleton::get_instance( 'Fragen\Git_Updater\API\API', new REST_API() );
 		$rp             = new ReflectionProperty( get_class( $api_singleton ), 'type' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		$saved_type     = $rp->getValue( $api_singleton );
 		$type_obj       = new stdClass();
 		$type_obj->slug = self::SLUG;
 		$rp->setValue( $api_singleton, $type_obj );
 
 		$method = new ReflectionMethod( REST_API::class, 'build_download_metadata' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		new Base();
 		$result = $method->invoke( $this->rest, self::SLUG );
@@ -2188,7 +2188,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 		update_site_option( 'git_updater_api_key', self::API_KEY );
 		$prop = ( new ReflectionClass( Remote_Management::class ) )->getProperty( 'api_key' );
-		$prop->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $prop->setAccessible( true );
 		$prop->setValue( null, self::API_KEY );
 
 		$empty_transient = (object) [
@@ -2255,7 +2255,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 		update_site_option( 'git_updater_api_key', self::API_KEY );
 		$prop = ( new ReflectionClass( Remote_Management::class ) )->getProperty( 'api_key' );
-		$prop->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $prop->setAccessible( true );
 		$prop->setValue( null, self::API_KEY );
 
 		$empty_transient = (object) [
@@ -2283,7 +2283,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		// inside get_release_asset_redirect().
 		$api_singleton  = Singleton::get_instance( 'Fragen\Git_Updater\API\API', new REST_API() );
 		$rp             = new ReflectionProperty( get_class( $api_singleton ), 'type' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		$saved_type     = $rp->getValue( $api_singleton );
 		$type_obj       = new stdClass();
 		$type_obj->slug = self::SLUG;
@@ -2323,7 +2323,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		new Base();
 
 		$sign = new ReflectionMethod( REST_API::class, 'sign_download_url' );
-		$sign->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $sign->setAccessible( true );
 
 		$url = $sign->invoke( $this->rest, self::SLUG );
 		preg_match( '/[?&]expires=(\d+)/', $url, $m_expires );
@@ -2401,7 +2401,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		};
 
 		$sign = new ReflectionMethod( REST_API::class, 'sign_download_url' );
-		$sign->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $sign->setAccessible( true );
 
 		$url = $sign->invoke( $rest, self::SLUG );
 		preg_match( '/[?&]expires=(\d+)/', $url, $m_expires );
@@ -2452,7 +2452,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		update_site_option( $cache_key, $existing );
 
 		$sign = new ReflectionMethod( REST_API::class, 'sign_download_url' );
-		$sign->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $sign->setAccessible( true );
 
 		$url = $sign->invoke( $this->rest, self::SLUG );
 		preg_match( '/[?&]expires=(\d+)/', $url, $m_expires );
@@ -2506,7 +2506,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		update_site_option( $cache_key, $existing );
 
 		$sign = new ReflectionMethod( REST_API::class, 'sign_download_url' );
-		$sign->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $sign->setAccessible( true );
 
 		$url = $sign->invoke( $this->rest, self::SLUG );
 		preg_match( '/[?&]expires=(\d+)/', $url, $m_expires );
@@ -2545,7 +2545,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		update_site_option( $cache_key, $existing );
 
 		$sign = new ReflectionMethod( REST_API::class, 'sign_download_url' );
-		$sign->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $sign->setAccessible( true );
 
 		$url = $sign->invoke( $this->rest, self::SLUG );
 		preg_match( '/[?&]expires=(\d+)/', $url, $m_expires );
@@ -2620,7 +2620,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		update_site_option( $cache_key, $existing );
 
 		$method = new ReflectionMethod( REST_API::class, 'build_download_metadata' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		new Base();
 		$result = $method->invoke( $this->rest, self::SLUG );
@@ -2900,7 +2900,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 	public function test_has_uses_lite_returns_true_when_uses_lite_set(): void {
 		$method = new ReflectionMethod( REST_API::class, 'has_uses_lite' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$additions = get_site_option( 'git_updater_additions', [] );
 		$additions[] = [
@@ -2921,7 +2921,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 	public function test_has_uses_lite_returns_false_when_uses_lite_not_set(): void {
 		$method = new ReflectionMethod( REST_API::class, 'has_uses_lite' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$additions = get_site_option( 'git_updater_additions', [] );
 		$additions[] = [
@@ -2941,7 +2941,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 	public function test_has_uses_lite_returns_false_for_nonexistent_slug(): void {
 		$method = new ReflectionMethod( REST_API::class, 'has_uses_lite' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$result = $method->invoke( $this->rest, 'nonexistent-slug' );
 
@@ -2950,7 +2950,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 	public function test_has_uses_lite_handles_theme_slug(): void {
 		$method = new ReflectionMethod( REST_API::class, 'has_uses_lite' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$additions = get_site_option( 'git_updater_additions', [] );
 		$additions[] = [

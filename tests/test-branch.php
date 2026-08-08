@@ -77,14 +77,14 @@ class Test_Branch_Constructor extends GU_Test_Case {
 	public function test_constructor_sets_options_array(): void {
 		$branch = new Branch();
 		$rp     = new ReflectionProperty( Branch::class, 'options' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		$this->assertIsArray( $rp->getValue( null ) );
 	}
 
 	public function test_constructor_sets_base_instance(): void {
 		$branch = new Branch();
 		$rp     = new ReflectionProperty( Branch::class, 'base' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		$this->assertInstanceOf( Base::class, $rp->getValue( $branch ) );
 	}
 }
@@ -162,7 +162,7 @@ class Test_Branch_SetRollbackTransient extends GU_Test_Case {
 		$this->branch->set_rollback_transient( 'plugin', $this->repo );
 
 		$rp = new ReflectionProperty( Branch::class, 'tag' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		$this->assertSame( '1.2.3', $rp->getValue( $this->branch ) );
 	}
 
@@ -172,7 +172,7 @@ class Test_Branch_SetRollbackTransient extends GU_Test_Case {
 		$this->branch->set_rollback_transient( 'plugin', $this->repo );
 
 		$rp = new ReflectionProperty( Branch::class, 'tag' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		$this->assertFalse( $rp->getValue( $this->branch ) );
 	}
 

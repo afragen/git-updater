@@ -29,7 +29,7 @@ class Test_Lite_Domains extends WP_UnitTestCase {
 		// Reset static options.
 		$reflection = new ReflectionClass( $this->lite_domains );
 		$property   = $reflection->getProperty( 'options' );
-		$property->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $property->setAccessible( true );
 		$property->setValue( null, [] );
 	}
 
@@ -307,7 +307,7 @@ class Test_Lite_Domains extends WP_UnitTestCase {
 		] );
 
 		$reflection = new ReflectionMethod( $this->lite_domains, 'get_flagged_slugs' );
-		$reflection->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $reflection->setAccessible( true );
 		$flagged = $reflection->invoke( $this->lite_domains );
 
 		$this->assertContains( 'my-plugin', $flagged );
@@ -321,7 +321,7 @@ class Test_Lite_Domains extends WP_UnitTestCase {
 		$this->lite_domains = new Lite_Domains();
 
 		$reflection = new ReflectionMethod( $this->lite_domains, 'get_flagged_slugs' );
-		$reflection->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $reflection->setAccessible( true );
 		$flagged = $reflection->invoke( $this->lite_domains );
 
 		$this->assertContains( 'existing-slug', $flagged );
@@ -343,7 +343,7 @@ class Test_Lite_Domains extends WP_UnitTestCase {
 		] );
 
 		$reflection = new ReflectionMethod( $this->lite_domains, 'get_flagged_slugs' );
-		$reflection->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $reflection->setAccessible( true );
 		$flagged = $reflection->invoke( $this->lite_domains );
 
 		$this->assertContains( 'my-theme', $flagged );
@@ -364,11 +364,11 @@ class Test_Lite_Domains extends WP_UnitTestCase {
 		$mock_plugin = \Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this->lite_domains );
 		$reflection  = new ReflectionClass( $mock_plugin );
 		$config_prop = $reflection->getProperty( 'config' );
-		$config_prop->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $config_prop->setAccessible( true );
 		$config_prop->setValue( $mock_plugin, [ 'private-plugin' => $mock_repo ] );
 
 		$method = new ReflectionMethod( $this->lite_domains, 'is_flagged_for_warning' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$this->assertTrue( $method->invoke( $this->lite_domains, 'private-plugin' ) );
 
@@ -389,11 +389,11 @@ class Test_Lite_Domains extends WP_UnitTestCase {
 		$mock_plugin = \Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this->lite_domains );
 		$reflection  = new ReflectionClass( $mock_plugin );
 		$config_prop = $reflection->getProperty( 'config' );
-		$config_prop->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $config_prop->setAccessible( true );
 		$config_prop->setValue( $mock_plugin, [ 'private-with-uri' => $mock_repo ] );
 
 		$method = new ReflectionMethod( $this->lite_domains, 'get_flagged_slugs' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 		$flagged = $method->invoke( $this->lite_domains );
 
 		$this->assertContains( 'private-with-uri', $flagged );
@@ -413,11 +413,11 @@ class Test_Lite_Domains extends WP_UnitTestCase {
 		$mock_plugin = \Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this->lite_domains );
 		$reflection  = new ReflectionClass( $mock_plugin );
 		$config_prop = $reflection->getProperty( 'config' );
-		$config_prop->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $config_prop->setAccessible( true );
 		$config_prop->setValue( $mock_plugin, [ 'public-plugin' => $mock_repo ] );
 
 		$method = new ReflectionMethod( $this->lite_domains, 'is_flagged_for_warning' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$this->assertFalse( $method->invoke( $this->lite_domains, 'public-plugin' ) );
 

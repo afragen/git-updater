@@ -844,7 +844,7 @@ class Test_Base_Upgrader_Source_Selection extends WP_UnitTestCase {
 	// Lines 512–515: remote install path — Install::$install carries the repo slug.
 	public function test_remote_install_path_sets_slug_and_options(): void {
 		$rp = new \ReflectionProperty( 'Fragen\Git_Updater\Install', 'install' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		$original = $rp->getValue( null );
 		$rp->setValue( null, [ 'git_updater_install_repo' => 'my-install-plugin' ] );
 
@@ -904,7 +904,7 @@ class Test_Base_Fix_Misnamed_Directory extends WP_UnitTestCase {
 	public function test_fix_misnamed_directory_returns_slug_did_path_on_hash_match(): void {
 		$plugin_obj = Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this->base );
 		$rp         = new \ReflectionProperty( get_class( $plugin_obj ), 'config' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		$original = $rp->getValue( $plugin_obj );
 
 		$base_slug = 'my-plugin';

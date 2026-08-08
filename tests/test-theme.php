@@ -87,7 +87,7 @@ trait Theme_Mock_Helper {
 	private function theme_with_config( array $config ): Theme {
 		$theme = new Theme();
 		$ref   = new ReflectionProperty( Theme::class, 'config' );
-		$ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $ref->setAccessible( true );
 		$ref->setValue( $theme, $config );
 		return $theme;
 	}
@@ -199,6 +199,21 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 		parent::tear_down();
 	}
 
+	/**
+	 * Seed a complete 'ran' cache so waiting_for_background_update() returns
+	 * false (background fetch already finished) and themes_api() proceeds.
+	 */
+	private function seed_complete_cache(): void {
+		update_site_option(
+			$this->cache_key,
+			[
+				'timeout' => strtotime( '+12 hours' ),
+				'any'     => 'data',
+				'ran'     => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
+			]
+		);
+	}
+
 	public function test_returns_result_for_non_theme_information_action(): void {
 		$theme    = $this->theme_with_config( [ 'test-gu-theme' => $this->make_theme_obj() ] );
 		$response = new stdClass();
@@ -226,7 +241,7 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_returns_result_for_dot_org_theme(): void {
-		update_site_option( $this->cache_key, [ 'any' => 'data' ] );
+		$this->seed_complete_cache();
 		$theme_obj = $this->make_theme_obj( [ 'dot_org' => true ] );
 		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 		$response  = new stdClass();
@@ -236,7 +251,7 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_populates_response_for_git_theme(): void {
-		update_site_option( $this->cache_key, [ 'any' => 'data' ] );
+		$this->seed_complete_cache();
 		$theme_obj = $this->make_theme_obj( [ 'dot_org' => false ] );
 		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 		$response  = new stdClass();
@@ -249,7 +264,7 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_populates_description_as_joined_sections(): void {
-		update_site_option( $this->cache_key, [ 'any' => 'data' ] );
+		$this->seed_complete_cache();
 		$theme_obj = $this->make_theme_obj( [
 			'dot_org'  => false,
 			'sections' => [
@@ -434,7 +449,7 @@ class Test_Theme_Append_Theme_Actions_Content extends WP_UnitTestCase {
 	 */
 	private function invoke_append( Theme $theme, stdClass $theme_obj ): string {
 		$ref = new ReflectionMethod( Theme::class, 'append_theme_actions_content' );
-		$ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $ref->setAccessible( true );
 		return $ref->invoke( $theme, $theme_obj );
 	}
 
@@ -824,7 +839,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 	public function test_returns_array(): void {
 		$theme = $this->theme_with_config( [] );
 		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $theme );
 		$this->assertIsArray( $result );
 	}
@@ -844,7 +859,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 		// get_theme_meta() is called from new Theme() constructor path; invoke directly via Reflection.
 		$theme = $this->theme_with_config( [] );
 		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$rm->invoke( $theme );
 
 		$this->assertSame( 'theme', $captured_type );
@@ -857,7 +872,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 
 		$theme  = new Theme();
 		$rm     = new ReflectionMethod( $theme, 'get_theme_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $theme );
 
 		$this->assertArrayHasKey( 'test-gu-theme', $result );
@@ -883,7 +898,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 
 		$theme = new Theme();
 		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $theme );
 
 		// Injected theme must be absent — the loop hit `continue` for it.
@@ -903,7 +918,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 		new Theme();
 
 		$options_ref = new ReflectionProperty( Theme::class, 'options' );
-		$options_ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $options_ref->setAccessible( true );
 		$options = $options_ref->getValue( null );
 		$this->assertArrayNotHasKey( 'current_branch_test-gu-theme', $options );
 	}
@@ -929,7 +944,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 		try {
 			$theme = new Theme();
 			$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
-			$rm->setAccessible( true );
+			PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 			$result = $rm->invoke( $theme );
 
 			$this->assertArrayHasKey( 'test-gu-theme', $result );
@@ -964,7 +979,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 
 		$theme = new Theme();
 		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $theme );
 
 		$this->assertArrayNotHasKey( 'custom-theme', $result );
@@ -990,7 +1005,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 
 		$theme = new Theme();
 		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $theme );
 
 		$this->assertArrayHasKey( 'no-name-theme', $result );
@@ -1019,7 +1034,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 
 		$theme = new Theme();
 		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $theme );
 
 		$this->assertArrayHasKey( 'did-theme', $result );
@@ -1063,7 +1078,7 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 
 		$theme = new Theme();
 		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $theme );
 
 		$this->assertArrayHasKey( $real_slug, $result );
@@ -1244,7 +1259,7 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 
 		// A truthy $tag suppresses the wp_theme_update_row action inside the multisite block.
 		$tag_ref = new ReflectionProperty( Theme::class, 'tag' );
-		$tag_ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $tag_ref->setAccessible( true );
 		$tag_ref->setValue( $theme, '1.0.0' );
 
 		$theme->get_remote_theme_meta();
@@ -1257,13 +1272,14 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		wp_cache_delete( 'cron', 'options' );
 		wp_unschedule_hook( 'gu_get_remote_theme' );
 
-		// Seed a non-empty cache so waiting_for_background_update($repo) → get_repo_cache(slug, false)
-		// returns a non-empty array, making empty($cache) === false → not waiting → direct fetch.
+		// Seed a complete 'ran' cache so waiting_for_background_update($repo) →
+		// is_repo_cache_complete() returns true → not waiting → direct fetch.
 		update_site_option(
 			'ghu-' . md5( 'test-gu-theme' ),
 			[
 				'timeout' => strtotime( '+12 hours' ),
 				'dot_org' => false,
+				'ran'     => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
 			]
 		);
 

@@ -62,7 +62,7 @@ trait Install_Test_Helper {
 	 */
 	private function inject_install_static( array $data ): void {
 		$rp = new ReflectionProperty( Install::class, 'install' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		$rp->setValue( null, $data );
 	}
 
@@ -73,7 +73,7 @@ trait Install_Test_Helper {
 	 */
 	private function read_install_static(): array {
 		$rp = new ReflectionProperty( Install::class, 'install' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		return $rp->getValue( null ) ?? [];
 	}
 
@@ -156,15 +156,15 @@ class Test_Install_Constructor extends WP_UnitTestCase {
 		$install = new Install();
 
 		$rp_options = new ReflectionProperty( Install::class, 'options' );
-		$rp_options->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp_options->setAccessible( true );
 		$this->assertNotNull( $rp_options->getValue( null ) );
 
 		$rp_apis = new ReflectionProperty( Install::class, 'installed_apis' );
-		$rp_apis->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp_apis->setAccessible( true );
 		$this->assertNotNull( $rp_apis->getValue( null ) );
 
 		$rp_servers = new ReflectionProperty( Install::class, 'git_servers' );
-		$rp_servers->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp_servers->setAccessible( true );
 		$this->assertIsArray( $rp_servers->getValue( null ) );
 	}
 }

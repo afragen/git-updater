@@ -80,7 +80,7 @@ trait Plugin_Mock_Helper {
 	private function plugin_with_config( array $config ): Plugin {
 		$plugin = new Plugin();
 		$ref    = new ReflectionProperty( Plugin::class, 'config' );
-		$ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $ref->setAccessible( true );
 		$ref->setValue( $plugin, $config );
 		return $plugin;
 	}
@@ -165,7 +165,7 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 	public function test_returns_array(): void {
 		$plugin = new Plugin();
 		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$this->assertIsArray( $rm->invoke( $plugin ) );
 	}
 
@@ -183,7 +183,7 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 
 		$plugin = new Plugin();
 		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$rm->invoke( $plugin );
 
 		$this->assertSame( 'plugin', $captured_type );
@@ -207,7 +207,7 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 
 		$plugin = new Plugin();
 		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $plugin );
 
 		// parse_header_uri would yield 'no-uri-plugin'; loop must have hit continue before that.
@@ -233,7 +233,7 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 
 		$plugin = new Plugin();
 		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $plugin );
 
 		$this->assertArrayNotHasKey( 'custom-plugin', $result );
@@ -259,7 +259,7 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 
 		$plugin = new Plugin();
 		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $plugin );
 
 		$this->assertArrayHasKey( 'no-name-plugin', $result );
@@ -288,7 +288,7 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 
 		$plugin = new Plugin();
 		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $plugin );
 
 		$this->assertArrayHasKey( 'did-plugin', $result );
@@ -319,7 +319,7 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 		new Plugin();
 
 		$options_ref = new ReflectionProperty( Plugin::class, 'options' );
-		$options_ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $options_ref->setAccessible( true );
 		$options = $options_ref->getValue( null );
 		$this->assertArrayNotHasKey( 'current_branch_branch-plugin', $options );
 	}
@@ -351,7 +351,7 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 
 		$plugin = new Plugin();
 		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $plugin );
 
 		$this->assertArrayNotHasKey( 'original-plugin', $result );
@@ -379,7 +379,7 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 		try {
 			$plugin = new Plugin();
 			$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
-			$rm->setAccessible( true );
+			PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 			$result = $rm->invoke( $plugin );
 
 			$this->assertArrayHasKey( 'test-gu-plugin', $result );
@@ -546,6 +546,21 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 		parent::tear_down();
 	}
 
+	/**
+	 * Seed a complete 'ran' cache so waiting_for_background_update() returns
+	 * false (background fetch already finished) and plugins_api() proceeds.
+	 */
+	private function seed_complete_cache(): void {
+		update_site_option(
+			$this->cache_key,
+			[
+				'timeout' => strtotime( '+12 hours' ),
+				'any'     => 'data',
+				'ran'     => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
+			]
+		);
+	}
+
 	public function test_returns_result_for_non_plugin_information_action(): void {
 		$plugin   = $this->plugin_with_config( [ 'test-plugin' => $this->make_plugin_obj() ] );
 		$response = new stdClass();
@@ -573,7 +588,7 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_returns_result_when_dot_org_on_primary_branch(): void {
-		update_site_option( $this->cache_key, [ 'any' => 'data' ] );
+		$this->seed_complete_cache();
 		$plugin_obj = $this->make_plugin_obj( [
 			'dot_org'        => true,
 			'branch'         => 'main',
@@ -587,7 +602,7 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_populates_response_for_git_plugin(): void {
-		update_site_option( $this->cache_key, [ 'any' => 'data' ] );
+		$this->seed_complete_cache();
 		$plugin_obj = $this->make_plugin_obj( [ 'dot_org' => false ] );
 		$plugin     = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
 		$response   = new stdClass();
@@ -601,7 +616,7 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_response_version_falls_back_to_local_version(): void {
-		update_site_option( $this->cache_key, [ 'any' => 'data' ] );
+		$this->seed_complete_cache();
 		$plugin_obj = $this->make_plugin_obj( [
 			'dot_org'        => false,
 			'remote_version' => '',
@@ -615,7 +630,7 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_response_short_description_is_truncated(): void {
-		update_site_option( $this->cache_key, [ 'any' => 'data' ] );
+		$this->seed_complete_cache();
 		$long_desc  = str_repeat( 'A', 200 );
 		$plugin_obj = $this->make_plugin_obj( [
 			'dot_org'  => false,
@@ -630,7 +645,7 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 
 	public function test_dot_org_on_non_primary_branch_returns_response(): void {
 		// dot_org = true but branch != primary_branch → should NOT skip (returns populated response).
-		update_site_option( $this->cache_key, [ 'any' => 'data' ] );
+		$this->seed_complete_cache();
 		$plugin_obj = $this->make_plugin_obj( [
 			'dot_org'        => true,
 			'branch'         => 'develop',
@@ -1049,12 +1064,13 @@ class Test_Plugin_Get_Remote_Plugin_Meta extends WP_UnitTestCase {
 		wp_cache_delete( 'cron', 'options' );
 		wp_unschedule_hook( 'gu_get_remote_plugin' );
 
-		// Seed a non-empty cache so waiting_for_background_update($plugin) returns false.
+		// Seed a complete 'ran' cache so waiting_for_background_update($plugin) returns false.
 		update_site_option(
 			'ghu-' . md5( 'test-plugin' ),
 			[
 				'timeout' => strtotime( '+12 hours' ),
 				'dot_org' => false,
+				'ran'     => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
 			]
 		);
 

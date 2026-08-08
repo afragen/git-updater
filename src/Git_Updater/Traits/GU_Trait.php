@@ -40,6 +40,20 @@ trait GU_Trait {
 	public $type;
 
 	/**
+	 * Cache keys that must all be present in a repo's 'ran' list for the
+	 * background fetch cycle to be considered complete.
+	 *
+	 * Declared as a method (not a trait constant) because PHPStan flags
+	 * `final` constants inside traits as PHP 8.2-only (classConstant.inTrait /
+	 * classConstant.finalNotSupported), and this plugin supports PHP 8.0.
+	 *
+	 * @return array<int, string>
+	 */
+	final protected static function expected_ran_steps(): array {
+		return [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
+	}
+
+	/**
 	 * Holds the plugin basename.
 	 *
 	 * @return string
@@ -209,9 +223,8 @@ trait GU_Trait {
 	final public function set_repo_cache_timeout( string $slug ): void {
 		$cache_key = $this->get_cache_key( $slug );
 		$cache     = get_site_option( $cache_key, [] );
-		$expected  = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
 
-		if ( ! isset( $cache['ran'] ) || array_diff( $expected, $cache['ran'] ) ) {
+		if ( ! isset( $cache['ran'] ) || array_diff( self::expected_ran_steps(), $cache['ran'] ) ) {
 			/**
 			 * Filter the fallback cache timeout duration (in hours) for an
 			 * incomplete fetch cycle.  Prevents infinite re-fetching by setting
@@ -263,9 +276,8 @@ trait GU_Trait {
 		$return    = false;
 		$cache_key = $this->get_cache_key( $repo->slug ?? false );
 		$cache     = get_site_option( $cache_key, [] );
-		$expected  = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
 
-		if ( isset( $cache['ran'] ) && ! array_diff( $expected, $cache['ran'] ) ) {
+		if ( isset( $cache['ran'] ) && ! array_diff( self::expected_ran_steps(), $cache['ran'] ) ) {
 			if ( version_compare( $remote_headers['Version'], $old_version, '==' ) ) {
 				if ( ! $this->is_cache_timeout_valid( $cache['timeout'] ?? 0 ) ) {
 					$cache['timeout'] = strtotime( '+6 hours' );
@@ -582,8 +594,9 @@ trait GU_Trait {
 	}
 
 	/**
-	 * Check to see if wp-cron/background updating has finished.
-	 * Or not managed by Git Updater.
+	 * Check whether the background fetch for a managed repo has completed.
+	 * A repo is considered waiting when its 'ran' bookkeeping key is missing
+	 * or does not yet contain every expected API call.
 	 *
 	 * @param null|stdClass $repo Repo object.
 	 *
@@ -601,8 +614,7 @@ trait GU_Trait {
 
 			$cache = isset( $repo->slug ) ? $this->get_repo_cache( $repo->slug, false ) : [];
 
-			// Probably not managed by Git Updater if $cache is empty.
-			return empty( $cache );
+			return ! $this->is_repo_cache_complete( $cache );
 		}
 
 		$repos = array_merge(
@@ -638,11 +650,23 @@ trait GU_Trait {
 		$waiting = array_filter(
 			$caches,
 			function ( $e ) {
-				return empty( $e );
+				return ! $this->is_repo_cache_complete( $e );
 			}
 		);
 
 		return ! empty( $waiting );
+	}
+
+	/**
+	 * Is this repo's background fetch cycle complete?
+	 *
+	 * @param array<string, mixed> $cache Repo cache data.
+	 *
+	 * @return bool true when the 'ran' list contains all expected keys.
+	 */
+	final protected function is_repo_cache_complete( array $cache ): bool {
+		return isset( $cache['ran'] )
+			&& ! array_diff( self::expected_ran_steps(), (array) $cache['ran'] );
 	}
 
 	/**
@@ -982,15 +1006,22 @@ trait GU_Trait {
 	 * @return bool
 	 */
 	final public function use_release_asset( $branch_switch = false ): bool {
-		$is_tag                  = property_exists( $this->type, 'branches' ) ? $branch_switch && ! array_key_exists( $branch_switch, (array) $this->type->branches ) : false;
+		$is_tag                  = is_string( $branch_switch ) && ! array_key_exists( $branch_switch, (array) ( $this->type->branches ?? [] ) );
 		$switch_master_tag       = $this->type->primary_branch === $branch_switch || $is_tag;
 		$current_master_noswitch = $this->type->primary_branch === $this->type->branch && false === $branch_switch;
 
 		$need_release_asset = $switch_master_tag || $current_master_noswitch;
-		$use_release_asset  = ( $this->type->release_asset ?? false ) && '0.0.0' !== ( $this->type->newest_tag ?? '0.0.0' )
-			&& $need_release_asset;
 
-		return $use_release_asset;
+		/*
+		 * Do not gate on the cached release_assets list here: it is only populated
+		 * by get_release_assets(), which runs after this decision inside
+		 * construct_download_link(). An empty cache on first run is normal, not a
+		 * signal that the repo has no assets. The '0.0.0' newest_tag proxy stands in
+		 * for "repo has tags" until the release-assets API is actually queried.
+		 */
+		return (bool) ( $this->type->release_asset ?? false )
+			&& '0.0.0' !== ( $this->type->newest_tag ?? '0.0.0' )
+			&& $need_release_asset;
 	}
 
 	/**

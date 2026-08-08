@@ -93,7 +93,7 @@ class Test_GitHub_API_Parse extends WP_UnitTestCase {
 	 */
 	private function call_protected( string $method, ...$args ) {
 		$rm = new ReflectionMethod( $this->api, $method );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		return $rm->invoke( $this->api, ...$args );
 	}
 
@@ -445,7 +445,7 @@ class Test_GitHub_API_Links extends WP_UnitTestCase {
 	 */
 	private function set_static_method( string $value ): void {
 		$rp = new ReflectionProperty( GitHub_API::class, 'method' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		$rp->setValue( null, $value );
 	}
 
@@ -749,7 +749,8 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 	/**
 	 * When get_release_assets() returns false (no-update gate fires),
-	 * construct_download_link() returns an empty string.
+	 * construct_download_link() returns an empty string so the update fails
+	 * rather than installing source that lacks the built release asset.
 	 */
 	public function test_construct_download_link_returns_empty_when_release_assets_unavailable(): void {
 		// Seed release_assets with a message object so validate_response returns true → get_api_release_assets returns false.
@@ -784,7 +785,8 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 	/**
 	 * When release_assets is in cache but release_asset_download is not,
-	 * construct_download_link() returns false (no download URL available).
+	 * construct_download_link() returns false (no download URL available),
+	 * failing the update rather than installing the unbuilt tag source.
 	 */
 	public function test_construct_download_link_calls_redirect_when_no_cached_download(): void {
 		$this->seed_cache(
