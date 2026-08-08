@@ -26,19 +26,6 @@ use WP_Error;
 trait GU_Trait {
 
 	/**
-	 * Fetch steps recorded in the `ran` cache column. A repo is considered
-	 * fully cached only when its `ran` set contains every step here.
-	 *
-	 * Declared as a method (not a trait constant) because PHPStan flags
-	 * constants inside traits as PHP 8.2-only (classConstant.inTrait).
-	 *
-	 * @return array<int, string>
-	 */
-	private static function expected_ran_steps(): array {
-		return [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
-	}
-
-	/**
 	 * Holds the Base class instance.
 	 *
 	 * @var Base
@@ -746,18 +733,6 @@ trait GU_Trait {
 		}
 
 		return $waiting;
-	}
-
-	/**
-	 * Is this repo's background fetch cycle complete?
-	 *
-	 * @param array<string, mixed> $cache Repo cache data.
-	 *
-	 * @return bool true when the 'ran' list contains all expected keys.
-	 */
-	final protected function is_repo_cache_complete( array $cache ): bool {
-		return isset( $cache['ran'] )
-			&& ! array_diff( self::expected_ran_steps(), (array) $cache['ran'] );
 	}
 
 	/**
