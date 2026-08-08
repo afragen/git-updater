@@ -982,15 +982,17 @@ trait GU_Trait {
 	 * @return bool
 	 */
 	final public function use_release_asset( $branch_switch = false ): bool {
-		$is_tag                  = property_exists( $this->type, 'branches' ) ? $branch_switch && ! array_key_exists( $branch_switch, (array) $this->type->branches ) : false;
+		$is_tag                  = is_string( $branch_switch ) && ! array_key_exists( $branch_switch, (array) ( $this->type->branches ?? [] ) );
 		$switch_master_tag       = $this->type->primary_branch === $branch_switch || $is_tag;
 		$current_master_noswitch = $this->type->primary_branch === $this->type->branch && false === $branch_switch;
 
 		$need_release_asset = $switch_master_tag || $current_master_noswitch;
-		$use_release_asset  = ( $this->type->release_asset ?? false ) && '0.0.0' !== ( $this->type->newest_tag ?? '0.0.0' )
-			&& $need_release_asset;
+		$cache              = $this->get_repo_cache( $this->type->slug ?? false, false ) ?: [];
+		$release_assets     = (array) ( $cache['release_assets'] ?? [] );
 
-		return $use_release_asset;
+		return (bool) ( $this->type->release_asset ?? false )
+			&& ! empty( $release_assets['assets'] )
+			&& $need_release_asset;
 	}
 
 	/**

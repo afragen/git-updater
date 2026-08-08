@@ -1243,6 +1243,11 @@ class Test_GUTrait_Extended extends WP_UnitTestCase {
 		$this->type = $this->make_type();
 	}
 
+	public function tear_down(): void {
+		delete_site_option( $this->get_cache_key( 'test-plugin' ) );
+		parent::tear_down();
+	}
+
 	private function make_type(): stdClass {
 		$type                 = new stdClass();
 		$type->slug           = 'test-plugin';
@@ -1255,6 +1260,16 @@ class Test_GUTrait_Extended extends WP_UnitTestCase {
 		$type->enterprise_api = null;
 		$type->gist_id        = null;
 		return $type;
+	}
+
+	private function seed_release_assets_cache( array $release_assets ): void {
+		update_site_option(
+			$this->get_cache_key( 'test-plugin' ),
+			[
+				'timeout'        => strtotime( '+12 hours' ),
+				'release_assets' => $release_assets,
+			]
+		);
 	}
 
 	// -------------------------------------------------------------------------
@@ -1524,49 +1539,49 @@ class Test_GUTrait_Extended extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	public function test_use_release_asset_returns_false_without_release_asset_property(): void {
-		$this->type->newest_tag = '1.0.0';
+		$this->seed_release_assets_cache( [ 'assets' => [ '1.0.0' => 'https://example.com/asset.zip' ] ] );
 		$this->assertFalse( $this->use_release_asset() );
 	}
 
 	public function test_use_release_asset_returns_false_when_release_asset_is_false(): void {
 		$this->type->release_asset = false;
-		$this->type->newest_tag    = '1.0.0';
+		$this->seed_release_assets_cache( [ 'assets' => [ '1.0.0' => 'https://example.com/asset.zip' ] ] );
 		$this->assertFalse( $this->use_release_asset() );
 	}
 
-	public function test_use_release_asset_returns_false_when_newest_tag_is_zero(): void {
+	public function test_use_release_asset_returns_false_when_release_assets_are_empty(): void {
 		$this->type->release_asset = true;
-		$this->type->newest_tag    = '0.0.0';
+		$this->seed_release_assets_cache( [ 'assets' => [] ] );
 		$this->assertFalse( $this->use_release_asset() );
 	}
 
 	public function test_use_release_asset_returns_true_on_primary_branch_without_switch(): void {
 		$this->type->release_asset = true;
-		$this->type->newest_tag    = '1.0.0';
+		$this->seed_release_assets_cache( [ 'assets' => [ '1.0.0' => 'https://example.com/asset.zip' ] ] );
 		// branch == primary_branch and branch_switch === false
 		$this->assertTrue( $this->use_release_asset( false ) );
 	}
 
 	public function test_use_release_asset_returns_true_when_switching_to_primary_branch(): void {
 		$this->type->release_asset = true;
-		$this->type->newest_tag    = '1.0.0';
 		$this->type->branches      = [ 'master' => [], 'develop' => [] ];
+		$this->seed_release_assets_cache( [ 'assets' => [ '1.0.0' => 'https://example.com/asset.zip' ] ] );
 		// branch_switch == primary_branch
 		$this->assertTrue( $this->use_release_asset( 'master' ) );
 	}
 
 	public function test_use_release_asset_returns_true_when_switching_to_tag(): void {
 		$this->type->release_asset = true;
-		$this->type->newest_tag    = '1.0.0';
 		$this->type->branches      = [ 'master' => [], 'develop' => [] ];
+		$this->seed_release_assets_cache( [ 'assets' => [ '1.0.0' => 'https://example.com/asset.zip' ] ] );
 		// '1.0.0' tag is not in branches array → is_tag = true
 		$this->assertTrue( $this->use_release_asset( '1.0.0' ) );
 	}
 
 	public function test_use_release_asset_returns_false_when_switching_to_non_primary_branch(): void {
 		$this->type->release_asset = true;
-		$this->type->newest_tag    = '1.0.0';
 		$this->type->branches      = [ 'master' => [], 'develop' => [] ];
+		$this->seed_release_assets_cache( [ 'assets' => [ '1.0.0' => 'https://example.com/asset.zip' ] ] );
 		// 'develop' is in branches and is not primary_branch
 		$this->assertFalse( $this->use_release_asset( 'develop' ) );
 	}
