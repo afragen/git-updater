@@ -1005,11 +1005,16 @@ trait GU_Trait {
 		$current_master_noswitch = $this->type->primary_branch === $this->type->branch && false === $branch_switch;
 
 		$need_release_asset = $switch_master_tag || $current_master_noswitch;
-		$cache              = $this->get_repo_cache( $this->type->slug ?? false, false ) ?: [];
-		$release_assets     = (array) ( $cache['release_assets'] ?? [] );
 
+		/*
+		 * Do not gate on the cached release_assets list here: it is only populated
+		 * by get_release_assets(), which runs after this decision inside
+		 * construct_download_link(). An empty cache on first run is normal, not a
+		 * signal that the repo has no assets. The '0.0.0' newest_tag proxy stands in
+		 * for "repo has tags" until the release-assets API is actually queried.
+		 */
 		return (bool) ( $this->type->release_asset ?? false )
-			&& ! empty( $release_assets['assets'] )
+			&& '0.0.0' !== ( $this->type->newest_tag ?? '0.0.0' )
 			&& $need_release_asset;
 	}
 

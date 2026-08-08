@@ -1,4 +1,6 @@
 #### [unreleased]
+* fix `use_release_asset()` first-run gating — restore the `newest_tag` proxy instead of gating on the cached `release_assets` list, which is only populated after the decision; fall back to the branch/tag zipball when no release asset is found so a dead `''` download link is never emitted (GitHub and Gitea)
+* update `coverage-exclude.json` multisite exclusion for `OAuth_Connect.php` from stale line 343 to the current multisite-only branch at line 362
 * guard all remaining `ReflectionMethod::setAccessible()`/`ReflectionProperty::setAccessible()` calls in tests with `PHP_VERSION_ID < 80100` to avoid deprecation on PHP 8.5
 * email the site admin when a provider's OAuth token refresh fails and the token is deleted, with a 36-hour reminder cron while the token remains empty; a "token is empty" variant of the reminder email is sent only to premium license holders
 * show the OAuth revocation notice on the settings page whenever the Connect button is displayed (no token stored), not only when the revoked flag is set

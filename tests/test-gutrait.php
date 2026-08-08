@@ -1556,51 +1556,63 @@ class Test_GUTrait_Extended extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	public function test_use_release_asset_returns_false_without_release_asset_property(): void {
-		$this->seed_release_assets_cache( [ 'assets' => [ '1.0.0' => 'https://example.com/asset.zip' ] ] );
+		$this->type->newest_tag = '1.0.0';
 		$this->assertFalse( $this->use_release_asset() );
 	}
 
 	public function test_use_release_asset_returns_false_when_release_asset_is_false(): void {
 		$this->type->release_asset = false;
-		$this->seed_release_assets_cache( [ 'assets' => [ '1.0.0' => 'https://example.com/asset.zip' ] ] );
+		$this->type->newest_tag    = '1.0.0';
 		$this->assertFalse( $this->use_release_asset() );
 	}
 
-	public function test_use_release_asset_returns_false_when_release_assets_are_empty(): void {
+	public function test_use_release_asset_returns_false_when_newest_tag_is_zero(): void {
 		$this->type->release_asset = true;
-		$this->seed_release_assets_cache( [ 'assets' => [] ] );
+		$this->type->newest_tag    = '0.0.0';
 		$this->assertFalse( $this->use_release_asset() );
 	}
 
 	public function test_use_release_asset_returns_true_on_primary_branch_without_switch(): void {
 		$this->type->release_asset = true;
-		$this->seed_release_assets_cache( [ 'assets' => [ '1.0.0' => 'https://example.com/asset.zip' ] ] );
+		$this->type->newest_tag    = '1.0.0';
 		// branch == primary_branch and branch_switch === false
 		$this->assertTrue( $this->use_release_asset( false ) );
 	}
 
 	public function test_use_release_asset_returns_true_when_switching_to_primary_branch(): void {
 		$this->type->release_asset = true;
+		$this->type->newest_tag    = '1.0.0';
 		$this->type->branches      = [ 'master' => [], 'develop' => [] ];
-		$this->seed_release_assets_cache( [ 'assets' => [ '1.0.0' => 'https://example.com/asset.zip' ] ] );
 		// branch_switch == primary_branch
 		$this->assertTrue( $this->use_release_asset( 'master' ) );
 	}
 
 	public function test_use_release_asset_returns_true_when_switching_to_tag(): void {
 		$this->type->release_asset = true;
+		$this->type->newest_tag    = '1.0.0';
 		$this->type->branches      = [ 'master' => [], 'develop' => [] ];
-		$this->seed_release_assets_cache( [ 'assets' => [ '1.0.0' => 'https://example.com/asset.zip' ] ] );
 		// '1.0.0' tag is not in branches array → is_tag = true
 		$this->assertTrue( $this->use_release_asset( '1.0.0' ) );
 	}
 
 	public function test_use_release_asset_returns_false_when_switching_to_non_primary_branch(): void {
 		$this->type->release_asset = true;
+		$this->type->newest_tag    = '1.0.0';
 		$this->type->branches      = [ 'master' => [], 'develop' => [] ];
-		$this->seed_release_assets_cache( [ 'assets' => [ '1.0.0' => 'https://example.com/asset.zip' ] ] );
 		// 'develop' is in branches and is not primary_branch
 		$this->assertFalse( $this->use_release_asset( 'develop' ) );
+	}
+
+	/**
+	 * First-run regression: with no release_assets cache yet populated, a
+	 * release-asset repo on its primary branch must still pass the gate so
+	 * construct_download_link() can fetch the asset list.
+	 */
+	public function test_use_release_asset_returns_true_on_first_run_with_empty_cache(): void {
+		$this->type->release_asset = true;
+		$this->type->newest_tag    = '1.0.0';
+		// No seed_release_assets_cache() — cache is empty, as on first run.
+		$this->assertTrue( $this->use_release_asset( false ) );
 	}
 
 	// -------------------------------------------------------------------------
