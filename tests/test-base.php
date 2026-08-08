@@ -40,7 +40,7 @@ class Test_Base extends WP_UnitTestCase {
 	private function seed_cache( array $data ): void {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 		$table->delete_repo( $this->slug );
-		$table->add_entry( $this->slug, 'placeholder', '', strtotime( '+12 hours' ) );
+		$table->add_entry( $this->slug, 'repo', '', strtotime( '+12 hours' ) );
 		foreach ( $data as $column => $value ) {
 			if ( 'timeout' === $column ) {
 				continue;

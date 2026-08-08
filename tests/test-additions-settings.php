@@ -291,15 +291,22 @@ class Test_Additions_Settings_Save_Settings extends WP_UnitTestCase {
 
 	private Additions_Settings $settings;
 
+	/** @var int */
+	private int $admin_id = 0;
+
 	public function set_up(): void {
 		parent::set_up();
 		Additions_Settings::$options_additions = [];
+		$this->admin_id = $this->factory->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $this->admin_id );
+		grant_super_admin( $this->admin_id );
 		$this->settings = new Additions_Settings();
 	}
 
 	public function tear_down(): void {
 		unset( $_POST['_wpnonce'], $_POST['action'] );
 		delete_site_option( 'git_updater_additions' );
+		wp_set_current_user( 0 );
 		remove_all_filters( 'gu_save_redirect' );
 		parent::tear_down();
 	}

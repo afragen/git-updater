@@ -29,6 +29,23 @@ trait Settings_Test_Helper {
 	/** @var Settings */
 	private Settings $settings;
 
+	/** @var int */
+	private int $gu_admin_id = 0;
+
+	/**
+	 * Create and log in an admin user with the capability to save settings on
+	 * both single-site and multisite (super admin on multisite).
+	 *
+	 * @return int User ID.
+	 */
+	private function set_admin_user(): int {
+		$this->gu_admin_id = $this->factory->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $this->gu_admin_id );
+		grant_super_admin( $this->gu_admin_id );
+
+		return $this->gu_admin_id;
+	}
+
 	private function make_plugin_obj( array $overrides = [] ): stdClass {
 		return (object) array_merge(
 			[
@@ -989,11 +1006,13 @@ class Test_Settings_Update_Settings extends GU_Test_Case {
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
+		$this->set_admin_user();
 		$this->settings = new Settings();
 	}
 
 	public function tear_down(): void {
 		delete_site_option( 'git_updater' );
+		wp_set_current_user( 0 );
 		$this->settings_tear_down();
 		parent::tear_down();
 	}

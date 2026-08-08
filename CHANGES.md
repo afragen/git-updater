@@ -1,4 +1,7 @@
 #### [unreleased]
+* security: settings save handlers (`Settings`, `Additions/Settings`, `Lite_Domains`) now require `manage_options` (single-site) or `manage_network_options` (multisite) in addition to the nonce, so a low-privilege user cannot alter tokens, Additions, or lite-domain settings
+* security: `Abstract_Cache_Table::whitelist()` now fails closed with an exception on an unknown column instead of silently rewriting it to `slug` (which could corrupt a row key)
+* db: only drop the network-wide cache table on uninstall from the main site on multisite, so a subsite uninstall no longer wipes the shared cache
 * security: verify the settings nonce and `install_plugins`/`install_themes` capability in `Install::install()` before processing a remote install — closes a CSRF install vector
 * cache: `delete_all_cached_data()` and the `flush-repo-cache` endpoint now clear API-derived data but preserve each repo's `current_branch` selection, so upgrades/refreshes re-collect API data without resetting the user's active branch; add `Abstract_Cache_Table::delete_all_api_data()` and `delete_repo_api_data()`
 * cache: `set_repo_cache()` reads only the target column (+ timeout) instead of the full 22-column LONGTEXT row to compare values before writing — drops a full-row read per cache write

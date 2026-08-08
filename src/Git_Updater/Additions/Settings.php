@@ -87,7 +87,10 @@ class Settings {
 	 * @return void
 	 */
 	public function save_settings( $post_data ) {
-		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater_additions-options' ) ) {
+		if ( ! isset( $_POST['_wpnonce'] )
+			|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater_additions-options' )
+			|| ! current_user_can( is_multisite() ? 'manage_network_options' : 'manage_options' )
+		) {
 			return;
 		}
 		$options   = (array) get_site_option( 'git_updater_additions', [] );

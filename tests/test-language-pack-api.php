@@ -67,7 +67,7 @@ class Test_Language_Pack_API extends WP_UnitTestCase {
 	public function test_get_language_pack_does_not_set_language_packs_when_cache_has_empty_languages(): void {
 		// Cache exists but 'languages' key is missing — should fall through to the API call path.
 		// Seed with a cache that has no 'languages' key.
-		Repo_Cache_Table::instance()->add_entry( $this->slug, 'placeholder', '', strtotime( '+12 hours' ) );
+		Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', '', strtotime( '+12 hours' ) );
 
 		$type = $this->make_type();
 		// language_packs should NOT be set yet.

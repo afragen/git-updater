@@ -698,7 +698,10 @@ class Settings {
 	 * @return void
 	 */
 	public function update_settings() {
-		if ( isset( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater-options' ) ) {
+		if ( isset( $_POST['_wpnonce'] )
+			&& wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater-options' )
+			&& current_user_can( is_multisite() ? 'manage_network_options' : 'manage_options' )
+		) {
 			if ( ( isset( $_POST['option_page'] )
 			&& 'git_updater' === $_POST['option_page'] )
 			) {

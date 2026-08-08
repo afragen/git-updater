@@ -85,7 +85,10 @@ class Lite_Domains {
 	 * @return void
 	 */
 	public function save_settings( $post_data ) {
-		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater_lite_domains-options' ) ) {
+		if ( ! isset( $_POST['_wpnonce'] )
+			|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater_lite_domains-options' )
+			|| ! current_user_can( is_multisite() ? 'manage_network_options' : 'manage_options' )
+		) {
 			return;
 		}
 

@@ -209,10 +209,10 @@ class Test_Cache_Table extends WP_UnitTestCase {
 	}
 
 	public function test_whitelist_rejects_unknown_column(): void {
-		// Invalid column must not be written to a real column.
+		// An invalid column is a programming error and must fail loudly instead
+		// of being silently rewritten to `slug` (which could corrupt the row key).
+		$this->expectException( InvalidArgumentException::class );
 		$this->table->add_entry( 'test-plugin', 'bogus_column', 'x' );
-		$row = (array) $this->table->get_repo( 'test-plugin' );
-		$this->assertArrayNotHasKey( 'bogus_column', $row );
 	}
 
 	public function test_schema_contains_slug_unique_index(): void {

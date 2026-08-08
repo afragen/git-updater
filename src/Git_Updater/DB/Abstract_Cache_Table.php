@@ -591,13 +591,21 @@ abstract class Abstract_Cache_Table {
 	/**
 	 * Validate a column name against the whitelist.
 	 *
+	 * Column identifiers are interpolated into SQL, so they must be drawn from
+	 * the whitelist to prevent SQL injection (column names cannot be bound by
+	 * $wpdb->prepare()). An invalid column is a programming error — fail loudly
+	 * rather than silently rewriting it to `slug`, which could corrupt the row
+	 * key.
+	 *
 	 * @param string $column Column name.
 	 *
-	 * @return string Validated column name (falls back to `slug` if invalid).
+	 * @return string The validated column name.
+	 *
+	 * @throws \InvalidArgumentException When the column is not whitelisted.
 	 */
 	protected function whitelist( string $column ): string {
 		if ( ! in_array( $column, static::$allowed_columns, true ) ) {
-			return 'slug'; // @codeCoverageIgnore
+			throw new \InvalidArgumentException( sprintf( 'Invalid cache column: %s', esc_html( $column ) ) );
 		}
 
 		return $column;

@@ -45,5 +45,9 @@ foreach ( $ghu_options as $option ) {
 }
 
 // Drop the custom repo cache table.
-$cache_table = $wpdb->base_prefix . 'git_updater_cache';
-$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $cache_table ) ); // phpcs:ignore
+// The table is network-wide on multisite, so only drop it when uninstalling
+// from the main site to avoid wiping shared cache for the whole network.
+if ( ! is_multisite() || is_main_site() ) {
+	$cache_table = $wpdb->base_prefix . 'git_updater_cache';
+	$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $cache_table ) ); // phpcs:ignore
+}

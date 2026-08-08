@@ -25,12 +25,20 @@ class Test_Lite_Domains extends WP_UnitTestCase {
 	 */
 	public function set_up(): void {
 		parent::set_up();
+		$admin_id = $this->factory->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $admin_id );
+		grant_super_admin( $admin_id );
 		$this->lite_domains = new Lite_Domains();
 		// Reset static options.
 		$reflection = new ReflectionClass( $this->lite_domains );
 		$property   = $reflection->getProperty( 'options' );
 		PHP_VERSION_ID < 80100 && $property->setAccessible( true );
 		$property->setValue( null, [] );
+	}
+
+	public function tear_down(): void {
+		wp_set_current_user( 0 );
+		parent::tear_down();
 	}
 
 	/**
