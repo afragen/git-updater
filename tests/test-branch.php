@@ -544,6 +544,23 @@ class Test_Branch_SingleInstallSwitcher extends GU_Test_Case {
 		$this->assertStringContainsString( '<option>develop</option>', $result );
 	}
 
+	public function test_rollback_href_encodes_selected_value(): void {
+		$this->set_branch_options( [ 'branch_switch' => '1' ] );
+		$theme = $this->make_theme(
+			[
+				'branches' => [ 'main' => [], 'develop' => [] ],
+				'tags'     => [],
+			]
+		);
+
+		$result = $this->branch->single_install_switcher( $theme );
+
+		// The onchange handler must encode the selected branch/tag before
+		// appending it to the rollback URL so a crafted remote branch name
+		// cannot inject into the href.
+		$this->assertStringContainsString( "encodeURIComponent(jQuery(this).val())", $result );
+	}
+
 	public function test_unsets_primary_branch_for_release_asset(): void {
 		$this->set_branch_options( [ 'branch_switch' => '1' ] );
 		$theme = $this->make_theme(

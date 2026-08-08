@@ -1,4 +1,5 @@
 #### [unreleased]
+* security: `encodeURIComponent()` the selected branch/tag before appending it to the rollback href in the theme branch switcher, so a crafted remote branch name cannot inject into the URL
 * security: require a nonce and `manage_options`/`manage_network_options` capability to reset the Remote Management REST API key, so a low-privilege user cannot rotate it via a crafted request (availability DoS on webhooks); the reset form now emits a nonce field
 * security: settings save handlers (`Settings`, `Additions/Settings`, `Lite_Domains`) now require `manage_options` (single-site) or `manage_network_options` (multisite) in addition to the nonce, so a low-privilege user cannot alter tokens, Additions, or lite-domain settings
 * security: `Abstract_Cache_Table::whitelist()` now fails closed with an exception on an unknown column instead of silently rewriting it to `slug` (which could corrupt a row key)

@@ -301,7 +301,7 @@ class Branch {
 			);
 			?>
 			<div id="gu_versions" style="display:none; width: 100%;">
-				<label><select style="width: 60%;" onchange="if(jQuery(this).val() != '') { jQuery(this).parent().next().show(); jQuery(this).parent().next().attr('href','<?php echo esc_url( $rollback_url ); ?>'+jQuery(this).val()); } else jQuery(this).parent().next().hide();">
+				<label><select style="width: 60%;" onchange="if(jQuery(this).val() != '') { jQuery(this).parent().next().show(); jQuery(this).parent().next().attr('href','<?php echo esc_url( $rollback_url ); ?>'+encodeURIComponent(jQuery(this).val())); } else jQuery(this).parent().next().hide();">
 				<option value=""><?php esc_html_e( 'Choose a Version', 'git-updater' ); ?>&#8230;</option>
 			<?php
 
