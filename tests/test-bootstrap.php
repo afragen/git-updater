@@ -25,6 +25,7 @@ trait Bootstrap_Test_Helper {
 		remove_all_filters( 'gu_api_domain' );
 		remove_all_actions( 'activate_git-updater/git-updater.php' );
 		delete_site_option( 'git_updater' );
+		Repo_Cache_Table::instance()->delete_repo( 'git-updater' );
 		wp_cache_delete( 'cron', 'options' );
 		wp_unschedule_hook( 'gu_get_remote_plugin' );
 		wp_unschedule_hook( 'gu_get_remote_theme' );
@@ -152,6 +153,7 @@ class Test_Bootstrap_Rename_On_Activation extends WP_UnitTestCase {
 			WP_Filesystem();
 		}
 		new Base();
+		Repo_Cache_Table::instance()->delete_repo( 'git-updater' );
 		$this->bootstrap = new Bootstrap();
 	}
 
@@ -173,6 +175,7 @@ class Test_Bootstrap_Rename_On_Activation extends WP_UnitTestCase {
 
 		$option = get_site_option( 'git_updater' );
 		$this->assertFalse( isset( $option['current_branch_git-updater'] ) );
+		$this->assertNull( Repo_Cache_Table::instance()->get_repo( 'git-updater', 'current_branch' ) );
 	}
 
 	public function test_rename_on_activation_initializes_wp_filesystem_when_null(): void {
@@ -191,7 +194,11 @@ class Test_Bootstrap_Rename_On_Activation extends WP_UnitTestCase {
 		$this->fire_activation( $this->bootstrap );
 
 		$option = get_site_option( 'git_updater' );
-		$this->assertSame( 'develop', $option['current_branch_git-updater'] );
+		$this->assertFalse( isset( $option['current_branch_git-updater'] ) );
+		$this->assertSame(
+			'develop',
+			Repo_Cache_Table::instance()->get_repo( 'git-updater', 'current_branch' )
+		);
 	}
 
 	public function test_rename_on_activation_standard_slug_skips_move_dir(): void {

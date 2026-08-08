@@ -164,6 +164,22 @@ class Install {
 		}
 
 		if ( isset( $_POST['option_page'] ) && 'git_updater_install' === $_POST['option_page'] ) {
+			// Verify the settings nonce and that the user may install plugins/themes.
+			if ( ! self::is_wp_cli() ) {
+				$nonce = isset( $_POST['_wpnonce'] ) ? sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ) : '';
+				if ( ! wp_verify_nonce( $nonce, 'git_updater_install-options' ) ) {
+					wp_die( esc_html__( 'The link you followed has expired.', 'git-updater' ) );
+				}
+				if ( 'plugin' === $type ) {
+					$can_install = current_user_can( 'install_plugins' );
+				} else {
+					$can_install = current_user_can( 'install_themes' );
+				}
+				if ( ! $can_install ) {
+					wp_die( esc_html__( 'You do not have sufficient permissions to install plugins or themes.', 'git-updater' ) );
+				}
+			}
+
 			if ( empty( $_POST['git_updater_branch'] ) ) {
 				$_POST['git_updater_branch'] = 'master';
 			}

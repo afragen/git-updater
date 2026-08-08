@@ -251,7 +251,7 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'slug', $data['error'] );
 	}
 
-	public function test_flush_endpoint_returns_success_false_when_no_cache_exists(): void {
+	public function test_flush_endpoint_returns_success_for_missing_cache(): void {
 		$slug     = 'nonexistent-test-slug-xyzzy';
 		$request  = new WP_REST_Request( 'GET', '/git-updater/v1/flush-repo-cache' );
 		$request->set_param( 'key', $this->api_key );
@@ -259,12 +259,15 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 		$response = $this->server->dispatch( $request );
 		$data     = (array) $response->get_data();
 
-		$this->assertFalse( $data['success'] );
+		// A no-op clear (no cached row) reports success, consistent with the
+		// idempotent clear semantics.
+		$this->assertTrue( $data['success'] );
 	}
 
-	public function test_flush_endpoint_returns_success_true_and_clears_cache(): void {
+	public function test_flush_endpoint_returns_success_true_and_clears_api_data(): void {
 		$slug = 'test-flush-slug-xyzzy';
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $slug, 'repo', 'data', strtotime( '+12 hours' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $slug, 'current_branch', 'develop' );
 
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/flush-repo-cache' );
 		$request->set_param( 'key', $this->api_key );
@@ -273,7 +276,10 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 		$data     = (array) $response->get_data();
 
 		$this->assertTrue( $data['success'] );
-		$this->assertNull( \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $slug ) );
+		// API-derived data is cleared...
+		$this->assertNull( \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $slug, 'repo' ) );
+		// ...but the user's current_branch survives.
+		$this->assertSame( 'develop', \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $slug, 'current_branch' ) );
 	}
 
 	// -------------------------------------------------------------------------

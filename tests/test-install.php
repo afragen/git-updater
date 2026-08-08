@@ -644,11 +644,18 @@ class Test_Install_Install extends WP_UnitTestCase {
 	/** @var array<string, mixed> */
 	private array $saved_post = [];
 
+	/** @var int */
+	private int $admin_id = 0;
+
 	/**
 	 * @return void
 	 */
 	public function set_up(): void {
 		parent::set_up();
+		$this->admin_id = $this->factory->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $this->admin_id );
+		// grant_super_admin() is a no-op on single-site; on multisite it grants install_plugins/themes.
+		grant_super_admin( $this->admin_id );
 		$this->install       = new Install();
 		$this->saved_install = $this->read_install_static();
 		$this->saved_post    = $_POST;
@@ -662,6 +669,7 @@ class Test_Install_Install extends WP_UnitTestCase {
 	public function tear_down(): void {
 		$this->inject_install_static( $this->saved_install );
 		$_POST = $this->saved_post;
+		wp_set_current_user( 0 );
 		remove_all_filters( 'gu_get_upgrader_skin' );
 		remove_all_filters( 'upgrader_pre_download' );
 		remove_all_filters( 'http_request_args' );
@@ -682,6 +690,45 @@ class Test_Install_Install extends WP_UnitTestCase {
 	}
 
 	/**
+	 * An invalid or missing nonce aborts the install with wp_die().
+	 *
+	 * @return void
+	 */
+	public function test_invalid_nonce_aborts_install(): void {
+		$_POST = [
+			'option_page'        => 'git_updater_install',
+			'_wpnonce'           => 'bad_nonce',
+			'git_updater_repo'   => 'https://github.com/owner/test-repo',
+			'git_updater_branch' => 'main',
+			'git_updater_api'    => 'github',
+		];
+
+		$this->expectException( WPDieException::class );
+		$this->install->install( 'plugin' );
+	}
+
+	/**
+	 * A user without install_plugins capability cannot install plugins.
+	 *
+	 * @return void
+	 */
+	public function test_insufficient_capability_aborts_install(): void {
+		$subscriber = $this->factory->user->create( [ 'role' => 'subscriber' ] );
+		wp_set_current_user( $subscriber );
+
+		$_POST = [
+			'option_page'        => 'git_updater_install',
+			'_wpnonce'           => wp_create_nonce( 'git_updater_install-options' ),
+			'git_updater_repo'   => 'https://github.com/owner/test-repo',
+			'git_updater_branch' => 'main',
+			'git_updater_api'    => 'github',
+		];
+
+		$this->expectException( WPDieException::class );
+		$this->install->install( 'plugin' );
+	}
+
+	/**
 	 * POST with empty branch defaults to 'master' and empty repo returns false.
 	 *
 	 * @return void
@@ -689,6 +736,7 @@ class Test_Install_Install extends WP_UnitTestCase {
 	public function test_empty_branch_defaults_to_master_and_empty_repo_returns_false(): void {
 		$_POST = [
 			'option_page'        => 'git_updater_install',
+			'_wpnonce'           => wp_create_nonce( 'git_updater_install-options' ),
 			'git_updater_repo'   => '',
 			'git_updater_branch' => '',
 			'git_updater_api'    => 'github',
@@ -710,6 +758,7 @@ class Test_Install_Install extends WP_UnitTestCase {
 	public function test_empty_repo_outputs_error_and_returns_false(): void {
 		$_POST = [
 			'option_page'        => 'git_updater_install',
+			'_wpnonce'           => wp_create_nonce( 'git_updater_install-options' ),
 			'git_updater_repo'   => '',
 			'git_updater_branch' => 'main',
 			'git_updater_api'    => 'github',
@@ -736,6 +785,7 @@ class Test_Install_Install extends WP_UnitTestCase {
 	public function test_github_api_path_and_save_options_on_install(): void {
 		$_POST = [
 			'option_page'        => 'git_updater_install',
+			'_wpnonce'           => wp_create_nonce( 'git_updater_install-options' ),
 			'git_updater_repo'   => 'https://github.com/owner/test-repo',
 			'git_updater_branch' => 'main',
 			'git_updater_api'    => 'github',
@@ -774,6 +824,7 @@ class Test_Install_Install extends WP_UnitTestCase {
 	public function test_theme_upgrader_failure_covers_theme_get_upgrader(): void {
 		$_POST = [
 			'option_page'        => 'git_updater_install',
+			'_wpnonce'           => wp_create_nonce( 'git_updater_install-options' ),
 			'git_updater_repo'   => 'https://github.com/owner/test-theme',
 			'git_updater_branch' => 'main',
 			'git_updater_api'    => 'github',
@@ -825,6 +876,7 @@ class Test_Install_Install extends WP_UnitTestCase {
 
 		$_POST = [
 			'option_page'        => 'git_updater_install',
+			'_wpnonce'           => wp_create_nonce( 'git_updater_install-options' ),
 			'git_updater_repo'   => 'https://github.com/owner/' . $slug,
 			'git_updater_branch' => 'main',
 			'git_updater_api'    => 'gitea',

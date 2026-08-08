@@ -120,8 +120,7 @@ class Bootstrap {
 		$exploded = explode( '-', dirname( $slug ) );
 
 		if ( in_array( 'develop', $exploded, true ) ) {
-			$options = $this->get_class_vars( 'Base', 'options' );
-			update_site_option( 'git_updater', array_merge( $options, [ 'current_branch_git-updater' => 'develop' ] ) );
+			\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( 'git-updater', 'current_branch', 'develop' );
 		}
 
 		// Strip hash from slug and re-make file.

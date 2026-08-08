@@ -714,18 +714,12 @@ class REST_API {
 		if ( ! $slug ) {
 			return (object) [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
 		}
-		$flush   = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( $slug );
-		$message = $flush
-			? [
-				'success' => true,
-				$slug     => "Repository cache for $slug has been flushed.",
-			]
-			: [
-				'success' => false,
-				$slug     => 'Repository cache flush failed.',
-			];
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo_api_data( $slug );
 
-		return (object) $message;
+		return (object) [
+			'success' => true,
+			$slug     => "Repository cache for $slug has been flushed.",
+		];
 	}
 
 	/**

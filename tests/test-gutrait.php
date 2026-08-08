@@ -697,13 +697,18 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 	// delete_all_cached_data()
 	// -------------------------------------------------------------------------
 
-	public function test_delete_all_cached_data_removes_rows(): void {
-		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( 'test-plugin', 'tags', [ '1.0.0' ] );
-		$this->assertNotNull( \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( 'test-plugin' ) );
+	public function test_delete_all_cached_data_clears_api_data(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ] );
+		$table->add_entry( 'test-plugin', 'current_branch', 'develop' );
+		$this->assertNotNull( $table->get_repo( 'test-plugin' ) );
 
 		$this->api->delete_all_cached_data();
 
-		$this->assertNull( \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( 'test-plugin' ) );
+		// API-derived data is cleared...
+		$this->assertNull( $table->get_repo( 'test-plugin', 'tags' ) );
+		// ...but the user's current_branch selection is preserved.
+		$this->assertSame( 'develop', $table->get_repo( 'test-plugin', 'current_branch' ) );
 	}
 
 	public function test_delete_all_cached_data_returns_true(): void {

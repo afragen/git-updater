@@ -224,9 +224,12 @@ trait GU_Trait {
 		if ( is_wp_error( $response ) ) {
 			return false;
 		}
-		$slug     = $this->get_cache_key( $repo );
-		$table    = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
-		$existing = $table->get_repo( $slug );
+		$slug  = $this->get_cache_key( $repo );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+
+		// Read only the target column (plus timeout for row-timeout preservation)
+		// instead of the full 22-column LONGTEXT row.
+		$existing = $table->get_repo( $slug, [ $id, 'timeout' ] );
 
 		// Skip the write when the new value matches the cached value for this
 		// column. Serialized comparison is robust against null vs '', array
@@ -555,13 +558,16 @@ trait GU_Trait {
 	}
 
 	/**
-	 * Delete all cached repository data from the cache table.
+	 * Delete all cached repository API data from the cache table.
+	 *
+	 * Preserves each repo's `current_branch` selection so a refresh or upgrade
+	 * re-collects API data without resetting the user's active branch.
 	 *
 	 * @return bool
 	 */
 	final public function delete_all_cached_data() {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
-		$table->delete_all_repos();
+		$table->delete_all_api_data();
 
 		if ( ! is_multisite() || is_main_site() ) {
 			wp_cron();

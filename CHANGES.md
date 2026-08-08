@@ -1,4 +1,7 @@
 #### [unreleased]
+* security: verify the settings nonce and `install_plugins`/`install_themes` capability in `Install::install()` before processing a remote install — closes a CSRF install vector
+* cache: `delete_all_cached_data()` and the `flush-repo-cache` endpoint now clear API-derived data but preserve each repo's `current_branch` selection, so upgrades/refreshes re-collect API data without resetting the user's active branch; add `Abstract_Cache_Table::delete_all_api_data()` and `delete_repo_api_data()`
+* cache: `set_repo_cache()` reads only the target column (+ timeout) instead of the full 22-column LONGTEXT row to compare values before writing — drops a full-row read per cache write
 
 #### 14.3.0 / 2026-08-08
 * fix `use_release_asset()` first-run gating — restore the `newest_tag` proxy instead of gating on the cached `release_assets` list, which is only populated after the decision; when no release asset is found the update fails with an empty download link rather than falling back to unbuilt tag source (GitHub and Gitea)

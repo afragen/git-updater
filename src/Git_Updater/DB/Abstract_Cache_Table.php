@@ -228,6 +228,38 @@ abstract class Abstract_Cache_Table {
 	}
 
 	/**
+	 * Clear a single repository's API-derived data, preserving its active branch.
+	 *
+	 * Nulls every data column except `current_branch` so the next fetch cycle
+	 * re-collects API responses (readme, tags, meta, release assets, error
+	 * backoff, etc.) without resetting the user's branch selection.
+	 *
+	 * @param string $slug Repository slug.
+	 *
+	 * @return bool
+	 */
+	public function delete_repo_api_data( string $slug ): bool {
+		global $wpdb;
+
+		$clear = [];
+		foreach ( static::$allowed_columns as $column ) {
+			if ( 'current_branch' !== $column ) {
+				$clear[] = "`{$column}` = NULL";
+			}
+		}
+		$set = implode( ', ', $clear );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$result = $wpdb->query(
+			$wpdb->prepare( "UPDATE {$this->table_name()} SET {$set} WHERE slug = %s", $slug ) // phpcs:ignore
+		);
+
+		$this->invalidate_row_cache( $slug );
+
+		return false !== $result;
+	}
+
+	/**
 	 * Delete all cached data for every repository (keeps the table).
 	 *
 	 * @return bool
@@ -241,6 +273,33 @@ abstract class Abstract_Cache_Table {
 		$this->row_cache = [];
 
 		return true;
+	}
+
+	/**
+	 * Clear every repository's API-derived data, preserving active branches.
+	 *
+	 * Nulls all data columns except `current_branch` for every repo so the next
+	 * fetch cycle re-collects API responses without resetting branch selections.
+	 *
+	 * @return bool
+	 */
+	public function delete_all_api_data(): bool {
+		global $wpdb;
+
+		$clear = [];
+		foreach ( static::$allowed_columns as $column ) {
+			if ( 'current_branch' !== $column ) {
+				$clear[] = "`{$column}` = NULL";
+			}
+		}
+		$set = implode( ', ', $clear );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$result = $wpdb->query( "UPDATE {$this->table_name()} SET {$set}" );
+
+		$this->row_cache = [];
+
+		return false !== $result;
 	}
 
 	/**

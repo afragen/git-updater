@@ -124,6 +124,36 @@ class Test_Cache_Table extends WP_UnitTestCase {
 		$this->assertSame( [], $this->table->get_all_rows() );
 	}
 
+	public function test_delete_all_api_data_preserves_current_branch(): void {
+		$this->table->add_entry( 'plugin-a', 'tags', [ '1.0.0' ] );
+		$this->table->add_entry( 'plugin-a', 'current_branch', 'develop' );
+		$this->table->add_entry( 'plugin-a', 'primary_branch', 'main' );
+
+		$this->assertTrue( $this->table->delete_all_api_data() );
+
+		// API-derived columns are nulled...
+		$this->assertNull( $this->table->get_repo( 'plugin-a', 'tags' ) );
+		// ...primary_branch is re-derivable and cleared...
+		$this->assertNull( $this->table->get_repo( 'plugin-a', 'primary_branch' ) );
+		// ...but the user's current_branch survives.
+		$this->assertSame( 'develop', $this->table->get_repo( 'plugin-a', 'current_branch' ) );
+	}
+
+	public function test_delete_repo_api_data_preserves_current_branch(): void {
+		$this->table->add_entry( 'plugin-a', 'readme', 'readme body' );
+		$this->table->add_entry( 'plugin-a', 'current_branch', 'develop' );
+
+		$this->assertTrue( $this->table->delete_repo_api_data( 'plugin-a' ) );
+
+		$this->assertNull( $this->table->get_repo( 'plugin-a', 'readme' ) );
+		$this->assertSame( 'develop', $this->table->get_repo( 'plugin-a', 'current_branch' ) );
+	}
+
+	public function test_delete_repo_api_data_unknown_slug_is_noop(): void {
+		// A no-op UPDATE (0 rows) returns true, consistent with other table methods.
+		$this->assertTrue( $this->table->delete_repo_api_data( 'no-such-slug' ) );
+	}
+
 	public function test_prune_stale_removes_only_absent_rows(): void {
 		$this->table->add_entry( 'plugin-a', 'tags', [ '1.0.0' ] );
 		$this->table->add_entry( 'plugin-b', 'tags', [ '2.0.0' ] );
