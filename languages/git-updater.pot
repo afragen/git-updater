@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-07T14:47:32+00:00\n"
+"POT-Creation-Date: 2026-08-08T12:20:54+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: git-updater\n"
@@ -493,7 +493,7 @@ msgstr ""
 #. translators: %s is the provider label, e.g. "GitHub".
 #: src/Git_Updater/Settings.php:411
 #, php-format
-msgid "%s access was revoked. Please reconnect using the Connect button on the Git Updater settings page."
+msgid "%s OAuth access was revoked. Please reconnect using the Connect button on the Git Updater settings page."
 msgstr ""
 
 #: src/Git_Updater/Settings.php:457
