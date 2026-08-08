@@ -40,6 +40,14 @@ trait GU_Trait {
 	public $type;
 
 	/**
+	 * Cache keys that must all be present in a repo's 'ran' list for the
+	 * background fetch cycle to be considered complete.
+	 *
+	 * @var array<int, string>
+	 */
+	final protected const CACHE_RAN_KEYS = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
+
+	/**
 	 * Holds the plugin basename.
 	 *
 	 * @return string
@@ -209,9 +217,8 @@ trait GU_Trait {
 	final public function set_repo_cache_timeout( string $slug ): void {
 		$cache_key = $this->get_cache_key( $slug );
 		$cache     = get_site_option( $cache_key, [] );
-		$expected  = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
 
-		if ( ! isset( $cache['ran'] ) || array_diff( $expected, $cache['ran'] ) ) {
+		if ( ! isset( $cache['ran'] ) || array_diff( self::CACHE_RAN_KEYS, $cache['ran'] ) ) {
 			/**
 			 * Filter the fallback cache timeout duration (in hours) for an
 			 * incomplete fetch cycle.  Prevents infinite re-fetching by setting
@@ -263,9 +270,8 @@ trait GU_Trait {
 		$return    = false;
 		$cache_key = $this->get_cache_key( $repo->slug ?? false );
 		$cache     = get_site_option( $cache_key, [] );
-		$expected  = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
 
-		if ( isset( $cache['ran'] ) && ! array_diff( $expected, $cache['ran'] ) ) {
+		if ( isset( $cache['ran'] ) && ! array_diff( self::CACHE_RAN_KEYS, $cache['ran'] ) ) {
 			if ( version_compare( $remote_headers['Version'], $old_version, '==' ) ) {
 				if ( ! $this->is_cache_timeout_valid( $cache['timeout'] ?? 0 ) ) {
 					$cache['timeout'] = strtotime( '+6 hours' );
@@ -582,8 +588,9 @@ trait GU_Trait {
 	}
 
 	/**
-	 * Check to see if wp-cron/background updating has finished.
-	 * Or not managed by Git Updater.
+	 * Check whether the background fetch for a managed repo has completed.
+	 * A repo is considered waiting when its 'ran' bookkeeping key is missing
+	 * or does not yet contain every expected API call.
 	 *
 	 * @param null|stdClass $repo Repo object.
 	 *
@@ -601,8 +608,7 @@ trait GU_Trait {
 
 			$cache = isset( $repo->slug ) ? $this->get_repo_cache( $repo->slug, false ) : [];
 
-			// Probably not managed by Git Updater if $cache is empty.
-			return empty( $cache );
+			return ! $this->is_repo_cache_complete( $cache );
 		}
 
 		$repos = array_merge(
@@ -638,11 +644,23 @@ trait GU_Trait {
 		$waiting = array_filter(
 			$caches,
 			function ( $e ) {
-				return empty( $e );
+				return ! $this->is_repo_cache_complete( $e );
 			}
 		);
 
 		return ! empty( $waiting );
+	}
+
+	/**
+	 * Is this repo's background fetch cycle complete?
+	 *
+	 * @param array<string, mixed> $cache Repo cache data.
+	 *
+	 * @return bool true when the 'ran' list contains all expected keys.
+	 */
+	final protected function is_repo_cache_complete( array $cache ): bool {
+		return isset( $cache['ran'] )
+			&& ! array_diff( self::CACHE_RAN_KEYS, (array) $cache['ran'] );
 	}
 
 	/**

@@ -199,6 +199,21 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 		parent::tear_down();
 	}
 
+	/**
+	 * Seed a complete 'ran' cache so waiting_for_background_update() returns
+	 * false (background fetch already finished) and themes_api() proceeds.
+	 */
+	private function seed_complete_cache(): void {
+		update_site_option(
+			$this->cache_key,
+			[
+				'timeout' => strtotime( '+12 hours' ),
+				'any'     => 'data',
+				'ran'     => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
+			]
+		);
+	}
+
 	public function test_returns_result_for_non_theme_information_action(): void {
 		$theme    = $this->theme_with_config( [ 'test-gu-theme' => $this->make_theme_obj() ] );
 		$response = new stdClass();
@@ -226,7 +241,7 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_returns_result_for_dot_org_theme(): void {
-		update_site_option( $this->cache_key, [ 'any' => 'data' ] );
+		$this->seed_complete_cache();
 		$theme_obj = $this->make_theme_obj( [ 'dot_org' => true ] );
 		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 		$response  = new stdClass();
@@ -236,7 +251,7 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_populates_response_for_git_theme(): void {
-		update_site_option( $this->cache_key, [ 'any' => 'data' ] );
+		$this->seed_complete_cache();
 		$theme_obj = $this->make_theme_obj( [ 'dot_org' => false ] );
 		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 		$response  = new stdClass();
@@ -249,7 +264,7 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_populates_description_as_joined_sections(): void {
-		update_site_option( $this->cache_key, [ 'any' => 'data' ] );
+		$this->seed_complete_cache();
 		$theme_obj = $this->make_theme_obj( [
 			'dot_org'  => false,
 			'sections' => [
@@ -1257,13 +1272,14 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		wp_cache_delete( 'cron', 'options' );
 		wp_unschedule_hook( 'gu_get_remote_theme' );
 
-		// Seed a non-empty cache so waiting_for_background_update($repo) → get_repo_cache(slug, false)
-		// returns a non-empty array, making empty($cache) === false → not waiting → direct fetch.
+		// Seed a complete 'ran' cache so waiting_for_background_update($repo) →
+		// is_repo_cache_complete() returns true → not waiting → direct fetch.
 		update_site_option(
 			'ghu-' . md5( 'test-gu-theme' ),
 			[
 				'timeout' => strtotime( '+12 hours' ),
 				'dot_org' => false,
+				'ran'     => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
 			]
 		);
 

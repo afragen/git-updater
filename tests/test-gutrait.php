@@ -869,10 +869,27 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 	}
 
 	public function test_waiting_for_background_update_returns_false_when_repo_has_cached_data(): void {
-		$this->seed_cache( [ 'meta' => [ 'Version' => '1.0.0' ] ] );
+		// A complete 'ran' list means the background fetch cycle finished.
+		$this->seed_cache( [ 'ran' => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ] ] );
 		$rm   = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
 		$repo = (object) [ 'slug' => 'test-plugin' ]; // no 'git' property, skips Singleton
 		$this->assertFalse( $rm->invoke( $this->api, $repo ) );
+	}
+
+	public function test_waiting_for_background_update_returns_true_when_ran_incomplete(): void {
+		// A partial 'ran' list (interrupted/failed fetch) means still waiting.
+		$this->seed_cache( [ 'ran' => [ 'contents', 'assets' ] ] );
+		$rm   = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$repo = (object) [ 'slug' => 'test-plugin' ]; // no 'git' property, skips Singleton
+		$this->assertTrue( $rm->invoke( $this->api, $repo ) );
+	}
+
+	public function test_waiting_for_background_update_returns_true_when_cache_has_data_but_no_ran(): void {
+		// Cached data without a complete 'ran' key is not a finished fetch.
+		$this->seed_cache( [ 'meta' => [ 'Version' => '1.0.0' ] ] );
+		$rm   = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$repo = (object) [ 'slug' => 'test-plugin' ]; // no 'git' property, skips Singleton
+		$this->assertTrue( $rm->invoke( $this->api, $repo ) );
 	}
 
 	public function test_waiting_for_background_update_with_null_returns_false_when_repos_empty(): void {
@@ -1102,7 +1119,7 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	public function test_waiting_for_background_update_instantiates_git_api_when_repo_has_git(): void {
-		$this->seed_cache( [ 'meta' => [ 'Version' => '1.0.0' ] ] );
+		$this->seed_cache( [ 'ran' => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ] ] );
 		// $this->base is not set on GitHub_API; inject via reflection so the
 		// $this->base::$git_servers lookup on line 547 does not throw.
 		$rp = new ReflectionProperty( $this->api, 'base' );
