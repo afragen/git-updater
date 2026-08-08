@@ -43,9 +43,15 @@ trait GU_Trait {
 	 * Cache keys that must all be present in a repo's 'ran' list for the
 	 * background fetch cycle to be considered complete.
 	 *
-	 * @var array<int, string>
+	 * Declared as a method (not a trait constant) because PHPStan flags
+	 * `final` constants inside traits as PHP 8.2-only (classConstant.inTrait /
+	 * classConstant.finalNotSupported), and this plugin supports PHP 8.0.
+	 *
+	 * @return array<int, string>
 	 */
-	final protected const CACHE_RAN_KEYS = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
+	final protected static function expected_ran_steps(): array {
+		return [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
+	}
 
 	/**
 	 * Holds the plugin basename.
@@ -218,7 +224,7 @@ trait GU_Trait {
 		$cache_key = $this->get_cache_key( $slug );
 		$cache     = get_site_option( $cache_key, [] );
 
-		if ( ! isset( $cache['ran'] ) || array_diff( self::CACHE_RAN_KEYS, $cache['ran'] ) ) {
+		if ( ! isset( $cache['ran'] ) || array_diff( self::expected_ran_steps(), $cache['ran'] ) ) {
 			/**
 			 * Filter the fallback cache timeout duration (in hours) for an
 			 * incomplete fetch cycle.  Prevents infinite re-fetching by setting
@@ -271,7 +277,7 @@ trait GU_Trait {
 		$cache_key = $this->get_cache_key( $repo->slug ?? false );
 		$cache     = get_site_option( $cache_key, [] );
 
-		if ( isset( $cache['ran'] ) && ! array_diff( self::CACHE_RAN_KEYS, $cache['ran'] ) ) {
+		if ( isset( $cache['ran'] ) && ! array_diff( self::expected_ran_steps(), $cache['ran'] ) ) {
 			if ( version_compare( $remote_headers['Version'], $old_version, '==' ) ) {
 				if ( ! $this->is_cache_timeout_valid( $cache['timeout'] ?? 0 ) ) {
 					$cache['timeout'] = strtotime( '+6 hours' );
@@ -660,7 +666,7 @@ trait GU_Trait {
 	 */
 	final protected function is_repo_cache_complete( array $cache ): bool {
 		return isset( $cache['ran'] )
-			&& ! array_diff( self::CACHE_RAN_KEYS, (array) $cache['ran'] );
+			&& ! array_diff( self::expected_ran_steps(), (array) $cache['ran'] );
 	}
 
 	/**
