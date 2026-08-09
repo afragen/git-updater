@@ -256,9 +256,16 @@ trait GU_Trait {
 			return $table->set_error_cache( $slug, $response, max( $error_timeout, 0 ) );
 		}
 
-		// When $timeout is false, preserve the existing row timeout.
+		// When $timeout is false, preserve an existing still-valid row timeout so
+		// repeated per-step writes don't bump the expiry. But refresh a dead one
+		// (0 after a reset via delete_repo_api_data/delete_all_api_data, or naturally
+		// expired): otherwise the row stays unreadable via get_repo_cache($timeout=true).
 		if ( 0 === $int_timeout ) {
-			$int_timeout = null === $existing ? (int) ( $this->get_class_vars( 'API\API', 'hours' ) * HOUR_IN_SECONDS + time() ) : (int) ( $existing['timeout'] ?? 0 );
+			if ( null === $existing || ! $this->is_cache_timeout_valid( (int) ( $existing['timeout'] ?? 0 ) ) ) {
+				$int_timeout = (int) ( $this->get_class_vars( 'API\API', 'hours' ) * HOUR_IN_SECONDS + time() );
+			} else {
+				$int_timeout = (int) ( $existing['timeout'] ?? 0 );
+			}
 		}
 
 		return $table->add_entry( $slug, $id, $response, $int_timeout );

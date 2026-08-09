@@ -390,6 +390,51 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 		$this->assertSame( $timeout_after_first, $timeout_after_second );
 	}
 
+	public function test_set_repo_cache_refreshes_zero_timeout(): void {
+		// Simulate the reset state: a row with timeout 0 (delete_repo_api_data
+		// nulls every column except current_branch, including timeout).
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo', 'old', 0 );
+
+		$result = $this->api->set_repo_cache( 'contents', [ 'dirs' => [ 'assets' ] ], 'test-plugin' );
+
+		$this->assertTrue( $result );
+		$timeout = (int) $table->get_repo( 'test-plugin', 'timeout' );
+		$this->assertGreaterThan( time(), $timeout );
+		$this->assertSame( [ 'dirs' => [ 'assets' ] ], $this->api->get_repo_cache( 'test-plugin', true, 'contents' ) );
+	}
+
+	public function test_set_repo_cache_refreshes_expired_timeout(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo', 'old', strtotime( '-1 hour' ) );
+
+		$this->api->set_repo_cache( 'contents', [ 'dirs' => [ 'assets' ] ], 'test-plugin' );
+
+		$timeout = (int) $table->get_repo( 'test-plugin', 'timeout' );
+		$this->assertGreaterThan( time(), $timeout );
+		$this->assertSame( [ 'dirs' => [ 'assets' ] ], $this->api->get_repo_cache( 'test-plugin', true, 'contents' ) );
+	}
+
+	public function test_set_repo_cache_creates_fresh_timeout_on_missing_row(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+
+		$this->api->set_repo_cache( 'contents', [ 'dirs' => [ 'assets' ] ], 'test-plugin' );
+
+		$timeout = (int) $table->get_repo( 'test-plugin', 'timeout' );
+		$this->assertGreaterThan( time(), $timeout );
+		$this->assertSame( [ 'dirs' => [ 'assets' ] ], $this->api->get_repo_cache( 'test-plugin', true, 'contents' ) );
+	}
+
+	public function test_set_repo_cache_preserves_valid_timeout(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$valid = strtotime( '+12 hours' );
+		$table->add_entry( 'test-plugin', 'repo', 'old', $valid );
+
+		$this->api->set_repo_cache( 'contents', [ 'dirs' => [ 'assets' ] ], 'test-plugin' );
+
+		$this->assertSame( (string) $valid, (string) $table->get_repo( 'test-plugin', 'timeout' ) );
+	}
+
 	public function test_set_repo_cache_stores_multiple_keys_in_same_cache_entry(): void {
 		$this->api->set_repo_cache( 'repo_headers', 'a', 'test-plugin', '+1 hour' );
 		$this->api->set_repo_cache( 'tags', 'b', 'test-plugin' );
