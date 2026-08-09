@@ -67,7 +67,8 @@ class Branch {
 	 */
 	public function get_current_branch( $repo ) {
 		$cache          = $this->get_repo_cache( $repo->slug, false, 'current_branch' );
-		$current_branch = ! empty( $cache ) ? $cache : $repo->branch;
+		$cache_primary  = $this->get_repo_cache( $repo->slug, false, 'primary_branch' );
+		$current_branch = ! empty( $cache ) ? $cache : ( ! empty( $cache_primary ) ? $cache_primary : $repo->branch );
 
 		return $current_branch;
 	}

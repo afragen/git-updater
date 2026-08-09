@@ -848,4 +848,36 @@ class Test_Branch_Current_Branch extends GU_Test_Case {
 
 		$this->assertSame( 'main', $result );
 	}
+
+	public function test_get_current_branch_falls_back_to_cached_primary_branch(): void {
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			$this->slug,
+			'primary_branch',
+			'develop',
+			strtotime( '+12 hours' )
+		);
+
+		$result = $this->branch->get_current_branch( $this->make_repo( 'master' ) );
+
+		$this->assertSame( 'develop', $result );
+	}
+
+	public function test_get_current_branch_prefers_cached_current_branch_over_primary(): void {
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			$this->slug,
+			'current_branch',
+			'feature-x',
+			strtotime( '+12 hours' )
+		);
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			$this->slug,
+			'primary_branch',
+			'develop',
+			strtotime( '+12 hours' )
+		);
+
+		$result = $this->branch->get_current_branch( $this->make_repo( 'master' ) );
+
+		$this->assertSame( 'feature-x', $result );
+	}
 }
