@@ -1007,7 +1007,6 @@ class Test_API_Exit_No_Update extends WP_UnitTestCase {
 
 	public function tear_down(): void {
 		remove_all_filters( 'gu_always_fetch_update' );
-		delete_site_transient( 'gu_refresh_cache' );
 		parent::tear_down();
 	}
 
@@ -1096,7 +1095,6 @@ class Test_API_Local_Info extends WP_UnitTestCase {
 	}
 
 	public function tear_down(): void {
-		delete_site_transient( 'gu_refresh_cache' );
 		if ( file_exists( $this->temp_file ) ) {
 			unlink( $this->temp_file );
 		}

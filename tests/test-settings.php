@@ -1529,7 +1529,7 @@ class Test_Settings_Refresh_Caches extends GU_Test_Case {
 	}
 
 	public function tear_down(): void {
-		delete_site_transient( 'gu_refresh_cache' );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		unset( $_POST['_wpnonce'], $_POST['gu_refresh_cache'] );
 		$this->settings_tear_down();
 		parent::tear_down();
@@ -1538,28 +1538,36 @@ class Test_Settings_Refresh_Caches extends GU_Test_Case {
 	public function test_refresh_caches_returns_early_without_nonce(): void {
 		unset( $_POST['_wpnonce'] );
 		$_POST['gu_refresh_cache'] = '1';
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', 'x', strtotime( '+12 hours' ) );
 		$this->call_private( 'refresh_caches' );
-		$this->assertFalse( get_site_transient( 'gu_refresh_cache' ) );
+		$this->assertSame( 'x', $table->get_entry( 'test-plugin', 'repo_headers' ), 'Cache must not be flushed without a valid nonce.' );
 	}
 
 	public function test_refresh_caches_returns_early_with_invalid_nonce(): void {
 		$_POST['_wpnonce']        = 'bad_nonce';
 		$_POST['gu_refresh_cache'] = '1';
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', 'x', strtotime( '+12 hours' ) );
 		$this->call_private( 'refresh_caches' );
-		$this->assertFalse( get_site_transient( 'gu_refresh_cache' ) );
+		$this->assertSame( 'x', $table->get_entry( 'test-plugin', 'repo_headers' ), 'Cache must not be flushed with an invalid nonce.' );
 	}
 
 	public function test_refresh_caches_returns_early_without_gu_refresh_cache(): void {
 		$_POST['_wpnonce'] = wp_create_nonce( 'gu_refresh_cache' );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', 'x', strtotime( '+12 hours' ) );
 		$this->call_private( 'refresh_caches' );
-		$this->assertFalse( get_site_transient( 'gu_refresh_cache' ) );
+		$this->assertSame( 'x', $table->get_entry( 'test-plugin', 'repo_headers' ), 'Cache must not be flushed without the gu_refresh_cache POST key.' );
 	}
 
-	public function test_refresh_caches_deletes_cache_and_sets_transient_when_valid(): void {
+	public function test_refresh_caches_deletes_cache_when_valid(): void {
 		$_POST['_wpnonce']        = wp_create_nonce( 'gu_refresh_cache' );
 		$_POST['gu_refresh_cache'] = '1';
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', 'x', strtotime( '+12 hours' ) );
 		$this->call_private( 'refresh_caches' );
-		$this->assertTrue( get_site_transient( 'gu_refresh_cache' ) );
+		$this->assertNull( $table->get_entry( 'test-plugin', 'repo_headers' ), 'Valid refresh must null the cached data columns.' );
 	}
 
 	public function test_refresh_transients_returns_false_without_nonce(): void {

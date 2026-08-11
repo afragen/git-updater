@@ -1,4 +1,5 @@
 #### [unreleased]
+* internal: drop the never-read `gu_refresh_cache` transient write from `Settings::refresh_caches()` (the table flush is the real effect); remove dead `ghu-<md5>` site-option cleanup/seeding from the test suite, which referenced the pre-cache-table option scheme — the one release-assets seeding now writes to the cache table where production reads it
 * cache: store a repo's API error cache on its own cache row instead of a detached `{slug}_error` row, so a 404/401 from a private repo with an empty or incorrect auth token is visible to `get_cached_error_flags()` and `waiting_for_background_update()` — the "please be patient" notice now shows while the error backoff is active
 * oauth: send the OAuth token revocation reminder email daily instead of every 36 hours
 * cache: `Branch::get_current_branch()` now falls back to the cached `primary_branch` before `$repo->branch` when no `current_branch` is set, so the REST webhook path (`Rest_Update::get_local_branch()`) uses the same persisted branch as the Plugin/Theme config resolution after a branch reset

@@ -925,15 +925,18 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 
 		// Pre-seed release_assets so the dev asset key matches the fixture's
 		// remote version (2.0.0).
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_assets'] = [
-			'assets'     => [ '1.9.0' => 'https://example.com/stable.zip' ],
-			'created_at' => [ '1.9.0' => '2024-01-01T00:00:00Z' ],
-			'dev_assets'     => [ '2.0.0' => 'https://example.com/dev.zip' ],
-			'dev_created_at' => [ '2.0.0' => '2024-02-01T00:00:00Z' ],
-		];
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry(
+			self::SLUG,
+			'release_assets',
+			[
+				'assets'     => [ '1.9.0' => 'https://example.com/stable.zip' ],
+				'created_at' => [ '1.9.0' => '2024-01-01T00:00:00Z' ],
+				'dev_assets'     => [ '2.0.0' => 'https://example.com/dev.zip' ],
+				'dev_created_at' => [ '2.0.0' => '2024-02-01T00:00:00Z' ],
+			],
+			strtotime( '+12 hours' )
+		);
 
 		// '1.9.0' < '2.0.0' → $use_channel=true; dev asset version === remote version.
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
@@ -942,7 +945,7 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 		$response = $this->server->dispatch( $request );
 		$data     = (array) $response->get_data();
 
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		$this->assertArrayNotHasKey( 'error', $data );
 		$this->assertSame( '2.0.0', $data['version'] );

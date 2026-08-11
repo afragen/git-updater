@@ -111,21 +111,15 @@ class Test_Language_Pack_Constructor_And_Run extends GU_Test_Case {
 	/** @var string */
 	private string $slug = 'test-lp-cr-plugin';
 
-	/** @var string */
-	private string $cache_key;
-
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
-		$this->cache_key = 'ghu-' . md5( $this->slug );
-		delete_site_option( $this->cache_key );
 	}
 
 	public function tear_down(): void {
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'site_transient_update_plugins' );
 		remove_all_filters( 'site_transient_update_themes' );
-		delete_site_option( $this->cache_key );
 		parent::tear_down();
 	}
 

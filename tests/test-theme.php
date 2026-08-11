@@ -188,20 +188,15 @@ class Test_Theme_Load_Pre_Filters extends WP_UnitTestCase {
 class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	use Theme_Mock_Helper;
 
-	private string $cache_key;
-
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
-		$this->cache_key = 'ghu-' . md5( 'test-gu-theme' );
-		delete_site_option( $this->cache_key );
 	}
 
 	public function tear_down(): void {
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme' );
-		delete_site_option( $this->cache_key );
 		parent::tear_down();
 	}
 
@@ -1120,7 +1115,6 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		remove_all_actions( 'after_theme_row_test-gu-theme' );
 		wp_cache_delete( 'cron', 'options' );
 		wp_unschedule_hook( 'gu_get_remote_theme' );
-		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme' );
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme_error' );
 		parent::tear_down();
@@ -1152,8 +1146,6 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 
 		$theme_obj = $this->make_theme_obj();
 		// Empty cache → waiting_for_background_update = true → theme queued for background.
-		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
-
 		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 		// Theme constructor populates the cache; clear it to simulate uncached state.
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme' );
@@ -1180,7 +1172,6 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		wp_schedule_single_event( time() - HOUR_IN_SECONDS, 'gu_get_remote_theme', [ [] ] );
 
 		$theme_obj = $this->make_theme_obj();
-		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
 
 		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme' );
@@ -1205,8 +1196,6 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 
 		$this->assertSame( 2, $this->cron_hook_count( 'gu_get_remote_theme' ), 'Pre-condition: two race-left events must exist' );
 
-		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
-
 		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme' );
 		$theme->get_remote_theme_meta();
@@ -1222,7 +1211,6 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		add_filter( 'gu_disable_wpcron', '__return_true' );
 
 		$theme_obj = $this->make_theme_obj();
-		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
 
 		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 		$theme->get_remote_theme_meta();
@@ -1244,7 +1232,6 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		wp_unschedule_hook( 'gu_get_remote_theme' );
 
 		$theme_obj = $this->make_theme_obj();
-		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
 
 		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 		$theme->get_remote_theme_meta();
@@ -1265,7 +1252,6 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		wp_unschedule_hook( 'gu_get_remote_theme' );
 
 		$theme_obj = $this->make_theme_obj();
-		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
 
 		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 

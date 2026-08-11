@@ -550,21 +550,6 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 		parent::tear_down();
 	}
 
-	/**
-	 * Seed a complete 'ran' cache so waiting_for_background_update() returns
-	 * false (background fetch already finished) and plugins_api() proceeds.
-	 */
-	private function seed_complete_cache(): void {
-		update_site_option(
-			$this->cache_key,
-			[
-				'timeout' => strtotime( '+12 hours' ),
-				'any'     => 'data',
-				'ran'     => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-			]
-		);
-	}
-
 	public function test_returns_result_for_non_plugin_information_action(): void {
 		$plugin   = $this->plugin_with_config( [ 'test-plugin' => $this->make_plugin_obj() ] );
 		$response = new stdClass();
@@ -689,17 +674,12 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 class Test_Plugin_Update_Site_Transient_Method extends WP_UnitTestCase {
 	use Plugin_Mock_Helper;
 
-	private string $cache_key;
-
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
-		$this->cache_key = 'ghu-' . md5( 'test-plugin' );
-		delete_site_option( $this->cache_key );
 	}
 
 	public function tear_down(): void {
-		delete_site_option( $this->cache_key );
 		remove_all_filters( 'gu_config_pre_process' );
 		remove_all_filters( 'gu_override_dot_org' );
 		remove_all_filters( 'gu_remote_is_newer' );
@@ -958,7 +938,6 @@ class Test_Plugin_Get_Remote_Plugin_Meta extends WP_UnitTestCase {
 		remove_all_filters( 'pre_http_request' );
 		remove_all_actions( 'after_plugin_row_test-plugin/test-plugin.php' );
 		remove_all_actions( 'get_remote_repo_meta' );
-		delete_site_option( 'ghu-' . md5( 'test-plugin' ) );
 		wp_cache_delete( 'cron', 'options' );
 		wp_unschedule_hook( 'gu_get_remote_plugin' );
 		$GLOBALS['current_screen'] = null;
@@ -993,8 +972,6 @@ class Test_Plugin_Get_Remote_Plugin_Meta extends WP_UnitTestCase {
 
 		$plugin_obj = $this->make_plugin_obj();
 		// Empty cache → waiting_for_background_update = true → plugin queued for background.
-		delete_site_option( 'ghu-' . md5( 'test-plugin' ) );
-
 		$plugin = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
 		$plugin->get_remote_plugin_meta();
 
@@ -1023,8 +1000,6 @@ class Test_Plugin_Get_Remote_Plugin_Meta extends WP_UnitTestCase {
 		wp_schedule_single_event( time() - HOUR_IN_SECONDS, 'gu_get_remote_plugin', [ [] ] );
 
 		$plugin_obj = $this->make_plugin_obj();
-		delete_site_option( 'ghu-' . md5( 'test-plugin' ) );
-
 		$plugin = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
 		$plugin->get_remote_plugin_meta();
 
@@ -1047,7 +1022,6 @@ class Test_Plugin_Get_Remote_Plugin_Meta extends WP_UnitTestCase {
 
 		$this->assertSame( 2, $this->cron_hook_count( 'gu_get_remote_plugin' ), 'Pre-condition: two race-left events must exist' );
 
-		delete_site_option( 'ghu-' . md5( 'test-plugin' ) );
 		$plugin = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
 		$plugin->get_remote_plugin_meta();
 
