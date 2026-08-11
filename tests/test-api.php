@@ -5,7 +5,7 @@
  * Covers:
  * - HTTP request made when no cache exists.
  * - No HTTP request on second call within the 12-hour main cache window.
- * - Non-200 response writes error_cache to its dedicated site option key.
+ * - Non-200 response writes error_cache to the repo's own cache row.
  * - No HTTP request and false returned when error cache is fresh (< 60 min).
  * - HTTP request retried after the error cache has expired (> 60 min).
  * - api() propagates WP_Error when wp_remote_get() itself fails.
@@ -135,13 +135,13 @@ class Test_API extends WP_UnitTestCase {
 
 		$this->api->api( $this->endpoint );
 
-		$error_cache = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_error_cache( 'test-plugin_error' );
+		$error_cache = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_error_cache( 'test-plugin' );
 		$this->assertNotEmpty( $error_cache );
 	}
 
 	public function test_skips_request_and_returns_false_when_error_cache_is_fresh(): void {
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->set_error_cache(
-			'test-plugin_error',
+			'test-plugin',
 			[
 				'timeout'   => 60,
 				'http_code' => 403,
@@ -160,7 +160,7 @@ class Test_API extends WP_UnitTestCase {
 
 	public function test_retries_request_after_error_cache_expires(): void {
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->set_error_cache(
-			'test-plugin_error',
+			'test-plugin',
 			[
 				'timeout'   => 60,
 				'http_code' => 403,
@@ -2191,8 +2191,7 @@ class Test_API_Debug_Filters extends WP_UnitTestCase {
 	public function tear_down(): void {
 		remove_all_filters( 'gu_debug_api_requests' );
 		remove_all_filters( 'pre_http_request' );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		parent::tear_down();
 	}
 

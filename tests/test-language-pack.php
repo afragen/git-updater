@@ -114,16 +114,11 @@ class Test_Language_Pack_Constructor_And_Run extends GU_Test_Case {
 	/** @var string */
 	private string $cache_key;
 
-	/** @var string */
-	private string $error_cache_key;
-
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
-		$this->cache_key       = 'ghu-' . md5( $this->slug );
-		$this->error_cache_key = 'ghu-' . md5( $this->slug . '_error' );
+		$this->cache_key = 'ghu-' . md5( $this->slug );
 		delete_site_option( $this->cache_key );
-		delete_site_option( $this->error_cache_key );
 	}
 
 	public function tear_down(): void {
@@ -131,7 +126,6 @@ class Test_Language_Pack_Constructor_And_Run extends GU_Test_Case {
 		remove_all_filters( 'site_transient_update_plugins' );
 		remove_all_filters( 'site_transient_update_themes' );
 		delete_site_option( $this->cache_key );
-		delete_site_option( $this->error_cache_key );
 		parent::tear_down();
 	}
 

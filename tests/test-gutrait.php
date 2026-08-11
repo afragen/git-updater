@@ -1091,6 +1091,44 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 		$this->assertTrue( $result );
 	}
 
+	/**
+	 * A 404 from api() (private repo with empty/incorrect auth) writes the
+	 * error cache to the repo's own row, so the waiting/notice path sees it.
+	 * Regression for the `{slug}_error` key mismatch.
+	 */
+	public function test_api_404_error_cache_is_visible_to_waiting_and_flags(): void {
+		$this->force_config_with_repo( 'test-plugin' );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+
+		add_filter(
+			'pre_http_request',
+			static function ( $preempt, $args, $url ) {
+				return [
+					'response' => [ 'code' => 404 ],
+					'body'     => wp_json_encode( [ 'message' => 'Not Found' ] ),
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		$rm = $this->api->get_reflection_method( $this->api, 'api' );
+		$rm->invoke( $this->api, 'https://api.github.com/repos/test-owner/test-plugin' );
+
+		$flags = $table->get_cached_error_flags();
+		$this->assertArrayHasKey( 'test-plugin', $flags );
+		$this->assertTrue( $flags['test-plugin'], '404 must be visible via get_cached_error_flags() on the plain slug' );
+
+		$rp = new ReflectionProperty( $this->api, 'base' );
+		$rp->setAccessible( true );
+		$rp->setValue( $this->api, Singleton::get_instance( 'Fragen\Git_Updater\Base', $this->api ) );
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, (object) [ 'slug' => 'test-plugin', 'git' => 'github' ] );
+		$this->assertTrue( $result, 'Repo with a fresh 404 error cache must still be waiting' );
+	}
+
 	// -------------------------------------------------------------------------
 	// is_heartbeat()
 	// -------------------------------------------------------------------------

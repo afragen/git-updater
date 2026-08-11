@@ -90,7 +90,7 @@ class Test_API_Common extends WP_UnitTestCase {
 	public function test_get_remote_api_tag_with_failed_api_returns_false(): void {
 		// Seed an in-force error cache so api() returns false immediately.
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->set_error_cache(
-			'test-plugin_error',
+			'test-plugin',
 			[
 				'timeout'   => 60,
 				'http_code' => 403,
@@ -199,7 +199,7 @@ class Test_API_Common extends WP_UnitTestCase {
 	 */
 	public function test_get_remote_api_branches_with_failed_api_returns_false(): void {
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->set_error_cache(
-			'test-plugin_error',
+			'test-plugin',
 			[
 				'timeout'   => 60,
 				'http_code' => 403,
@@ -1181,7 +1181,7 @@ class Test_API_Common_Extended extends WP_UnitTestCase {
 	 */
 	private function seed_error_cache(): void {
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->set_error_cache(
-			'test-plugin_error',
+			'test-plugin',
 			[
 				'timeout'   => 60,
 				'http_code' => 403,
