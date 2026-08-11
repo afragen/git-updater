@@ -1,4 +1,5 @@
 #### [unreleased]
+* oauth: send the OAuth token revocation reminder email daily instead of every 36 hours
 * cache: `Branch::get_current_branch()` now falls back to the cached `primary_branch` before `$repo->branch` when no `current_branch` is set, so the REST webhook path (`Rest_Update::get_local_branch()`) uses the same persisted branch as the Plugin/Theme config resolution after a branch reset
 * cache: `set_repo_cache()` now refreshes a dead/zero/expired row timeout to `now + $hours` when written with `$timeout=false`, instead of preserving it forever. Previously a reset (`delete_repo_api_data`/`delete_all_api_data`, which null `timeout`) or natural expiry left the row at timeout 0, so `get_repo_cache($timeout=true)` returned `false` and forced a refetch on every page load/cron run. A still-valid non-zero timeout is still preserved (by design, so per-step writes don't bump expiry)
 * security: `encodeURIComponent()` the selected branch/tag before appending it to the rollback href in the theme branch switcher, so a crafted remote branch name cannot inject into the URL
