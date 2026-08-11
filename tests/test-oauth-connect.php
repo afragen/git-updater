@@ -164,6 +164,18 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	}
 
 	/**
+	 * Test load_hooks schedules the revocation reminder on the daily schedule.
+	 */
+	public function test_load_hooks_schedules_revocation_notify_daily(): void {
+		wp_clear_scheduled_hook( 'gu_oauth_revoke_notify' );
+		$this->oauth->load_hooks();
+		$event = wp_get_scheduled_event( 'gu_oauth_revoke_notify' );
+		$this->assertNotFalse( $event );
+		$this->assertSame( 'daily', $event->schedule );
+		$this->assertLessThanOrEqual( DAY_IN_SECONDS, $event->timestamp - time() );
+	}
+
+	/**
 	 * Test render_connect_field with invalid provider
 	 */
 	public function test_render_connect_field_with_invalid_provider(): void {
@@ -1954,7 +1966,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	}
 
 	/**
-	 * Test no duplicate email on repeated failure within the 36h window.
+	 * Test no duplicate email on repeated failure within the daily window.
 	 */
 	public function test_refresh_failure_does_not_send_duplicate_email(): void {
 		$this->oauth->connector_url = 'https://connector.example.com/';
@@ -1984,7 +1996,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$this->set_tokens_for_other_providers( 'github' );
 
-		// Second call: token already deleted; direct reminder path is gated by 36h timestamp.
+		// Second call: token already deleted; direct reminder path is gated by daily timestamp.
 		$this->oauth->remind_admin_of_token_revocation();
 		$this->assertCount( 1, $mails );
 	}
@@ -2072,7 +2084,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	}
 
 	/**
-	 * Test cron reminder skips when notified within the last 36 hours.
+	 * Test cron reminder skips when notified within the last day.
 	 */
 	public function test_cron_reminder_skips_when_notified_recently(): void {
 		update_site_option( 'git_updater', [

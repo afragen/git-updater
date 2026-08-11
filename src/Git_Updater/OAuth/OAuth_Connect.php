@@ -80,19 +80,9 @@ class OAuth_Connect {
 		add_action( 'admin_post_gu_remove_token', [ $this, 'handle_remove_token' ] );
 		add_action( 'gu_oauth_revoke_notify', [ $this, 'remind_admin_of_token_revocation' ] );
 
-		// Custom 36-hour schedule for the revocation reminder.
-		add_filter(
-			'cron_schedules',
-			static function ( $schedules ) {
-				$schedules['gu_oauth_revoke_36h'] = [
-					'interval' => 36 * HOUR_IN_SECONDS,
-					'display'  => esc_html__( 'Every 36 hours', 'git-updater' ),
-				];
-				return $schedules;
-			}
-		);
+		// Daily schedule for the revocation reminder.
 		if ( false === wp_next_scheduled( 'gu_oauth_revoke_notify' ) ) {
-			wp_schedule_event( time() + 36 * HOUR_IN_SECONDS, 'gu_oauth_revoke_36h', 'gu_oauth_revoke_notify' );
+			wp_schedule_event( time() + DAY_IN_SECONDS, 'daily', 'gu_oauth_revoke_notify' );
 		}
 	}
 
@@ -667,7 +657,7 @@ class OAuth_Connect {
 	 * Notify the site administrator via email that a provider's OAuth token
 	 * is missing (Connect button displayed). Message differs based on whether
 	 * the token was revoked by a failed refresh or is simply empty. Sends at
-	 * most once per 36-hour period.
+	 * most once per day.
 	 *
 	 * @param string $provider Provider slug.
 	 * @return void
@@ -685,9 +675,9 @@ class OAuth_Connect {
 			return;
 		}
 
-		// Skip if we already emailed within the last 36 hours.
+		// Skip if we already emailed within the last day.
 		$notified_at = (int) ( $options[ 'gu_oauth_notified_' . $provider ] ?? 0 );
-		if ( $notified_at > time() - 36 * HOUR_IN_SECONDS ) {
+		if ( $notified_at > time() - DAY_IN_SECONDS ) {
 			return;
 		}
 
@@ -758,7 +748,7 @@ class OAuth_Connect {
 	}
 
 	/**
-	 * Cron callback: re-notify the admin every 36 hours while any running
+	 * Cron callback: re-notify the admin daily while any running
 	 * provider's Connect button is still displayed (no token stored).
 	 * Mirrors the condition in render_connect_field().
 	 *
