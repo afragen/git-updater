@@ -1,4 +1,5 @@
 # Workflow
+- The user actively reads and audits the `.commandcode/taste/` files and reports corruption (e.g., "some of the changes to .commandcode/taste/testing/taste.md have been corrupted, especially from line 24 to the end") when appended learnings arrive as truncated fragments: partial duplicate lines missing the leading `- ` bullet marker, leftover tails of an earlier bullet, or duplicated section headings. Keep taste files clean — every learning must be written as a complete `- ` bullet, never a fragment — and when corruption is reported, repair it across all taste files (remove orphan fragments and duplicated sections while preserving the legitimate new bullets), even when some of the corruption was committed in earlier commits. Confidence: 0.6
 - Commit changes after completing each distinct work phase. Confidence: 0.90
 - Do not publish packages to npm; leave publishing for the user to handle manually. Confidence: 0.65
 - Run tests before committing changes to verify nothing is broken. Confidence: 0.80
