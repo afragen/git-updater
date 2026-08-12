@@ -45,12 +45,3 @@ See [architecture/taste.md](architecture/taste.md)
 
 # Documentation
 - Place documentation files in the `docs/` directory. Confidence: 0.95
-- `maybe_refresh_token_and_retry()` to improve readability, testability, and separation of concerns. Confidence: 0.90
-- For string matching of error messages from external services, use case-insensitive comparison (e.g., `stripos()`) to be robust against provider variations. Confidence: 0.90
-- When implementing automatic retry mechanisms for API authentication, trigger token refresh on HTTP 401/403 OR when the response body contains auth error indicators (like "Bad Credentials") on 200 or 4xx codes, but never retry on 5xx server errors. Confidence: 0.85
-
-# architecture
-See [architecture/taste.md](architecture/taste.md)
-
-# Documentation
-- Place documentation files in the `docs/` directory. Confidence: 0.95
