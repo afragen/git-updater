@@ -194,6 +194,10 @@ trait API_Common {
 			return false;
 		}
 
+		// Set newest_tag + tags on the repo object before construct_download_link().
+		// sort_tags() keys by tag name, so combine the flat list into a tag-name map.
+		$this->sort_tags( array_combine( $response, $response ) );
+
 		return true;
 	}
 

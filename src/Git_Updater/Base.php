@@ -351,8 +351,8 @@ class Base {
 			$language_pack->run();
 		}
 
-		$this->populate_api_data( $repo, $repo_api );
 		$repo->download_link = $repo_api->construct_download_link();
+		$this->populate_api_data( $repo, $repo_api );
 		$this->add_assets( $repo_api );
 
 		do_action( 'get_remote_repo_meta', $repo, $repo_api );
