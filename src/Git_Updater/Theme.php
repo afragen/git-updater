@@ -345,22 +345,25 @@ class Theme {
 			return $result;
 		}
 
-		$response->did          = $theme->did;
-		$response->slug         = $theme->slug;
-		$response->name         = $theme->name;
-		$response->homepage     = $theme->homepage;
-		$response->donate_link  = $theme->donate_link;
-		$response->version      = $theme->remote_version;
-		$response->sections     = $theme->sections;
-		$response->description  = implode( "\n", $theme->sections );
-		$response->author       = $theme->author;
-		$response->preview_url  = $theme->theme_uri;
-		$response->requires     = $theme->requires;
-		$response->tested       = $theme->tested;
-		$response->downloaded   = $theme->downloaded;
-		$response->last_updated = $theme->last_updated;
-		$response->rating       = $theme->rating;
-		$response->num_ratings  = $theme->num_ratings;
+		$this->ensure_download_data( $theme );
+
+		$response->did           = $theme->did;
+		$response->slug          = $theme->slug;
+		$response->name          = $theme->name;
+		$response->homepage      = $theme->homepage;
+		$response->donate_link   = $theme->donate_link;
+		$response->version       = $theme->remote_version;
+		$response->sections      = $theme->sections;
+		$response->description   = implode( "\n", $theme->sections );
+		$response->author        = $theme->author;
+		$response->preview_url   = $theme->theme_uri;
+		$response->requires      = $theme->requires;
+		$response->tested        = $theme->tested;
+		$response->downloaded    = $theme->downloaded;
+		$response->last_updated  = $theme->last_updated;
+		$response->rating        = $theme->rating;
+		$response->num_ratings   = $theme->num_ratings;
+		$response->download_link = $theme->download_link ?? '';
 
 		return $response;
 	}
@@ -611,6 +614,7 @@ class Theme {
 		$config = apply_filters( 'gu_config_pre_process', $this->config );
 
 		foreach ( (array) $config as $theme ) {
+			$this->ensure_download_data( $theme );
 			$theme_requires = $this->get_repo_requirements( $theme );
 			$response       = [
 				'theme'            => $theme->slug,
