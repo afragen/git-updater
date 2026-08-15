@@ -1090,6 +1090,51 @@ class Test_Plugin_Get_Remote_Plugin_Meta extends WP_UnitTestCase {
 		$this->assertSame( 1, $this->cron_hook_count( 'gu_get_remote_plugin' ) );
 	}
 
+	/**
+	 * The reschedule must write the cron option in a single consolidated write:
+	 * the pre_unschedule_hook filter (fired by wp_unschedule_hook) must NOT run,
+	 * proving the merge path avoids the core unschedule that logs the
+	 * "Cron unschedule event error ... could_not_set" message.
+	 */
+	public function test_merge_and_reschedule_does_not_call_wp_unschedule_hook(): void {
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_plugin' );
+
+		$unschedule_ran = false;
+		add_filter(
+			'pre_unschedule_hook',
+			function ( $pre ) use ( &$unschedule_ran ) {
+				$unschedule_ran = true;
+				return $pre;
+			}
+		);
+
+		$plugin_obj = $this->make_plugin_obj();
+		$plugin     = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$plugin->get_remote_plugin_meta();
+
+		remove_all_filters( 'pre_unschedule_hook' );
+		$this->assertFalse( $unschedule_ran, 'The single-write reschedule must not fire pre_unschedule_hook' );
+		$this->assertSame( 1, $this->cron_hook_count( 'gu_get_remote_plugin' ) );
+	}
+
+	/**
+	 * The consolidated cron array must carry the 'version' key that
+	 * _set_cron_array() maintains, so _upgrade_cron_array() does not re-run
+	 * on the next read. (_get_cron_array() strips 'version'; read the raw option.)
+	 */
+	public function test_merge_and_reschedule_preserves_cron_version_key(): void {
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_plugin' );
+
+		$plugin_obj = $this->make_plugin_obj();
+		$plugin     = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$plugin->get_remote_plugin_meta();
+
+		$cron = get_option( 'cron' );
+		$this->assertSame( 2, $cron['version'] ?? null, 'Cron array version key must be preserved as 2' );
+	}
+
 	public function test_registers_after_plugin_row_action_when_current_filter_is_init(): void {
 		$plugin_obj = $this->make_plugin_obj();
 		$plugin     = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );

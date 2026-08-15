@@ -1,5 +1,6 @@
 #### [unreleased]
 * fix stale `newest_tag`/`download_link` in `update_site_transient()`, `plugins_api()`, and `themes_api()` for release-asset repos — persist `newest_tag` as a named cache entry at fetch time and hydrate it (plus the host-aware release-asset `download_link`) from the cache in the transient/API consumers, so cache-only requests no longer see the `'0.0.0'` sentinel or an empty package; `themes_api()` now also returns `download_link`
+* fix intermittent "Cron unschedule event error for hook: gu_get_remote_plugin/gu_get_remote_theme" — `merge_and_reschedule_cron_batch()` now performs the unschedule + reschedule in a single `cron` option write instead of `wp_unschedule_hook()` + `wp_schedule_single_event()`, so a transient DB write failure or a concurrent request can no longer trigger the core `could_not_set` error or leave duplicate cron events
 * fix release-asset download links on first run — run `sort_tags()` in `get_remote_api_tag()` so `newest_tag` is set before `construct_download_link()`, reorder `get_remote_repo_meta()` to build the download link before `populate_api_data()` merges cache data, and drop the now-redundant `sort_tags()` call from `populate_api_data()`; the first request now resolves the release-asset URL instead of falling back to the zipball
 
 #### 14.3.0 / 2026-08-08
