@@ -996,10 +996,15 @@ class Test_Plugin_Get_Remote_Plugin_Meta extends WP_UnitTestCase {
 	}
 
 	public function test_no_duplicate_cron_when_already_scheduled(): void {
-		// Pre-schedule a ready event so is_cron_event_scheduled returns true.
-		wp_schedule_single_event( time() - HOUR_IN_SECONDS, 'gu_get_remote_plugin', [ [] ] );
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_plugin' );
 
 		$plugin_obj = $this->make_plugin_obj();
+		$args       = [ [ 'test-plugin' => $plugin_obj ] ];
+
+		// Pre-schedule the exact event the merge would create, at a future timestamp.
+		wp_schedule_single_event( time() + HOUR_IN_SECONDS, 'gu_get_remote_plugin', $args );
+
 		$plugin = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
 		$plugin->get_remote_plugin_meta();
 
@@ -1017,8 +1022,10 @@ class Test_Plugin_Get_Remote_Plugin_Meta extends WP_UnitTestCase {
 		// Inject two events at different timestamps with different args to simulate
 		// what a previous race left behind (args differ so WP dedup doesn't catch them;
 		// timestamps are 2 hours apart so the 10-minute dedup window doesn't apply).
-		wp_schedule_single_event( time() - 2 * HOUR_IN_SECONDS, 'gu_get_remote_plugin', [ [ 'slug-a' => $plugin_obj ] ] );
-		wp_schedule_single_event( time() - HOUR_IN_SECONDS, 'gu_get_remote_plugin', [ [ 'slug-b' => $plugin_obj ] ] );
+		// Future timestamps: due events (<= now) are skipped by the due-event guard,
+		// which is meant to leave in-flight events alone.
+		wp_schedule_single_event( time() + HOUR_IN_SECONDS, 'gu_get_remote_plugin', [ [ 'slug-a' => $plugin_obj ] ] );
+		wp_schedule_single_event( time() + 2 * HOUR_IN_SECONDS, 'gu_get_remote_plugin', [ [ 'slug-b' => $plugin_obj ] ] );
 
 		$this->assertSame( 2, $this->cron_hook_count( 'gu_get_remote_plugin' ), 'Pre-condition: two race-left events must exist' );
 
@@ -1027,6 +1034,125 @@ class Test_Plugin_Get_Remote_Plugin_Meta extends WP_UnitTestCase {
 
 		// All pre-existing timestamps must be merged and collapsed into one event.
 		$this->assertSame( 1, $this->cron_hook_count( 'gu_get_remote_plugin' ) );
+	}
+
+	/**
+	 * Regression test for the recurring "Cron unschedule event error for hook:
+	 * gu_get_remote_plugin ... could_not_set" message.
+	 *
+	 * A *due* event (timestamp <= now) means the wp-cron runner is executing it.
+	 * Re-scheduling at `time()` during the same spawn keeps the batch perpetually
+	 * pending and races core's post-run unschedule. The due-event guard must leave
+	 * such an event alone, so the event count and timestamp stay unchanged.
+	 */
+	public function test_merge_and_reschedule_leaves_due_event_untouched(): void {
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_plugin' );
+
+		$plugin_obj = $this->make_plugin_obj();
+		$due_time   = time() - HOUR_IN_SECONDS;
+		wp_schedule_single_event( $due_time, 'gu_get_remote_plugin', [ [ 'test-plugin' => $plugin_obj ] ] );
+
+		$error_fired = false;
+		add_action(
+			'cron_unschedule_event_error',
+			function () use ( &$error_fired ) {
+				$error_fired = true;
+			}
+		);
+
+		$plugin = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$plugin->get_remote_plugin_meta();
+
+		remove_all_actions( 'cron_unschedule_event_error' );
+
+		// The due event must not be re-scheduled to time().
+		$this->assertSame( 1, $this->cron_hook_count( 'gu_get_remote_plugin' ) );
+		$this->assertNotFalse( wp_next_scheduled( 'gu_get_remote_plugin', [ [ 'test-plugin' => $plugin_obj ] ] ) );
+		$next = wp_next_scheduled( 'gu_get_remote_plugin', [ [ 'test-plugin' => $plugin_obj ] ] );
+		$this->assertLessThanOrEqual( time(), $next, 'The due event timestamp must not be moved to the future' );
+		$this->assertFalse( $error_fired, 'cron_unschedule_event_error must not fire for a due event' );
+	}
+
+	/**
+	 * When the single-write update_option('cron') fails (the WP core
+	 * `could_not_set` false-positive condition), the fallback must NOT call
+	 * wp_schedule_single_event() if the event is already present — otherwise a
+	 * concurrent write that succeeded would get a duplicate.
+	 */
+	public function test_merge_and_reschedule_fallback_skips_when_event_present(): void {
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_plugin' );
+
+		$plugin_obj = $this->make_plugin_obj();
+		$args       = [ [ 'test-plugin' => $plugin_obj ] ];
+
+		// Pre-schedule the event so the merge would find it present on failure.
+		wp_schedule_single_event( time() + HOUR_IN_SECONDS, 'gu_get_remote_plugin', $args );
+
+		// Simulate the WP core `could_not_set` false-positive (Trac #57271):
+		// update_option('cron') returns false when the value is *identical* to
+		// the old value (option.php:921). Returning the old value from the filter
+		// triggers exactly that path.
+		add_filter(
+			'pre_update_option_cron',
+			static function ( $value, $old_value ) {
+				return $old_value;
+			},
+			10,
+			2
+		);
+
+		$plugin = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$plugin->get_remote_plugin_meta();
+
+		remove_all_filters( 'pre_update_option_cron' );
+
+		// The pre-existing event must remain, with no duplicate added.
+		$this->assertSame( 1, $this->cron_hook_count( 'gu_get_remote_plugin' ) );
+		$this->assertNotFalse( wp_next_scheduled( 'gu_get_remote_plugin', $args ) );
+	}
+
+	/**
+	 * When the single-write update_option('cron') fails AND the event is truly
+	 * absent, the fallback must call wp_schedule_single_event() so the batch is
+	 * not lost. This covers the else-branch of the fallback guard.
+	 */
+	public function test_merge_and_reschedule_fallback_schedules_when_event_absent(): void {
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_plugin' );
+
+		$plugin_obj = $this->make_plugin_obj();
+		$args       = [ [ 'test-plugin' => $plugin_obj ] ];
+
+		// No pre-existing event: the merge builds the event in memory, then
+		// update_option('cron') fails (identical-value false-positive), and
+		// wp_next_scheduled() finds nothing → fallback must run.
+		add_filter(
+			'pre_update_option_cron',
+			static function ( $value, $old_value ) {
+				return $old_value;
+			},
+			10,
+			2
+		);
+
+		$fallback_ran = false;
+		add_filter(
+			'pre_schedule_event',
+			static function ( $pre ) use ( &$fallback_ran ) {
+				$fallback_ran = true;
+				return false; // Prevent the actual schedule; we only assert the call.
+			}
+		);
+
+		$plugin = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$plugin->get_remote_plugin_meta();
+
+		remove_all_filters( 'pre_schedule_event' );
+		remove_all_filters( 'pre_update_option_cron' );
+
+		$this->assertTrue( $fallback_ran, 'Fallback wp_schedule_single_event() must run when the event is absent' );
 	}
 
 	/**

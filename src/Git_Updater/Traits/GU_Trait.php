@@ -1026,12 +1026,23 @@ trait GU_Trait {
 	 * concurrent requests racing through this method cannot each trigger the
 	 * core `could_not_set` unschedule error.
 	 *
+	 * If a *due* event for $hook already exists, the wp-cron runner is (or is
+	 * about to be) executing it. Re-scheduling at `time()` would keep the batch
+	 * perpetually pending and race core's post-run unschedule, so we bail out.
+	 *
 	 * @param string               $hook     Cron event hook name.
 	 * @param array<string, mixed> $new_args Keyed-by-slug repo array for this request.
 	 *
 	 * @return void
 	 */
 	final protected function merge_and_reschedule_cron_batch( string $hook, array $new_args ): void {
+		$cron = _get_cron_array();
+		foreach ( (array) $cron as $timestamp => $hooks ) {
+			if ( isset( $hooks[ $hook ] ) && (int) $timestamp <= time() ) {
+				// A due event exists; do not re-schedule it.
+				return;
+			}
+		}
 		if ( wp_next_scheduled( $hook ) ) {
 			return;
 		}
@@ -1067,8 +1078,9 @@ trait GU_Trait {
 		$cron['version'] = 2;
 
 		$result = update_option( 'cron', $cron, true );
-		if ( false === $result ) {
-			// Fall back to core's single-event scheduling so the batch is not lost.
+		if ( false === $result && ! wp_next_scheduled( $hook, [ $new_args ] ) ) {
+			// Another process may have written the same event (false positive);
+			// only fall back to core scheduling if the event is truly absent.
 			wp_schedule_single_event( $timestamp, $hook, [ $new_args ] );
 		}
 	}
