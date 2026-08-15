@@ -62,6 +62,7 @@ final class Repo_Cache_Table extends Abstract_Cache_Table {
 			repo_headers             LONGTEXT,
 			repo                     LONGTEXT,
 			tags                     LONGTEXT,
+			newest_tag               LONGTEXT,
 			changes                  LONGTEXT,
 			readme                   LONGTEXT,
 			meta                     LONGTEXT,

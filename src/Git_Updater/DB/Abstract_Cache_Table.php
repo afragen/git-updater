@@ -54,6 +54,7 @@ abstract class Abstract_Cache_Table {
 		'repo_headers',
 		'repo',
 		'tags',
+		'newest_tag',
 		'changes',
 		'readme',
 		'meta',
