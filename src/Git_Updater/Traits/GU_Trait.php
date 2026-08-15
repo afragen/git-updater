@@ -1021,6 +1021,11 @@ trait GU_Trait {
 	 * unschedule all existing events and schedule a single consolidated event.
 	 * This prevents duplicate events accumulating across page loads.
 	 *
+	 * The unschedule + schedule is done in a single `cron` option write so a
+	 * transient DB write failure cannot leave the hook half-removed, and so
+	 * concurrent requests racing through this method cannot each trigger the
+	 * core `could_not_set` unschedule error.
+	 *
 	 * @param string               $hook     Cron event hook name.
 	 * @param array<string, mixed> $new_args Keyed-by-slug repo array for this request.
 	 *
@@ -1040,8 +1045,32 @@ trait GU_Trait {
 				}
 			}
 		}
-		wp_unschedule_hook( $hook );
-		wp_schedule_single_event( time(), $hook, [ $new_args ] );
+
+		// Remove all existing events for $hook.
+		foreach ( array_keys( (array) $cron ) as $timestamp ) {
+			unset( $cron[ $timestamp ][ $hook ] );
+			if ( empty( $cron[ $timestamp ] ) ) {
+				unset( $cron[ $timestamp ] );
+			}
+		}
+
+		// Add the single consolidated event.
+		$timestamp = time();
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- WP core cron keys use md5(serialize()) for dedup.
+		$key                                 = md5( serialize( [ $new_args ] ) );
+		$cron[ $timestamp ][ $hook ][ $key ] = [
+			'schedule' => false,
+			'args'     => [ $new_args ],
+			'interval' => 0,
+		];
+		uksort( $cron, 'strnatcasecmp' );
+		$cron['version'] = 2;
+
+		$result = update_option( 'cron', $cron, true );
+		if ( false === $result ) {
+			// Fall back to core's single-event scheduling so the batch is not lost.
+			wp_schedule_single_event( $timestamp, $hook, [ $new_args ] );
+		}
 	}
 
 	/**
