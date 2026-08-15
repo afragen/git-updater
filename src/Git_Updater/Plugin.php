@@ -329,6 +329,8 @@ class Plugin {
 			return $result;
 		}
 
+		$this->ensure_download_data( $plugin );
+
 		$response->did         = $plugin->did;
 		$response->slug        = $plugin->slug;
 		$response->plugin_name = $plugin->name;
@@ -407,6 +409,7 @@ class Plugin {
 		$config = apply_filters( 'gu_config_pre_process', $this->config );
 
 		foreach ( (array) $config as $plugin ) {
+				$this->ensure_download_data( $plugin );
 				$plugin_requires = $this->get_repo_requirements( $plugin );
 				$response        = [
 					'slug'             => $plugin->slug,
