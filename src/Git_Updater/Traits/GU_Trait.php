@@ -323,9 +323,9 @@ trait GU_Trait {
 
 					$parse_tags = $this->get_reflection_method( $repo_api, 'parse_tags' );
 					$tags       = $parse_tags->invoke( $repo_api, $value, $repo_type );
+					$repo->tags = $tags;
 
-					$sort_tags = $this->get_reflection_method( $repo_api, 'sort_tags' );
-					$sort_tags->invoke( $repo_api, $tags );
+					// newest_tag was already set by sort_tags() in get_remote_api_tag().
 					break;
 				case 'changes':
 					if ( $validate_response->invoke( $repo_api, $value ) ) {

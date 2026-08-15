@@ -1,4 +1,5 @@
 #### [unreleased]
+* fix release-asset download links on first run — run `sort_tags()` in `get_remote_api_tag()` so `newest_tag` is set before `construct_download_link()`, reorder `get_remote_repo_meta()` to build the download link before `populate_api_data()` merges cache data, and drop the now-redundant `sort_tags()` call from `populate_api_data()`; the first request now resolves the release-asset URL instead of falling back to the zipball
 
 #### 14.3.0 / 2026-08-08
 * fix `use_release_asset()` first-run gating — restore the `newest_tag` proxy instead of gating on the cached `release_assets` list, which is only populated after the decision; when no release asset is found the update fails with an empty download link rather than falling back to unbuilt tag source (GitHub and Gitea)

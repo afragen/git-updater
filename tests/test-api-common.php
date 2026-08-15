@@ -101,7 +101,8 @@ class Test_API_Common extends WP_UnitTestCase {
 	}
 
 	/**
-	 * When the API returns a valid tag list, get_remote_api_tag() returns true.
+	 * When the API returns a valid tag list, get_remote_api_tag() returns true
+	 * and sets newest_tag + tags on the repo object via sort_tags().
 	 */
 	public function test_get_remote_api_tag_with_valid_tags_returns_true(): void {
 		$tag_response = [
@@ -114,6 +115,7 @@ class Test_API_Common extends WP_UnitTestCase {
 
 		$result = $this->api->get_remote_tag();
 		$this->assertTrue( $result );
+		$this->assertSame( '1.0.0', $this->api->type->newest_tag );
 	}
 
 	// -------------------------------------------------------------------------

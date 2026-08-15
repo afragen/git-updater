@@ -1136,10 +1136,12 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 
 	public function test_populate_api_data_processes_tags_from_cache(): void {
 		$this->seed_cache( [ 'tags' => [ '1.0.0', '0.9.0' ] ] );
-		$this->api->type->newest_tag = '';
 		$repo = (object) [ 'slug' => 'test-plugin' ];
 		$this->api->populate_api_data( $repo, $this->api );
-		$this->assertSame( '1.0.0', $this->api->type->newest_tag );
+		// newest_tag is set by sort_tags() in get_remote_api_tag(); populate_api_data()
+		// builds the URL-map form of tags on the repo object.
+		$tag_keys = array_keys( $repo->tags ?? [] );
+		$this->assertSame( '1.0.0', $tag_keys[0] ?? null );
 	}
 
 	// -------------------------------------------------------------------------
@@ -1612,6 +1614,17 @@ class Test_GUTrait_Extended extends WP_UnitTestCase {
 		$this->type->release_asset = true;
 		$this->type->newest_tag    = '1.0.0';
 		// No seed_release_assets_cache() — cache is empty, as on first run.
+		$this->assertTrue( $this->use_release_asset( false ) );
+	}
+
+	/**
+	 * After get_remote_api_tag() runs sort_tags(), newest_tag + tags are both set
+	 * before construct_download_link() — use_release_asset() must pass.
+	 */
+	public function test_use_release_asset_returns_true_after_get_remote_api_tag_sets_tags(): void {
+		$this->type->release_asset = true;
+		$this->type->newest_tag    = '2.0.0';
+		$this->type->tags          = [ '2.0.0' => 'https://example.com/2.0.0.zip', '1.0.0' => 'https://example.com/1.0.0.zip' ];
 		$this->assertTrue( $this->use_release_asset( false ) );
 	}
 

@@ -1283,6 +1283,21 @@ class Test_Plugin_Meta_HTTP_Mock extends WP_UnitTestCase {
 			);
 		}
 
+		if ( str_ends_with( $path, '/releases' ) ) {
+			return $this->http_response(
+				json_encode(
+					[
+						[
+							'tag_name' => '2.0.0',
+							'assets'   => [
+								[ 'name' => 'test-gu-plugin.zip', 'url' => 'https://example.com/releases/test-gu-plugin.zip', 'created_at' => '2024-06-01T12:00:00Z' ],
+							],
+						],
+					]
+				)
+			);
+		}
+
 		if ( '/repos/afragen/test-gu-plugin' === $path ) {
 			return $this->http_response(
 				json_encode(
@@ -1343,5 +1358,21 @@ class Test_Plugin_Meta_HTTP_Mock extends WP_UnitTestCase {
 	public function test_get_remote_repo_meta_sets_correct_remote_version(): void {
 		( new Base() )->get_remote_repo_meta( $this->config );
 		$this->assertSame( '2.0.0', $this->config->remote_version );
+	}
+
+	/**
+	 * Regression for the get_remote_repo_meta() reorder: construct_download_link()
+	 * must run before populate_api_data() so the release-assets cache is populated
+	 * before populate_api_data() merges it onto the repo object. With a
+	 * release-asset-enabled repo, the resulting download_link must be the asset URL
+	 * (not the zipball), proving the release-asset branch ran.
+	 */
+	public function test_get_remote_repo_meta_uses_release_asset_download_link(): void {
+		$this->config->release_asset = true;
+		( new Base() )->get_remote_repo_meta( $this->config );
+		$this->assertSame(
+			'https://example.com/releases/test-gu-plugin.zip',
+			$this->config->download_link
+		);
 	}
 }
