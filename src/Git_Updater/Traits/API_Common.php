@@ -198,6 +198,10 @@ trait API_Common {
 		// sort_tags() keys by tag name, so combine the flat list into a tag-name map.
 		$this->sort_tags( array_combine( $response, $response ) );
 
+		// Persist newest_tag as a named cache entry so cache-only requests (and
+		// the transient/API consumers) can read it back without re-deriving it.
+		$this->set_repo_cache( 'newest_tag', $this->type->newest_tag );
+
 		return true;
 	}
 

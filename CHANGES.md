@@ -1,4 +1,5 @@
 #### [unreleased]
+* fix stale `newest_tag`/`download_link` in `update_site_transient()`, `plugins_api()`, and `themes_api()` for release-asset repos — persist `newest_tag` as a named cache entry at fetch time and hydrate it (plus the host-aware release-asset `download_link`) from the cache in the transient/API consumers, so cache-only requests no longer see the `'0.0.0'` sentinel or an empty package; `themes_api()` now also returns `download_link`
 * fix release-asset download links on first run — run `sort_tags()` in `get_remote_api_tag()` so `newest_tag` is set before `construct_download_link()`, reorder `get_remote_repo_meta()` to build the download link before `populate_api_data()` merges cache data, and drop the now-redundant `sort_tags()` call from `populate_api_data()`; the first request now resolves the release-asset URL instead of falling back to the zipball
 
 #### 14.3.0 / 2026-08-08

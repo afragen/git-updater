@@ -1135,13 +1135,92 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	public function test_populate_api_data_processes_tags_from_cache(): void {
-		$this->seed_cache( [ 'tags' => [ '1.0.0', '0.9.0' ] ] );
+		$this->seed_cache( [ 'tags' => [ '1.0.0', '0.9.0' ], 'newest_tag' => '1.0.0' ] );
 		$repo = (object) [ 'slug' => 'test-plugin' ];
 		$this->api->populate_api_data( $repo, $this->api );
-		// newest_tag is set by sort_tags() in get_remote_api_tag(); populate_api_data()
-		// builds the URL-map form of tags on the repo object.
+		// newest_tag is persisted by get_remote_api_tag() at fetch time; populate_api_data()
+		// builds the URL-map form of tags on the repo object and reads newest_tag back.
 		$tag_keys = array_keys( $repo->tags ?? [] );
 		$this->assertSame( '1.0.0', $tag_keys[0] ?? null );
+		$this->assertSame( '1.0.0', $repo->newest_tag ?? null );
+	}
+
+	/**
+	 * get_newest_tag_from_cache() returns the cached newest_tag, or '0.0.0'
+	 * when none is stored.
+	 */
+	public function test_get_newest_tag_from_cache(): void {
+		$this->seed_cache( [ 'newest_tag' => '2.1.0' ] );
+		$get = $this->api->get_reflection_method( $this->api, 'get_newest_tag_from_cache' );
+		$this->assertSame( '2.1.0', $get->invoke( $this->api, 'test-plugin' ) );
+
+		$this->seed_cache( [] );
+		$this->assertSame( '0.0.0', $get->invoke( $this->api, 'test-plugin' ) );
+	}
+
+	/**
+	 * ensure_download_data() hydrates newest_tag and download_link from the
+	 * cache when the repo object was not live-fetched.
+	 */
+	public function test_ensure_download_data_hydrates_from_cache(): void {
+		$this->seed_cache(
+			[
+				'newest_tag'              => '1.0.0',
+				'release_asset_download'  => 'https://example.com/asset-1.0.0.zip',
+				'tags'                    => [ '1.0.0' ],
+			]
+		);
+		$repo              = (object) [
+			'slug'          => 'test-plugin',
+			'git'           => 'github',
+			'newest_tag'    => '0.0.0',
+			'download_link' => '',
+		];
+		$ensure = $this->api->get_reflection_method( $this->api, 'ensure_download_data' );
+		$ensure->invoke( $this->api, $repo );
+		$this->assertSame( '1.0.0', $repo->newest_tag );
+		$this->assertSame( 'https://example.com/asset-1.0.0.zip', $repo->download_link );
+	}
+
+	/**
+	 * ensure_download_data() falls back to the per-host zipball URL from the
+	 * tags map when no release-asset cache exists.
+	 */
+	public function test_ensure_download_data_falls_back_to_tags_map(): void {
+		$this->seed_cache(
+			[
+				'newest_tag' => '2.0.0',
+				'tags'       => [ '2.0.0' => 'https://example.com/zipball/2.0.0' ],
+			]
+		);
+		$repo              = (object) [
+			'slug'          => 'test-plugin',
+			'git'           => 'github',
+			'newest_tag'    => '0.0.0',
+			'download_link' => '',
+			'tags'          => [ '2.0.0' => 'https://example.com/zipball/2.0.0' ],
+		];
+		$ensure = $this->api->get_reflection_method( $this->api, 'ensure_download_data' );
+		$ensure->invoke( $this->api, $repo );
+		$this->assertSame( '2.0.0', $repo->newest_tag );
+		$this->assertSame( 'https://example.com/zipball/2.0.0', $repo->download_link );
+	}
+
+	/**
+	 * ensure_download_data() leaves Gist repos alone (no release assets, links
+	 * built from the meta hash).
+	 */
+	public function test_ensure_download_data_skips_gist(): void {
+		$this->seed_cache( [ 'newest_tag' => '1.0.0', 'release_asset_download' => 'https://example.com/asset.zip' ] );
+		$repo              = (object) [
+			'slug'          => 'test-plugin',
+			'git'           => 'gist',
+			'newest_tag'    => '0.0.0',
+			'download_link' => '',
+		];
+		$ensure = $this->api->get_reflection_method( $this->api, 'ensure_download_data' );
+		$ensure->invoke( $this->api, $repo );
+		$this->assertSame( '', $repo->download_link );
 	}
 
 	// -------------------------------------------------------------------------

@@ -325,7 +325,9 @@ trait GU_Trait {
 					$tags       = $parse_tags->invoke( $repo_api, $value, $repo_type );
 					$repo->tags = $tags;
 
-					// newest_tag was already set by sort_tags() in get_remote_api_tag().
+					// newest_tag is persisted as a named cache entry at fetch time;
+					// read it back so cache-only requests see the correct value.
+					$repo->newest_tag = $this->get_newest_tag_from_cache( $repo->slug );
 					break;
 				case 'changes':
 					if ( $validate_response->invoke( $repo_api, $value ) ) {
@@ -373,6 +375,67 @@ trait GU_Trait {
 		}
 
 		return $repo;
+	}
+
+	/**
+	 * Get the newest tag from the repo cache.
+	 *
+	 * On master the cache is a `ghu-<md5>` site option holding a keyed array;
+	 * `get_repo_cache()` returns the whole array. `newest_tag` is stored as a
+	 * named entry by `get_remote_api_tag()` at fetch time.
+	 *
+	 * @param string $slug Repo slug.
+	 *
+	 * @return string
+	 */
+	final protected function get_newest_tag_from_cache( $slug ): string {
+		$cache = $this->get_repo_cache( $slug, false );
+
+		return isset( $cache['newest_tag'] ) && '' !== $cache['newest_tag']
+			? (string) $cache['newest_tag']
+			: '0.0.0';
+	}
+
+	/**
+	 * Ensure a repo object has correct newest_tag and download_link for the
+	 * transient / plugins_api / themes_api consumers, hydrating from the cache
+	 * when the object was not live-fetched in this request.
+	 *
+	 * @param stdClass $repo Repo object.
+	 *
+	 * @return void
+	 */
+	final protected function ensure_download_data( stdClass $repo ): void {
+		// 1. newest_tag: from the object, else from the cached named entry.
+		if ( empty( $repo->newest_tag ) || '0.0.0' === $repo->newest_tag ) {
+			$repo->newest_tag = $this->get_newest_tag_from_cache( $repo->slug );
+		}
+
+		// 2. download_link: host-aware cache read. Gist has no release assets
+		// and builds its link from the meta hash — leave it alone.
+		if ( empty( $repo->download_link ) && 'gist' !== ( $repo->git ?? '' ) ) {
+			$git      = $repo->git ?? '';
+			$cache    = $this->get_repo_cache( $repo->slug, false );
+			$download = '';
+
+			if ( 'bitbucket' === $git ) {
+				$download = $cache['release_asset_redirect'] ?? ''
+					?: $cache['release_asset_download'] ?? '';
+			} elseif ( 'gitlab' === $git ) {
+				$download = $cache['release_asset'] ?? '';
+			} else {
+				$download = $cache['release_asset_download'] ?? '';
+			}
+
+			if ( '' === $download && $repo->newest_tag && '0.0.0' !== $repo->newest_tag ) {
+				// Per-host zipball URL already built by parse_tags().
+				$download = $repo->tags[ $repo->newest_tag ] ?? '';
+			}
+
+			if ( '' !== $download ) {
+				$repo->download_link = $download;
+			}
+		}
 	}
 
 	/**
