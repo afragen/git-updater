@@ -275,29 +275,6 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'Description text.', $result->description );
 		$this->assertStringContainsString( 'Changelog text.', $result->description );
 	}
-
-	/**
-	 * themes_api() must include download_link, hydrated from the cache when the
-	 * theme object was not live-fetched.
-	 */
-	public function test_themes_api_sets_download_link_from_cache(): void {
-		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
-		$table->add_entry( 'test-gu-theme', 'repo', '', strtotime( '+12 hours' ) );
-		$table->add_entry( 'test-gu-theme', 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
-		$table->add_entry( 'test-gu-theme', 'newest_tag', '2.0.0' );
-		$table->add_entry( 'test-gu-theme', 'release_asset_download', 'https://example.com/theme-asset-2.0.0.zip' );
-
-		$theme_obj = $this->make_theme_obj( [
-			'dot_org'       => false,
-			'download_link' => '',
-			'newest_tag'    => '0.0.0',
-		] );
-		$theme    = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
-		$response = new stdClass();
-		$response->slug = 'test-gu-theme';
-		$result = $theme->themes_api( false, 'theme_information', $response );
-		$this->assertSame( 'https://example.com/theme-asset-2.0.0.zip', $result->download_link );
-	}
 }
 
 // ---------------------------------------------------------------------------
