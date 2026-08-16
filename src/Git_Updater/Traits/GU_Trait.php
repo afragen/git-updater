@@ -406,14 +406,26 @@ trait GU_Trait {
 	 * @return void
 	 */
 	final protected function ensure_download_data( stdClass $repo ): void {
+		$dev_filter = apply_filters( 'gu_dev_release_asset', false, $repo );
+
+		// Fast path: the object is already fully hydrated and no dev-asset
+		// override is requested — nothing to compute or read.
+		if ( ! empty( $repo->download_link ) && ! $dev_filter
+			&& ! empty( $repo->newest_tag ) && '0.0.0' !== $repo->newest_tag
+		) {
+			return;
+		}
+
 		$cache      = $this->get_repo_cache( $repo->slug, false );
+		$cache      = is_array( $cache ) ? $cache : [];
 		$assets     = $cache['release_assets']['assets'] ?? [];
 		$dev_assets = $cache['release_assets']['dev_assets'] ?? [];
-		$dev_filter = apply_filters( 'gu_dev_release_asset', false, $repo );
 
 		// 1. newest_tag: from the object, else from the cached named entry.
 		if ( empty( $repo->newest_tag ) || '0.0.0' === $repo->newest_tag ) {
-			$repo->newest_tag = $this->get_newest_tag_from_cache( $repo->slug );
+			$repo->newest_tag = isset( $cache['newest_tag'] ) && '' !== $cache['newest_tag']
+				? (string) $cache['newest_tag']
+				: '0.0.0';
 		}
 
 		// 1b. When the dev-release-asset filter is active, the effective newest
