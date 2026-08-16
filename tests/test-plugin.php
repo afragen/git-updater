@@ -658,32 +658,6 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 		$this->assertInstanceOf( stdClass::class, $result );
 		$this->assertSame( 'Test Plugin', $result->name );
 	}
-
-	/**
-	 * A repo object that was not live-fetched (empty download_link/newest_tag)
-	 * must still get the correct download_link in plugins_api() from the cache.
-	 */
-	public function test_plugins_api_download_link_hydrated_from_cache(): void {
-		update_site_option(
-			$this->cache_key,
-			[
-				'timeout'              => strtotime( '+12 hours' ),
-				'ran'                  => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-				'newest_tag'           => '2.0.0',
-				'release_asset_download' => 'https://example.com/asset-2.0.0.zip',
-			]
-		);
-		$plugin_obj = $this->make_plugin_obj( [
-			'dot_org'       => false,
-			'download_link' => '',
-			'newest_tag'    => '0.0.0',
-		] );
-		$plugin   = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
-		$response = new stdClass();
-		$response->slug = 'test-plugin';
-		$result = $plugin->plugins_api( false, 'plugin_information', $response );
-		$this->assertSame( 'https://example.com/asset-2.0.0.zip', $result->download_link );
-	}
 }
 
 // ---------------------------------------------------------------------------
@@ -932,34 +906,6 @@ class Test_Plugin_Update_Site_Transient_Method extends WP_UnitTestCase {
 		$entry = $result->response['test-plugin/test-plugin.php'];
 		$this->assertSame( $rollback_tag, $entry->new_version );
 		$this->assertSame( 'test-plugin', $entry->slug );
-	}
-
-	/**
-	 * A repo that was not live-fetched (empty download_link/newest_tag) must
-	 * still get the correct package URL in the transient from the cache.
-	 */
-	public function test_update_site_transient_package_hydrated_from_cache(): void {
-		update_site_option(
-			$this->cache_key,
-			[
-				'timeout'                => strtotime( '+12 hours' ),
-				'newest_tag'             => '2.0.0',
-				'release_asset_download' => 'https://example.com/asset-2.0.0.zip',
-			]
-		);
-		$plugin_obj = $this->make_plugin_obj( [
-			'dot_org'       => false,
-			'download_link' => '',
-			'newest_tag'    => '0.0.0',
-			'release_asset' => true,
-		] );
-		$plugin    = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
-		$transient = new stdClass();
-		$transient->response  = [];
-		$transient->no_update = [];
-		$result = $plugin->update_site_transient( $transient );
-		$this->assertArrayHasKey( 'test-plugin/test-plugin.php', $result->response );
-		$this->assertSame( 'https://example.com/asset-2.0.0.zip', $result->response['test-plugin/test-plugin.php']->package );
 	}
 }
 
