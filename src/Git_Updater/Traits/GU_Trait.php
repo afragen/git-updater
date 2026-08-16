@@ -552,7 +552,11 @@ trait GU_Trait {
 				}
 			}
 
-			if ( '' === (string) $download && $repo->newest_tag && '0.0.0' !== $repo->newest_tag ) {
+			// Only fall back to a zipball tag URL when nothing was resolved AND
+			// the repo has no pre-existing download_link. $repo->download_link
+			// already carries the correct branch-or-tag URL from
+			// construct_download_link(); never clobber it with a recomputed one.
+			if ( '' === (string) $download && empty( $repo->download_link ) && $repo->newest_tag && '0.0.0' !== $repo->newest_tag ) {
 				// Per-host zipball URL already built by parse_tags().
 				$download = $repo->tags[ $repo->newest_tag ] ?? '';
 			}
