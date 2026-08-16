@@ -531,7 +531,7 @@ trait GU_Trait {
 				if ( $dev_filter ) {
 					$current_asset_version     = array_key_first( $assets ) ?? '';
 					$current_dev_asset_version = array_key_first( $dev_assets ) ?? '';
-					if ( $current_asset_version && $current_dev_asset_version
+					if ( $current_dev_asset_version
 						&& version_compare( $current_asset_version, $current_dev_asset_version, '<' )
 					) {
 						$download           = reset( $dev_assets );
