@@ -1578,6 +1578,23 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A fully hydrated repo with no dev filter and no cache row must hit the
+	 * fast path and preserve its download_link without touching the cache.
+	 */
+	public function test_ensure_download_data_fast_path_hydrated_repo(): void {
+		$repo              = (object) [
+			'slug'          => 'fast-path-plugin',
+			'git'           => 'github',
+			'newest_tag'    => '2.0.0',
+			'download_link' => 'https://example.com/zipball/2.0.0',
+		];
+		$ensure = $this->api->get_reflection_method( $this->api, 'ensure_download_data' );
+		$ensure->invoke( $this->api, $repo );
+		$this->assertSame( '2.0.0', $repo->newest_tag );
+		$this->assertSame( 'https://example.com/zipball/2.0.0', $repo->download_link );
+	}
+
+	/**
 	 * A repo on a non-primary branch whose download_link already holds the
 	 * correct branch URL must not have it replaced by a tag URL.
 	 */

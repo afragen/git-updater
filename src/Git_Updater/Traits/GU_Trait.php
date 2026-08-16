@@ -492,15 +492,32 @@ trait GU_Trait {
 	 * @return void
 	 */
 	final protected function ensure_download_data( stdClass $repo ): void {
-		$release_assets = $this->get_repo_cache( $repo->slug, false, 'release_assets' );
-		$release_assets = is_array( $release_assets ) ? $release_assets : [];
-		$assets         = $release_assets['assets'] ?? [];
-		$dev_assets     = $release_assets['dev_assets'] ?? [];
-		$dev_filter     = apply_filters( 'gu_dev_release_asset', false, $repo );
+		$dev_filter = apply_filters( 'gu_dev_release_asset', false, $repo );
+
+		// Fast path: the download link is already resolved and no dev-asset
+		// override is requested — nothing to compute or read. With the dev
+		// filter off, a populated download_link is never overridden.
+		if ( ! empty( $repo->download_link ) && ! $dev_filter ) {
+			return;
+		}
+
+		// Projected read: only the columns this method needs, avoiding the
+		// full-row read that would memoize the row (including `ran`) on the
+		// table singleton's per-request row cache.
+		$cache      = $this->get_repo_cache(
+			$repo->slug,
+			false,
+			[ 'release_assets', 'newest_tag', 'release_asset_download', 'release_asset_redirect', 'release_asset' ]
+		);
+		$cache      = is_array( $cache ) ? $cache : [];
+		$assets     = $cache['release_assets']['assets'] ?? [];
+		$dev_assets = $cache['release_assets']['dev_assets'] ?? [];
 
 		// 1. newest_tag: from the object, else from the cached named entry.
 		if ( empty( $repo->newest_tag ) || '0.0.0' === $repo->newest_tag ) {
-			$repo->newest_tag = $this->get_newest_tag_from_cache( $repo->slug );
+			$repo->newest_tag = isset( $cache['newest_tag'] ) && '' !== $cache['newest_tag']
+				? (string) $cache['newest_tag']
+				: '0.0.0';
 		}
 
 		// 1b. When the dev-release-asset filter is active, the effective newest
@@ -520,10 +537,10 @@ trait GU_Trait {
 			$dev_asset_selected = false;
 
 			if ( 'bitbucket' === $git ) {
-				$download = $this->get_repo_cache( $repo->slug, false, 'release_asset_redirect' )
-					?: $this->get_repo_cache( $repo->slug, false, 'release_asset_download' );
+				$download = $cache['release_asset_redirect'] ?? ''
+					?: $cache['release_asset_download'] ?? '';
 			} elseif ( 'gitlab' === $git ) {
-				$download = $this->get_repo_cache( $repo->slug, false, 'release_asset' );
+				$download = $cache['release_asset'] ?? '';
 			} else {
 				// Hosts that use the plural /releases endpoint (github, gitea)
 				// cache the parsed map; honor the dev-release-asset filter the
@@ -543,7 +560,7 @@ trait GU_Trait {
 					// release_asset_download may be a URL string (plural path) or,
 					// in the singular get_api_release_asset() path, an array — only
 					// accept a scalar.
-					$cached   = $this->get_repo_cache( $repo->slug, false, 'release_asset_download' );
+					$cached   = $cache['release_asset_download'] ?? '';
 					$download = is_scalar( $cached ) ? (string) $cached : '';
 					if ( '' === $download && is_array( $assets ) ) {
 						$asset    = reset( $assets );
