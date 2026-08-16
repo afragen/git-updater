@@ -496,6 +496,7 @@ trait GU_Trait {
 		$release_assets = is_array( $release_assets ) ? $release_assets : [];
 		$assets         = $release_assets['assets'] ?? [];
 		$dev_assets     = $release_assets['dev_assets'] ?? [];
+		$dev_filter     = apply_filters( 'gu_dev_release_asset', false, $repo );
 
 		// 1. newest_tag: from the object, else from the cached named entry.
 		if ( empty( $repo->newest_tag ) || '0.0.0' === $repo->newest_tag ) {
@@ -504,7 +505,7 @@ trait GU_Trait {
 
 		// 1b. When the dev-release-asset filter is active, the effective newest
 		//     version is the dev asset version if it is newer than the stable tag.
-		if ( apply_filters( 'gu_dev_release_asset', false, $repo ) ) {
+		if ( $dev_filter ) {
 			$dev = array_key_first( $dev_assets ) ?? '';
 			if ( '' !== $dev && version_compare( $repo->newest_tag, $dev, '<' ) ) {
 				$repo->newest_tag = $dev;
@@ -513,9 +514,10 @@ trait GU_Trait {
 
 		// 2. download_link: host-aware cache read. Gist has no release assets
 		// and builds its link from the meta hash — leave it alone.
-		if ( empty( $repo->download_link ) && 'gist' !== ( $repo->git ?? '' ) ) {
-			$git      = $repo->git ?? '';
-			$download = '';
+		if ( 'gist' !== ( $repo->git ?? '' ) ) {
+			$git                = $repo->git ?? '';
+			$download           = '';
+			$dev_asset_selected = false;
 
 			if ( 'bitbucket' === $git ) {
 				$download = $this->get_repo_cache( $repo->slug, false, 'release_asset_redirect' )
@@ -526,14 +528,15 @@ trait GU_Trait {
 				// Hosts that use the plural /releases endpoint (github, gitea)
 				// cache the parsed map; honor the dev-release-asset filter the
 				// same way construct_download_link() does.
-				if ( apply_filters( 'gu_dev_release_asset', false, $repo ) ) {
+				if ( $dev_filter ) {
 					$current_asset_version     = array_key_first( $assets ) ?? '';
 					$current_dev_asset_version = array_key_first( $dev_assets ) ?? '';
 					if ( $current_asset_version && $current_dev_asset_version
 						&& version_compare( $current_asset_version, $current_dev_asset_version, '<' )
 					) {
-						$download = reset( $dev_assets );
-					} else {
+						$download           = reset( $dev_assets );
+						$dev_asset_selected = true;
+					} elseif ( $current_asset_version ) {
 						$download = reset( $assets );
 					}
 				} else {
@@ -554,7 +557,10 @@ trait GU_Trait {
 				$download = $repo->tags[ $repo->newest_tag ] ?? '';
 			}
 
-			if ( '' !== (string) $download ) {
+			// A resolved dev release asset must always win, even over an
+			// existing zipball or stable link. Otherwise only hydrate an
+			// empty link.
+			if ( ( empty( $repo->download_link ) || $dev_asset_selected ) && '' !== (string) $download ) {
 				$repo->download_link = $download;
 			}
 		}
