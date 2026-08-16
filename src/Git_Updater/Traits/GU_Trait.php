@@ -408,11 +408,10 @@ trait GU_Trait {
 	final protected function ensure_download_data( stdClass $repo ): void {
 		$dev_filter = apply_filters( 'gu_dev_release_asset', false, $repo );
 
-		// Fast path: the object is already fully hydrated and no dev-asset
-		// override is requested — nothing to compute or read.
-		if ( ! empty( $repo->download_link ) && ! $dev_filter
-			&& ! empty( $repo->newest_tag ) && '0.0.0' !== $repo->newest_tag
-		) {
+		// Fast path: the download link is already resolved and no dev-asset
+		// override is requested — nothing to compute or read. With the dev
+		// filter off, a populated download_link is never overridden.
+		if ( ! empty( $repo->download_link ) && ! $dev_filter ) {
 			return;
 		}
 
