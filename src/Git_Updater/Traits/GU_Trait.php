@@ -406,16 +406,26 @@ trait GU_Trait {
 	 * @return void
 	 */
 	final protected function ensure_download_data( stdClass $repo ): void {
+		$cache = $this->get_repo_cache( $repo->slug, false );
+
 		// 1. newest_tag: from the object, else from the cached named entry.
 		if ( empty( $repo->newest_tag ) || '0.0.0' === $repo->newest_tag ) {
 			$repo->newest_tag = $this->get_newest_tag_from_cache( $repo->slug );
+		}
+
+		// 1b. When the dev-release-asset filter is active, the effective newest
+		// version is the dev asset version if it is newer than the stable tag.
+		if ( apply_filters( 'gu_dev_release_asset', false, $repo ) ) {
+			$dev = array_key_first( $cache['release_assets']['dev_assets'] ?? [] ) ?? '';
+			if ( '' !== $dev && version_compare( $repo->newest_tag, $dev, '<' ) ) {
+				$repo->newest_tag = $dev;
+			}
 		}
 
 		// 2. download_link: host-aware cache read. Gist has no release assets
 		// and builds its link from the meta hash — leave it alone.
 		if ( empty( $repo->download_link ) && 'gist' !== ( $repo->git ?? '' ) ) {
 			$git      = $repo->git ?? '';
-			$cache    = $this->get_repo_cache( $repo->slug, false );
 			$download = '';
 
 			if ( 'bitbucket' === $git ) {
@@ -424,7 +434,33 @@ trait GU_Trait {
 			} elseif ( 'gitlab' === $git ) {
 				$download = $cache['release_asset'] ?? '';
 			} else {
-				$download = $cache['release_asset_download'] ?? '';
+				// Hosts that use the plural /releases endpoint (github, gitea)
+				// cache the parsed map; honor the dev-release-asset filter the
+				// same way construct_download_link() does.
+				$release_assets = $cache['release_assets'] ?? [];
+				$assets         = $release_assets['assets'] ?? [];
+				$dev_assets     = $release_assets['dev_assets'] ?? [];
+				if ( is_array( $release_assets ) && apply_filters( 'gu_dev_release_asset', false, $repo ) ) {
+					$current_asset_version     = array_key_first( $assets ) ?? '';
+					$current_dev_asset_version = array_key_first( $dev_assets ) ?? '';
+					if ( $current_asset_version && $current_dev_asset_version
+						&& version_compare( $current_asset_version, $current_dev_asset_version, '<' )
+					) {
+						$download = reset( $dev_assets );
+					} else {
+						$download = reset( $assets );
+					}
+				} else {
+					// release_asset_download may be a URL string (plural path) or,
+					// in the singular get_api_release_asset() path, an array — only
+					// accept a scalar.
+					$cached   = $cache['release_asset_download'] ?? '';
+					$download = is_scalar( $cached ) ? (string) $cached : '';
+					if ( '' === $download && is_array( $assets ) ) {
+						$asset    = reset( $assets );
+						$download = false === $asset ? '' : (string) $asset;
+					}
+				}
 			}
 
 			if ( '' === $download && $repo->newest_tag && '0.0.0' !== $repo->newest_tag ) {
