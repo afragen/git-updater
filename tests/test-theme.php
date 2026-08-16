@@ -1193,11 +1193,15 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 	}
 
 	public function test_no_duplicate_cron_when_already_scheduled(): void {
-		// Schedule a past-due event so wp_get_ready_cron_jobs() can see it.
-		wp_schedule_single_event( time() - HOUR_IN_SECONDS, 'gu_get_remote_theme', [ [] ] );
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_theme' );
 
 		$theme_obj = $this->make_theme_obj();
 		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
+		$args      = [ [ 'test-gu-theme' => $theme_obj ] ];
+
+		// Pre-schedule the exact event the merge would create, at a future timestamp.
+		wp_schedule_single_event( time() + HOUR_IN_SECONDS, 'gu_get_remote_theme', $args );
 
 		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 		$theme->get_remote_theme_meta();
@@ -1216,8 +1220,10 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		// Inject two events at different timestamps with different args to simulate
 		// what a previous race left behind (args differ so WP dedup doesn't catch them;
 		// timestamps are 2 hours apart so the 10-minute dedup window doesn't apply).
-		wp_schedule_single_event( time() - 2 * HOUR_IN_SECONDS, 'gu_get_remote_theme', [ [ 'slug-a' => $theme_obj ] ] );
-		wp_schedule_single_event( time() - HOUR_IN_SECONDS, 'gu_get_remote_theme', [ [ 'slug-b' => $theme_obj ] ] );
+		// Future timestamps: due events (<= now) are skipped by the due-event guard,
+		// which is meant to leave in-flight events alone.
+		wp_schedule_single_event( time() + HOUR_IN_SECONDS, 'gu_get_remote_theme', [ [ 'slug-a' => $theme_obj ] ] );
+		wp_schedule_single_event( time() + 2 * HOUR_IN_SECONDS, 'gu_get_remote_theme', [ [ 'slug-b' => $theme_obj ] ] );
 
 		$this->assertSame( 2, $this->cron_hook_count( 'gu_get_remote_theme' ), 'Pre-condition: two race-left events must exist' );
 

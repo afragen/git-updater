@@ -1011,12 +1011,28 @@ trait GU_Trait {
 	 * unschedule all existing events and schedule a single consolidated event.
 	 * This prevents duplicate events accumulating across page loads.
 	 *
+	 * The unschedule + schedule is done in a single `cron` option write so a
+	 * transient DB write failure cannot leave the hook half-removed, and so
+	 * concurrent requests racing through this method cannot each trigger the
+	 * core `could_not_set` unschedule error.
+	 *
+	 * If a *due* event for $hook already exists, the wp-cron runner is (or is
+	 * about to be) executing it. Re-scheduling at `time()` would keep the batch
+	 * perpetually pending and race core's post-run unschedule, so we bail out.
+	 *
 	 * @param string               $hook     Cron event hook name.
 	 * @param array<string, mixed> $new_args Keyed-by-slug repo array for this request.
 	 *
 	 * @return void
 	 */
 	final protected function merge_and_reschedule_cron_batch( string $hook, array $new_args ): void {
+		$cron = _get_cron_array();
+		foreach ( (array) $cron as $timestamp => $hooks ) {
+			if ( isset( $hooks[ $hook ] ) && (int) $timestamp <= time() ) {
+				// A due event exists; do not re-schedule it.
+				return;
+			}
+		}
 		if ( wp_next_scheduled( $hook ) ) {
 			return;
 		}
@@ -1030,8 +1046,33 @@ trait GU_Trait {
 				}
 			}
 		}
-		wp_unschedule_hook( $hook );
-		wp_schedule_single_event( time(), $hook, [ $new_args ] );
+
+		// Remove all existing events for $hook.
+		foreach ( array_keys( (array) $cron ) as $timestamp ) {
+			unset( $cron[ $timestamp ][ $hook ] );
+			if ( empty( $cron[ $timestamp ] ) ) {
+				unset( $cron[ $timestamp ] );
+			}
+		}
+
+		// Add the single consolidated event.
+		$timestamp = time();
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- WP core cron keys use md5(serialize()) for dedup.
+		$key                                 = md5( serialize( [ $new_args ] ) );
+		$cron[ $timestamp ][ $hook ][ $key ] = [
+			'schedule' => false,
+			'args'     => [ $new_args ],
+			'interval' => 0,
+		];
+		uksort( $cron, 'strnatcasecmp' );
+		$cron['version'] = 2;
+
+		$result = update_option( 'cron', $cron, true );
+		if ( false === $result && ! wp_next_scheduled( $hook, [ $new_args ] ) ) {
+			// Another process may have written the same event (false positive);
+			// only fall back to core scheduling if the event is truly absent.
+			wp_schedule_single_event( $timestamp, $hook, [ $new_args ] );
+		}
 	}
 
 	/**
