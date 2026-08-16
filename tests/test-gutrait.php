@@ -1604,6 +1604,61 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 	}
 
 	/**
+	 * When gu_dev_release_asset is true and the dev asset is newer, the dev URL
+	 * must override an already-populated download_link (the zipball/stable link
+	 * built by Base::get_remote_repo_meta()).
+	 */
+	public function test_ensure_download_data_dev_asset_overrides_existing_download_link(): void {
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+		$this->seed_cache(
+			[
+				'newest_tag'     => '1.0.0',
+				'release_assets' => [
+					'assets'     => [ '1.0.0' => 'https://example.com/stable-1.0.0.zip' ],
+					'dev_assets' => [ '1.1.0-nightly' => 'https://example.com/dev-1.1.0.zip' ],
+				],
+			]
+		);
+		$repo              = (object) [
+			'slug'          => 'test-plugin',
+			'git'           => 'github',
+			'newest_tag'    => '1.0.0',
+			'download_link' => 'https://example.com/zipball/1.0.0',
+		];
+		$ensure = $this->api->get_reflection_method( $this->api, 'ensure_download_data' );
+		$ensure->invoke( $this->api, $repo );
+		$this->assertSame( '1.1.0-nightly', $repo->newest_tag );
+		$this->assertSame( 'https://example.com/dev-1.1.0.zip', $repo->download_link );
+	}
+
+	/**
+	 * When gu_dev_release_asset is true but the dev asset is NOT newer, a
+	 * pre-existing download_link must be left untouched.
+	 */
+	public function test_ensure_download_data_dev_asset_not_newer_keeps_existing_download_link(): void {
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+		$this->seed_cache(
+			[
+				'newest_tag'     => '2.0.0',
+				'release_assets' => [
+					'assets'     => [ '2.0.0' => 'https://example.com/stable-2.0.0.zip' ],
+					'dev_assets' => [ '1.9.0-nightly' => 'https://example.com/dev-1.9.0.zip' ],
+				],
+			]
+		);
+		$repo              = (object) [
+			'slug'          => 'test-plugin',
+			'git'           => 'github',
+			'newest_tag'    => '2.0.0',
+			'download_link' => 'https://example.com/zipball/2.0.0',
+		];
+		$ensure = $this->api->get_reflection_method( $this->api, 'ensure_download_data' );
+		$ensure->invoke( $this->api, $repo );
+		$this->assertSame( '2.0.0', $repo->newest_tag );
+		$this->assertSame( 'https://example.com/zipball/2.0.0', $repo->download_link );
+	}
+
+	/**
 	 * When gu_dev_release_asset is true but the dev asset is NOT newer than the
 	 * stable asset, ensure_download_data() must keep the stable asset URL and
 	 * the stable newest_tag.
