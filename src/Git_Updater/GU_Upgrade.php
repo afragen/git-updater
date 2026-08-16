@@ -41,7 +41,7 @@ final class GU_Upgrade {
 	 */
 	public function run() {
 		$options    = $this->get_class_vars( 'Base', 'options' );
-		$db_version = ! is_float( $options['db_version'] ) ? $options['db_version'] : '6.0.0';
+		$db_version = isset( $options['db_version'] ) && ! is_float( $options['db_version'] ) ? $options['db_version'] : '6.0.0';
 		$this->schedule_access_token_cleanup();
 
 		if ( version_compare( $db_version, $this->db_version, '=' ) ) {
