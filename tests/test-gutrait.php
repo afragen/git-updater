@@ -1207,6 +1207,45 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A non-release-asset repo whose download_link already holds the correct
+	 * tag URL must not have it replaced by a recomputed zipball URL.
+	 */
+	public function test_ensure_download_data_keeps_existing_tag_link_for_non_dev_repo(): void {
+		$this->seed_cache( [ 'newest_tag' => '2.0.0' ] );
+		$repo              = (object) [
+			'slug'          => 'test-plugin',
+			'git'           => 'github',
+			'newest_tag'    => '2.0.0',
+			'download_link' => 'https://example.com/zipball/2.0.0',
+			'tags'          => [ '2.0.0' => 'https://example.com/zipball/2.0.0' ],
+		];
+		$ensure = $this->api->get_reflection_method( $this->api, 'ensure_download_data' );
+		$ensure->invoke( $this->api, $repo );
+		$this->assertSame( '2.0.0', $repo->newest_tag );
+		$this->assertSame( 'https://example.com/zipball/2.0.0', $repo->download_link );
+	}
+
+	/**
+	 * A repo on a non-primary branch whose download_link already holds the
+	 * correct branch URL must not have it replaced by a tag URL.
+	 */
+	public function test_ensure_download_data_keeps_existing_branch_link_on_non_primary_branch(): void {
+		$this->seed_cache( [ 'newest_tag' => '2.0.0' ] );
+		$repo              = (object) [
+			'slug'           => 'test-plugin',
+			'git'            => 'github',
+			'branch'         => 'develop',
+			'primary_branch' => 'master',
+			'newest_tag'     => '2.0.0',
+			'download_link'  => 'https://example.com/zipball/develop',
+			'tags'           => [ '2.0.0' => 'https://example.com/zipball/2.0.0' ],
+		];
+		$ensure = $this->api->get_reflection_method( $this->api, 'ensure_download_data' );
+		$ensure->invoke( $this->api, $repo );
+		$this->assertSame( 'https://example.com/zipball/develop', $repo->download_link );
+	}
+
+	/**
 	 * ensure_download_data() leaves Gist repos alone (no release assets, links
 	 * built from the meta hash).
 	 */
