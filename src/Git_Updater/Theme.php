@@ -344,8 +344,6 @@ class Theme {
 			return $result;
 		}
 
-		$this->ensure_download_data( $theme );
-
 		$response->did           = $theme->did;
 		$response->slug          = $theme->slug;
 		$response->name          = $theme->name;
@@ -613,7 +611,6 @@ class Theme {
 		$config = apply_filters( 'gu_config_pre_process', $this->config );
 
 		foreach ( (array) $config as $theme ) {
-			$this->ensure_download_data( $theme );
 			$theme_requires = $this->get_repo_requirements( $theme );
 			$response       = [
 				'theme'            => $theme->slug,
