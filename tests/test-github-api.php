@@ -855,6 +855,83 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 			$result
 		);
 	}
+
+	/**
+	 * When the target is a specific tag, construct_download_link() must fetch the
+	 * release asset for that tag instead of the latest release asset.
+	 */
+	public function test_construct_download_link_returns_tag_specific_release_asset_url(): void {
+		$tag_url = 'https://github.com/test-owner/test-plugin/releases/download/v1.2.3/plugin.zip';
+
+		add_filter(
+			'pre_http_request',
+			static function ( $preempt, $args, $url ) use ( $tag_url ) {
+				if ( str_contains( $url, '/releases/tags/1.2.3' ) ) {
+					return [
+						'body'     => json_encode(
+							(object) [
+								'tag_name' => '1.2.3',
+								'assets'   => [
+									(object) [
+										'name' => 'test-plugin.zip',
+										'url'  => $tag_url,
+									],
+								],
+							]
+						),
+						'headers'  => [ 'content-type' => 'application/json' ],
+						'response' => [ 'code' => 200 ],
+					];
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$result = $this->api->construct_download_link( '1.2.3' );
+
+		$this->assertSame( $tag_url, $result );
+	}
+
+	/**
+	 * A tag-specific release asset must not overwrite the primary
+	 * release_asset_download cache, which is reserved for the latest release.
+	 */
+	public function test_construct_download_link_does_not_cache_tag_specific_asset_as_latest(): void {
+		$tag_url = 'https://github.com/test-owner/test-plugin/releases/download/v1.2.3/plugin.zip';
+
+		add_filter(
+			'pre_http_request',
+			static function ( $preempt, $args, $url ) use ( $tag_url ) {
+				if ( str_contains( $url, '/releases/tags/1.2.3' ) ) {
+					return [
+						'body'     => json_encode(
+							(object) [
+								'tag_name' => '1.2.3',
+								'assets'   => [
+									(object) [
+										'name' => 'test-plugin.zip',
+										'url'  => $tag_url,
+									],
+								],
+							]
+						),
+						'headers'  => [ 'content-type' => 'application/json' ],
+						'response' => [ 'code' => 200 ],
+					];
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$this->api->construct_download_link( '1.2.3' );
+
+		$cache = $this->api->get_repo_cache( 'test-plugin' );
+		$this->assertArrayNotHasKey( 'release_asset_download', $cache );
+	}
 }
 
 /**

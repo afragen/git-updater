@@ -153,28 +153,10 @@ class GitHub_API extends API implements API_Interface {
 
 		// Release asset.
 		if ( $this->use_release_asset( $branch_switch ) ) {
-			$release_assets = $this->get_release_assets();
-			if ( ! $release_assets ) {
-				return '';
-			}
-			$release_assets['assets'] = $release_assets['assets'] ?? [];
-			$release_asset            = reset( $release_assets['assets'] );
-
-			/*
-			 * Check if dev release asset is newer than latest release asset.
-			 *
-			 * @param bool
-			 * @param $this->type Repo type object.
-			 */
-			if ( apply_filters( 'gu_dev_release_asset', false, $this->type ) ) {
-				$current_asset_version     = array_key_first( $release_assets['assets'] ) ?? '';
-				$current_dev_asset_version = array_key_first( $release_assets['dev_assets'] ) ?? '';
-				if ( version_compare( $current_asset_version, $current_dev_asset_version, '<' ) ) {
-					$release_asset = reset( $release_assets['dev_assets'] );
-				}
-			}
-
-			if ( $release_asset ) {
+			$release_asset = $this->resolve_release_asset( $branch_switch );
+			// Only cache the primary/latest release asset; tag-specific assets
+			// must not pollute the release_asset_download cache.
+			if ( $release_asset && ! $this->is_tag_target( (string) ( false !== $branch_switch ? $branch_switch : $this->type->branch ) ) ) {
 				$this->set_repo_cache( 'release_asset_download', $release_asset );
 			}
 			return $release_asset;
@@ -184,21 +166,102 @@ class GitHub_API extends API implements API_Interface {
 		 * If a branch has been given, use branch.
 		 * If branch is primary branch (default) and tags are used, use newest tag.
 		 */
-		if ( $this->type->primary_branch !== $this->type->branch || empty( $this->type->tags ) ) {
-			$endpoint .= $this->type->branch;
+		$target = false !== $branch_switch ? $branch_switch : $this->type->branch;
+		if ( $this->type->primary_branch !== $target || empty( $this->type->tags ) ) {
+			$endpoint .= $target;
 		} else {
 			$endpoint .= $this->type->newest_tag;
-		}
-
-		// Create endpoint for branch switching.
-		if ( $branch_switch ) {
-			$endpoint = $branch_switch;
 		}
 
 		$download_link = $download_link_base . $endpoint;
 		$download_link = apply_filters( 'gu_post_construct_download_link', $download_link, $this->type, $branch_switch );
 
 		return $download_link;
+	}
+
+	/**
+	 * Resolve the release asset URL for a given target.
+	 *
+	 * @param bool|string $branch_switch Branch or tag to switch to, or false.
+	 *
+	 * @return string Release asset URL, or empty string if none.
+	 */
+	private function resolve_release_asset( $branch_switch = false ): string {
+		$target = false !== $branch_switch ? $branch_switch : $this->type->branch;
+
+		// For a specific tag target, return that tag's release asset without
+		// caching it as the primary release_asset_download.
+		if ( is_string( $target ) && $this->is_tag_target( $target ) ) {
+			return $this->get_release_asset_for_tag( $target );
+		}
+
+		return $this->get_latest_release_asset();
+	}
+
+	/**
+	 * Check whether a string target is a tag (not a branch).
+	 *
+	 * @param string $target Target branch or tag.
+	 *
+	 * @return bool
+	 */
+	private function is_tag_target( string $target ): bool {
+		return ! array_key_exists( $target, (array) ( $this->type->branches ?? [] ) );
+	}
+
+	/**
+	 * Fetch the release asset URL for a specific tag.
+	 *
+	 * Makes a direct, non-cached API request so that tag-specific lookups do not
+	 * overwrite the primary/latest `release_assets` cache.
+	 *
+	 * @param string $tag Tag name.
+	 *
+	 * @return string Release asset URL, or empty string if none.
+	 */
+	private function get_release_asset_for_tag( string $tag ): string {
+		$response = $this->api( '/repos/:owner/:repo/releases/tags/' . $tag );
+		if ( is_wp_error( $response ) || ! isset( $response->assets ) || ! is_array( $response->assets ) ) {
+			return '';
+		}
+
+		foreach ( $response->assets as $asset ) {
+			if ( isset( $asset->name, $asset->url ) && str_starts_with( $asset->name, $this->type->slug ) ) {
+				return $asset->url;
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Fetch the latest release asset URL, applying the dev-release-asset filter.
+	 *
+	 * @return string Release asset URL, or empty string if none.
+	 */
+	private function get_latest_release_asset(): string {
+		$release_assets = $this->get_release_assets();
+		if ( ! $release_assets ) {
+			return '';
+		}
+		$release_assets['assets'] = $release_assets['assets'] ?? [];
+		$release_asset            = reset( $release_assets['assets'] );
+
+		/*
+		 * Check if dev release asset is newer than latest release asset.
+		 *
+		 * @param bool
+		 * @param $this->type Repo type object.
+		 */
+		if ( apply_filters( 'gu_dev_release_asset', false, $this->type ) ) {
+			$current_asset_version     = array_key_first( $release_assets['assets'] ) ?? '';
+			$current_dev_asset_version = array_key_first( $release_assets['dev_assets'] ?? [] ) ?? '';
+			if ( version_compare( $current_asset_version, $current_dev_asset_version, '<' ) ) {
+				$release_asset = reset( $release_assets['dev_assets'] );
+			}
+		}
+
+		return $release_asset;
 	}
 
 	/**

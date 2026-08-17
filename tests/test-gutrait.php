@@ -1620,6 +1620,34 @@ class Test_GUTrait_Extended extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Target-driven behavior: the decision must be based on the branch_switch
+	 * argument, not on $this->type->branch. Even when the repo object says it is
+	 * currently on a dev branch, switching to the primary branch must still
+	 * use the release asset.
+	 */
+	public function test_use_release_asset_uses_target_not_current_branch_for_primary_switch(): void {
+		$this->type->release_asset = true;
+		$this->type->newest_tag    = '1.0.0';
+		$this->type->branch        = 'develop';
+		$this->type->branches      = [ 'master' => [], 'develop' => [] ];
+
+		$this->assertTrue( $this->use_release_asset( 'master' ) );
+	}
+
+	/**
+	 * Target-driven behavior: switching to a non-primary branch from the primary
+	 * branch must not use the release asset.
+	 */
+	public function test_use_release_asset_uses_target_not_current_branch_for_non_primary_switch(): void {
+		$this->type->release_asset = true;
+		$this->type->newest_tag    = '1.0.0';
+		$this->type->branch        = 'master';
+		$this->type->branches      = [ 'master' => [], 'develop' => [] ];
+
+		$this->assertFalse( $this->use_release_asset( 'develop' ) );
+	}
+
+	/**
 	 * First-run regression: with no release_assets cache yet populated, a
 	 * release-asset repo on its primary branch must still pass the gate so
 	 * construct_download_link() can fetch the asset list.
