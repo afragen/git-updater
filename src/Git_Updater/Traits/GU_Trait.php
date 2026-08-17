@@ -1138,11 +1138,20 @@ trait GU_Trait {
 	 * @return bool
 	 */
 	final public function use_release_asset( $branch_switch = false ): bool {
-		$is_tag                  = is_string( $branch_switch ) && ! array_key_exists( $branch_switch, (array) ( $this->type->branches ?? [] ) );
-		$switch_master_tag       = $this->type->primary_branch === $branch_switch || $is_tag;
-		$current_master_noswitch = $this->type->primary_branch === $this->type->branch && false === $branch_switch;
+		// The effective target is either the explicit branch/tag being switched to
+		// or the repo's current tracking branch. The config's `branch` field is
+		// already resolved from the cached `current_branch`, so it represents the
+		// branch the user is actually on.
+		$target = false !== $branch_switch ? $branch_switch : $this->type->branch;
 
-		$need_release_asset = $switch_master_tag || $current_master_noswitch;
+		// A tag is any string target not present in the branches list. In contexts
+		// without a populated branches list (some non-fetch callers), we fall back
+		// to treating non-empty string targets as tags only when they cannot be the
+		// primary branch.
+		$is_tag = is_string( $target ) && ! array_key_exists( $target, (array) ( $this->type->branches ?? [] ) );
+
+		// Release assets are only used for the primary branch or a specific tag.
+		$use_release_asset = $this->type->primary_branch === $target || $is_tag;
 
 		/*
 		 * Do not gate on the cached release_assets list here: it is only populated
@@ -1153,7 +1162,7 @@ trait GU_Trait {
 		 */
 		return (bool) ( $this->type->release_asset ?? false )
 			&& '0.0.0' !== ( $this->type->newest_tag ?? '0.0.0' )
-			&& $need_release_asset;
+			&& $use_release_asset;
 	}
 
 	/**
