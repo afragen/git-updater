@@ -184,10 +184,15 @@ class GitHub_API extends API implements API_Interface {
 	 *
 	 * @param bool|string $branch_switch Branch or tag to switch to, or false.
 	 *
-	 * @return string Release asset URL, or empty string if none.
+	 * @return string|bool Release asset URL, or false if none.
 	 */
-	private function resolve_release_asset( $branch_switch = false ): string {
+	private function resolve_release_asset( $branch_switch = false ) {
 		$target = false !== $branch_switch ? $branch_switch : $this->type->branch;
+
+		// For the primary branch, use the latest release asset.
+		if ( $target === $this->type->primary_branch ) {
+			return $this->get_latest_release_asset();
+		}
 
 		// For a specific tag target, return that tag's release asset without
 		// caching it as the primary release_asset_download.
@@ -195,7 +200,7 @@ class GitHub_API extends API implements API_Interface {
 			return $this->get_release_asset_for_tag( $target );
 		}
 
-		return $this->get_latest_release_asset();
+		return '';
 	}
 
 	/**
@@ -237,9 +242,9 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Fetch the latest release asset URL, applying the dev-release-asset filter.
 	 *
-	 * @return string Release asset URL, or empty string if none.
+	 * @return string|bool Release asset URL, or false if none.
 	 */
-	private function get_latest_release_asset(): string {
+	private function get_latest_release_asset() {
 		$release_assets = $this->get_release_assets();
 		if ( ! $release_assets ) {
 			return '';

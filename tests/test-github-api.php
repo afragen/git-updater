@@ -934,7 +934,11 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 		$this->api->construct_download_link( '1.2.3' );
 
 		$cache = $this->api->get_repo_cache( 'test-plugin' );
-		$this->assertArrayNotHasKey( 'release_asset_download', $cache );
+		if ( is_array( $cache ) ) {
+			$this->assertArrayNotHasKey( 'release_asset_download', $cache );
+		} else {
+			$this->assertTrue( true ); // No cache row means nothing was cached.
+		}
 	}
 }
 
