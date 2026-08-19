@@ -662,6 +662,30 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 		$this->assertInstanceOf( stdClass::class, $result );
 		$this->assertSame( 'Test Plugin', $result->name );
 	}
+
+	/**
+	 * plugins_api() returns the persisted dev release asset download_link for a
+	 * release-asset repo on the primary branch when the dev filter is active.
+	 */
+	public function test_plugins_api_returns_dev_release_asset_download_link(): void {
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
+		$plugin_obj = $this->make_plugin_obj( [
+			'dot_org'        => false,
+			'release_asset'  => true,
+			'branch'         => 'main',
+			'primary_branch' => 'main',
+			'download_link'  => 'https://example.com/releases/download/v2.1.0-beta1/plugin-beta.zip',
+		] );
+		$plugin   = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$response = new stdClass();
+		$response->slug = 'test-plugin';
+		$result = $plugin->plugins_api( false, 'plugin_information', $response );
+		$this->assertSame(
+			'https://example.com/releases/download/v2.1.0-beta1/plugin-beta.zip',
+			$result->download_link
+		);
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -837,6 +861,65 @@ class Test_Plugin_Update_Site_Transient_Method extends WP_UnitTestCase {
 		$transient->no_update = [];
 		$result = $plugin->update_site_transient( $transient );
 		$this->assertNull( $result->response['test-plugin/test-plugin.php']->package );
+	}
+
+	/**
+	 * A release-asset repo on its primary branch must keep the dev release asset
+	 * selected by construct_download_link() when the gu_dev_release_asset filter
+	 * is active. The consumer must not replace it with the primary-branch zipball.
+	 */
+	public function test_release_asset_primary_branch_dev_filter_keeps_dev_release_asset_package(): void {
+		$plugin_obj = $this->make_plugin_obj( [
+			'remote_version' => '2.0.0',
+			'local_version'  => '1.0.0',
+			'dot_org'        => false,
+			'release_asset'  => true,
+			'branch'         => 'main',
+			'primary_branch' => 'main',
+			'download_link'  => 'https://example.com/releases/download/v2.1.0-beta1/plugin-beta.zip',
+			'branches'       => [
+				'main' => [ 'download' => 'https://example.com/main.zip' ],
+			],
+		] );
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+		$plugin    = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+		$result = $plugin->update_site_transient( $transient );
+		remove_all_filters( 'gu_dev_release_asset' );
+		$this->assertSame(
+			'https://example.com/releases/download/v2.1.0-beta1/plugin-beta.zip',
+			$result->response['test-plugin/test-plugin.php']->package
+		);
+	}
+
+	/**
+	 * A release-asset repo on the primary branch WITHOUT the dev filter must keep
+	 * the stable release asset selected by construct_download_link().
+	 */
+	public function test_release_asset_primary_branch_keeps_stable_release_asset_package(): void {
+		$plugin_obj = $this->make_plugin_obj( [
+			'remote_version' => '2.0.0',
+			'local_version'  => '1.0.0',
+			'dot_org'        => false,
+			'release_asset'  => true,
+			'branch'         => 'main',
+			'primary_branch' => 'main',
+			'download_link'  => 'https://example.com/releases/download/v2.0.0/plugin.zip',
+			'branches'       => [
+				'main' => [ 'download' => 'https://example.com/main.zip' ],
+			],
+		] );
+		$plugin    = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+		$result = $plugin->update_site_transient( $transient );
+		$this->assertSame(
+			'https://example.com/releases/download/v2.0.0/plugin.zip',
+			$result->response['test-plugin/test-plugin.php']->package
+		);
 	}
 
 	public function test_dot_org_plugin_on_primary_branch_skipped_for_update(): void {

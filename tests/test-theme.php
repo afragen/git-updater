@@ -275,6 +275,29 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'Description text.', $result->description );
 		$this->assertStringContainsString( 'Changelog text.', $result->description );
 	}
+
+	/**
+	 * themes_api() returns the persisted dev release asset download_link for a
+	 * release-asset theme on the primary branch when the dev filter is active.
+	 */
+	public function test_themes_api_returns_dev_release_asset_download_link(): void {
+		$this->seed_cache();
+		$theme_obj = $this->make_theme_obj( [
+			'dot_org'        => false,
+			'release_asset'  => true,
+			'branch'         => 'main',
+			'primary_branch' => 'main',
+			'download_link'  => 'https://example.com/releases/download/v2.1.0-beta1/theme-beta.zip',
+		] );
+		$theme    = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$response = new stdClass();
+		$response->slug = 'test-gu-theme';
+		$result = $theme->themes_api( false, 'theme_information', $response );
+		$this->assertSame(
+			'https://example.com/releases/download/v2.1.0-beta1/theme-beta.zip',
+			$result->download_link
+		);
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -741,6 +764,37 @@ class Test_Theme_Update_Site_Transient_Method extends WP_UnitTestCase {
 		$transient->no_update = [];
 		$result = $theme->update_site_transient( $transient );
 		$this->assertNull( $result->response['test-gu-theme']['package'] );
+	}
+
+	/**
+	 * A release-asset theme on its primary branch must keep the dev release asset
+	 * when the gu_dev_release_asset filter is active — the consumer must not
+	 * replace it with the primary-branch zipball.
+	 */
+	public function test_release_asset_primary_branch_dev_filter_keeps_dev_release_asset_package(): void {
+		$theme_obj = $this->make_theme_obj( [
+			'remote_version' => '2.0.0',
+			'local_version'  => '1.0.0',
+			'dot_org'        => false,
+			'release_asset'  => true,
+			'branch'         => 'main',
+			'primary_branch' => 'main',
+			'download_link'  => 'https://example.com/releases/download/v2.1.0-beta1/theme-beta.zip',
+			'branches'       => [
+				'main' => [ 'download' => 'https://example.com/main.zip' ],
+			],
+		] );
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+		$result = $theme->update_site_transient( $transient );
+		remove_all_filters( 'gu_dev_release_asset' );
+		$this->assertSame(
+			'https://example.com/releases/download/v2.1.0-beta1/theme-beta.zip',
+			$result->response['test-gu-theme']['package']
+		);
 	}
 
 	public function test_dot_org_theme_on_primary_branch_skipped_for_update(): void {

@@ -861,6 +861,89 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The gu_dev_release_asset filter means "use the dev release asset only when
+	 * its version is greater than the stable release asset version." When the dev
+	 * version is NOT greater (e.g. a pre-release of the same base version), the
+	 * stable release asset must be selected.
+	 */
+	public function test_construct_download_link_uses_stable_asset_when_dev_not_newer(): void {
+		$stable_url = 'https://github.com/test-owner/test-plugin/releases/download/v2.0.0/plugin.zip';
+		$dev_url    = 'https://github.com/test-owner/test-plugin/releases/download/v2.0.0-beta1/plugin-beta.zip';
+
+		$this->seed_cache(
+			[
+				'release_assets' => [
+					'assets'     => [ '2.0.0' => $stable_url ],
+					'dev_assets' => [ '2.0.0-beta1' => $dev_url ],
+				],
+			]
+		);
+
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+
+		$result = $this->api->construct_download_link();
+
+		// version_compare('2.0.0', '2.0.0-beta1', '<') is false — a final release
+		// outranks a pre-release of the same version, so the stable asset wins.
+		$this->assertSame( $stable_url, $result );
+	}
+
+	/**
+	 * A release-asset repo on the primary branch with the dev filter active must
+	 * resolve to the dev release asset, not the primary-branch zipball.
+	 */
+	public function test_construct_download_link_primary_branch_dev_filter_returns_dev_asset(): void {
+		$stable_url = 'https://github.com/test-owner/test-plugin/releases/download/v1.0.0/plugin.zip';
+		$dev_url    = 'https://github.com/test-owner/test-plugin/releases/download/v2.0.0-beta1/plugin-beta.zip';
+
+		$this->seed_cache(
+			[
+				'release_assets' => [
+					'assets'     => [ '1.0.0' => $stable_url ],
+					'dev_assets' => [ '2.0.0-beta1' => $dev_url ],
+				],
+			]
+		);
+
+		// Repo is on the primary branch, as in the reported consumer scenario.
+		$this->type->branch         = 'master';
+		$this->type->primary_branch = 'master';
+		$this->type->branches       = (object) [ 'master' => [], 'develop' => [] ];
+
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+
+		$result = $this->api->construct_download_link();
+
+		$this->assertSame( $dev_url, $result );
+	}
+
+	/**
+	 * A release-asset repo on the primary branch WITHOUT the dev filter must
+	 * resolve to the stable release asset, not the primary-branch zipball.
+	 */
+	public function test_construct_download_link_primary_branch_returns_stable_asset(): void {
+		$stable_url = 'https://github.com/test-owner/test-plugin/releases/download/v1.0.0/plugin.zip';
+		$dev_url    = 'https://github.com/test-owner/test-plugin/releases/download/v2.0.0-beta1/plugin-beta.zip';
+
+		$this->seed_cache(
+			[
+				'release_assets' => [
+					'assets'     => [ '1.0.0' => $stable_url ],
+					'dev_assets' => [ '2.0.0-beta1' => $dev_url ],
+				],
+			]
+		);
+
+		$this->type->branch         = 'master';
+		$this->type->primary_branch = 'master';
+		$this->type->branches       = (object) [ 'master' => [], 'develop' => [] ];
+
+		$result = $this->api->construct_download_link();
+
+		$this->assertSame( $stable_url, $result );
+	}
+
+	/**
 	 * When the target is a specific tag, construct_download_link() must fetch the
 	 * release asset for that tag instead of the latest release asset.
 	 */
