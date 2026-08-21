@@ -1075,7 +1075,8 @@ trait GU_Trait {
 			}
 		}
 
-		// Remove all existing events for $hook.
+		// Remove all existing events for $hook from the array manually
+		// to avoid triggering wp_unschedule_hook() which causes "could_not_set" errors.
 		foreach ( array_keys( (array) $cron ) as $timestamp ) {
 			unset( $cron[ $timestamp ][ $hook ] );
 			if ( empty( $cron[ $timestamp ] ) ) {
@@ -1083,24 +1084,13 @@ trait GU_Trait {
 			}
 		}
 
-		// Add the single consolidated event.
-		$timestamp = time();
-		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- WP core cron keys use md5(serialize()) for dedup.
-		$key                                 = md5( serialize( [ $new_args ] ) );
-		$cron[ $timestamp ][ $hook ][ $key ] = [
-			'schedule' => false,
-			'args'     => [ $new_args ],
-			'interval' => 0,
-		];
-		uksort( $cron, 'strnatcasecmp' );
-		$cron['version'] = 2;
+		// Write the cleaned cron array back to the database.
+		_set_cron_array( $cron );
 
-		$result = update_option( 'cron', $cron, true );
-		if ( false === $result && ! wp_next_scheduled( $hook, [ $new_args ] ) ) {
-			// Another process may have written the same event (false positive);
-			// only fall back to core scheduling if the event is truly absent.
-			wp_schedule_single_event( $timestamp, $hook, [ $new_args ] );
-		}
+		// Schedule the single consolidated event using WordPress's built-in function
+		// so it properly integrates with the cron system.
+		$timestamp = time();
+		wp_schedule_single_event( $timestamp, $hook, [ $new_args ] );
 	}
 
 	/**
