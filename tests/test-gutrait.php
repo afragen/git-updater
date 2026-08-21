@@ -857,6 +857,99 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 		$this->addToAssertionCount( 1 );
 	}
 
+	/**
+	 * Test that merge_and_reschedule_cron_batch() properly schedules a consolidated event
+	 * even when the cron cache contains stale data.
+	 */
+	public function test_merge_and_reschedule_cron_batch_clears_cache_and_schedules_event(): void {
+		$hook = 'gu_test_consolidated_hook';
+		$args = [ 'test-slug' => [ 'version' => '1.0.0' ] ];
+
+		// Clear any existing events for this hook.
+		wp_unschedule_hook( $hook );
+		wp_cache_delete( 'cron', 'options' );
+
+		// Verify no event exists initially.
+		$this->assertFalse( wp_next_scheduled( $hook, [ $args ] ), 'Precondition: no event should be scheduled.' );
+
+		// Call the method to schedule the consolidated event.
+		$rm = $this->api->get_reflection_method( $this->api, 'merge_and_reschedule_cron_batch' );
+		$rm->invoke( $this->api, $hook, $args );
+
+		// Verify the event is now scheduled.
+		$scheduled_time = wp_next_scheduled( $hook, [ $args ] );
+		$this->assertNotFalse( $scheduled_time, 'Event should be scheduled after merge_and_reschedule_cron_batch().' );
+
+		// Verify the event appears in the cron array.
+		$cron = _get_cron_array();
+		$found = false;
+		foreach ( $cron as $timestamp => $hooks ) {
+			if ( isset( $hooks[ $hook ] ) ) {
+				foreach ( $hooks[ $hook ] as $event ) {
+					if ( $event['args'] === [ $args ] ) {
+						$found = true;
+						break 2;
+					}
+				}
+			}
+		}
+		$this->assertTrue( $found, 'Event should appear in cron array with correct arguments.' );
+
+		// Clean up.
+		wp_unschedule_hook( $hook );
+		wp_cache_delete( 'cron', 'options' );
+	}
+
+	/**
+	 * Test that merge_and_reschedule_cron_batch() removes old events and creates a single consolidated event.
+	 */
+	public function test_merge_and_reschedule_cron_batch_consolidates_multiple_events(): void {
+		$hook = 'gu_test_consolidation_hook';
+		$args1 = [ 'slug-1' => [ 'version' => '1.0.0' ] ];
+		$args2 = [ 'slug-2' => [ 'version' => '2.0.0' ] ];
+
+		// Clear any existing events.
+		wp_unschedule_hook( $hook );
+		wp_cache_delete( 'cron', 'options' );
+
+		// Schedule two separate events with different arguments.
+		wp_schedule_single_event( time() + 60, $hook, [ $args1 ] );
+		wp_schedule_single_event( time() + 120, $hook, [ $args2 ] );
+
+		// Verify both events exist.
+		$this->assertNotFalse( wp_next_scheduled( $hook, [ $args1 ] ), 'First event should be scheduled.' );
+		$this->assertNotFalse( wp_next_scheduled( $hook, [ $args2 ] ), 'Second event should be scheduled.' );
+
+		// Call merge_and_reschedule_cron_batch with new args.
+		$new_args = [ 'slug-3' => [ 'version' => '3.0.0' ] ];
+		$rm = $this->api->get_reflection_method( $this->api, 'merge_and_reschedule_cron_batch' );
+		$rm->invoke( $this->api, $hook, $new_args );
+
+		// Count events for this hook.
+		$cron = _get_cron_array();
+		$event_count = 0;
+		$actual_args = null;
+		foreach ( $cron as $timestamp => $hooks ) {
+			if ( isset( $hooks[ $hook ] ) ) {
+				$event_count += count( $hooks[ $hook ] );
+				foreach ( $hooks[ $hook ] as $event ) {
+					$actual_args = $event['args'][0] ?? null;
+				}
+			}
+		}
+
+		// Should have exactly one consolidated event.
+		$this->assertSame( 1, $event_count, 'Should have exactly one consolidated event.' );
+
+		// The consolidated event should have merged args from all three calls.
+		$merged_args = array_merge( $args1, $args2, $new_args );
+		$this->assertEquals( $merged_args, $actual_args, 'Consolidated event should have merged args.' );
+
+		// Clean up.
+		wp_unschedule_hook( $hook );
+		wp_cache_delete( 'cron', 'options' );
+	}
+
 	// -------------------------------------------------------------------------
 	// delete_upgrade_source()
 	// -------------------------------------------------------------------------
