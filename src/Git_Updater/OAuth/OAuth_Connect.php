@@ -141,13 +141,16 @@ class OAuth_Connect {
 			return;
 		}
 
+		$base       = is_multisite()
+			? network_admin_url( 'admin-post.php' )
+			: admin_url( 'admin-post.php' );
 		$remove_url = add_query_arg(
 			[
 				'action'   => 'gu_remove_token',
 				'provider' => $provider,
 				'_wpnonce' => wp_create_nonce( 'gu_remove_token_' . $provider ),
 			],
-			admin_url( 'admin-post.php' )
+			$base
 		);
 		echo '<a href="' . esc_url( $remove_url ) . '" class="button button-small">' . esc_html__( 'Remove Token', 'git-updater' ) . '</a>';
 	}
@@ -159,13 +162,16 @@ class OAuth_Connect {
 	 * @return void
 	 */
 	private function render_connected_state( string $provider ): void {
+		$base           = is_multisite()
+			? network_admin_url( 'admin-post.php' )
+			: admin_url( 'admin-post.php' );
 		$disconnect_url = add_query_arg(
 			[
 				'action'   => 'gu_oauth_disconnect',
 				'provider' => $provider,
 				'_wpnonce' => wp_create_nonce( 'gu_oauth_disconnect_' . $provider ),
 			],
-			admin_url( 'admin-post.php' )
+			$base
 		);
 		echo '<span class="gu-oauth-connected">&#10003; ' . esc_html__( 'Connected', 'git-updater' ) . '</span> ';
 		echo '<a href="' . esc_url( $disconnect_url ) . '" class="button button-small">' . esc_html__( 'Disconnect', 'git-updater' ) . '</a>';
