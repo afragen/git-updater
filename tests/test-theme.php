@@ -277,26 +277,96 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	}
 
 	/**
-	 * themes_api() returns the persisted dev release asset download_link for a
-	 * release-asset theme on the primary branch when the dev filter is active.
+	 * themes_api() computes the dev release asset download_link from the repo
+	 * cache for a release-asset theme on the primary branch when the dev filter
+	 * is active.
 	 */
 	public function test_themes_api_returns_dev_release_asset_download_link(): void {
 		$this->seed_cache();
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-gu-theme', 'tags', [ '2.0.0' ] );
+		$table->add_entry( 'test-gu-theme', 'newest_tag', '2.0.0' );
+		$table->add_entry(
+			'test-gu-theme',
+			'release_assets',
+			[
+				'assets'     => [ '2.0.0' => 'https://example.com/releases/download/v2.0.0/theme.zip' ],
+				'dev_assets' => [ '2.1.0-beta1' => 'https://example.com/releases/download/v2.1.0-beta1/theme-beta.zip' ],
+			]
+		);
 		$theme_obj = $this->make_theme_obj( [
 			'dot_org'        => false,
 			'release_asset'  => true,
 			'branch'         => 'main',
 			'primary_branch' => 'main',
-			'download_link'  => 'https://example.com/releases/download/v2.1.0-beta1/theme-beta.zip',
+			'download_link'  => '',
+		] );
+		$theme    = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$response = new stdClass();
+		$response->slug = 'test-gu-theme';
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+		$result = $theme->themes_api( false, 'theme_information', $response );
+		remove_all_filters( 'gu_dev_release_asset' );
+		$this->assertSame(
+			'https://example.com/releases/download/v2.1.0-beta1/theme-beta.zip',
+			$result->download_link
+		);
+	}
+
+	/**
+	 * themes_api() computes the download link from cached tag data when the
+	 * repo object's download_link is empty (unhydrated object).
+	 */
+	public function test_themes_api_computes_download_link_from_cache_when_object_unhydrated(): void {
+		$this->seed_cache();
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-gu-theme', 'tags', [ '1.0.0', '1.2.0' ] );
+		$table->add_entry( 'test-gu-theme', 'newest_tag', '1.2.0' );
+		$theme_obj = $this->make_theme_obj( [
+			'dot_org'       => false,
+			'download_link' => '',
 		] );
 		$theme    = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 		$response = new stdClass();
 		$response->slug = 'test-gu-theme';
 		$result = $theme->themes_api( false, 'theme_information', $response );
 		$this->assertSame(
-			'https://example.com/releases/download/v2.1.0-beta1/theme-beta.zip',
+			'https://api.github.com/repos/afragen/test-gu-theme/zipball/1.2.0',
 			$result->download_link
 		);
+	}
+
+	/**
+	 * themes_api() prefers the computed release-asset URL over a populated but
+	 * incorrect download_link on the repo object.
+	 */
+	public function test_themes_api_prefers_computed_release_asset_over_wrong_object_property(): void {
+		$this->seed_cache();
+		$asset_url = 'https://example.com/releases/download/v2.0.0/theme.zip';
+		$table     = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-gu-theme', 'tags', [ '2.0.0' ] );
+		$table->add_entry( 'test-gu-theme', 'newest_tag', '2.0.0' );
+		$table->add_entry(
+			'test-gu-theme',
+			'release_assets',
+			[
+				'assets'     => [ '2.0.0' => $asset_url ],
+				'dev_assets' => [],
+			]
+		);
+		$theme_obj = $this->make_theme_obj( [
+			'dot_org'        => false,
+			'release_asset'  => true,
+			'branch'         => 'main',
+			'primary_branch' => 'main',
+			// Wrong: plain zipball URL where a release asset applies.
+			'download_link'  => 'https://api.github.com/repos/afragen/test-gu-theme/zipball/main',
+		] );
+		$theme    = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$response = new stdClass();
+		$response->slug = 'test-gu-theme';
+		$result = $theme->themes_api( false, 'theme_information', $response );
+		$this->assertSame( $asset_url, $result->download_link );
 	}
 }
 
@@ -604,9 +674,13 @@ class Test_Theme_Customize_Theme_Update_HTML extends WP_UnitTestCase {
 class Test_Theme_Update_Site_Transient_Method extends WP_UnitTestCase {
 	use Theme_Mock_Helper;
 
+	private string $slug = 'test-gu-theme';
+
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 	}
 
 	public function tear_down(): void {
@@ -614,6 +688,7 @@ class Test_Theme_Update_Site_Transient_Method extends WP_UnitTestCase {
 		remove_all_filters( 'gu_override_dot_org' );
 		remove_all_filters( 'gu_remote_is_newer' );
 		unset( $_GET['action'], $_GET['theme'], $_GET['_wpnonce'], $_GET['rollback'] );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( $this->slug );
 		parent::tear_down();
 	}
 
@@ -767,11 +842,23 @@ class Test_Theme_Update_Site_Transient_Method extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A release-asset theme on its primary branch must keep the dev release asset
-	 * when the gu_dev_release_asset filter is active — the consumer must not
-	 * replace it with the primary-branch zipball.
+	 * A release-asset theme on its primary branch must serve the dev release
+	 * asset computed by construct_download_link() from the repo cache when the
+	 * gu_dev_release_asset filter is active.
 	 */
 	public function test_release_asset_primary_branch_dev_filter_keeps_dev_release_asset_package(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( $this->slug, 'repo', '', strtotime( '+12 hours' ) );
+		$table->add_entry( $this->slug, 'tags', [ '2.0.0' ] );
+		$table->add_entry( $this->slug, 'newest_tag', '2.0.0' );
+		$table->add_entry(
+			$this->slug,
+			'release_assets',
+			[
+				'assets'     => [ '2.0.0' => 'https://example.com/releases/download/v2.0.0/theme.zip' ],
+				'dev_assets' => [ '2.1.0-beta1' => 'https://example.com/releases/download/v2.1.0-beta1/theme-beta.zip' ],
+			]
+		);
 		$theme_obj = $this->make_theme_obj( [
 			'remote_version' => '2.0.0',
 			'local_version'  => '1.0.0',
@@ -779,7 +866,7 @@ class Test_Theme_Update_Site_Transient_Method extends WP_UnitTestCase {
 			'release_asset'  => true,
 			'branch'         => 'main',
 			'primary_branch' => 'main',
-			'download_link'  => 'https://example.com/releases/download/v2.1.0-beta1/theme-beta.zip',
+			'download_link'  => '',
 			'branches'       => [
 				'main' => [ 'download' => 'https://example.com/main.zip' ],
 			],
@@ -793,6 +880,32 @@ class Test_Theme_Update_Site_Transient_Method extends WP_UnitTestCase {
 		remove_all_filters( 'gu_dev_release_asset' );
 		$this->assertSame(
 			'https://example.com/releases/download/v2.1.0-beta1/theme-beta.zip',
+			$result->response['test-gu-theme']['package']
+		);
+	}
+
+	/**
+	 * With an empty download_link on the repo object, package is computed from
+	 * cached tag data.
+	 */
+	public function test_package_computed_from_cache_when_object_download_link_empty(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( $this->slug, 'repo', '', strtotime( '+12 hours' ) );
+		$table->add_entry( $this->slug, 'tags', [ '1.0.0', '1.2.0' ] );
+		$table->add_entry( $this->slug, 'newest_tag', '1.2.0' );
+		$theme_obj = $this->make_theme_obj( [
+			'remote_version' => '2.0.0',
+			'local_version'  => '1.0.0',
+			'dot_org'        => false,
+			'download_link'  => '',
+		] );
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+		$result = $theme->update_site_transient( $transient );
+		$this->assertSame(
+			'https://api.github.com/repos/afragen/test-gu-theme/zipball/1.2.0',
 			$result->response['test-gu-theme']['package']
 		);
 	}

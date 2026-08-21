@@ -345,6 +345,11 @@ class Theme {
 			return $result;
 		}
 
+		// Compute the download link from cached repo data rather than trusting
+		// the repo object's property, which may be empty or stale.
+		$repo_api      = Singleton::get_instance( 'API\API', $this )->get_repo_api( $theme->git, $theme );
+		$download_link = $repo_api->construct_download_link();
+
 		$response->did           = $theme->did;
 		$response->slug          = $theme->slug;
 		$response->name          = $theme->name;
@@ -361,7 +366,7 @@ class Theme {
 		$response->last_updated  = $theme->last_updated;
 		$response->rating        = $theme->rating;
 		$response->num_ratings   = $theme->num_ratings;
-		$response->download_link = $theme->download_link ?? '';
+		$response->download_link = $download_link ?: '';
 
 		return $response;
 	}
@@ -612,6 +617,10 @@ class Theme {
 		$config = apply_filters( 'gu_config_pre_process', $this->config );
 
 		foreach ( (array) $config as $theme ) {
+			// Compute the download link from cached repo data rather than trusting
+			// the repo object's property, which may be empty or stale.
+			$repo_api       = Singleton::get_instance( 'API\API', $this )->get_repo_api( $theme->git, $theme );
+			$download_link  = $repo_api->construct_download_link();
 			$theme_requires = $this->get_repo_requirements( $theme );
 			$response       = [
 				'theme'            => $theme->slug,
@@ -625,7 +634,7 @@ class Theme {
 			if ( property_exists( $theme, 'remote_version' ) && $theme->remote_version ) {
 				$response_api_checked = [
 					'new_version'    => $theme->remote_version,
-					'package'        => $theme->download_link,
+					'package'        => $download_link,
 					'tested'         => $theme->tested,
 					'requires'       => $theme->requires,
 					'requires_php'   => $theme->requires_php,

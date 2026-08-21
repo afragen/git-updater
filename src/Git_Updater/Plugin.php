@@ -339,6 +339,11 @@ class Plugin {
 			return $result;
 		}
 
+		// Compute the download link from cached repo data rather than trusting
+		// the repo object's property, which may be empty or stale.
+		$repo_api      = Singleton::get_instance( 'API\API', $this )->get_repo_api( $plugin->git, $plugin );
+		$download_link = $repo_api->construct_download_link();
+
 		$response->did         = $plugin->did;
 		$response->slug        = $plugin->slug;
 		$response->plugin_name = $plugin->name;
@@ -357,7 +362,7 @@ class Plugin {
 		$response->active_installs   = $response->downloaded;
 		$response->last_updated      = $plugin->last_updated ?: '';
 		$response->added             = $plugin->added ?: '';
-		$response->download_link     = $plugin->download_link ?: '';
+		$response->download_link     = $download_link ?: '';
 		$response->banners           = $plugin->banners;
 		$response->icons             = $plugin->icons ?: [];
 		$response->contributors      = $plugin->contributors;
@@ -417,6 +422,10 @@ class Plugin {
 		$config = apply_filters( 'gu_config_pre_process', $this->config );
 
 		foreach ( (array) $config as $plugin ) {
+				// Compute the download link from cached repo data rather than trusting
+				// the repo object's property, which may be empty or stale.
+				$repo_api        = Singleton::get_instance( 'API\API', $this )->get_repo_api( $plugin->git, $plugin );
+				$download_link   = $repo_api->construct_download_link();
 				$plugin_requires = $this->get_repo_requirements( $plugin );
 				$response        = [
 					'slug'             => $plugin->slug,
@@ -433,7 +442,7 @@ class Plugin {
 				if ( property_exists( $plugin, 'remote_version' ) && $plugin->remote_version ) {
 					$response_api_checked = [
 						'new_version'    => $plugin->remote_version,
-						'package'        => $plugin->download_link,
+						'package'        => $download_link,
 						'tested'         => $plugin->tested,
 						'requires'       => $plugin->requires,
 						'requires_php'   => $plugin->requires_php,
