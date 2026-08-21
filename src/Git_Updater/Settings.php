@@ -407,8 +407,13 @@ class Settings {
 
 			if ( $revoked || $no_token ) {
 				echo '<div class="error"><p>';
-				/* translators: %s is the provider label, e.g. "GitHub". */
-				echo esc_html( sprintf( __( '%s OAuth access was revoked. Please reconnect using the Connect button on the Git Updater settings page.', 'git-updater' ), $config['label'] ) );
+				if ( apply_filters( 'git_updater_skip_oauth_reminder', false, $provider ) ) {
+					/* translators: %s is the provider label, e.g. "GitHub". */
+					echo esc_html( sprintf( __( '%s OAuth reminder suppressed by filter.', 'git-updater' ), $config['label'] ) );
+				} else {
+					/* translators: %s is the provider label, e.g. "GitHub". */
+					echo esc_html( sprintf( __( '%s OAuth access was revoked. Please reconnect using the Connect button on the Git Updater settings page.', 'git-updater' ), $config['label'] ) );
+				}
 				echo '</p></div>';
 				return;
 			}

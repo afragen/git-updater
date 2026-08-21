@@ -671,11 +671,23 @@ class OAuth_Connect {
 	 *
 	 * @param string $provider Provider slug.
 	 * @return void
+	 *
+	 * @filter git_updater_skip_oauth_reminder bool $skip, string $provider
+	 *           Return true to skip the email reminder for a specific provider.
+	 *           Example:
+	 *           add_filter( 'git_updater_skip_oauth_reminder', function( $skip, $provider ) {
+	 *               return 'github' === $provider ? true : $skip;
+	 *           }, 10, 2 );
 	 */
 	private function notify_admin_of_token_revocation( string $provider ): void {
 		if ( ! isset( self::PROVIDERS[ $provider ] ) ) {
 			return;
 		}
+
+		if ( apply_filters( 'git_updater_skip_oauth_reminder', false, $provider ) ) {
+			return;
+		}
+
 		$config  = self::PROVIDERS[ $provider ];
 		$options = get_site_option( 'git_updater', [] );
 
