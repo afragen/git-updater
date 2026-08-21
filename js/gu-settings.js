@@ -15,13 +15,23 @@
 			}
 			event.preventDefault();
 
-			const url = button.getAttribute( 'data-flush-url' );
-			if ( ! url ) {
+			const slug = button.getAttribute( 'data-slug' );
+			if ( ! slug || ! window.gitUpdaterSettings ) {
 				return;
 			}
 
 			button.classList.add( 'gu-flush-disabled' );
-			fetch( url, { credentials: 'same-origin' } )
+
+			const formData = new FormData();
+			formData.append( 'action', 'git_updater_flush_repo_cache' );
+			formData.append( '_ajax_nonce', window.gitUpdaterSettings.flushNonce );
+			formData.append( 'slug', slug );
+
+			fetch( window.gitUpdaterSettings.ajaxUrl, {
+				method: 'POST',
+				credentials: 'same-origin',
+				body: formData,
+			} )
 				.then( function ( response ) {
 					return response.json();
 				} )

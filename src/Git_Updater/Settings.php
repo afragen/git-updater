@@ -134,6 +134,14 @@ class Settings {
 						$this->get_plugin_version(),
 						true
 					);
+					wp_localize_script(
+						'git-updater-settings',
+						'gitUpdaterSettings',
+						[
+							'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
+							'flushNonce'  => wp_create_nonce( 'gu_flush_repo_cache' ),
+						]
+					);
 				}
 			);
 		}
@@ -872,7 +880,6 @@ class Settings {
 		$broken_title  = esc_html__( 'This repository has not connected to the API or was unable to connect.', 'git-updater' );
 		$dot_org_title = esc_html__( 'This repository is hosted on WordPress.org.', 'git-updater' );
 		$dismiss_title = esc_html__( 'This repository has been ignored and does not connect to the API.', 'git-updater' );
-		$api_key       = get_site_option( 'git_updater_api_key', '' );
 
 		$plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
 		$themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
@@ -927,16 +934,9 @@ class Settings {
 			$is_dot_org    = $data['dot_org'] && ! $override ? $dot_org : null;
 			$is_dismissed  = $data['dismiss'] ? $dismiss : null;
 
-			$flush_endpoint = add_query_arg(
-				[
-					'key'  => $api_key,
-					'slug' => $data['slug'],
-				],
-				home_url( 'wp-json/' . $this->get_class_vars( 'REST\REST_API', 'namespace' ) . '/flush-repo-cache/' )
-			);
 			/* translators: %s is the name of the plugin or theme. */
-			$tooltip        = __( sprintf( 'Flush %s cache', $data['name'] ), 'git-updater' );
-			$dashicon_flush = '<button type="button" class="button-link gu-flush-repo dashicons-no-decoration" data-flush-url="' . esc_url( $flush_endpoint ) . '" title="' . esc_attr__( $tooltip ) . '">' . $dashicon . '</button>';
+			$tooltip        = sprintf( __( 'Flush %s cache', 'git-updater' ), $data['name'] );
+			$dashicon_flush = '<button type="button" class="button-link gu-flush-repo dashicons-no-decoration" data-slug="' . esc_attr( $data['slug'] ) . '" title="' . esc_attr( $tooltip ) . '">' . $dashicon . '</button>';
 			printf( '<p>' . wp_kses_post( $dashicon_flush . $data['name'] . $is_private . $is_dot_org . $is_broken . $is_dismissed ) . '</p>' );
 		}
 	}
