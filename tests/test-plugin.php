@@ -39,6 +39,9 @@ trait Plugin_Mock_Helper {
 				'slug'           => 'test-plugin',
 				'file'           => 'test-plugin/test-plugin.php',
 				'uri'            => 'https://github.com/test-owner/test-plugin',
+				'owner'          => 'test-owner',
+				'enterprise'     => '',
+				'enterprise_api' => '',
 				'icons'          => [ 'default' => 'https://s.w.org/plugins/geopattern-icon/test-plugin.svg' ],
 				'banners'        => [],
 				'branch'         => 'main',
@@ -658,6 +661,160 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 		$this->assertInstanceOf( stdClass::class, $result );
 		$this->assertSame( 'Test Plugin', $result->name );
 	}
+
+	/**
+	 * Seed a complete 'ran' cache plus extra cache entries (tags,
+	 * newest_tag, release_assets) for download-link computation tests.
+	 *
+	 * @param array<string, mixed> $data Extra cache entries to include.
+	 */
+	private function seed_cache( array $data = [] ): void {
+		update_site_option(
+			$this->cache_key,
+			array_merge(
+				[
+					'timeout' => strtotime( '+12 hours' ),
+					'any'     => 'data',
+					'ran'     => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
+				],
+				$data
+			)
+		);
+	}
+
+	/**
+	 * plugins_api() computes the dev release asset download_link from the repo
+	 * cache for a release-asset repo on the primary branch when the dev filter
+	 * is active.
+	 */
+	public function test_plugins_api_returns_dev_release_asset_download_link(): void {
+		$this->seed_cache(
+			[
+				'tags'       => [ '2.0.0' ],
+				'newest_tag' => '2.0.0',
+				'release_assets' => [
+					'assets'     => [ '2.0.0' => 'https://example.com/releases/download/v2.0.0/plugin.zip' ],
+					'dev_assets' => [ '2.1.0-beta1' => 'https://example.com/releases/download/v2.1.0-beta1/plugin-beta.zip' ],
+				],
+			]
+		);
+		$plugin_obj = $this->make_plugin_obj( [
+			'dot_org'        => false,
+			'release_asset'  => true,
+			'branch'         => 'main',
+			'primary_branch' => 'main',
+			'download_link'  => '',
+		] );
+		$plugin   = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$response = new stdClass();
+		$response->slug = 'test-plugin';
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+		$result = $plugin->plugins_api( false, 'plugin_information', $response );
+		remove_all_filters( 'gu_dev_release_asset' );
+		$this->assertSame(
+			'https://example.com/releases/download/v2.1.0-beta1/plugin-beta.zip',
+			$result->download_link
+		);
+	}
+
+	/**
+	 * plugins_api() computes the download link from cached tag data when the
+	 * repo object's download_link is empty (unhydrated object).
+	 */
+	public function test_plugins_api_computes_download_link_from_cache_when_object_unhydrated(): void {
+		$this->seed_cache(
+			[
+				'tags'       => [ '1.0.0', '1.2.0' ],
+				'newest_tag' => '1.2.0',
+			]
+		);
+		$plugin_obj = $this->make_plugin_obj( [
+			'dot_org'       => false,
+			'download_link' => '',
+		] );
+		$plugin   = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$response = new stdClass();
+		$response->slug = 'test-plugin';
+		$result = $plugin->plugins_api( false, 'plugin_information', $response );
+		$this->assertSame(
+			'https://api.github.com/repos/test-owner/test-plugin/zipball/1.2.0',
+			$result->download_link
+		);
+	}
+
+	/**
+	 * plugins_api() prefers the computed release-asset URL over a populated but
+	 * incorrect download_link on the repo object.
+	 */
+	public function test_plugins_api_prefers_computed_release_asset_over_wrong_object_property(): void {
+		$asset_url = 'https://example.com/releases/download/v2.0.0/plugin.zip';
+		$this->seed_cache(
+			[
+				'tags'       => [ '2.0.0' ],
+				'newest_tag' => '2.0.0',
+				'release_assets' => [
+					'assets'     => [ '2.0.0' => $asset_url ],
+					'dev_assets' => [],
+				],
+			]
+		);
+		$plugin_obj = $this->make_plugin_obj( [
+			'dot_org'        => false,
+			'release_asset'  => true,
+			'branch'         => 'main',
+			'primary_branch' => 'main',
+			// Wrong: plain zipball URL where a release asset applies.
+			'download_link'  => 'https://api.github.com/repos/test-owner/test-plugin/zipball/main',
+		] );
+		$plugin   = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$response = new stdClass();
+		$response->slug = 'test-plugin';
+		$result = $plugin->plugins_api( false, 'plugin_information', $response );
+		$this->assertSame( $asset_url, $result->download_link );
+	}
+
+	/**
+	 * With a warm cache, plugins_api() computation performs no remote calls.
+	 */
+	public function test_plugins_api_computation_makes_no_remote_call_with_warm_cache(): void {
+		$this->seed_cache(
+			[
+				'tags'       => [ '2.0.0' ],
+				'newest_tag' => '2.0.0',
+				'release_assets' => [
+					'assets'     => [ '2.0.0' => 'https://example.com/releases/download/v2.0.0/plugin.zip' ],
+					'dev_assets' => [],
+				],
+			]
+		);
+		$plugin_obj = $this->make_plugin_obj( [
+			'dot_org'        => false,
+			'release_asset'  => true,
+			'branch'         => 'main',
+			'primary_branch' => 'main',
+			'download_link'  => '',
+		] );
+		$plugin   = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$response = new stdClass();
+		$response->slug = 'test-plugin';
+
+		$http_requests = 0;
+		add_filter(
+			'pre_http_request',
+			function () use ( &$http_requests ) {
+				++$http_requests;
+				return new WP_Error( 'http_disabled', 'Test: no remote calls expected.' );
+			}
+		);
+		$result = $plugin->plugins_api( false, 'plugin_information', $response );
+		remove_all_filters( 'pre_http_request' );
+
+		$this->assertSame( 0, $http_requests );
+		$this->assertSame(
+			'https://example.com/releases/download/v2.0.0/plugin.zip',
+			$result->download_link
+		);
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -686,6 +843,28 @@ class Test_Plugin_Update_Site_Transient_Method extends WP_UnitTestCase {
 		remove_all_filters( 'gu_remote_is_newer' );
 		unset( $_GET['action'], $_GET['plugin'], $_GET['_wpnonce'], $_GET['rollback'] );
 		parent::tear_down();
+	}
+
+	/**
+	 * Seed tag + release-asset cache entries for download-link computation tests.
+	 *
+	 * @param string      $stable_url Stable release asset URL.
+	 * @param string      $dev_url    Dev release asset URL, optional.
+	 */
+	private function seed_release_asset_cache( string $stable_url, string $dev_url = '' ): void {
+		update_site_option(
+			$this->cache_key,
+			[
+				'timeout'        => strtotime( '+12 hours' ),
+				'repo'           => '',
+				'tags'           => [ '2.0.0' ],
+				'newest_tag'     => '2.0.0',
+				'release_assets' => [
+					'assets'     => [ '2.0.0' => $stable_url ],
+					'dev_assets' => $dev_url ? [ '2.1.0-beta1' => $dev_url ] : [],
+				],
+			]
+		);
 	}
 
 	public function test_non_object_transient_becomes_stdclass(): void {
@@ -838,6 +1017,101 @@ class Test_Plugin_Update_Site_Transient_Method extends WP_UnitTestCase {
 		$transient->no_update = [];
 		$result = $plugin->update_site_transient( $transient );
 		$this->assertNull( $result->response['test-plugin/test-plugin.php']->package );
+	}
+
+	/**
+	 * A release-asset repo on its primary branch must serve the dev release
+	 * asset computed by construct_download_link() from the repo cache when the
+	 * gu_dev_release_asset filter is active.
+	 */
+	public function test_release_asset_primary_branch_dev_filter_keeps_dev_release_asset_package(): void {
+		$this->seed_release_asset_cache(
+			'https://example.com/releases/download/v2.0.0/plugin.zip',
+			'https://example.com/releases/download/v2.1.0-beta1/plugin-beta.zip'
+		);
+		$plugin_obj = $this->make_plugin_obj( [
+			'remote_version' => '2.0.0',
+			'local_version'  => '1.0.0',
+			'dot_org'        => false,
+			'release_asset'  => true,
+			'branch'         => 'main',
+			'primary_branch' => 'main',
+			'download_link'  => '',
+			'branches'       => [
+				'main' => [ 'download' => 'https://example.com/main.zip' ],
+			],
+		] );
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+		$plugin    = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+		$result = $plugin->update_site_transient( $transient );
+		remove_all_filters( 'gu_dev_release_asset' );
+		$this->assertSame(
+			'https://example.com/releases/download/v2.1.0-beta1/plugin-beta.zip',
+			$result->response['test-plugin/test-plugin.php']->package
+		);
+	}
+
+	/**
+	 * A release-asset repo on the primary branch WITHOUT the dev filter must
+	 * serve the stable release asset computed from the repo cache.
+	 */
+	public function test_release_asset_primary_branch_keeps_stable_release_asset_package(): void {
+		$this->seed_release_asset_cache( 'https://example.com/releases/download/v2.0.0/plugin.zip' );
+		$plugin_obj = $this->make_plugin_obj( [
+			'remote_version' => '2.0.0',
+			'local_version'  => '1.0.0',
+			'dot_org'        => false,
+			'release_asset'  => true,
+			'branch'         => 'main',
+			'primary_branch' => 'main',
+			'download_link'  => '',
+			'branches'       => [
+				'main' => [ 'download' => 'https://example.com/main.zip' ],
+			],
+		] );
+		$plugin    = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+		$result = $plugin->update_site_transient( $transient );
+		$this->assertSame(
+			'https://example.com/releases/download/v2.0.0/plugin.zip',
+			$result->response['test-plugin/test-plugin.php']->package
+		);
+	}
+
+	/**
+	 * With an empty download_link on the repo object, package is computed from
+	 * cached tag data.
+	 */
+	public function test_package_computed_from_cache_when_object_download_link_empty(): void {
+		update_site_option(
+			$this->cache_key,
+			[
+				'timeout'    => strtotime( '+12 hours' ),
+				'repo'       => '',
+				'tags'       => [ '1.0.0', '1.2.0' ],
+				'newest_tag' => '1.2.0',
+			]
+		);
+		$plugin_obj = $this->make_plugin_obj( [
+			'remote_version' => '2.0.0',
+			'local_version'  => '1.0.0',
+			'dot_org'        => false,
+			'download_link'  => '',
+		] );
+		$plugin    = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+		$result = $plugin->update_site_transient( $transient );
+		$this->assertSame(
+			'https://api.github.com/repos/test-owner/test-plugin/zipball/1.2.0',
+			$result->response['test-plugin/test-plugin.php']->package
+		);
 	}
 
 	public function test_dot_org_plugin_on_primary_branch_skipped_for_update(): void {

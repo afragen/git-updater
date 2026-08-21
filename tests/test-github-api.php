@@ -915,6 +915,220 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 }
 
 /**
+ * Class Test_GitHub_API_DownloadLink_CacheTags
+ *
+ * construct_download_link() reading tags/newest_tag from the repo cache
+ * for non-fetch callers with a stale (unhydrated) repo object.
+ */
+class Test_GitHub_API_DownloadLink_CacheTags extends WP_UnitTestCase {
+
+	/**
+	 * @var GitHub_API
+	 */
+	private GitHub_API $api;
+
+	/**
+	 * @var stdClass
+	 */
+	private stdClass $type;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->type = $this->make_stale_type();
+		$this->api  = new GitHub_API( $this->type );
+	}
+
+	public function tear_down(): void {
+		remove_all_filters( 'pre_http_request' );
+		remove_all_filters( 'gu_dev_release_asset' );
+		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
+		parent::tear_down();
+	}
+
+	/**
+	 * Unhydrated repo object as constructed by non-fetch callers:
+	 * no tags, sentinel newest_tag.
+	 */
+	private function make_stale_type(): stdClass {
+		$type                 = new stdClass();
+		$type->slug           = 'test-plugin';
+		$type->git            = 'github';
+		$type->type           = 'plugin';
+		$type->owner          = 'test-owner';
+		$type->branch         = 'master';
+		$type->primary_branch = 'master';
+		$type->enterprise     = false;
+		$type->enterprise_api = null;
+		$type->gist_id        = null;
+		$type->release_asset  = false;
+		$type->newest_tag     = '0.0.0';
+		$type->tags           = [];
+		$type->branches       = (object) [ 'master' => [] ];
+		return $type;
+	}
+
+	private function seed_cache( array $data ): void {
+		update_site_option(
+			$this->api->get_cache_key( 'test-plugin' ),
+			array_merge( [ 'timeout' => strtotime( '+12 hours' ) ], $data )
+		);
+	}
+
+	/**
+	 * Stale type + cached tags/newest_tag → default call resolves the cached
+	 * newest tag, not the branch name.
+	 */
+	public function test_cached_tags_and_newest_tag_used_when_type_stale(): void {
+		$this->seed_cache(
+			[
+				'tags'       => [ '1.0.0', '1.2.0' ],
+				'newest_tag' => '1.2.0',
+			]
+		);
+
+		$result = $this->api->construct_download_link();
+
+		$this->assertSame( 'https://api.github.com/repos/test-owner/test-plugin/zipball/1.2.0', $result );
+	}
+
+	/**
+	 * Stale type + release_asset config + cached release assets → the release
+	 * asset URL is returned, proving hydration fixes the use_release_asset() gate.
+	 */
+	public function test_release_asset_resolved_for_stale_type_via_cache(): void {
+		$this->type->release_asset = true;
+		$cached_url                = 'https://github.com/test-owner/test-plugin/releases/download/v1.2.0/plugin.zip';
+		$this->seed_cache(
+			[
+				'tags'           => [ '1.0.0', '1.2.0' ],
+				'newest_tag'     => '1.2.0',
+				'release_assets' => [
+					'assets'     => [ '1.2.0' => $cached_url ],
+					'dev_assets' => [],
+				],
+			]
+		);
+
+		$result = $this->api->construct_download_link();
+
+		$this->assertSame( $cached_url, $result );
+	}
+
+	/**
+	 * Cache has tags but no newest_tag entry → newest derived from the tag
+	 * list via version_compare.
+	 */
+	public function test_newest_derived_from_cached_tags_when_newest_tag_missing(): void {
+		$this->seed_cache(
+			[
+				'tags' => [ '1.0.0', '2.5.0', '1.9.0' ],
+			]
+		);
+
+		$result = $this->api->construct_download_link();
+
+		$this->assertSame( 'https://api.github.com/repos/test-owner/test-plugin/zipball/2.5.0', $result );
+	}
+
+	/**
+	 * Cache tags holding the 'No tags found' error message are treated as
+	 * no tags → endpoint falls back to the target branch.
+	 */
+	public function test_no_tags_found_message_treated_as_no_tags(): void {
+		$no_tags          = new stdClass();
+		$no_tags->message = 'No tags found';
+		$this->seed_cache(
+			[
+				'tags'       => $no_tags,
+				'newest_tag' => '1.2.0',
+			]
+		);
+
+		$result = $this->api->construct_download_link();
+
+		$this->assertSame( 'https://api.github.com/repos/test-owner/test-plugin/zipball/master', $result );
+	}
+
+	/**
+	 * No cache row → falls back to the $this->type values (regression guard).
+	 */
+	public function test_no_cache_row_falls_back_to_type_values(): void {
+		$this->type->newest_tag = '1.0.0';
+		$this->type->tags       = [ '1.0.0' => 'https://github.com/test-owner/test-plugin/zipball/1.0.0' ];
+
+		$result = $this->api->construct_download_link();
+
+		$this->assertSame( 'https://api.github.com/repos/test-owner/test-plugin/zipball/1.0.0', $result );
+	}
+
+	/**
+	 * Tag rollback with release assets: a tag matching the newest release
+	 * asset version gets the asset URL; other tags get their zipball URL.
+	 */
+	public function test_tag_rollback_with_cached_release_assets(): void {
+		$this->type->release_asset = true;
+		$asset_url                 = 'https://github.com/test-owner/test-plugin/releases/download/v1.2.0/plugin.zip';
+		$this->seed_cache(
+			[
+				'tags'           => [ '1.0.0', '1.2.0' ],
+				'newest_tag'     => '1.2.0',
+				'release_assets' => [
+					'assets'     => [ '1.2.0' => $asset_url ],
+					'dev_assets' => [],
+				],
+			]
+		);
+
+		$this->assertSame( $asset_url, $this->api->construct_download_link( '1.2.0' ) );
+		$this->assertSame(
+			'https://api.github.com/repos/test-owner/test-plugin/zipball/1.0.0',
+			$this->api->construct_download_link( '1.0.0' )
+		);
+	}
+
+	/**
+	 * Hydration guard: a repo object already holding a real newest_tag
+	 * (fetch context) is not overwritten by the cached value, even though
+	 * the cached value drives the endpoint.
+	 */
+	public function test_hydration_does_not_overwrite_fresh_newest_tag(): void {
+		$this->type->newest_tag = '2.0.0';
+		$this->type->tags       = [ '2.0.0' => 'https://github.com/test-owner/test-plugin/zipball/2.0.0' ];
+		$this->seed_cache(
+			[
+				'tags'       => [ '1.0.0', '1.2.0' ],
+				'newest_tag' => '1.2.0',
+			]
+		);
+
+		$result = $this->api->construct_download_link();
+
+		$this->assertSame( '2.0.0', $this->type->newest_tag );
+		$this->assertSame( 'https://api.github.com/repos/test-owner/test-plugin/zipball/1.2.0', $result );
+	}
+
+	/**
+	 * Cache reads ignore expiration: an expired cache row still supplies
+	 * tag data to construct_download_link().
+	 */
+	public function test_expired_cache_still_supplies_tag_data(): void {
+		update_site_option(
+			$this->api->get_cache_key( 'test-plugin' ),
+			[
+				'timeout'    => strtotime( '-1 hour' ),
+				'tags'       => [ '1.0.0', '1.2.0' ],
+				'newest_tag' => '1.2.0',
+			]
+		);
+
+		$result = $this->api->construct_download_link();
+
+		$this->assertSame( 'https://api.github.com/repos/test-owner/test-plugin/zipball/1.2.0', $result );
+	}
+}
+
+/**
  * Class Test_GitHub_API_Settings
  *
  * Covers all settings output and registration methods in GitHub_API.
