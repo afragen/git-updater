@@ -462,6 +462,135 @@ trait API_Common {
 	}
 
 	/**
+	 * Get release asset URL for a specific version from cache.
+	 *
+	 * @param string $version Tag/version to look up.
+	 *
+	 * @return string Asset URL or empty string if not found.
+	 */
+	final protected function get_release_asset_url_for_version( string $version ): string {
+		if ( ! method_exists( $this, 'get_release_assets' ) ) {
+			return '';
+		}
+		$release_assets = $this->get_release_assets();
+		if ( ! $release_assets ) {
+			return '';
+		}
+
+		return $this->get_release_asset_url_for_version_from_data( $release_assets, $version );
+	}
+
+	/**
+	 * Get release asset URL for a specific version from release assets data.
+	 *
+	 * @param array<string, mixed> $release_assets Release assets data.
+	 * @param string               $version        Tag/version to look up.
+	 *
+	 * @return string Asset URL or empty string if not found.
+	 */
+	final protected function get_release_asset_url_for_version_from_data( array $release_assets, string $version ): string {
+		// Check stable assets first.
+		if ( isset( $release_assets['assets'][ $version ] ) ) {
+			return $release_assets['assets'][ $version ];
+		}
+
+		// Check dev assets.
+		if ( isset( $release_assets['dev_assets'][ $version ] ) ) {
+			return $release_assets['dev_assets'][ $version ];
+		}
+
+		return '';
+	}
+
+	/**
+	 * Get the newest release asset version (stable or dev based on filter).
+	 *
+	 * @return string Version tag or empty string if no assets.
+	 */
+	final protected function get_newest_release_asset_version(): string {
+		if ( ! method_exists( $this, 'get_release_assets' ) ) {
+			return '';
+		}
+		$release_assets = $this->get_release_assets();
+		if ( ! $release_assets ) {
+			return '';
+		}
+
+		return $this->get_newest_release_asset_version_from_data( $release_assets );
+	}
+
+	/**
+	 * Get the newest release asset version from release assets data (stable or dev based on filter).
+	 *
+	 * @param array<string, mixed> $release_assets Release assets data.
+	 *
+	 * @return string Version tag or empty string if no assets.
+	 */
+	final protected function get_newest_release_asset_version_from_data( array $release_assets ): string {
+		$release_assets['assets']     = $release_assets['assets'] ?? [];
+		$release_assets['dev_assets'] = $release_assets['dev_assets'] ?? [];
+
+		// Default to newest stable asset.
+		$newest_version = array_key_first( $release_assets['assets'] ) ?? '';
+
+		// Check if dev asset is newer (respects gu_dev_release_asset filter).
+		if ( apply_filters( 'gu_dev_release_asset', false, $this->type ) ) {
+			$current_asset_version     = array_key_first( $release_assets['assets'] ) ?? '';
+			$current_dev_asset_version = array_key_first( $release_assets['dev_assets'] ) ?? '';
+			if ( version_compare( $current_asset_version, $current_dev_asset_version, '<' ) ) {
+				$newest_version = $current_dev_asset_version;
+			}
+		}
+
+		return $newest_version;
+	}
+
+	/**
+	 * Get the newest tag or remote version for setting newest_tag.
+	 *
+	 * @param array<string, mixed>|false $release_assets Optional release assets data.
+	 *
+	 * @return string Version tag or remote_version.
+	 */
+	final protected function get_newest_tag_or_remote_version( $release_assets = false ): string {
+		if ( ! apply_filters( 'gu_dev_release_asset', false, $this->type ) ) {
+			return $this->type->newest_tag ?? '';
+		}
+
+		if ( false === $release_assets ) {
+			if ( ! method_exists( $this, 'get_release_assets' ) ) {
+				return $this->type->newest_tag ?? '';
+			}
+			$release_assets = $this->get_release_assets();
+		}
+
+		if ( ! $release_assets || ! is_array( $release_assets ) ) {
+			return $this->type->newest_tag ?? '';
+		}
+
+		$release_assets['dev_assets'] = $release_assets['dev_assets'] ?? [];
+		$dev_asset_version            = array_key_first( $release_assets['dev_assets'] ) ?? '';
+
+		// If dev asset version matches remote_version, use it.
+		$remote_version = $this->type->remote_version ?? '';
+		if ( '' !== $remote_version && ltrim( $dev_asset_version, 'v' ) === $remote_version ) {
+			return $dev_asset_version;
+		}
+
+		/*
+		 * If dev asset version doesn't match remote_version, use remote_version.
+		 * This handles edge cases where dev asset key doesn't match remote_version:
+		 * - dev asset key is "1.3.0-beta1" but remote_version is "1.3.0"
+		 * - dev asset key is "28.3-nightly" but remote_version is "28.3.20260824"
+		 */
+		if ( '' !== $dev_asset_version && '' !== $remote_version ) {
+			return $remote_version;
+		}
+
+		return $this->type->newest_tag ?? '';
+	}
+
+	/**
 	 * Get API release assets.
 	 *
 	 * @param  string $git     Name of API, eg 'github'.
@@ -485,10 +614,31 @@ trait API_Common {
 
 		if ( $response && false === $cache ) {
 			$this->set_repo_cache( 'release_assets', $response );
+
+			// Set release_asset (boolean) and release_asset_download (URL) to the newest release asset.
+			if ( is_array( $response ) ) {
+				$newest_version = $this->get_newest_release_asset_version_from_data( $response );
+				if ( '' !== $newest_version ) {
+					$release_asset_url = $this->get_release_asset_url_for_version_from_data( $response, $newest_version );
+					if ( '' !== $release_asset_url ) {
+						$this->set_repo_cache( 'release_asset', true );
+						$this->set_repo_cache( 'release_asset_download', $release_asset_url );
+					}
+				}
+			}
 		}
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
+		}
+
+		// Update newest_tag if using dev release assets and dev asset key doesn't match remote_version.
+		if ( is_array( $response ) && apply_filters( 'gu_dev_release_asset', false, $this->type ) ) {
+			$newest_tag_or_version = $this->get_newest_tag_or_remote_version( $response );
+			if ( '' !== $newest_tag_or_version && $newest_tag_or_version !== ( $this->type->newest_tag ?? '' ) ) {
+				$this->type->newest_tag = $newest_tag_or_version;
+				$this->set_repo_cache( 'newest_tag', $newest_tag_or_version );
+			}
 		}
 
 		return $response;

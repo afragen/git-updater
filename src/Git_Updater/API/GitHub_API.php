@@ -154,12 +154,16 @@ class GitHub_API extends API implements API_Interface {
 		// Release asset.
 		if ( $this->use_release_asset( $branch_switch ) ) {
 			$release_asset = $this->resolve_release_asset( $branch_switch );
-			// Only cache the primary/latest release asset; tag-specific assets
-			// must not pollute the release_asset_download cache.
-			if ( $release_asset && ! $this->is_tag_target( (string) ( false !== $branch_switch ? $branch_switch : $this->type->branch ) ) ) {
-				$this->set_repo_cache( 'release_asset_download', $release_asset );
+			// Only fall through to zipball if resolve_release_asset() returns empty.
+			if ( $release_asset ) {
+				// Only cache the primary/latest release asset; tag-specific assets
+				// must not pollute the release_asset_download cache.
+				if ( ! $this->is_tag_target( (string) ( false !== $branch_switch ? $branch_switch : $this->type->branch ) ) ) {
+					$this->set_repo_cache( 'release_asset_download', $release_asset );
+				}
+				return $release_asset;
 			}
-			return $release_asset;
+			// Empty string from resolve_release_asset() means fall through to zipball.
 		}
 
 		/*
@@ -189,17 +193,23 @@ class GitHub_API extends API implements API_Interface {
 	private function resolve_release_asset( $branch_switch = false ) {
 		$target = false !== $branch_switch ? $branch_switch : $this->type->branch;
 
-		// For the primary branch, use the latest release asset.
+		// Primary branch: use latest release asset.
 		if ( $target === $this->type->primary_branch ) {
 			return $this->get_latest_release_asset();
 		}
 
-		// For a specific tag target, return that tag's release asset without
-		// caching it as the primary release_asset_download.
+		// Tag target: only use release asset if tag matches newest release asset version.
 		if ( is_string( $target ) && $this->is_tag_target( $target ) ) {
-			return $this->get_release_asset_for_tag( $target );
+			$newest_version = $this->get_newest_release_asset_version();
+			if ( $target === $newest_version ) {
+				// Use cached data, no API call.
+				return $this->get_release_asset_url_for_version( $target );
+			}
+			// Tag doesn't match newest release asset, fall through to zipball.
+			return '';
 		}
 
+		// Branch target: never use release asset.
 		return '';
 	}
 
@@ -212,31 +222,6 @@ class GitHub_API extends API implements API_Interface {
 	 */
 	private function is_tag_target( string $target ): bool {
 		return ! array_key_exists( $target, (array) ( $this->type->branches ?? [] ) );
-	}
-
-	/**
-	 * Fetch the release asset URL for a specific tag.
-	 *
-	 * Makes a direct, non-cached API request so that tag-specific lookups do not
-	 * overwrite the primary/latest `release_assets` cache.
-	 *
-	 * @param string $tag Tag name.
-	 *
-	 * @return string Release asset URL, or empty string if none.
-	 */
-	private function get_release_asset_for_tag( string $tag ): string {
-		$response = $this->api( '/repos/:owner/:repo/releases/tags/' . $tag );
-		if ( is_wp_error( $response ) || ! isset( $response->assets ) || ! is_array( $response->assets ) ) {
-			return '';
-		}
-
-		foreach ( $response->assets as $asset ) {
-			if ( isset( $asset->name, $asset->url ) && str_starts_with( $asset->name, $this->type->slug ) ) {
-				return $asset->url;
-			}
-		}
-
-		return '';
 	}
 
 	/**

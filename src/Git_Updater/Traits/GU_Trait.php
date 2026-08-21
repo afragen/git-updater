@@ -1138,28 +1138,14 @@ trait GU_Trait {
 	 * @return bool
 	 */
 	final public function use_release_asset( $branch_switch = false ): bool {
-		// The effective target is either the explicit branch/tag being switched to
-		// or the repo's current tracking branch. The config's `branch` field is
-		// already resolved from the cached `current_branch`, so it represents the
-		// branch the user is actually on.
 		$target = false !== $branch_switch ? $branch_switch : $this->type->branch;
 
-		// A tag is any string target not present in the branches list. In contexts
-		// without a populated branches list (some non-fetch callers), we fall back
-		// to treating non-empty string targets as tags only when they cannot be the
-		// primary branch.
+		// Check if target is a tag (not in branches list).
 		$is_tag = is_string( $target ) && ! array_key_exists( $target, (array) ( $this->type->branches ?? [] ) );
 
-		// Release assets are only used for the primary branch or a specific tag.
+		// Use release asset for primary branch or any tag (if release_asset is true).
 		$use_release_asset = $this->type->primary_branch === $target || $is_tag;
 
-		/*
-		 * Do not gate on the cached release_assets list here: it is only populated
-		 * by get_release_assets(), which runs after this decision inside
-		 * construct_download_link(). An empty cache on first run is normal, not a
-		 * signal that the repo has no assets. The '0.0.0' newest_tag proxy stands in
-		 * for "repo has tags" until the release-assets API is actually queried.
-		 */
 		return (bool) ( $this->type->release_asset ?? false )
 			&& '0.0.0' !== ( $this->type->newest_tag ?? '0.0.0' )
 			&& $use_release_asset;

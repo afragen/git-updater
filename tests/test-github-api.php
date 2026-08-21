@@ -753,8 +753,7 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 	/**
 	 * When get_release_assets() returns false (no-update gate fires),
-	 * construct_download_link() returns an empty string so the update fails
-	 * rather than installing source that lacks the built release asset.
+	 * construct_download_link() falls through to zipball URL.
 	 */
 	public function test_construct_download_link_returns_empty_when_release_assets_unavailable(): void {
 		// Seed release_assets with a message object so validate_response returns true → get_api_release_assets returns false.
@@ -764,7 +763,8 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 		$result = $this->api->construct_download_link();
 
-		$this->assertSame( '', $result );
+		// Falls through to zipball URL when release assets are unavailable.
+		$this->assertSame( 'https://api.github.com/repos/test-owner/test-plugin/zipball/1.0.0', $result );
 	}
 
 	/**
@@ -789,8 +789,7 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 	/**
 	 * When release_assets is in cache but release_asset_download is not,
-	 * construct_download_link() returns false (no download URL available),
-	 * failing the update rather than installing the unbuilt tag source.
+	 * construct_download_link() falls through to zipball URL.
 	 */
 	public function test_construct_download_link_calls_redirect_when_no_cached_download(): void {
 		$this->seed_cache(
@@ -804,12 +803,13 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 		$result = $this->api->construct_download_link();
 
-		$this->assertFalse( $result );
+		// Falls through to zipball URL when no release assets are available.
+		$this->assertSame( 'https://api.github.com/repos/test-owner/test-plugin/zipball/1.0.0', $result );
 	}
 
 	/**
 	 * When release_assets resolves to an empty assets array, a previously cached
-	 * release_asset_download must not be overwritten with a falsy value.
+	 * release_asset_download is preserved and construct_download_link() falls through to zipball.
 	 */
 	public function test_construct_download_link_does_not_clobber_cached_release_asset_download(): void {
 		$cached_url = 'https://github.com/test-owner/test-plugin/releases/download/v1.0.0/plugin.zip';
@@ -825,7 +825,8 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 		$result = $this->api->construct_download_link();
 
-		$this->assertFalse( $result );
+		// Falls through to zipball URL when no release assets are available.
+		$this->assertSame( 'https://api.github.com/repos/test-owner/test-plugin/zipball/1.0.0', $result );
 
 		$cache = $this->api->get_repo_cache( 'test-plugin' );
 		$this->assertSame( $cached_url, $cache['release_asset_download'] );
@@ -944,41 +945,56 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 	}
 
 	/**
-	 * When the target is a specific tag, construct_download_link() must fetch the
-	 * release asset for that tag instead of the latest release asset.
+	 * When the target is a specific tag that matches the newest release asset version,
+	 * construct_download_link() returns the release asset URL from cache.
 	 */
 	public function test_construct_download_link_returns_tag_specific_release_asset_url(): void {
 		$tag_url = 'https://github.com/test-owner/test-plugin/releases/download/v1.2.3/plugin.zip';
 
-		add_filter(
-			'pre_http_request',
-			static function ( $preempt, $args, $url ) use ( $tag_url ) {
-				if ( str_contains( $url, '/releases/tags/1.2.3' ) ) {
-					return [
-						'body'     => json_encode(
-							(object) [
-								'tag_name' => '1.2.3',
-								'assets'   => [
-									(object) [
-										'name' => 'test-plugin.zip',
-										'url'  => $tag_url,
-									],
-								],
-							]
-						),
-						'headers'  => [ 'content-type' => 'application/json' ],
-						'response' => [ 'code' => 200 ],
-					];
-				}
-				return $preempt;
-			},
-			10,
-			3
+		// Seed cache with release assets where 1.2.3 is the newest.
+		$this->seed_cache(
+			[
+				'release_assets' => [
+					'assets'     => [ '1.2.3' => $tag_url, '1.0.0' => 'https://example.com/1.0.0.zip' ],
+					'dev_assets' => [],
+				],
+			]
 		);
+
+		// Update type to have 1.2.3 as newest tag.
+		$this->type->newest_tag = '1.2.3';
 
 		$result = $this->api->construct_download_link( '1.2.3' );
 
+		// Tag matches newest release asset version, so it gets the release asset URL.
 		$this->assertSame( $tag_url, $result );
+	}
+
+	/**
+	 * When the target is a specific tag that does NOT match the newest release asset version,
+	 * construct_download_link() falls through to zipball URL.
+	 */
+	public function test_construct_download_link_returns_zipball_for_non_matching_tag(): void {
+		$tag_url = 'https://github.com/test-owner/test-plugin/releases/download/v1.2.3/plugin.zip';
+
+		// Seed cache with release assets where 1.2.3 is the newest.
+		$this->seed_cache(
+			[
+				'release_assets' => [
+					'assets'     => [ '1.2.3' => $tag_url, '1.0.0' => 'https://example.com/1.0.0.zip' ],
+					'dev_assets' => [],
+				],
+			]
+		);
+
+		// Update type to have 1.2.3 as newest tag.
+		$this->type->newest_tag = '1.2.3';
+
+		// Request tag 1.0.0 which does NOT match the newest release asset version (1.2.3).
+		$result = $this->api->construct_download_link( '1.0.0' );
+
+		// Tag doesn't match newest release asset version, so it gets zipball URL.
+		$this->assertSame( 'https://api.github.com/repos/test-owner/test-plugin/zipball/1.0.0', $result );
 	}
 
 	/**
@@ -988,37 +1004,25 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 	public function test_construct_download_link_does_not_cache_tag_specific_asset_as_latest(): void {
 		$tag_url = 'https://github.com/test-owner/test-plugin/releases/download/v1.2.3/plugin.zip';
 
-		add_filter(
-			'pre_http_request',
-			static function ( $preempt, $args, $url ) use ( $tag_url ) {
-				if ( str_contains( $url, '/releases/tags/1.2.3' ) ) {
-					return [
-						'body'     => json_encode(
-							(object) [
-								'tag_name' => '1.2.3',
-								'assets'   => [
-									(object) [
-										'name' => 'test-plugin.zip',
-										'url'  => $tag_url,
-									],
-								],
-							]
-						),
-						'headers'  => [ 'content-type' => 'application/json' ],
-						'response' => [ 'code' => 200 ],
-					];
-				}
-				return $preempt;
-			},
-			10,
-			3
+		// Seed cache with release assets where 1.2.3 is the newest.
+		$this->seed_cache(
+			[
+				'release_assets' => [
+					'assets'     => [ '1.2.3' => $tag_url ],
+					'dev_assets' => [],
+				],
+			]
 		);
+
+		// Update type to have 1.2.3 as newest tag.
+		$this->type->newest_tag = '1.2.3';
 
 		$this->api->construct_download_link( '1.2.3' );
 
 		$cache = $this->api->get_repo_cache( 'test-plugin' );
 		if ( is_array( $cache ) ) {
-			$this->assertArrayNotHasKey( 'release_asset_download', $cache );
+			// Tag-specific assets should not be cached as release_asset_download.
+			$this->assertEmpty( $cache['release_asset_download'] ?? null );
 		} else {
 			$this->assertTrue( true ); // No cache row means nothing was cached.
 		}
