@@ -984,6 +984,7 @@ trait GU_Trait {
 	 * @return void
 	 */
 	final protected function merge_and_reschedule_cron_batch( string $hook, array $new_args ): void {
+		wp_cache_delete( 'cron', 'options' );
 		$cron = _get_cron_array();
 		foreach ( (array) $cron as $timestamp => $hooks ) {
 			if ( isset( $hooks[ $hook ] ) && (int) $timestamp <= time() ) {
@@ -994,7 +995,6 @@ trait GU_Trait {
 		if ( wp_next_scheduled( $hook ) ) {
 			return;
 		}
-		wp_cache_delete( 'cron', 'options' );
 		$cron = _get_cron_array();
 		foreach ( (array) $cron as $hooks ) {
 			if ( isset( $hooks[ $hook ] ) ) {
