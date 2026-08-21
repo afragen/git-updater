@@ -1923,6 +1923,28 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	}
 
 	/**
+	 * Test notify_admin_of_token_revocation returns early when git_updater_skip_oauth_reminder
+	 * filter returns true. Covers OAuth_Connect.php:684.
+	 */
+	public function test_notify_returns_early_when_skip_filter_true(): void {
+		// No token stored so the method would normally proceed to send email.
+		delete_site_option( 'git_updater' );
+
+		add_filter( 'git_updater_skip_oauth_reminder', '__return_true' );
+
+		$mails = [];
+		$this->capture_wp_mail( $mails );
+
+		$method = new ReflectionMethod( OAuth_Connect::class, 'notify_admin_of_token_revocation' );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
+		$method->invoke( $this->oauth, 'github' );
+
+		remove_all_filters( 'git_updater_skip_oauth_reminder' );
+
+		$this->assertCount( 0, $mails );
+	}
+
+	/**
 	 * Test immediate email is sent when token refresh fails and deletes the token.
 	 */
 	public function test_refresh_failure_sends_immediate_email(): void {

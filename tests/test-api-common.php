@@ -1788,3 +1788,265 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 		$this->assertSame( $cached, $result );
 	}
 }
+
+/**
+ * Class Test_API_Common_ReleaseAssetHelpers
+ *
+ * Covers remaining lines in API_Common trait release asset helper methods:
+ * - get_release_asset_url_for_version()         lines 477
+ * - get_release_asset_url_for_version_from_data() lines 498-502
+ * - get_newest_release_asset_version()           line 516
+ * - get_newest_release_asset_version_from_data() lines 538-541
+ * - get_newest_tag_or_remote_version()           lines 557, 564, 568, 577
+ * - get_api_release_assets()                     lines 639-640
+ */
+class Test_API_Common_ReleaseAssetHelpers extends WP_UnitTestCase {
+
+	/** @var GitHub_API */
+	private GitHub_API $api;
+
+	/** @var stdClass */
+	private stdClass $type;
+
+	public function set_up(): void {
+		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		new Base();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
+		$this->type = $this->make_type();
+		$this->api  = new GitHub_API( $this->type );
+	}
+
+	public function tear_down(): void {
+		remove_all_filters( 'pre_http_request' );
+		remove_all_filters( 'gu_dev_release_asset' );
+		remove_all_filters( 'gu_always_fetch_update' );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
+		parent::tear_down();
+	}
+
+	private function make_type(): stdClass {
+		$type                 = new stdClass();
+		$type->slug           = 'test-plugin';
+		$type->git            = 'github';
+		$type->type           = 'plugin';
+		$type->owner          = 'test-owner';
+		$type->branch         = 'master';
+		$type->primary_branch = 'master';
+		$type->enterprise     = false;
+		$type->enterprise_api = null;
+		$type->gist_id        = null;
+		$type->release_asset  = true;
+		$type->newest_tag     = '1.0.0';
+		$type->tags           = [ '1.0.0' => 'https://example.com/zipball/1.0.0' ];
+		$type->branches       = (object) [ 'master' => [] ];
+		return $type;
+	}
+
+	private function seed_cache( array $data ): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$table->add_entry( 'test-plugin', 'repo', '', strtotime( '+12 hours' ) );
+		foreach ( $data as $column => $value ) {
+			if ( 'timeout' === $column ) {
+				continue;
+			}
+			$table->add_entry( 'test-plugin', $column, $value );
+		}
+	}
+
+	private function call_protected( string $method, ...$args ) {
+		$rm = $this->api->get_reflection_method( $this->api, $method );
+		return $rm->invoke( $this->api, ...$args );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_release_asset_url_for_version() — line 477
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When get_release_assets() returns false (e.g. API error cached),
+	 * get_release_asset_url_for_version() returns empty string. Covers line 477.
+	 */
+	public function test_get_release_asset_url_for_version_returns_empty_when_assets_false(): void {
+		// Seed a message object so validate_response returns true → get_release_assets returns false.
+		$no_assets          = new stdClass();
+		$no_assets->message = 'No release assets found';
+		$this->seed_cache( [ 'release_assets' => $no_assets ] );
+
+		$result = $this->call_protected( 'get_release_asset_url_for_version', '1.0.0' );
+		$this->assertSame( '', $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_release_asset_url_for_version_from_data() — lines 498-502
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When the version is found in dev_assets but not in stable assets,
+	 * the dev_assets URL is returned. Covers lines 498-499.
+	 */
+	public function test_get_release_asset_url_from_data_returns_dev_asset_url(): void {
+		$data = [
+			'assets'     => [],
+			'dev_assets' => [ '2.0.0-beta1' => 'https://example.com/beta.zip' ],
+		];
+
+		$result = $this->call_protected( 'get_release_asset_url_for_version_from_data', $data, '2.0.0-beta1' );
+		$this->assertSame( 'https://example.com/beta.zip', $result );
+	}
+
+	/**
+	 * When the version is not found in either assets or dev_assets,
+	 * empty string is returned. Covers line 502.
+	 */
+	public function test_get_release_asset_url_from_data_returns_empty_when_version_not_found(): void {
+		$data = [
+			'assets'     => [ '1.0.0' => 'https://example.com/1.0.0.zip' ],
+			'dev_assets' => [ '2.0.0-beta1' => 'https://example.com/beta.zip' ],
+		];
+
+		$result = $this->call_protected( 'get_release_asset_url_for_version_from_data', $data, '3.0.0' );
+		$this->assertSame( '', $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_newest_release_asset_version() — line 516
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When get_release_assets() returns false, get_newest_release_asset_version()
+	 * returns empty string. Covers line 516.
+	 */
+	public function test_get_newest_release_asset_version_returns_empty_when_assets_false(): void {
+		$no_assets          = new stdClass();
+		$no_assets->message = 'No release assets found';
+		$this->seed_cache( [ 'release_assets' => $no_assets ] );
+
+		$result = $this->call_protected( 'get_newest_release_asset_version' );
+		$this->assertSame( '', $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_newest_release_asset_version_from_data() — lines 538-541
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When gu_dev_release_asset filter is true and the dev asset version is
+	 * newer than the stable asset version, the dev version is returned.
+	 * Covers lines 538-541.
+	 */
+	public function test_get_newest_release_asset_version_from_data_returns_dev_when_newer(): void {
+		$data = [
+			'assets'     => [ '1.0.0' => 'https://example.com/1.0.0.zip' ],
+			'dev_assets' => [ '2.0.0-beta1' => 'https://example.com/beta.zip' ],
+		];
+
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+
+		$result = $this->call_protected( 'get_newest_release_asset_version_from_data', $data );
+		$this->assertSame( '2.0.0-beta1', $result );
+	}
+
+	/**
+	 * When gu_dev_release_asset filter is true but the dev asset version is
+	 * NOT newer than the stable asset version, the stable version is returned.
+	 */
+	public function test_get_newest_release_asset_version_from_data_returns_stable_when_dev_not_newer(): void {
+		$data = [
+			'assets'     => [ '2.0.0' => 'https://example.com/2.0.0.zip' ],
+			'dev_assets' => [ '2.0.0-beta1' => 'https://example.com/beta.zip' ],
+		];
+
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+
+		$result = $this->call_protected( 'get_newest_release_asset_version_from_data', $data );
+		$this->assertSame( '2.0.0', $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_newest_tag_or_remote_version() — lines 557, 564, 568, 577
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When gu_dev_release_asset filter is false, get_newest_tag_or_remote_version()
+	 * returns newest_tag directly. Covers line 557.
+	 */
+	public function test_get_newest_tag_or_remote_version_returns_newest_tag_when_filter_false(): void {
+		$this->type->newest_tag = '1.5.0';
+
+		$result = $this->call_protected( 'get_newest_tag_or_remote_version' );
+		$this->assertSame( '1.5.0', $result );
+	}
+
+	/**
+	 * When gu_dev_release_asset filter is true, release_assets is false (not passed),
+	 * and get_release_assets() returns false, the method returns newest_tag.
+	 * Covers lines 564, 568.
+	 */
+	public function test_get_newest_tag_or_remote_version_returns_newest_tag_when_assets_false(): void {
+		$this->type->newest_tag = '1.5.0';
+
+		$no_assets          = new stdClass();
+		$no_assets->message = 'No release assets found';
+		$this->seed_cache( [ 'release_assets' => $no_assets ] );
+
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+
+		$result = $this->call_protected( 'get_newest_tag_or_remote_version' );
+		$this->assertSame( '1.5.0', $result );
+	}
+
+	/**
+	 * When gu_dev_release_asset filter is true and the dev asset version
+	 * matches remote_version (after ltrim), the dev asset version is returned.
+	 * Covers line 577.
+	 */
+	public function test_get_newest_tag_or_remote_version_returns_dev_version_when_matching_remote(): void {
+		$this->type->newest_tag     = '1.0.0';
+		$this->type->remote_version = '2.0.0';
+
+		$release_assets = [
+			'assets'     => [ '1.0.0' => 'https://example.com/1.0.0.zip' ],
+			'dev_assets' => [ 'v2.0.0' => 'https://example.com/beta.zip' ],
+		];
+
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+
+		$result = $this->call_protected( 'get_newest_tag_or_remote_version', $release_assets );
+		$this->assertSame( 'v2.0.0', $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_api_release_assets() — lines 639-640
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When gu_dev_release_asset filter is true and the dev asset version
+	 * differs from newest_tag, get_api_release_assets() updates newest_tag
+	 * and caches it. Covers lines 639-640.
+	 */
+	public function test_get_api_release_assets_updates_newest_tag_with_dev_filter(): void {
+		add_filter( 'gu_always_fetch_update', '__return_true' );
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+
+		$this->type->newest_tag     = '1.0.0';
+		$this->type->remote_version = '2.0.0';
+
+		// Pre-seed release_assets cache with dev assets so get_api_release_assets
+		// reads from cache and reaches the dev filter block.
+		$cached = [
+			'assets'         => [ '1.0.0' => 'https://example.com/1.0.0.zip' ],
+			'created_at'     => [ '1.0.0' => '2024-01-01T00:00:00Z' ],
+			'dev_assets'     => [ 'v2.0.0' => 'https://example.com/2.0.0.zip' ],
+			'dev_created_at' => [ 'v2.0.0' => '2024-06-01T00:00:00Z' ],
+		];
+		$this->seed_cache( [ 'release_assets' => $cached ] );
+
+		$result = $this->api->get_api_release_assets( 'github', '/repos/test-owner/test-plugin/releases' );
+
+		$this->assertIsArray( $result );
+		// newest_tag should be updated to the dev asset version.
+		$this->assertSame( 'v2.0.0', $this->type->newest_tag );
+	}
+}

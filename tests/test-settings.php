@@ -1513,6 +1513,25 @@ class Test_Settings_OAuth_Revocation_Notice extends GU_Test_Case {
 
 		$this->assertStringContainsString( 'access was revoked', $output );
 	}
+
+	/**
+	 * When git_updater_skip_oauth_reminder filter returns true, the notice
+	 * shows the suppressed-by-filter message instead of the standard revocation
+	 * message. Covers Settings.php:413.
+	 */
+	public function test_notice_shows_suppressed_message_when_skip_filter_true(): void {
+		update_site_option( 'git_updater', [] );
+
+		add_filter( 'git_updater_skip_oauth_reminder', '__return_true' );
+
+		ob_start();
+		$this->call_private( 'maybe_show_oauth_revocation_notice' );
+		$output = ob_get_clean();
+
+		remove_all_filters( 'git_updater_skip_oauth_reminder' );
+
+		$this->assertStringContainsString( 'OAuth reminder suppressed by filter', $output );
+	}
 }
 
 // =============================================================================
