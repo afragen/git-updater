@@ -365,7 +365,11 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 			}
 		);
 
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		if ( is_multisite() ) {
+			grant_super_admin( $user_id );
+		}
+		wp_set_current_user( $user_id );
 
 		$_POST['_ajax_nonce'] = wp_create_nonce( 'gu_flush_repo_cache' );
 		unset( $_POST['slug'] );
@@ -397,7 +401,11 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 			}
 		);
 
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		if ( is_multisite() ) {
+			grant_super_admin( $user_id );
+		}
+		wp_set_current_user( $user_id );
 
 		$slug = 'test-ajax-flush-slug';
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $slug, 'repo', 'data', strtotime( '+12 hours' ) );
