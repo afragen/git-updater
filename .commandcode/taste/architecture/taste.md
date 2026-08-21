@@ -7,6 +7,7 @@
 - Prefer server-side configuration over client-side configuration when the server is the source of truth (e.g., domain validation, access control). Confidence: 0.75
 - Public repositories should bypass domain validation entirely. Confidence: 0.75
 - Use subsystem-specific prefixes for WordPress filters/hooks (e.g., `git_updater_lite_` instead of `git_updater_`) to isolate functionality and prevent unintended side effects on other parts of the codebase. Confidence: 0.70
+- WordPress filters that gate behavior should pass relevant context (e.g., `$provider`, `$repo_slug`) as additional parameters and return a boolean, so consumers can make per-item decisions. Example: `apply_filters( 'git_updater_skip_oauth_reminder', false, $provider )`. Confidence: 0.80
 - Prefers the `git_updater_` function prefix over `fragen_git_updater_` in the Git Updater satellite API plugin repos (gist, bitbucket, gitea, gitlab) — explicitly renamed the custom autoloader function `fragen_git_updater_register_autoloader()` → `git_updater_register_autoloader()` across all four repos. Confidence: 0.80
 - In Git Updater, `private_package` in Additions blocks API access entirely (not sharable); it does NOT indicate whether the repository is private on the git host. Use existing repo metadata from cached API data (not plugin/theme headers) for detection instead. Confidence: 0.85
 - When the system already stores relevant metadata, use it directly for feature targeting rather than introducing heuristic detection (e.g., composer.json parsing, auth token presence). Confidence: 0.75
