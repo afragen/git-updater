@@ -2,22 +2,22 @@
 # This file is distributed under the GPL-3.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 14.3.0.4\n"
+"Project-Id-Version: Git Updater 14.3.0.7\n"
 "Report-Msgid-Bugs-To: https://github.com/afragen/git-updater/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-11T21:44:59+00:00\n"
+"POT-Creation-Date: 2026-08-22T18:59:48+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: git-updater\n"
 
 #. Plugin Name of the plugin
 #: git-updater.php
-#: src/Git_Updater/Settings.php:182
-#: src/Git_Updater/Settings.php:308
+#: src/Git_Updater/Settings.php:190
+#: src/Git_Updater/Settings.php:316
 msgid "Git Updater"
 msgstr ""
 
@@ -77,10 +77,10 @@ msgid "Delete"
 msgstr ""
 
 #: src/Git_Updater/Additions/Repo_List_Table.php:292
-#: src/Git_Updater/OAuth/OAuth_Connect.php:232
-#: src/Git_Updater/OAuth/OAuth_Connect.php:292
-#: src/Git_Updater/OAuth/OAuth_Connect.php:310
-#: src/Git_Updater/OAuth/OAuth_Connect.php:314
+#: src/Git_Updater/OAuth/OAuth_Connect.php:238
+#: src/Git_Updater/OAuth/OAuth_Connect.php:298
+#: src/Git_Updater/OAuth/OAuth_Connect.php:316
+#: src/Git_Updater/OAuth/OAuth_Connect.php:320
 msgid "Forbidden"
 msgstr ""
 
@@ -148,45 +148,45 @@ msgstr ""
 msgid "Add-Ons"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:455
+#: src/Git_Updater/API/GitHub_API.php:535
 msgid "GitHub Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:486
-#: src/Git_Updater/API/GitHub_API.php:570
+#: src/Git_Updater/API/GitHub_API.php:566
+#: src/Git_Updater/API/GitHub_API.php:650
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:495
+#: src/Git_Updater/API/GitHub_API.php:575
 msgid "GitHub OAuth"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:504
-#: src/Git_Updater/OAuth/OAuth_Connect.php:152
+#: src/Git_Updater/API/GitHub_API.php:584
+#: src/Git_Updater/OAuth/OAuth_Connect.php:155
 msgid "Remove Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:517
+#: src/Git_Updater/API/GitHub_API.php:597
 msgid "GitHub Private Settings"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:546
+#: src/Git_Updater/API/GitHub_API.php:626
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:555
+#: src/Git_Updater/API/GitHub_API.php:635
 msgid "Click the \"Connect GitHub\" button for an OAuth connection or enter your GitHub Access Token to avoid API access limits."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:556
+#: src/Git_Updater/API/GitHub_API.php:636
 msgid "Access tokens are stored in this site's options table. Database backups contain them in cleartext — handle backup files accordingly."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:586
+#: src/Git_Updater/API/GitHub_API.php:666
 msgid "GitHub"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:602
+#: src/Git_Updater/API/GitHub_API.php:682
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
@@ -364,42 +364,42 @@ msgstr ""
 msgid "Purchase from Store"
 msgstr ""
 
-#: src/Git_Updater/OAuth/OAuth_Connect.php:170
+#: src/Git_Updater/OAuth/OAuth_Connect.php:176
 msgid "Connected"
 msgstr ""
 
-#: src/Git_Updater/OAuth/OAuth_Connect.php:171
+#: src/Git_Updater/OAuth/OAuth_Connect.php:177
 msgid "Disconnect"
 msgstr ""
 
-#: src/Git_Updater/OAuth/OAuth_Connect.php:181
+#: src/Git_Updater/OAuth/OAuth_Connect.php:187
 msgid "Define GIT_UPDATER_OAUTH_CONNECTOR_URL in wp-config.php to enable OAuth."
 msgstr ""
 
-#: src/Git_Updater/OAuth/OAuth_Connect.php:213
+#: src/Git_Updater/OAuth/OAuth_Connect.php:219
 msgid "Please enter Gitea Server URL and OAuth App Client ID first."
 msgstr ""
 
 #. translators: %s is the provider label, e.g. "GitHub".
-#: src/Git_Updater/OAuth/OAuth_Connect.php:221
+#: src/Git_Updater/OAuth/OAuth_Connect.php:227
 #, php-format
 msgid "Connect %s"
 msgstr ""
 
 #. translators: %s is the provider label, e.g. "GitHub".
-#: src/Git_Updater/OAuth/OAuth_Connect.php:698
+#: src/Git_Updater/OAuth/OAuth_Connect.php:716
 #, php-format
 msgid "Git Updater: %s OAuth access has been revoked"
 msgstr ""
 
 #. translators: 1: provider label, 2: settings page URL.
-#: src/Git_Updater/OAuth/OAuth_Connect.php:708
+#: src/Git_Updater/OAuth/OAuth_Connect.php:726
 #, php-format
 msgid "Git Updater was unable to refresh your %1$s OAuth access token, so the token has been revoked and removed. Please reconnect using the Connect button on the Git Updater settings page: %2$s"
 msgstr ""
 
 #. translators: 1: provider label, 2: settings page URL.
-#: src/Git_Updater/OAuth/OAuth_Connect.php:716
+#: src/Git_Updater/OAuth/OAuth_Connect.php:734
 #, php-format
 msgid "Your %1$s OAuth access token is empty, so Git Updater cannot access your private repositories. Please reconnect using the Connect button on the Git Updater settings page: %2$s"
 msgstr ""
@@ -451,98 +451,110 @@ msgstr ""
 msgid "REST API endpoints for webhook branch resetting begin at: %s"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:162
-#: src/Git_Updater/Settings.php:830
+#: src/Git_Updater/Settings.php:170
+#: src/Git_Updater/Settings.php:843
 msgid "Settings"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:246
-#: src/Git_Updater/Settings.php:445
+#: src/Git_Updater/Settings.php:254
+#: src/Git_Updater/Settings.php:458
 msgid "Git Updater Settings"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:247
+#: src/Git_Updater/Settings.php:255
 msgctxt "Menu item"
 msgid "Git Updater"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:333
+#: src/Git_Updater/Settings.php:341
 msgid "Refresh Cache"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:377
+#: src/Git_Updater/Settings.php:385
 msgid "Settings saved."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:379
+#: src/Git_Updater/Settings.php:387
 msgid "Cache refreshed."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:381
+#: src/Git_Updater/Settings.php:389
 msgid "Connected successfully."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:383
+#: src/Git_Updater/Settings.php:391
 msgid "Disconnected."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:385
+#: src/Git_Updater/Settings.php:393
 msgid "OAuth connection failed. Please try again."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:387
+#: src/Git_Updater/Settings.php:395
 msgid "Token removed."
 msgstr ""
 
 #. translators: %s is the provider label, e.g. "GitHub".
-#: src/Git_Updater/Settings.php:412
+#: src/Git_Updater/Settings.php:421
+#, php-format
+msgid "%s OAuth reminder suppressed by filter."
+msgstr ""
+
+#. translators: %s is the provider label, e.g. "GitHub".
+#: src/Git_Updater/Settings.php:424
 #, php-format
 msgid "%s OAuth access was revoked. Please reconnect using the Connect button on the Git Updater settings page."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:458
+#: src/Git_Updater/Settings.php:471
 msgid "Enable Branch Switching"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:470
+#: src/Git_Updater/Settings.php:483
 msgid "Bypass WP-Cron Background Processing for Debugging"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:512
-#: src/Git_Updater/Settings.php:900
+#: src/Git_Updater/Settings.php:525
+#: src/Git_Updater/Settings.php:912
 msgid "Name not available"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:610
+#: src/Git_Updater/Settings.php:623
 msgid "Check to enable."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:641
+#: src/Git_Updater/Settings.php:654
 msgid "Overridden Plugins and Themes"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:642
+#: src/Git_Updater/Settings.php:655
 msgid "The following plugins or themes might exist on wp.org, but any updates will be downloaded from their respective git repositories."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:866
+#: src/Git_Updater/Settings.php:879
 msgid "This is a private repository."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:867
+#: src/Git_Updater/Settings.php:880
 msgid "This repository has not connected to the API or was unable to connect."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:868
+#: src/Git_Updater/Settings.php:881
 msgid "This repository is hosted on WordPress.org."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:869
+#: src/Git_Updater/Settings.php:882
 msgid "This repository has been ignored and does not connect to the API."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:913
+#: src/Git_Updater/Settings.php:925
 msgid "Installed Plugins and Themes"
+msgstr ""
+
+#. translators: %s is the name of the plugin or theme.
+#: src/Git_Updater/Settings.php:938
+#, php-format
+msgid "Flush %s cache"
 msgstr ""
 
 #: src/Git_Updater/Shim.php:46
@@ -568,48 +580,48 @@ msgid "%s expects a non-empty string."
 msgstr ""
 
 #. translators: %s: theme name
-#: src/Git_Updater/Theme.php:419
-#: src/Git_Updater/Theme.php:548
+#: src/Git_Updater/Theme.php:425
+#: src/Git_Updater/Theme.php:554
 #, php-format
 msgid "There is a new version of %s available."
 msgstr ""
 
 #. translators: %s: theme version
-#: src/Git_Updater/Theme.php:431
+#: src/Git_Updater/Theme.php:437
 #, php-format
 msgid "View version %s details."
 msgstr ""
 
-#: src/Git_Updater/Theme.php:435
+#: src/Git_Updater/Theme.php:441
 msgid "Automatic update is unavailable for this theme."
 msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
-#: src/Git_Updater/Theme.php:440
-#: src/Git_Updater/Theme.php:559
+#: src/Git_Updater/Theme.php:446
+#: src/Git_Updater/Theme.php:565
 #, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%2$s."
 msgstr ""
 
 #. translators: %s: theme name
-#: src/Git_Updater/Theme.php:445
-#: src/Git_Updater/Theme.php:564
+#: src/Git_Updater/Theme.php:451
+#: src/Git_Updater/Theme.php:570
 #, php-format
 msgid "Update %s now"
 msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
-#: src/Git_Updater/Theme.php:571
+#: src/Git_Updater/Theme.php:577
 #, php-format
 msgid "View version %1$s details%2$s."
 msgstr ""
 
 #. translators: %s: opening/closing paragraph and italic tags
-#: src/Git_Updater/Theme.php:577
+#: src/Git_Updater/Theme.php:583
 #, php-format
 msgid "%1$sAutomatic update is unavailable for this theme.%2$s"
 msgstr ""
 
-#: src/Git_Updater/Traits/GU_Trait.php:1057
+#: src/Git_Updater/Traits/GU_Trait.php:1108
 msgid "There may be a problem with WP-Cron. A Git Updater WP-Cron event is overdue."
 msgstr ""
