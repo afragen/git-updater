@@ -682,7 +682,7 @@ class API {
 		if ( ! $asset ) {
 			return false;
 		}
-		$cache = $this->get_repo_cache( $this->type->slug ?? false, false, [ 'timeout', 'release_asset', 'release_asset_redirect', 'repo' ] ) ?: [];
+		$cache = $this->get_repo_cache( $this->type->slug ?? false, false, [ 'timeout', 'release_asset', 'release_asset_redirect' ] ) ?: [];
 
 		// Unset release asset url if older than 5 min to account for AWS expiration.
 		if ( $aws && ( time() - strtotime( "-{$this->hours} hours", $cache['timeout'] ) ) >= 300 ) {
@@ -696,7 +696,7 @@ class API {
 		if ( isset( $_REQUEST['key'] ) ) {
 			$slug = isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : false;
 			$slug = ! $slug && isset( $_REQUEST['theme'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['theme'] ) ) : $slug;
-			$rest = $slug === $cache['repo'];
+			$rest = $slug === $this->type->slug;
 		}
 		$override = $override || isset( $_REQUEST['override'] );
 		// phpcs:enable

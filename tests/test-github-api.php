@@ -738,7 +738,7 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 	private function seed_cache( array $data ): void {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 		$table->delete_repo( 'test-plugin' );
-		$table->add_entry( 'test-plugin', 'repo', '', strtotime( '+12 hours' ) );
+		$table->add_entry( 'test-plugin', 'repo_headers', '', strtotime( '+12 hours' ) );
 		foreach ( $data as $column => $value ) {
 			if ( 'timeout' === $column ) {
 				continue;
@@ -1088,7 +1088,7 @@ class Test_GitHub_API_DownloadLink_CacheTags extends WP_UnitTestCase {
 	private function seed_cache( array $data ): void {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 		$table->delete_repo( 'test-plugin' );
-		$table->add_entry( 'test-plugin', 'repo', '', strtotime( '+12 hours' ) );
+		$table->add_entry( 'test-plugin', 'repo_headers', '', strtotime( '+12 hours' ) );
 		foreach ( $data as $column => $value ) {
 			$table->add_entry( 'test-plugin', $column, $value );
 		}
@@ -1234,7 +1234,7 @@ class Test_GitHub_API_DownloadLink_CacheTags extends WP_UnitTestCase {
 	public function test_expired_cache_still_supplies_tag_data(): void {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 		$table->delete_repo( 'test-plugin' );
-		$table->add_entry( 'test-plugin', 'repo', '', strtotime( '-1 hour' ) );
+		$table->add_entry( 'test-plugin', 'repo_headers', '', strtotime( '-1 hour' ) );
 		$table->add_entry( 'test-plugin', 'tags', [ '1.0.0', '1.2.0' ] );
 		$table->add_entry( 'test-plugin', 'newest_tag', '1.2.0' );
 

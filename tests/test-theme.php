@@ -202,7 +202,7 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 
 	private function seed_cache(): void {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
-		$table->add_entry( 'test-gu-theme', 'repo', '', strtotime( '+12 hours' ) );
+		$table->add_entry( 'test-gu-theme', 'repo_headers', '', strtotime( '+12 hours' ) );
 		// A fetched repo has a `ran` row; without it waiting_for_background_update()
 		// treats the repo as still pending and the API response is not populated.
 		$table->add_entry( 'test-gu-theme', 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
@@ -848,7 +848,7 @@ class Test_Theme_Update_Site_Transient_Method extends WP_UnitTestCase {
 	 */
 	public function test_release_asset_primary_branch_dev_filter_keeps_dev_release_asset_package(): void {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
-		$table->add_entry( $this->slug, 'repo', '', strtotime( '+12 hours' ) );
+		$table->add_entry( $this->slug, 'repo_headers', '', strtotime( '+12 hours' ) );
 		$table->add_entry( $this->slug, 'tags', [ '2.0.0' ] );
 		$table->add_entry( $this->slug, 'newest_tag', '2.0.0' );
 		$table->add_entry(
@@ -890,7 +890,7 @@ class Test_Theme_Update_Site_Transient_Method extends WP_UnitTestCase {
 	 */
 	public function test_package_computed_from_cache_when_object_download_link_empty(): void {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
-		$table->add_entry( $this->slug, 'repo', '', strtotime( '+12 hours' ) );
+		$table->add_entry( $this->slug, 'repo_headers', '', strtotime( '+12 hours' ) );
 		$table->add_entry( $this->slug, 'tags', [ '1.0.0', '1.2.0' ] );
 		$table->add_entry( $this->slug, 'newest_tag', '1.2.0' );
 		$theme_obj = $this->make_theme_obj( [

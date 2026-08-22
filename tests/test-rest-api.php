@@ -269,7 +269,7 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 
 	public function test_flush_endpoint_returns_success_true_and_clears_api_data(): void {
 		$slug = 'test-flush-slug-xyzzy';
-		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $slug, 'repo', 'data', strtotime( '+12 hours' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $slug, 'repo_headers', 'data', strtotime( '+12 hours' ) );
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $slug, 'current_branch', 'develop' );
 
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/flush-repo-cache' );
@@ -280,7 +280,7 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 
 		$this->assertTrue( $data['success'] );
 		// API-derived data is cleared...
-		$this->assertNull( \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $slug, 'repo' ) );
+		$this->assertNull( \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $slug, 'repo_headers' ) );
 		// ...but the user's current_branch survives.
 		$this->assertSame( 'develop', \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $slug, 'current_branch' ) );
 	}
@@ -408,7 +408,7 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 		wp_set_current_user( $user_id );
 
 		$slug = 'test-ajax-flush-slug';
-		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $slug, 'repo', 'data', strtotime( '+12 hours' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $slug, 'repo_headers', 'data', strtotime( '+12 hours' ) );
 
 		$_POST['_ajax_nonce'] = wp_create_nonce( 'gu_flush_repo_cache' );
 		$_POST['slug']        = $slug;
@@ -424,7 +424,7 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 		$data = json_decode( $output, true );
 		$this->assertTrue( $data['success'] );
 		$this->assertStringContainsString( 'flushed', $data['data']['message'] );
-		$this->assertNull( \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $slug, 'repo' ) );
+		$this->assertNull( \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $slug, 'repo_headers' ) );
 
 		remove_filter( 'wp_doing_ajax', '__return_true' );
 	}
@@ -553,7 +553,7 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 	private function seed_cache( array $data ): void {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 		$table->delete_repo( self::SLUG );
-		$table->add_entry( self::SLUG, 'repo', '', strtotime( '+12 hours' ) );
+		$table->add_entry( self::SLUG, 'repo_headers', '', strtotime( '+12 hours' ) );
 		foreach ( $data as $column => $value ) {
 			if ( 'timeout' === $column ) {
 				continue;

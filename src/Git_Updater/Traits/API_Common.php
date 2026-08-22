@@ -154,7 +154,6 @@ trait API_Common {
 		$response['dot_org'] = $this->get_dot_org_data();
 		$this->set_file_info( $response );
 		$this->set_repo_cache( 'repo_headers', $response, false, false );
-		$this->set_repo_cache( 'repo', $this->type->slug, false, false );
 
 		// Check remote version against the pre-fetch cached version; extend cache if unchanged.
 		if ( $this->maybe_extend_repo_cache( $response, $this->type, $old_version ) ) {

@@ -826,7 +826,7 @@ class Test_Branch_Current_Branch extends GU_Test_Case {
 	public function test_get_current_branch_falls_back_to_repo_branch_when_cache_has_no_current_branch(): void {
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
 			$this->slug,
-			'repo',
+			'repo_headers',
 			'value',
 			strtotime( '+12 hours' )
 		);

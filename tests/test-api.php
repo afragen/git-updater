@@ -2082,7 +2082,7 @@ class Test_API_Detect_Provider extends WP_UnitTestCase {
 		// (older than 5 minutes relative to -12 hours) so the AWS branch fires.
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 		$table->delete_repo( 'test-plugin' );
-		$table->add_entry( 'test-plugin', 'repo', 'test-plugin', time() - 3600 );
+		$table->add_entry( 'test-plugin', 'repo_headers', 'test-plugin', time() - 3600 );
 		$table->add_entry( 'test-plugin', 'release_asset', 'https://api.github.com/repos/owner/repo/releases/assets/99' );
 		$table->add_entry( 'test-plugin', 'release_asset_redirect', 'https://stale-cached-url.example.com/old.zip' );
 
@@ -2125,7 +2125,7 @@ class Test_API_Detect_Provider extends WP_UnitTestCase {
 		// Seed cache with a matching 'repo' slug.
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 		$table->delete_repo( 'test-plugin' );
-		$table->add_entry( 'test-plugin', 'repo', 'test-plugin' );
+		$table->add_entry( 'test-plugin', 'repo_headers', 'test-plugin' );
 		$table->add_entry( 'test-plugin', 'release_asset_redirect', false );
 
 		// Simulate a REST request by setting $_REQUEST.

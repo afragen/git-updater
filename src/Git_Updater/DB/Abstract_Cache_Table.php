@@ -52,7 +52,6 @@ abstract class Abstract_Cache_Table {
 	 */
 	protected static $allowed_columns = [
 		'repo_headers',
-		'repo',
 		'tags',
 		'newest_tag',
 		'changes',

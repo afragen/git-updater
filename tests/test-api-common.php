@@ -276,7 +276,7 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 	private function seed_cache( array $extra ): void {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 		$table->delete_repo( 'test-plugin' );
-		$table->add_entry( 'test-plugin', 'repo', '', strtotime( '+12 hours' ) );
+		$table->add_entry( 'test-plugin', 'repo_headers', '', strtotime( '+12 hours' ) );
 		foreach ( $extra as $column => $value ) {
 			if ( 'timeout' === $column ) {
 				continue;
@@ -1464,7 +1464,7 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 	private function seed_main_cache( array $data ): void {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 		$table->delete_repo( 'test-plugin' );
-		$table->add_entry( 'test-plugin', 'repo', '', strtotime( '+12 hours' ) );
+		$table->add_entry( 'test-plugin', 'repo_headers', '', strtotime( '+12 hours' ) );
 		foreach ( $data as $column => $value ) {
 			if ( 'timeout' === $column ) {
 				continue;
@@ -1846,7 +1846,7 @@ class Test_API_Common_ReleaseAssetHelpers extends WP_UnitTestCase {
 	private function seed_cache( array $data ): void {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 		$table->delete_repo( 'test-plugin' );
-		$table->add_entry( 'test-plugin', 'repo', '', strtotime( '+12 hours' ) );
+		$table->add_entry( 'test-plugin', 'repo_headers', '', strtotime( '+12 hours' ) );
 		foreach ( $data as $column => $value ) {
 			if ( 'timeout' === $column ) {
 				continue;

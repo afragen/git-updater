@@ -60,7 +60,6 @@ final class Repo_Cache_Table extends Abstract_Cache_Table {
 			id                       BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			slug                     VARCHAR(191)        NOT NULL,
 			repo_headers             LONGTEXT,
-			repo                     LONGTEXT,
 			tags                     LONGTEXT,
 			newest_tag               LONGTEXT,
 			changes                  LONGTEXT,

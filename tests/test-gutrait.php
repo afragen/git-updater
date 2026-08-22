@@ -326,7 +326,7 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 	public function test_get_repo_cache_returns_false_when_timeout_expired(): void {
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
 			'test-plugin',
-			'repo',
+			'repo_headers',
 			'some-value',
 			strtotime( '-1 hour' )
 		);
@@ -338,27 +338,27 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 	public function test_get_repo_cache_returns_cache_when_timeout_valid(): void {
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
 			'test-plugin',
-			'repo',
+			'repo_headers',
 			'cached-value',
 			strtotime( '+12 hours' )
 		);
 
 		$result = $this->api->get_repo_cache( 'test-plugin' );
 		$this->assertIsArray( $result );
-		$this->assertSame( 'cached-value', $result['repo'] );
+		$this->assertSame( 'cached-value', $result['repo_headers'] );
 	}
 
 	public function test_get_repo_cache_without_timeout_returns_expired_cache(): void {
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
 			'test-plugin',
-			'repo',
+			'repo_headers',
 			'stale-value',
 			strtotime( '-1 hour' )
 		);
 
 		$result = $this->api->get_repo_cache( 'test-plugin', false );
 		$this->assertIsArray( $result );
-		$this->assertSame( 'stale-value', $result['repo'] );
+		$this->assertSame( 'stale-value', $result['repo_headers'] );
 	}
 
 	// -------------------------------------------------------------------------
@@ -367,24 +367,24 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 
 	public function test_set_repo_cache_returns_false_for_wp_error(): void {
 		$error  = new WP_Error( 'test', 'test error' );
-		$result = $this->api->set_repo_cache( 'repo', $error, 'test-plugin' );
+		$result = $this->api->set_repo_cache( 'repo_headers', $error, 'test-plugin' );
 		$this->assertFalse( $result );
 	}
 
 	public function test_set_repo_cache_stores_value_and_returns_true(): void {
-		$result = $this->api->set_repo_cache( 'repo', 'my_value', 'test-plugin', '+1 hour' );
+		$result = $this->api->set_repo_cache( 'tags', 'my_value', 'test-plugin', '+1 hour' );
 		$this->assertTrue( $result );
 
 		$cache = $this->api->get_repo_cache( 'test-plugin' );
 		$this->assertIsArray( $cache );
-		$this->assertSame( 'my_value', $cache['repo'] );
+		$this->assertSame( 'my_value', $cache['tags'] );
 	}
 
 	public function test_set_repo_cache_preserves_existing_timeout_on_second_write(): void {
-		$this->api->set_repo_cache( 'repo', 'val1', 'test-plugin', '+6 hours' );
+		$this->api->set_repo_cache( 'tags', 'val1', 'test-plugin', '+6 hours' );
 		$timeout_after_first = $this->api->get_repo_cache( 'test-plugin' )['timeout'];
 
-		$this->api->set_repo_cache( 'repo', 'val2', 'test-plugin' );
+		$this->api->set_repo_cache( 'tags', 'val2', 'test-plugin' );
 		$timeout_after_second = $this->api->get_repo_cache( 'test-plugin' )['timeout'];
 
 		$this->assertSame( $timeout_after_first, $timeout_after_second );
@@ -394,7 +394,7 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 		// Simulate the reset state: a row with timeout 0 (delete_repo_api_data
 		// nulls every column except current_branch, including timeout).
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
-		$table->add_entry( 'test-plugin', 'repo', 'old', 0 );
+		$table->add_entry( 'test-plugin', 'repo_headers', 'old', 0 );
 
 		$result = $this->api->set_repo_cache( 'contents', [ 'dirs' => [ 'assets' ] ], 'test-plugin' );
 
@@ -406,7 +406,7 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 
 	public function test_set_repo_cache_refreshes_expired_timeout(): void {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
-		$table->add_entry( 'test-plugin', 'repo', 'old', strtotime( '-1 hour' ) );
+		$table->add_entry( 'test-plugin', 'repo_headers', 'old', strtotime( '-1 hour' ) );
 
 		$this->api->set_repo_cache( 'contents', [ 'dirs' => [ 'assets' ] ], 'test-plugin' );
 
@@ -428,7 +428,7 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 	public function test_set_repo_cache_preserves_valid_timeout(): void {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 		$valid = strtotime( '+12 hours' );
-		$table->add_entry( 'test-plugin', 'repo', 'old', $valid );
+		$table->add_entry( 'test-plugin', 'repo_headers', 'old', $valid );
 
 		$this->api->set_repo_cache( 'contents', [ 'dirs' => [ 'assets' ] ], 'test-plugin' );
 
@@ -436,12 +436,12 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 	}
 
 	public function test_set_repo_cache_stores_multiple_keys_in_same_cache_entry(): void {
-		$this->api->set_repo_cache( 'repo_headers', 'a', 'test-plugin', '+1 hour' );
-		$this->api->set_repo_cache( 'tags', 'b', 'test-plugin' );
+		$this->api->set_repo_cache( 'tags', 'a', 'test-plugin', '+1 hour' );
+		$this->api->set_repo_cache( 'branches', 'b', 'test-plugin' );
 
 		$cache = $this->api->get_repo_cache( 'test-plugin' );
-		$this->assertSame( 'a', $cache['repo_headers'] );
-		$this->assertSame( 'b', $cache['tags'] );
+		$this->assertSame( 'a', $cache['tags'] );
+		$this->assertSame( 'b', $cache['branches'] );
 	}
 
 	/**
@@ -515,7 +515,7 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 		// Row exists for the slug but the column was never written.
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
 			'test-plugin',
-			'repo',
+			'repo_headers',
 			'existing',
 			strtotime( '+1 hour' )
 		);
@@ -1536,7 +1536,7 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 	public function test_set_repo_cache_gu_repo_cache_timeout_filter_overrides_timeout_string(): void {
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		add_filter( 'gu_repo_cache_timeout', fn() => '+1 minute', 10, 4 );
-		$this->api->set_repo_cache( 'repo', 'val', 'test-plugin', '+12 hours' );
+		$this->api->set_repo_cache( 'repo_headers', 'val', 'test-plugin', '+12 hours' );
 		$cache = $this->api->get_repo_cache( 'test-plugin' );
 		$this->assertEqualsWithDelta( time() + 60, $cache['timeout'], 5 );
 	}

@@ -577,7 +577,7 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_returns_result_when_dot_org_on_primary_branch(): void {
-		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo_headers', 'data', strtotime( '+12 hours' ) );
 		// A fetched repo has a `ran` row; without it waiting_for_background_update()
 		// treats the repo as still pending and the API response is not populated.
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
@@ -594,7 +594,7 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_populates_response_for_git_plugin(): void {
-		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo_headers', 'data', strtotime( '+12 hours' ) );
 		// A fetched repo has a `ran` row; without it waiting_for_background_update()
 		// treats the repo as still pending and the API response is not populated.
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
@@ -611,7 +611,7 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_response_version_falls_back_to_local_version(): void {
-		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo_headers', 'data', strtotime( '+12 hours' ) );
 		// A fetched repo has a `ran` row; without it waiting_for_background_update()
 		// treats the repo as still pending and the API response is not populated.
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
@@ -628,7 +628,7 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_response_short_description_is_truncated(): void {
-		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo_headers', 'data', strtotime( '+12 hours' ) );
 		// A fetched repo has a `ran` row; without it waiting_for_background_update()
 		// treats the repo as still pending and the API response is not populated.
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
@@ -646,7 +646,7 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 
 	public function test_dot_org_on_non_primary_branch_returns_response(): void {
 		// dot_org = true but branch != primary_branch → should NOT skip (returns populated response).
-		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo_headers', 'data', strtotime( '+12 hours' ) );
 		// A fetched repo has a `ran` row; without it waiting_for_background_update()
 		// treats the repo as still pending and the API response is not populated.
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
@@ -669,7 +669,7 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 	 * is active.
 	 */
 	public function test_plugins_api_returns_dev_release_asset_download_link(): void {
-		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo_headers', 'data', strtotime( '+12 hours' ) );
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'tags', [ '2.0.0' ], strtotime( '+12 hours' ) );
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'newest_tag', '2.0.0', strtotime( '+12 hours' ) );
@@ -706,7 +706,7 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 	 * repo object's download_link is empty (unhydrated object).
 	 */
 	public function test_plugins_api_computes_download_link_from_cache_when_object_unhydrated(): void {
-		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo_headers', 'data', strtotime( '+12 hours' ) );
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'tags', [ '1.0.0', '1.2.0' ], strtotime( '+12 hours' ) );
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'newest_tag', '1.2.0', strtotime( '+12 hours' ) );
@@ -730,7 +730,7 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 	 */
 	public function test_plugins_api_prefers_computed_release_asset_over_wrong_object_property(): void {
 		$asset_url = 'https://example.com/releases/download/v2.0.0/plugin.zip';
-		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo_headers', 'data', strtotime( '+12 hours' ) );
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'tags', [ '2.0.0' ], strtotime( '+12 hours' ) );
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'newest_tag', '2.0.0', strtotime( '+12 hours' ) );
@@ -762,7 +762,7 @@ class Test_Plugin_Plugins_API_Filter extends WP_UnitTestCase {
 	 * With a warm cache, plugins_api() computation performs no remote calls.
 	 */
 	public function test_plugins_api_computation_makes_no_remote_call_with_warm_cache(): void {
-		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo', 'data', strtotime( '+12 hours' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'repo_headers', 'data', strtotime( '+12 hours' ) );
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'tags', [ '2.0.0' ], strtotime( '+12 hours' ) );
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $this->slug, 'newest_tag', '2.0.0', strtotime( '+12 hours' ) );
@@ -835,7 +835,7 @@ class Test_Plugin_Update_Site_Transient_Method extends WP_UnitTestCase {
 
 	private function seed_release_asset_cache( string $stable_url, string $dev_url = '' ): void {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
-		$table->add_entry( $this->slug, 'repo', '', strtotime( '+12 hours' ) );
+		$table->add_entry( $this->slug, 'repo_headers', '', strtotime( '+12 hours' ) );
 		$table->add_entry( $this->slug, 'tags', [ '2.0.0' ] );
 		$table->add_entry( $this->slug, 'newest_tag', '2.0.0' );
 		$table->add_entry(
@@ -1070,7 +1070,7 @@ class Test_Plugin_Update_Site_Transient_Method extends WP_UnitTestCase {
 	 */
 	public function test_package_computed_from_cache_when_object_download_link_empty(): void {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
-		$table->add_entry( $this->slug, 'repo', '', strtotime( '+12 hours' ) );
+		$table->add_entry( $this->slug, 'repo_headers', '', strtotime( '+12 hours' ) );
 		$table->add_entry( $this->slug, 'tags', [ '1.0.0', '1.2.0' ] );
 		$table->add_entry( $this->slug, 'newest_tag', '1.2.0' );
 		$plugin_obj = $this->make_plugin_obj( [
