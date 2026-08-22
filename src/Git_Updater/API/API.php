@@ -230,6 +230,12 @@ class API {
 					$this->type->slug,
 					"+{$timeout} minutes"
 				);
+			} else {
+				// Clear stale error cache on success so the repo is no longer
+				// flagged as "waiting" by get_cached_error_flags().
+				$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+				$table->delete_entry( $this->type->slug, 'error_cache' );
+				$table->delete_entry( $this->type->slug, 'error_timeout' );
 			}
 
 			$response = [

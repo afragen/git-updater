@@ -724,7 +724,10 @@ trait GU_Trait {
 				return true;
 			}
 
-			return ! empty( $table->get_error_cache( $repo->slug ) );
+			$error_timeout = (int) $table->get_entry( $repo->slug, 'error_timeout' );
+			return ! empty( $table->get_error_cache( $repo->slug ) )
+				&& $error_timeout > 0
+				&& time() < $error_timeout;
 		}
 
 		$repos = array_merge(

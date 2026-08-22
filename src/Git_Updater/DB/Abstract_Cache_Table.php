@@ -507,7 +507,7 @@ abstract class Abstract_Cache_Table {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows = (array) $wpdb->get_results(
-			$wpdb->prepare( 'SELECT slug, error_cache FROM %i', $this->table_name() ),
+			$wpdb->prepare( 'SELECT slug, error_cache, error_timeout FROM %i', $this->table_name() ),
 			ARRAY_A
 		);
 
@@ -517,10 +517,12 @@ abstract class Abstract_Cache_Table {
 			if ( '' === $slug ) {
 				continue;
 			}
-			$err          = isset( $row['error_cache'] ) && is_string( $row['error_cache'] )
+			$err = isset( $row['error_cache'] ) && is_string( $row['error_cache'] )
 				? maybe_unserialize( $row['error_cache'] )
 				: null;
-			$map[ $slug ] = ! empty( $err );
+			// Only flag as waiting if error_cache is non-empty AND error_timeout hasn't expired.
+			$error_timeout  = (int) ( $row['error_timeout'] ?? 0 );
+			$map[ $slug ] = ! empty( $err ) && $error_timeout > 0 && time() < $error_timeout;
 		}
 
 		return $map;
