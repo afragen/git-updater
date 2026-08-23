@@ -284,6 +284,17 @@ trait GU_Trait {
 					update_site_option( $cache_key, $cache );
 				}
 				$return = true;
+			} else {
+				/*
+				 * Remote version changed. Release-asset data is only fetched lazily
+				 * and keyed on the cached asset versions, so drop the stale
+				 * release-asset entries now; get_api_release_assets() rebuilds them
+				 * from the new remote during this same fetch cycle.
+				 */
+				unset( $cache['release_assets'] );
+				unset( $cache['release_asset'] );
+				unset( $cache['release_asset_download'] );
+				update_site_option( $cache_key, $cache );
 			}
 		}
 

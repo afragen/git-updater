@@ -490,6 +490,83 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 		$this->assertFalse( $result );
 	}
 
+	public function test_maybe_extend_repo_cache_clears_release_assets_when_version_changes_and_cache_valid(): void {
+		$cache_key = $this->api->get_cache_key( 'test-plugin' );
+		update_site_option(
+			$cache_key,
+			[
+				'repo'                   => 'test-plugin',
+				'test-plugin'            => [ 'Version' => '1.0.0' ],
+				'ran'                    => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
+				'timeout'                => strtotime( '+1 hour' ),
+				'release_assets'         => [ 'assets' => [ '1.0.0' => 'url-stable' ], 'dev_assets' => [ '1.1.0-beta' => 'url-dev' ] ],
+				'release_asset'          => true,
+				'release_asset_download' => 'url-stale',
+			]
+		);
+
+		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '2.0.0' ], $this->type, '1.0.0' );
+		$this->assertFalse( $result );
+
+		$cache = get_site_option( $cache_key );
+		$this->assertArrayNotHasKey( 'release_assets', $cache );
+		$this->assertArrayNotHasKey( 'release_asset', $cache );
+		$this->assertArrayNotHasKey( 'release_asset_download', $cache );
+	}
+
+	/**
+	 * The version change is only observed when a fetch runs, at which point the
+	 * prior timeout is typically expired — the stale entries must still be
+	 * cleared so the lazy release-asset fetch rebuilds them this cycle.
+	 */
+	public function test_maybe_extend_repo_cache_clears_release_assets_when_version_changes_and_cache_expired(): void {
+		$cache_key = $this->api->get_cache_key( 'test-plugin' );
+		update_site_option(
+			$cache_key,
+			[
+				'repo'                   => 'test-plugin',
+				'test-plugin'            => [ 'Version' => '1.0.0' ],
+				'ran'                    => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
+				'timeout'                => strtotime( '-1 hour' ),
+				'release_assets'         => [ 'assets' => [ '1.0.0' => 'url-stable' ] ],
+				'release_asset'          => true,
+				'release_asset_download' => 'url-stale',
+			]
+		);
+
+		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '2.0.0' ], $this->type, '1.0.0' );
+		$this->assertFalse( $result );
+
+		$cache = get_site_option( $cache_key );
+		$this->assertArrayNotHasKey( 'release_assets', $cache );
+		$this->assertArrayNotHasKey( 'release_asset', $cache );
+		$this->assertArrayNotHasKey( 'release_asset_download', $cache );
+	}
+
+	public function test_maybe_extend_repo_cache_does_not_clear_release_assets_when_version_matches(): void {
+		$cache_key = $this->api->get_cache_key( 'test-plugin' );
+		update_site_option(
+			$cache_key,
+			[
+				'repo'                   => 'test-plugin',
+				'test-plugin'            => [ 'Version' => '1.0.0' ],
+				'ran'                    => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
+				'timeout'                => strtotime( '+1 hour' ),
+				'release_assets'         => [ 'assets' => [ '1.0.0' => 'url-stable' ] ],
+				'release_asset'          => true,
+				'release_asset_download' => 'url-stable',
+			]
+		);
+
+		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '1.0.0' ], $this->type, '1.0.0' );
+		$this->assertTrue( $result );
+
+		$cache = get_site_option( $cache_key );
+		$this->assertArrayHasKey( 'release_assets', $cache );
+		$this->assertArrayHasKey( 'release_asset', $cache );
+		$this->assertArrayHasKey( 'release_asset_download', $cache );
+	}
+
 	public function test_maybe_extend_repo_cache_returns_false_when_ran_missing(): void {
 		$cache_key = $this->api->get_cache_key( 'test-plugin' );
 		update_site_option(

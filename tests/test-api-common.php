@@ -1773,4 +1773,175 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 		$this->assertIsArray( $result );
 		$this->assertSame( $cached, $result );
 	}
+
+	/**
+	 * When the remote version changes while the cache is still in force,
+	 * maybe_extend_repo_cache() drops the stale release-asset entries so the
+	 * lazy get_release_assets() re-fetches them. With gu_dev_release_asset on,
+	 * the new release_asset_download must point at the newest dev asset, not the
+	 * newest stable asset from the stale cache.
+	 */
+	public function test_get_release_assets_refetches_after_version_change_with_dev_filter(): void {
+		add_filter( 'gu_always_fetch_update', '__return_true' );
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+
+		// Seed an expired cache (so the fetch runs) with a complete fetch cycle
+		// and stale release assets from the previous remote version.
+		update_site_option(
+			$this->api->get_cache_key( 'test-plugin' ),
+			[
+				'timeout'                => strtotime( '-1 hour' ),
+				'repo'                   => 'test-plugin',
+				'test-plugin'            => [ 'Version' => '1.0.0' ],
+				'ran'                    => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
+				'release_assets'         => [
+					'assets'     => [ '1.0.0' => 'https://example.com/stable-1.0.0.zip' ],
+					'dev_assets' => [ '1.1.0-beta' => 'https://example.com/dev-1.1.0-beta.zip' ],
+				],
+				'release_asset'          => true,
+				'release_asset_download' => 'https://example.com/dev-1.1.0-beta.zip',
+			]
+		);
+
+		// Remote now reports Version 2.0.0 with a newer dev asset.
+		$plugin_header = implode(
+			"\n",
+			[
+				'<?php',
+				'/**',
+				' * Plugin Name: Test Plugin',
+				' * Plugin URI: https://example.com',
+				' * Version: 2.0.0',
+				' * Description: A test plugin.',
+				' * Author: Test Author',
+				' * Author URI: https://example.com/author',
+				' * License: GPL-3.0-or-later',
+				' * Text Domain: test-plugin',
+				' */',
+			]
+		);
+		$api_body = wp_json_encode(
+			[
+				'content'  => base64_encode( $plugin_header ),
+				'encoding' => 'base64',
+			]
+		);
+
+		// Call 1: get_remote_info() fetches the bumped header; the version change
+		// (while the cache is valid) drops the stale release-asset entries.
+		$this->intercept_http_with( $this->mock_http_response_raw( 200, $api_body ) );
+		$this->api->get_remote_info( 'test-plugin.php' );
+		remove_all_filters( 'pre_http_request' );
+
+		$cache = $this->api->get_repo_cache( 'test-plugin', false );
+		$this->assertArrayNotHasKey( 'release_assets', $cache );
+		$this->assertArrayNotHasKey( 'release_asset', $cache );
+		$this->assertArrayNotHasKey( 'release_asset_download', $cache );
+
+		// Call 2: the lazy fetch rebuilds release assets from the new remote.
+		$releases = [
+			[
+				'tag_name' => '2.0.0',
+				'assets'   => [
+					[
+						'name'       => 'test-plugin-2.0.0.zip',
+						'url'        => 'https://example.com/stable-2.0.0.zip',
+						'created_at' => '2024-08-01T12:00:00Z',
+					],
+				],
+			],
+			[
+				'tag_name' => '2.1.0-beta',
+				'assets'   => [
+					[
+						'name'       => 'test-plugin-2.1.0-beta.zip',
+						'url'        => 'https://example.com/dev-2.1.0-beta.zip',
+						'created_at' => '2024-09-01T12:00:00Z',
+					],
+				],
+			],
+		];
+		$this->intercept_http_with( $this->mock_http_response( 200, $releases ) );
+
+		$result = $this->api->get_release_assets();
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( '2.0.0', $result['assets'] );
+		$this->assertArrayHasKey( '2.1.0-beta', $result['dev_assets'] );
+
+		// The dev filter makes the newest dev asset the release_asset_download.
+		$cache = $this->api->get_repo_cache( 'test-plugin', false );
+		$this->assertSame( 'https://example.com/dev-2.1.0-beta.zip', $cache['release_asset_download'] );
+	}
+
+	/**
+	 * Same as the dev-filter test, but without the filter the newest stable
+	 * asset wins after the version-change refresh.
+	 */
+	public function test_get_release_assets_refetches_after_version_change_stable(): void {
+		add_filter( 'gu_always_fetch_update', '__return_true' );
+
+		update_site_option(
+			$this->api->get_cache_key( 'test-plugin' ),
+			[
+				'timeout'                => strtotime( '-1 hour' ),
+				'repo'                   => 'test-plugin',
+				'test-plugin'            => [ 'Version' => '1.0.0' ],
+				'ran'                    => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
+				'release_assets'         => [
+					'assets'     => [ '1.0.0' => 'https://example.com/stable-1.0.0.zip' ],
+					'dev_assets' => [ '1.1.0-beta' => 'https://example.com/dev-1.1.0-beta.zip' ],
+				],
+				'release_asset'          => true,
+				'release_asset_download' => 'https://example.com/stable-1.0.0.zip',
+			]
+		);
+
+		$plugin_header = implode(
+			"\n",
+			[
+				'<?php',
+				'/**',
+				' * Plugin Name: Test Plugin',
+				' * Plugin URI: https://example.com',
+				' * Version: 2.0.0',
+				' * Description: A test plugin.',
+				' * Author: Test Author',
+				' * Author URI: https://example.com/author',
+				' * License: GPL-3.0-or-later',
+				' * Text Domain: test-plugin',
+				' */',
+			]
+		);
+		$api_body = wp_json_encode(
+			[
+				'content'  => base64_encode( $plugin_header ),
+				'encoding' => 'base64',
+			]
+		);
+
+		$this->intercept_http_with( $this->mock_http_response_raw( 200, $api_body ) );
+		$this->api->get_remote_info( 'test-plugin.php' );
+		remove_all_filters( 'pre_http_request' );
+
+		$releases = [
+			[
+				'tag_name' => '2.0.0',
+				'assets'   => [
+					[
+						'name'       => 'test-plugin-2.0.0.zip',
+						'url'        => 'https://example.com/stable-2.0.0.zip',
+						'created_at' => '2024-08-01T12:00:00Z',
+					],
+				],
+			],
+		];
+		$this->intercept_http_with( $this->mock_http_response( 200, $releases ) );
+
+		$result = $this->api->get_release_assets();
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( '2.0.0', $result['assets'] );
+
+		$cache = $this->api->get_repo_cache( 'test-plugin', false );
+		$this->assertSame( 'https://example.com/stable-2.0.0.zip', $cache['release_asset_download'] );
+	}
 }
