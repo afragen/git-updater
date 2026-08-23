@@ -448,6 +448,35 @@ if ( class_exists( 'WP_Block_Bindings_Registry' ) ) {
 }
 ```
 
+### `do_action('init')` — unregister core icon collections (WordPress 7.1+)
+WordPress 7.1 hooks `_wp_register_default_icon_collections` and `_wp_register_default_icons` onto `init` (default-filters.php). Both call into singletons that throw a "doing it wrong" notice when the collection or an icon is registered a second time. Because the test bootstrap already fires `init` once (registering the `core` collection and all `core/*` icons), any later `do_action('init')` in a test triggers duplicate-registration notices. Treat it like `WP_Block_Bindings_Registry`: snapshot collection slugs in `set_up()`, unregister everything immediately before `do_action('init')`, and unregister any new ones in `tear_down()`.
+```php
+// Snapshot registered slugs in set_up(), guarded by class_exists():
+if ( class_exists( 'WP_Icon_Collections_Registry' ) ) {
+    $this->pre_registered_icon_collections = wp_list_pluck(
+        WP_Icon_Collections_Registry::get_instance()->get_all_registered(),
+        'slug'
+    );
+}
+
+// Immediately before do_action('init') in the test body:
+if ( class_exists( 'WP_Icon_Collections_Registry' ) ) {
+    foreach ( wp_list_pluck( WP_Icon_Collections_Registry::get_instance()->get_all_registered(), 'slug' ) as $slug ) {
+        wp_unregister_icon_collection( $slug ); // cascades to the collection's icons
+    }
+}
+
+// In tear_down(), unregister collections not present before the test:
+if ( class_exists( 'WP_Icon_Collections_Registry' ) ) {
+    foreach ( wp_list_pluck( WP_Icon_Collections_Registry::get_instance()->get_all_registered(), 'slug' ) as $slug ) {
+        if ( ! in_array( $slug, $this->pre_registered_icon_collections, true ) ) {
+            wp_unregister_icon_collection( $slug );
+        }
+    }
+}
+```
+`WP_Icon_Collections_Registry::unregister()` unregisters the collection and all of its icons, so iterating collections alone is sufficient cleanup.
+
 ### Multisite-only failures: `WP_Theme::get_allowed_on_network()` static cache
 CI runs both single-site and multisite suites; locally only single-site runs. On single-site, `WP_Theme::is_allowed('network')` returns `true` immediately. On multisite it calls `get_allowed_on_network()`, which uses a `static $allowed_themes` local variable. That cache is populated early in the test run, so `update_site_option('allowedthemes', ...)` in a test has no effect on it.
 
