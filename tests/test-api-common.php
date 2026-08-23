@@ -15,6 +15,7 @@
  */
 
 use Fragen\Git_Updater\API\GitHub_API;
+use Fragen\Git_Updater\API\Language_Pack_API;
 use Fragen\Git_Updater\Base;
 
 class Test_API_Common extends WP_UnitTestCase {
@@ -1860,6 +1861,11 @@ class Test_API_Common_ReleaseAssetHelpers extends WP_UnitTestCase {
 		return $rm->invoke( $this->api, ...$args );
 	}
 
+	private function call_protected_on( object $obj, string $method, ...$args ) {
+		$rm = $obj->get_reflection_method( $obj, $method );
+		return $rm->invoke( $obj, ...$args );
+	}
+
 	// -------------------------------------------------------------------------
 	// get_release_asset_url_for_version() — line 477
 	// -------------------------------------------------------------------------
@@ -1875,6 +1881,18 @@ class Test_API_Common_ReleaseAssetHelpers extends WP_UnitTestCase {
 		$this->seed_cache( [ 'release_assets' => $no_assets ] );
 
 		$result = $this->call_protected( 'get_release_asset_url_for_version', '1.0.0' );
+		$this->assertSame( '', $result );
+	}
+
+	/**
+	 * When the API object does not implement get_release_assets() (e.g. a
+	 * Language_Pack_API), get_release_asset_url_for_version() returns empty
+	 * string via the method_exists guard. Covers line 472.
+	 */
+	public function test_get_release_asset_url_for_version_returns_empty_when_method_missing(): void {
+		$lp_api = new Language_Pack_API( $this->make_type() );
+
+		$result = $this->call_protected_on( $lp_api, 'get_release_asset_url_for_version', '1.0.0' );
 		$this->assertSame( '', $result );
 	}
 
@@ -1924,6 +1942,18 @@ class Test_API_Common_ReleaseAssetHelpers extends WP_UnitTestCase {
 		$this->seed_cache( [ 'release_assets' => $no_assets ] );
 
 		$result = $this->call_protected( 'get_newest_release_asset_version' );
+		$this->assertSame( '', $result );
+	}
+
+	/**
+	 * When the API object does not implement get_release_assets() (e.g. a
+	 * Language_Pack_API), get_newest_release_asset_version() returns empty
+	 * string via the method_exists guard. Covers line 511.
+	 */
+	public function test_get_newest_release_asset_version_returns_empty_when_method_missing(): void {
+		$lp_api = new Language_Pack_API( $this->make_type() );
+
+		$result = $this->call_protected_on( $lp_api, 'get_newest_release_asset_version' );
 		$this->assertSame( '', $result );
 	}
 
@@ -1994,6 +2024,24 @@ class Test_API_Common_ReleaseAssetHelpers extends WP_UnitTestCase {
 		add_filter( 'gu_dev_release_asset', '__return_true' );
 
 		$result = $this->call_protected( 'get_newest_tag_or_remote_version' );
+		$this->assertSame( '1.5.0', $result );
+	}
+
+	/**
+	 * When gu_dev_release_asset filter is true, no release_assets passed, and
+	 * the API object does not implement get_release_assets() (e.g. a
+	 * Language_Pack_API), get_newest_tag_or_remote_version() returns newest_tag
+	 * via the method_exists guard. Covers line 561.
+	 */
+	public function test_get_newest_tag_or_remote_version_returns_newest_tag_when_method_missing(): void {
+		$lp_type            = new stdClass();
+		$lp_type->newest_tag = '1.5.0';
+
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+
+		$lp_api = new Language_Pack_API( $lp_type );
+
+		$result = $this->call_protected_on( $lp_api, 'get_newest_tag_or_remote_version' );
 		$this->assertSame( '1.5.0', $result );
 	}
 

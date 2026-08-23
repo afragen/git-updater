@@ -208,13 +208,20 @@ class Test_Additions_Settings_Methods extends WP_UnitTestCase {
 
 class Test_Additions_Settings_Load_Hooks extends WP_UnitTestCase {
 
-	private array $pre_registered_bindings = [];
+	private array $pre_registered_bindings       = [];
+	private array $pre_registered_icon_collections = [];
 
 	public function set_up(): void {
 		parent::set_up();
 		if ( class_exists( 'WP_Block_Bindings_Registry' ) ) {
 			$this->pre_registered_bindings = array_keys(
 				WP_Block_Bindings_Registry::get_instance()->get_all_registered()
+			);
+		}
+		if ( class_exists( 'WP_Icon_Collections_Registry' ) ) {
+			$this->pre_registered_icon_collections = wp_list_pluck(
+				WP_Icon_Collections_Registry::get_instance()->get_all_registered(),
+				'slug'
 			);
 		}
 	}
@@ -230,6 +237,13 @@ class Test_Additions_Settings_Load_Hooks extends WP_UnitTestCase {
 			foreach ( array_keys( WP_Block_Bindings_Registry::get_instance()->get_all_registered() ) as $name ) {
 				if ( ! in_array( $name, $this->pre_registered_bindings, true ) ) {
 					unregister_block_bindings_source( $name );
+				}
+			}
+		}
+		if ( class_exists( 'WP_Icon_Collections_Registry' ) ) {
+			foreach ( wp_list_pluck( WP_Icon_Collections_Registry::get_instance()->get_all_registered(), 'slug' ) as $slug ) {
+				if ( ! in_array( $slug, $this->pre_registered_icon_collections, true ) ) {
+					wp_unregister_icon_collection( $slug );
 				}
 			}
 		}
@@ -263,6 +277,11 @@ class Test_Additions_Settings_Load_Hooks extends WP_UnitTestCase {
 		if ( class_exists( 'WP_Block_Bindings_Registry' ) ) {
 			foreach ( array_keys( WP_Block_Bindings_Registry::get_instance()->get_all_registered() ) as $name ) {
 				unregister_block_bindings_source( $name );
+			}
+		}
+		if ( class_exists( 'WP_Icon_Collections_Registry' ) ) {
+			foreach ( wp_list_pluck( WP_Icon_Collections_Registry::get_instance()->get_all_registered(), 'slug' ) as $slug ) {
+				wp_unregister_icon_collection( $slug );
 			}
 		}
 		do_action( 'init' );
