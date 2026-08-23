@@ -1399,8 +1399,9 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		$this->assertTrue( $filtered );
 	}
 
-	public function test_display_gu_repos_renders_flush_button_with_data_slug(): void {
+	public function test_display_gu_repos_renders_flush_button_with_rest_url(): void {
 		$plugin = $this->make_plugin_obj();
+		update_site_option( 'git_updater_api_key', 'test-api-key' );
 		$this->inject_plugin_config( [ 'test-plugin' => $plugin ] );
 		$this->inject_theme_config( [] );
 		ob_start();
@@ -1408,7 +1409,10 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		$output = ob_get_clean();
 		$this->assertStringContainsString( '<button type="button"', $output );
 		$this->assertStringContainsString( 'gu-flush-repo', $output );
-		$this->assertStringContainsString( 'data-slug="test-plugin"', $output );
+		$this->assertStringContainsString( 'data-flush-url="', $output );
+		$this->assertStringContainsString( 'flush-repo-cache', $output );
+		$this->assertStringContainsString( 'slug=test-plugin', $output );
+		$this->assertStringContainsString( 'key=test-api-key', $output );
 		// Broken indicator is rendered (hidden) so JS can reveal it after a flush.
 		$this->assertStringContainsString( 'gu-repo-broken', $output );
 		$this->assertStringContainsString( 'display:none', $output );

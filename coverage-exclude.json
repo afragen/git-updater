@@ -3,13 +3,13 @@
 		"src/Git_Updater/API/GitHub_API.php": [240],
 		"src/Git_Updater/OAuth/OAuth_Connect.php": [145, 166],
 		"src/Git_Updater/Traits/API_Common.php": [473, 512, 561, 562],
-		"src/Git_Updater/REST/REST_API.php": [624, 627]
+		"src/Git_Updater/REST/REST_API.php": [624]
 	},
 	"multisite": {
 		"src/Git_Updater/API/GitHub_API.php": [240],
 		"src/Git_Updater/Theme.php": [316],
 		"src/Git_Updater/OAuth/OAuth_Connect.php": [146, 167, 358],
 		"src/Git_Updater/Traits/API_Common.php": [473, 512, 562],
-		"src/Git_Updater/REST/REST_API.php": [624, 627]
+		"src/Git_Updater/REST/REST_API.php": [624]
 	}
 }

@@ -58,9 +58,6 @@ class REST_API {
 		 */
 		add_action( 'wp_ajax_git-updater-update', [ Singleton::get_instance( 'REST\Rest_Update', $this ), 'process_request' ] );
 		add_action( 'wp_ajax_nopriv_git-updater-update', [ Singleton::get_instance( 'REST\Rest_Update', $this ), 'process_request' ] );
-
-		// AJAX handler for flushing repo cache with immediate wp-cron trigger.
-		add_action( 'wp_ajax_git_updater_flush_repo_cache', [ $this, 'ajax_flush_repo_cache' ] );
 	}
 
 	/**
@@ -723,45 +720,6 @@ class REST_API {
 			'success' => true,
 			$slug     => "Repository cache for $slug has been flushed.",
 		];
-	}
-
-	/**
-	 * AJAX handler to flush individual repository cache and trigger wp-cron.
-	 *
-	 * @return void
-	 */
-	public function ajax_flush_repo_cache() {
-		// Verify nonce.
-		if ( ! isset( $_POST['_ajax_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_ajax_nonce'] ) ), 'gu_flush_repo_cache' ) ) {
-			wp_send_json_error( [ 'message' => 'Invalid nonce.' ], 403 );
-		}
-
-		// Verify capability.
-		$capability = is_multisite() ? 'manage_network_options' : 'manage_options';
-		if ( ! current_user_can( $capability ) ) {
-			wp_send_json_error( [ 'message' => 'Insufficient permissions.' ], 403 );
-		}
-
-		// Get and sanitize slug.
-		$slug = isset( $_POST['slug'] ) ? sanitize_title_with_dashes( wp_unslash( $_POST['slug'] ) ) : '';
-		if ( empty( $slug ) ) {
-			wp_send_json_error( [ 'message' => 'Missing slug parameter.' ], 400 );
-		}
-
-		// Delete repo cache.
-		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo_api_data( $slug );
-
-		// Trigger wp-cron to fetch fresh data immediately.
-		// Only on single-site or main site to avoid performance issues in multisite.
-		if ( ! is_multisite() || is_main_site() ) {
-			wp_cron();
-		}
-
-		wp_send_json_success(
-			[
-				'message' => "Repository cache for $slug has been flushed.",
-			]
-		);
 	}
 
 	/**

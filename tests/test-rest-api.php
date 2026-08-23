@@ -102,7 +102,6 @@ class Test_REST_API_Load_Hooks extends WP_UnitTestCase {
 class Test_REST_API_Dispatch extends WP_UnitTestCase {
 
 	private WP_REST_Server $server;
-	private REST_API       $rest;
 	private string         $api_key = 'test-gu-integration-key';
 
 	public function set_up(): void {
@@ -122,8 +121,6 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 		// regardless of whether the singleton was previously created.
 		update_site_option( 'git_updater_api_key', $this->api_key );
 		$this->force_api_key_static( $this->api_key );
-
-		$this->rest = new REST_API();
 	}
 
 	public function tear_down(): void {
@@ -283,150 +280,6 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 		$this->assertNull( \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $slug, 'repo_headers' ) );
 		// ...but the user's current_branch survives.
 		$this->assertSame( 'develop', \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $slug, 'current_branch' ) );
-	}
-
-	// -------------------------------------------------------------------------
-	// AJAX: ajax_flush_repo_cache()
-	// -------------------------------------------------------------------------
-
-	public function test_ajax_flush_returns_error_for_invalid_nonce(): void {
-		// Force AJAX context so wp_send_json_success/error() calls wp_die() instead of die;.
-		add_filter( 'wp_doing_ajax', '__return_true' );
-		add_filter(
-			'wp_die_ajax_handler',
-			static function (): callable {
-				return static function ( string $message ) {
-					throw new \WPDieException( $message );
-				};
-			}
-		);
-
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-
-		$_POST['_ajax_nonce'] = 'invalid-nonce';
-		$_POST['slug']        = 'test-slug';
-
-		ob_start();
-		try {
-			$this->rest->ajax_flush_repo_cache();
-		} catch ( \WPDieException $e ) {
-			// Expected.
-		}
-		$output = ob_get_clean();
-
-		$data = json_decode( $output, true );
-		$this->assertFalse( $data['success'] );
-		$this->assertStringContainsString( 'nonce', $data['data']['message'] );
-
-		remove_filter( 'wp_doing_ajax', '__return_true' );
-	}
-
-	public function test_ajax_flush_returns_error_for_insufficient_permissions(): void {
-		// Force AJAX context.
-		add_filter( 'wp_doing_ajax', '__return_true' );
-		add_filter(
-			'wp_die_ajax_handler',
-			static function (): callable {
-				return static function ( string $message ) {
-					throw new \WPDieException( $message );
-				};
-			}
-		);
-
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'subscriber' ] ) );
-
-		$_POST['_ajax_nonce'] = wp_create_nonce( 'gu_flush_repo_cache' );
-		$_POST['slug']        = 'test-slug';
-
-		ob_start();
-		try {
-			$this->rest->ajax_flush_repo_cache();
-		} catch ( \WPDieException $e ) {
-			// Expected.
-		}
-		$output = ob_get_clean();
-
-		$data = json_decode( $output, true );
-		$this->assertFalse( $data['success'] );
-		$this->assertStringContainsString( 'permissions', $data['data']['message'] );
-
-		remove_filter( 'wp_doing_ajax', '__return_true' );
-	}
-
-	public function test_ajax_flush_returns_error_for_missing_slug(): void {
-		// Force AJAX context.
-		add_filter( 'wp_doing_ajax', '__return_true' );
-		add_filter(
-			'wp_die_ajax_handler',
-			static function (): callable {
-				return static function ( string $message ) {
-					throw new \WPDieException( $message );
-				};
-			}
-		);
-
-		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
-		if ( is_multisite() ) {
-			grant_super_admin( $user_id );
-		}
-		wp_set_current_user( $user_id );
-
-		$_POST['_ajax_nonce'] = wp_create_nonce( 'gu_flush_repo_cache' );
-		unset( $_POST['slug'] );
-
-		ob_start();
-		try {
-			$this->rest->ajax_flush_repo_cache();
-		} catch ( \WPDieException $e ) {
-			// Expected.
-		}
-		$output = ob_get_clean();
-
-		$data = json_decode( $output, true );
-		$this->assertFalse( $data['success'] );
-		$this->assertStringContainsString( 'slug', $data['data']['message'] );
-
-		remove_filter( 'wp_doing_ajax', '__return_true' );
-	}
-
-	public function test_ajax_flush_returns_success_and_clears_cache(): void {
-		// Force AJAX context.
-		add_filter( 'wp_doing_ajax', '__return_true' );
-		add_filter(
-			'wp_die_ajax_handler',
-			static function (): callable {
-				return static function ( string $message ) {
-					throw new \WPDieException( $message );
-				};
-			}
-		);
-
-		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
-		if ( is_multisite() ) {
-			grant_super_admin( $user_id );
-		}
-		wp_set_current_user( $user_id );
-
-		$slug = 'test-ajax-flush-slug';
-		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $slug, 'repo_headers', 'data', strtotime( '+12 hours' ) );
-
-		$_POST['_ajax_nonce'] = wp_create_nonce( 'gu_flush_repo_cache' );
-		$_POST['slug']        = $slug;
-
-		ob_start();
-		try {
-			$this->rest->ajax_flush_repo_cache();
-		} catch ( \WPDieException $e ) {
-			// Expected.
-		}
-		$output = ob_get_clean();
-
-		$data = json_decode( $output, true );
-		$this->assertTrue( $data['success'] );
-		$this->assertStringContainsString( 'flushed', $data['data']['message'] );
-		$this->assertNull( \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $slug, 'repo_headers' ) );
-
-		remove_filter( 'wp_doing_ajax', '__return_true' );
 	}
 
 	// -------------------------------------------------------------------------
