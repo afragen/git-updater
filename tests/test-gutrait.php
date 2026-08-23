@@ -675,6 +675,49 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 		$this->assertFalse( $result );
 	}
 
+	/**
+	 * When the remote version changes while the cache is still in force, the
+	 * stale release-asset columns are cleared so the lazy get_api_release_assets()
+	 * rebuilds them — while repo_headers, ran, and current_branch are preserved.
+	 */
+	public function test_maybe_extend_repo_cache_clears_release_assets_when_version_changes(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', [ 'Version' => '1.0.0' ], strtotime( '+1 hour' ) );
+		$table->add_entry( 'test-plugin', 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ] );
+		$table->add_entry( 'test-plugin', 'current_branch', 'develop' );
+		$table->add_entry( 'test-plugin', 'release_assets', [ 'assets' => [ '1.0.0' => 'url-stable' ] ] );
+		$table->add_entry( 'test-plugin', 'release_asset', true );
+		$table->add_entry( 'test-plugin', 'release_asset_download', 'url-stale' );
+
+		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '2.0.0' ], $this->type, '1.0.0' );
+		$this->assertFalse( $result );
+
+		$this->assertNull( $table->get_repo( 'test-plugin', 'release_assets' ) );
+		$this->assertNull( $table->get_repo( 'test-plugin', 'release_asset' ) );
+		$this->assertNull( $table->get_repo( 'test-plugin', 'release_asset_download' ) );
+		// Non-release-asset columns are preserved.
+		$this->assertSame( [ 'Version' => '1.0.0' ], $table->get_repo( 'test-plugin', 'repo_headers' ) );
+		$this->assertSame( [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], $table->get_repo( 'test-plugin', 'ran' ) );
+		$this->assertSame( 'develop', $table->get_repo( 'test-plugin', 'current_branch' ) );
+	}
+
+	public function test_maybe_extend_repo_cache_does_not_clear_release_assets_when_version_matches(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', [ 'Version' => '1.0.0' ], strtotime( '+1 hour' ) );
+		$table->add_entry( 'test-plugin', 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ] );
+		$table->add_entry( 'test-plugin', 'release_assets', [ 'assets' => [ '1.0.0' => 'url-stable' ] ] );
+		$table->add_entry( 'test-plugin', 'release_asset', true );
+		$table->add_entry( 'test-plugin', 'release_asset_download', 'url-stable' );
+
+		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '1.0.0' ], $this->type, '1.0.0' );
+		$this->assertTrue( $result );
+
+		$this->assertSame( [ 'assets' => [ '1.0.0' => 'url-stable' ] ], $table->get_repo( 'test-plugin', 'release_assets' ) );
+		// Production reads the cached release_asset in boolean context.
+		$this->assertTrue( (bool) $table->get_repo( 'test-plugin', 'release_asset' ) );
+		$this->assertSame( 'url-stable', $table->get_repo( 'test-plugin', 'release_asset_download' ) );
+	}
+
 	public function test_maybe_extend_repo_cache_returns_false_when_ran_missing(): void {
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
 			'test-plugin',

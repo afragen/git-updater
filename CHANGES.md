@@ -46,6 +46,7 @@
 * reflect cache-table migration and `current_branch` consolidation in the test suite (new `tests/test-cache-table.php`; updated cache-seeding helpers across test files)
 * persist `primary_branch` and `current_branch` in the `git_updater_cache` table from `Plugin::parse_meta()` and `Theme::parse_meta()`; the existing `.git/HEAD` block in those methods continues to override the cache for locally version-controlled installs, making the table the source of truth for the active branch on every parse
 * make `Abstract_Cache_Table::install_table()` drop the table before `dbDelta` to guarantee a clean schema; `dbDelta` is unreliable for adding new columns to an existing table, and the only production caller (`GU_Upgrade::run`) flushes the cache on every upgrade, so the net effect is unchanged
+* fix stale release-asset cache after a remote version change — when the fetched remote version differs from the cached version, `maybe_extend_repo_cache()` now drops the cached `release_assets`, `release_asset`, and `release_asset_download` entries so the lazy release-asset fetch rebuilds them from the new remote during the same cycle instead of serving the previous version's asset list and download URL
 
 #### 14.3.0 / 2026-08-08
 * fix `use_release_asset()` first-run gating — restore the `newest_tag` proxy instead of gating on the cached `release_assets` list, which is only populated after the decision; when no release asset is found the update fails with an empty download link rather than falling back to unbuilt tag source (GitHub and Gitea)

@@ -369,6 +369,16 @@ trait GU_Trait {
 					$table->set_repo_timeout( $slug, strtotime( '+6 hours' ) );
 				}
 				$return = true;
+			} else {
+				/*
+				 * Remote version changed. Release-asset data is only fetched lazily
+				 * and keyed on the cached asset versions, so drop the stale
+				 * release-asset columns now; get_api_release_assets() rebuilds them
+				 * from the new remote during this same fetch cycle.
+				 */
+				$table->delete_entry( $slug, 'release_assets' );
+				$table->delete_entry( $slug, 'release_asset' );
+				$table->delete_entry( $slug, 'release_asset_download' );
 			}
 		}
 
