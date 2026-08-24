@@ -105,6 +105,21 @@ class Test_Cache_Table extends WP_UnitTestCase {
 		$this->assertSame( [ 'foo' => 'bar' ], $full['meta'] );
 	}
 
+	public function test_array_projection_slices_from_warm_row_cache(): void {
+		// After a full-row read warms $row_cache, an array projection slices from
+		// the memoized row without a DB query.
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ] );
+		$this->table->add_entry( 'test-plugin', 'readme', 'readme body' );
+		$this->table->get_repo( 'test-plugin' ); // warm $row_cache.
+
+		$queries = $this->count_cache_table_queries( function () {
+			$partial = $this->table->get_repo( 'test-plugin', [ 'tags', 'readme' ] );
+			$this->assertSame( [ 'tags' => [ '1.0.0' ], 'readme' => 'readme body' ], $partial );
+		} );
+
+		$this->assertSame( 0, $queries, 'array projection should slice from a warm row cache' );
+	}
+
 	public function test_get_repo_with_columns_missing_row_returns_null(): void {
 		$this->assertNull( $this->table->get_repo( 'no-such-slug', [ 'tags', 'readme' ] ) );
 	}
@@ -520,5 +535,220 @@ class Test_Cache_Table extends WP_UnitTestCase {
 
 		$this->assertSame( [ '9.9.9' ], $this->table->get_repo( 'plugin-a' )['tags'] );
 		$this->assertSame( $row_b, $this->table->get_repo( 'plugin-b' ) );
+	}
+
+	// -------------------------------------------------------------------------
+	// Object-cache tier (projected reads backed by wp_cache_)
+	// -------------------------------------------------------------------------
+
+	public function test_add_entry_with_valid_timeout_primes_projection_in_object_cache(): void {
+		// A write carrying a valid row timeout primes the written column in object
+		// cache, so the next projected read is served without a DB query.
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ], time() + 3600 );
+
+		$queries = $this->count_cache_table_queries( function () {
+			$this->assertSame( [ '1.0.0' ], $this->table->get_repo( 'test-plugin', 'tags' ) );
+		} );
+
+		$this->assertSame( 0, $queries, 'a write with a valid timeout should prime the projection in object cache' );
+	}
+
+	public function test_projected_read_populates_object_cache_on_cold_miss(): void {
+		// A cold projected read (row not already in $row_cache, and object cache
+		// invalidated) fetches from the DB once, then serves subsequent reads
+		// from object cache without re-querying.
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ], time() + 3600 );
+		$this->table->invalidate_object_cache( 'test-plugin' ); // Drop the primed cache.
+		$this->table->reset_row_cache(); // Clear the per-request row cache.
+
+		$queries = $this->count_cache_table_queries( function () {
+			$this->assertSame( [ '1.0.0' ], $this->table->get_repo( 'test-plugin', 'tags' ) );
+			$this->assertSame( [ '1.0.0' ], $this->table->get_repo( 'test-plugin', 'tags' ) );
+		} );
+
+		$this->assertSame( 1, $queries, 'a cold projection read should hit the DB once then read from object cache' );
+	}
+
+	public function test_null_column_result_is_cached_and_round_trips(): void {
+		// A NULL column with a valid row timeout is cached (via a sentinel) so the
+		// next read returns null without re-querying.
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ], time() + 3600 );
+		$this->table->reset_row_cache();
+
+		$queries = $this->count_cache_table_queries( function () {
+			$this->assertNull( $this->table->get_repo( 'test-plugin', 'readme' ) );
+			$this->assertNull( $this->table->get_repo( 'test-plugin', 'readme' ) );
+		} );
+
+		$this->assertSame( 1, $queries, 'a NULL column should be cached after its first read' );
+	}
+
+	public function test_expired_timeout_projection_is_not_cached(): void {
+		// When the row timeout has lapsed, no object-cache entry is written, so a
+		// repeated read still queries the DB rather than serving a pinned result.
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ], strtotime( '-1 hour' ) );
+		$this->table->reset_row_cache();
+
+		$queries = $this->count_cache_table_queries( function () {
+			$this->assertSame( [ '1.0.0' ], $this->table->get_repo( 'test-plugin', 'tags' ) );
+			$this->assertSame( [ '1.0.0' ], $this->table->get_repo( 'test-plugin', 'tags' ) );
+		} );
+
+		$this->assertSame( 2, $queries, 'an expired-timeout projection must not be object-cached' );
+	}
+
+	public function test_metadata_timeout_column_read_does_not_corrupt_cached_timeout(): void {
+		// Reading the `timeout` column must surface it correctly and leave the
+		// object-cached row timeout intact (so get_repo_cache(true) stays warm) —
+		// not overwrite it with 0, which would make the row look expired.
+		$timeout = time() + 3600;
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ], $timeout );
+
+		$this->assertSame( (string) $timeout, (string) $this->table->get_repo( 'test-plugin', 'timeout' ) );
+		$this->assertSame( $timeout, $this->table->get_repo_timeout( 'test-plugin' ) );
+	}
+
+	public function test_get_repo_timeout_returns_object_cached_value(): void {
+		$timeout = time() + 3600;
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ], $timeout );
+
+		$this->assertSame( $timeout, $this->table->get_repo_timeout( 'test-plugin' ) );
+	}
+
+	public function test_scalar_timeout_read_is_object_cached(): void {
+		// A standalone `timeout` read must be cached, not re-query the DB.
+		$timeout = time() + 3600;
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ], $timeout );
+		$this->table->reset_row_cache();
+
+		$queries = $this->count_cache_table_queries( function () {
+			$this->assertSame( (string) ( time() + 3600 ), (string) $this->table->get_repo( 'test-plugin', 'timeout' ) );
+			$this->assertSame( (string) ( time() + 3600 ), (string) $this->table->get_repo( 'test-plugin', 'timeout' ) );
+		} );
+
+		$this->assertSame( 1, $queries, 'a scalar timeout read should be cached after the first DB hit' );
+	}
+
+	public function test_scalar_error_timeout_read_is_object_cached(): void {
+		// A standalone `error_timeout` read must be cached too.
+		$this->table->set_error_cache( 'test-plugin', [ 'http_code' => 500 ], 300 );
+		$this->table->reset_row_cache();
+
+		$rows = $this->count_cache_table_queries( function () {
+			$this->assertGreaterThan( time(), (int) $this->table->get_repo( 'test-plugin', 'error_timeout' ) );
+			$this->assertGreaterThan( time(), (int) $this->table->get_repo( 'test-plugin', 'error_timeout' ) );
+		} );
+
+		$this->assertSame( 1, $rows, 'a scalar error_timeout read should be cached after the first DB hit' );
+	}
+
+	public function test_error_cache_timeout_combo_is_object_cached_on_error_row(): void {
+		// The hottest path (API.php:190) reads ['error_cache','error_timeout'] and
+		// must be cached even though a pure error row has row timeout = 0 — the
+		// error_timeout is the governing expiry, not the row timeout.
+		$this->table->set_error_cache( 'test-plugin', [ 'http_code' => 500 ], 300 );
+		$this->table->reset_row_cache();
+
+		$queries = $this->count_cache_table_queries( function () {
+			$row = $this->table->get_repo( 'test-plugin', [ 'error_cache', 'error_timeout' ] );
+			$this->assertSame( [ 'http_code' => 500 ], $row['error_cache'] );
+			$this->assertGreaterThan( time(), (int) $row['error_timeout'] );
+
+			$row2 = $this->table->get_repo( 'test-plugin', [ 'error_cache', 'error_timeout' ] );
+			$this->assertSame( [ 'http_code' => 500 ], $row2['error_cache'] );
+		} );
+
+		$this->assertSame( 1, $queries, 'the error_cache/error_timeout combo must be cached after the first DB hit, even with row timeout 0' );
+	}
+
+	public function test_timeout_with_other_columns_combo_is_object_cached(): void {
+		// API.php:691 reads ['timeout','release_asset','release_asset_redirect'],
+		// which must be cached as a unit.
+		$timeout = time() + 3600;
+		$this->table->add_entry( 'test-plugin', 'release_asset', 'asset-url', $timeout );
+		$this->table->reset_row_cache();
+
+		$queries = $this->count_cache_table_queries( function () use ( $timeout ) {
+			$row = $this->table->get_repo( 'test-plugin', [ 'timeout', 'release_asset' ] );
+			$this->assertSame( (string) $timeout, (string) $row['timeout'] );
+			$this->assertSame( 'asset-url', $row['release_asset'] );
+
+			$this->table->get_repo( 'test-plugin', [ 'timeout', 'release_asset' ] );
+		} );
+
+		$this->assertSame( 1, $queries, 'a timeout+data projection must be cached after the first DB hit' );
+	}
+
+	public function test_healthy_row_scalar_error_cache_is_object_cached(): void {
+		// On a healthy row (valid row timeout, no error), a scalar error_cache read
+		// falls back to the row timeout and caches rather than re-querying.
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ], time() + 3600 );
+		$this->table->reset_row_cache();
+
+		$queries = $this->count_cache_table_queries( function () {
+			$this->assertNull( $this->table->get_repo( 'test-plugin', 'error_cache' ) );
+			$this->assertNull( $this->table->get_repo( 'test-plugin', 'error_cache' ) );
+		} );
+
+		$this->assertSame( 1, $queries, 'a scalar error_cache read on a healthy row should be cached' );
+	}
+
+	public function test_add_entry_invalidates_object_cache_projection(): void {
+		// After a write, the previously-cached projection is discarded and the next
+		// read reflects the freshly-written value from the DB.
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ], time() + 3600 );
+		$this->assertSame( [ '1.0.0' ], $this->table->get_repo( 'test-plugin', 'tags' ) );
+
+		$this->table->add_entry( 'test-plugin', 'tags', [ '2.0.0' ], time() + 3600 );
+
+		$this->assertSame( [ '2.0.0' ], $this->table->get_repo( 'test-plugin', 'tags' ) );
+	}
+
+	public function test_delete_repo_api_data_invalidates_object_cache_projection(): void {
+		$this->table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ], time() + 3600 );
+		$this->assertSame( [ '1.0.0' ], $this->table->get_repo( 'test-plugin', 'tags' ) );
+
+		$this->table->delete_repo_api_data( 'test-plugin' );
+
+		$this->assertNull( $this->table->get_repo( 'test-plugin', 'tags' ) );
+	}
+
+	public function test_projection_cache_is_order_independent(): void {
+		// The same logical column set requested in a different order must share
+		// one cache entry (no re-query), and each permutation must get its own
+		// requested key order back.
+		$this->table->add_entry( 'test-plugin', 'release_asset', 'asset-url', time() + 3600 );
+		$this->table->reset_row_cache();
+
+		$queries = $this->count_cache_table_queries( function () {
+			$a = $this->table->get_repo( 'test-plugin', [ 'timeout', 'release_asset' ] );
+			$this->assertSame( [ 'timeout', 'release_asset' ], array_keys( $a ) );
+			$this->assertSame( 'asset-url', $a['release_asset'] );
+
+			$b = $this->table->get_repo( 'test-plugin', [ 'release_asset', 'timeout' ] );
+			$this->assertSame( [ 'release_asset', 'timeout' ], array_keys( $b ) );
+			$this->assertSame( 'asset-url', $b['release_asset'] );
+		} );
+
+		$this->assertSame( 1, $queries, 'permutations of the same column set must share one cache entry' );
+	}
+
+	public function test_error_combo_cache_is_order_independent(): void {
+		// The order of error_cache/error_timeout must not matter for caching, and
+		// each permutation returns its own key order.
+		$this->table->set_error_cache( 'test-plugin', [ 'http_code' => 500 ], 300 );
+		$this->table->reset_row_cache();
+
+		$queries = $this->count_cache_table_queries( function () {
+			$a = $this->table->get_repo( 'test-plugin', [ 'error_cache', 'error_timeout' ] );
+			$this->assertSame( [ 'error_cache', 'error_timeout' ], array_keys( $a ) );
+			$this->assertSame( [ 'http_code' => 500 ], $a['error_cache'] );
+
+			$b = $this->table->get_repo( 'test-plugin', [ 'error_timeout', 'error_cache' ] );
+			$this->assertSame( [ 'error_timeout', 'error_cache' ], array_keys( $b ) );
+			$this->assertSame( [ 'http_code' => 500 ], $b['error_cache'] );
+		} );
+
+		$this->assertSame( 1, $queries, 'the error_cache/error_timeout combo must cache regardless of order' );
 	}
 }

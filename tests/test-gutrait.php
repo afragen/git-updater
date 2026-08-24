@@ -323,6 +323,24 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 		$this->assertSame( [ 'tags' => [ '1.0.0' ] ], $this->api->get_repo_cache( 'test-plugin', false, [ 'tags' ] ) );
 	}
 
+	public function test_get_repo_cache_with_timeout_served_from_object_cache(): void {
+		// After a write with a valid timeout, a timeout-gated projected read is
+		// served entirely from object cache (no DB query for the timeout gate or
+		// the projection).
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'tags',
+			[ '1.0.0' ],
+			time() + 3600
+		);
+
+		$queries = $this->count_cache_table_queries( function () {
+			$this->assertSame( [ '1.0.0' ], $this->api->get_repo_cache( 'test-plugin', true, 'tags' ) );
+		} );
+
+		$this->assertSame( 0, $queries, 'get_repo_cache(true) should be served from object cache on a warm entry' );
+	}
+
 	public function test_get_repo_cache_returns_false_when_timeout_expired(): void {
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
 			'test-plugin',
@@ -333,6 +351,27 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 
 		$result = $this->api->get_repo_cache( 'test-plugin' );
 		$this->assertFalse( $result );
+	}
+
+	public function test_set_repo_cache_reuses_scalar_cache_no_duplicate_query(): void {
+		// The diff-guard in set_repo_cache must reuse the object-cached scalar value
+		// and row timeout, not issue a separate [$id,'timeout'] projection query.
+		// This is the ['repo_headers','timeout','error_timeout'] duplicate.
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'repo_headers',
+			[ 'Version' => '1.0.0' ],
+			time() + 3600
+		);
+
+		// Warm the scalar cache exactly as get_remote_api_info() does.
+		$this->assertSame( [ 'Version' => '1.0.0' ], $this->api->get_repo_cache( 'test-plugin', false, 'repo_headers' ) );
+
+		$queries = $this->count_cache_table_queries( function () {
+			$this->api->set_repo_cache( 'repo_headers', [ 'Version' => '1.0.0' ], 'test-plugin', '+1 hour' );
+		} );
+
+		$this->assertSame( 0, $queries, 'set_repo_cache must not issue a separate projection query when the scalar is cached' );
 	}
 
 	public function test_get_repo_cache_returns_cache_when_timeout_valid(): void {
@@ -460,6 +499,32 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 			}
 			$verb = strtoupper( ltrim( $query ) );
 			if ( str_starts_with( $verb, 'INSERT' ) || str_starts_with( $verb, 'UPDATE' ) ) {
+				++$count;
+			}
+			return $query;
+		};
+		add_filter( 'query', $filter );
+		try {
+			$fn();
+		} finally {
+			remove_filter( 'query', $filter );
+		}
+		return $count;
+	}
+
+	/**
+	 * Count SELECT/query statements against the cache table during the callback.
+	 *
+	 * @param callable $fn Callback to execute.
+	 *
+	 * @return int Number of queries against the cache table during $fn().
+	 */
+	private function count_cache_table_queries( callable $fn ): int {
+		global $wpdb;
+		$count      = 0;
+		$table_name = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->table_name();
+		$filter     = function ( $query ) use ( &$count, $table_name ) {
+			if ( false !== strpos( $query, $table_name ) ) {
 				++$count;
 			}
 			return $query;

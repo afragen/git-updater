@@ -163,9 +163,10 @@ trait GU_Trait {
 
 		if ( null !== $column ) {
 			// A projected read has no timeout of its own; honor the row timeout
-			// unless the caller opted out. The timeout column is tiny and memoized.
+			// unless the caller opted out. The timeout is surfaced in object cache
+			// so a warm entry avoids a DB query for the freshness gate.
 			if ( $timeout ) {
-				$row_timeout = (int) ( $table->get_repo( $slug, 'timeout' ) ?? 0 );
+				$row_timeout = $table->get_repo_timeout( $slug );
 				if ( ! $this->is_cache_timeout_valid( $row_timeout ) ) {
 					return false;
 				}
@@ -214,9 +215,20 @@ trait GU_Trait {
 		$slug  = $this->get_cache_key( $repo );
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 
-		// Read only the target column (plus timeout for row-timeout preservation)
-		// instead of the full 22-column LONGTEXT row.
-		$existing = $table->get_repo( $slug, [ $id, 'timeout' ] );
+		// Read the target column and the row timeout for the diff guard. The
+		// scalar read and the object-cached timeout are both served from the
+		// object cache (the timeout is surfaced via the repo_timeout: key), so
+		// no separate [$id, 'timeout'] projection query is needed.
+		$existing_value   = $table->get_repo( $slug, $id );
+		$existing_timeout = $table->get_repo_timeout( $slug );
+		// Normalize a SQL-NULL column to '' so the skip-write comparison agrees
+		// with the projection read (null and '' are stored as SQL NULL → '').
+		$existing = ( null === $existing_value && 0 === $existing_timeout )
+			? null
+			: [
+				$id       => null === $existing_value ? '' : $existing_value,
+				'timeout' => $existing_timeout,
+			];
 
 		// Skip the write when the new value matches the cached value for this
 		// column. Serialized comparison is robust against null vs '', array
@@ -1099,7 +1111,7 @@ trait GU_Trait {
 		// Write the cleaned cron array back to the database.
 		_set_cron_array( $cron );
 
-		// Clear cache again to ensure wp_schedule_single_event() reads fresh data
+		// Clear cache again to ensure wp_schedule_single_event() reads fresh data.
 		wp_cache_delete( 'cron', 'options' );
 
 		// Schedule the single consolidated event using WordPress's built-in function
