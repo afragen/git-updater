@@ -173,31 +173,37 @@ class GitHub_API extends API implements API_Interface {
 				$newest_tag = (string) reset( $sorted );
 			}
 		}
-		// Hydrate stale repo object so use_release_asset()'s '0.0.0' gate sees the real value.
-		if ( '0.0.0' === ( $this->type->newest_tag ?? '0.0.0' ) && '0.0.0' !== $newest_tag ) {
-			$this->type->newest_tag = $newest_tag;
-		}
+
+		$target = false !== $branch_switch ? $branch_switch : $this->type->branch;
 
 		// Release asset.
 		if ( $this->use_release_asset( $branch_switch ) ) {
 			$release_asset = $this->resolve_release_asset( $branch_switch );
-			// Only fall through to zipball if resolve_release_asset() returns empty.
 			if ( $release_asset ) {
 				// Only cache the primary/latest release asset; tag-specific assets
 				// must not pollute the release_asset_download cache.
-				if ( ! $this->is_tag_target( (string) ( false !== $branch_switch ? $branch_switch : $this->type->branch ) ) ) {
+				if ( ! $this->is_tag_target( (string) $target ) ) {
 					$this->set_repo_cache( 'release_asset_download', $release_asset );
 				}
 				return $release_asset;
 			}
-			// Empty string from resolve_release_asset() means fall through to zipball.
+
+			/*
+			 * A ReleaseAsset header implies a build step the plain branch/tag
+			 * source does not include. If the primary branch has no release asset,
+			 * return an empty download link so the update fails rather than
+			 * installing unbuilt, incorrect source. Tag targets that don't match
+			 * the newest release asset version fall through to their zipball.
+			 */
+			if ( $this->type->primary_branch === $target ) {
+				return '';
+			}
 		}
 
 		/*
 		 * If a branch has been given, use branch.
 		 * If branch is primary branch (default) and tags are used, use newest tag.
 		 */
-		$target = false !== $branch_switch ? $branch_switch : $this->type->branch;
 		if ( $this->type->primary_branch !== $target || empty( $tags ) ) {
 			$endpoint .= $target;
 		} else {

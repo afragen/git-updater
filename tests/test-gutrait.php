@@ -2121,32 +2121,33 @@ class Test_GUTrait_Extended extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	public function test_use_release_asset_returns_false_without_release_asset_property(): void {
-		$this->type->newest_tag = '1.0.0';
 		$this->assertFalse( $this->use_release_asset() );
 	}
 
 	public function test_use_release_asset_returns_false_when_release_asset_is_false(): void {
 		$this->type->release_asset = false;
-		$this->type->newest_tag    = '1.0.0';
 		$this->assertFalse( $this->use_release_asset() );
 	}
 
-	public function test_use_release_asset_returns_false_when_newest_tag_is_zero(): void {
+	/**
+	 * The '0.0.0' newest_tag proxy is gone: a release-asset repo on its primary
+	 * branch always enters the release-asset resolution path, even when the tags
+	 * endpoint was never fetched (or returned no tags).
+	 */
+	public function test_use_release_asset_returns_true_on_primary_branch_with_zero_newest_tag(): void {
 		$this->type->release_asset = true;
 		$this->type->newest_tag    = '0.0.0';
-		$this->assertFalse( $this->use_release_asset() );
+		$this->assertTrue( $this->use_release_asset() );
 	}
 
 	public function test_use_release_asset_returns_true_on_primary_branch_without_switch(): void {
 		$this->type->release_asset = true;
-		$this->type->newest_tag    = '1.0.0';
 		// branch == primary_branch and branch_switch === false
 		$this->assertTrue( $this->use_release_asset( false ) );
 	}
 
 	public function test_use_release_asset_returns_true_when_switching_to_primary_branch(): void {
 		$this->type->release_asset = true;
-		$this->type->newest_tag    = '1.0.0';
 		$this->type->branches      = [ 'master' => [], 'develop' => [] ];
 		// branch_switch == primary_branch
 		$this->assertTrue( $this->use_release_asset( 'master' ) );
@@ -2154,7 +2155,6 @@ class Test_GUTrait_Extended extends WP_UnitTestCase {
 
 	public function test_use_release_asset_returns_true_when_switching_to_tag(): void {
 		$this->type->release_asset = true;
-		$this->type->newest_tag    = '1.0.0';
 		$this->type->branches      = [ 'master' => [], 'develop' => [] ];
 		// '1.0.0' tag is not in branches array → is_tag = true
 		$this->assertTrue( $this->use_release_asset( '1.0.0' ) );
@@ -2162,7 +2162,6 @@ class Test_GUTrait_Extended extends WP_UnitTestCase {
 
 	public function test_use_release_asset_returns_false_when_switching_to_non_primary_branch(): void {
 		$this->type->release_asset = true;
-		$this->type->newest_tag    = '1.0.0';
 		$this->type->branches      = [ 'master' => [], 'develop' => [] ];
 		// 'develop' is in branches and is not primary_branch
 		$this->assertFalse( $this->use_release_asset( 'develop' ) );
@@ -2176,7 +2175,6 @@ class Test_GUTrait_Extended extends WP_UnitTestCase {
 	 */
 	public function test_use_release_asset_uses_target_not_current_branch_for_primary_switch(): void {
 		$this->type->release_asset = true;
-		$this->type->newest_tag    = '1.0.0';
 		$this->type->branch        = 'develop';
 		$this->type->branches      = [ 'master' => [], 'develop' => [] ];
 
@@ -2189,7 +2187,6 @@ class Test_GUTrait_Extended extends WP_UnitTestCase {
 	 */
 	public function test_use_release_asset_uses_target_not_current_branch_for_non_primary_switch(): void {
 		$this->type->release_asset = true;
-		$this->type->newest_tag    = '1.0.0';
 		$this->type->branch        = 'master';
 		$this->type->branches      = [ 'master' => [], 'develop' => [] ];
 
@@ -2203,18 +2200,28 @@ class Test_GUTrait_Extended extends WP_UnitTestCase {
 	 */
 	public function test_use_release_asset_returns_true_on_first_run_with_empty_cache(): void {
 		$this->type->release_asset = true;
-		$this->type->newest_tag    = '1.0.0';
 		// No seed_release_assets_cache() — cache is empty, as on first run.
 		$this->assertTrue( $this->use_release_asset( false ) );
 	}
 
 	/**
+	 * Existence is resolved downstream, not in the gate: even a populated but
+	 * empty release_assets struct (no stable or dev assets) still passes the
+	 * gate, so construct_download_link() reaches the resolve step and fails the
+	 * update rather than silently switching to a zipball.
+	 */
+	public function test_use_release_asset_returns_true_with_empty_release_assets_struct(): void {
+		$this->type->release_asset = true;
+		$this->seed_release_assets_cache( [ 'assets' => [], 'dev_assets' => [] ] );
+		$this->assertTrue( $this->use_release_asset( false ) );
+	}
+
+	/**
 	 * After get_remote_api_tag() runs sort_tags(), newest_tag + tags are both set
-	 * before construct_download_link() — use_release_asset() must pass.
+	 * before construct_download_link() — use_release_asset() must still pass.
 	 */
 	public function test_use_release_asset_returns_true_after_get_remote_api_tag_sets_tags(): void {
 		$this->type->release_asset = true;
-		$this->type->newest_tag    = '2.0.0';
 		$this->type->tags          = [ '2.0.0' => 'https://example.com/2.0.0.zip', '1.0.0' => 'https://example.com/1.0.0.zip' ];
 		$this->assertTrue( $this->use_release_asset( false ) );
 	}
