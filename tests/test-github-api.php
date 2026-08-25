@@ -748,8 +748,10 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * When get_release_assets() returns false (no-update gate fires),
-	 * construct_download_link() falls through to zipball URL.
+	 * A ReleaseAsset header implies a build step: when get_release_assets()
+	 * returns false (no-update gate fires), construct_download_link() on the
+	 * primary branch returns an empty string so the update fails rather than
+	 * falling back to unbuilt source.
 	 */
 	public function test_construct_download_link_returns_empty_when_release_assets_unavailable(): void {
 		// Seed release_assets with a message object so validate_response returns true → get_api_release_assets returns false.
@@ -759,8 +761,8 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 		$result = $this->api->construct_download_link();
 
-		// Falls through to zipball for newest tag.
-		$this->assertSame( 'https://api.github.com/repos/test-owner/test-plugin/zipball/1.0.0', $result );
+		// Update fails with an empty download link.
+		$this->assertSame( '', $result );
 	}
 
 	/**
@@ -785,7 +787,8 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 	/**
 	 * When release_assets is in cache but release_asset_download is not,
-	 * construct_download_link() falls through to zipball URL.
+	 * construct_download_link() returns an empty string so the primary-branch
+	 * update fails instead of falling through to the zipball.
 	 */
 	public function test_construct_download_link_calls_redirect_when_no_cached_download(): void {
 		$this->seed_cache(
@@ -799,13 +802,15 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 		$result = $this->api->construct_download_link();
 
-		// Falls through to zipball for newest tag.
-		$this->assertSame( 'https://api.github.com/repos/test-owner/test-plugin/zipball/1.0.0', $result );
+		// Update fails with an empty download link.
+		$this->assertSame( '', $result );
 	}
 
 	/**
 	 * When release_assets resolves to an empty assets array, a previously cached
-	 * release_asset_download must not be overwritten with a falsy value.
+	 * release_asset_download must not be overwritten with a falsy value, and the
+	 * primary-branch update fails with an empty download link rather than falling
+	 * through to the zipball.
 	 */
 	public function test_construct_download_link_does_not_clobber_cached_release_asset_download(): void {
 		$cached_url = 'https://github.com/test-owner/test-plugin/releases/download/v1.0.0/plugin.zip';
@@ -821,8 +826,8 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 		$result = $this->api->construct_download_link();
 
-		// Falls through to zipball for newest tag.
-		$this->assertSame( 'https://api.github.com/repos/test-owner/test-plugin/zipball/1.0.0', $result );
+		// Update fails with an empty download link.
+		$this->assertSame( '', $result );
 
 		$cache = $this->api->get_repo_cache( 'test-plugin' );
 		$this->assertSame( $cached_url, $cache['release_asset_download'] );

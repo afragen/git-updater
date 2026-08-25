@@ -1066,6 +1066,13 @@ trait GU_Trait {
 	/**
 	 * Test whether to use release asset.
 	 *
+	 * A pure config + target decision. Availability is deliberately NOT decided
+	 * here: the cached release_assets struct is only populated by
+	 * get_release_assets(), which runs after this decision inside
+	 * construct_download_link(), and '0.0.0' newest_tag as a proxy conflates
+	 * "tags never fetched" with "repo has no tags". Existence of assets is
+	 * resolved downstream in resolve_release_asset().
+	 *
 	 * @param bool|string $branch_switch Branch to switch to or false.
 	 *
 	 * @return bool
@@ -1086,15 +1093,7 @@ trait GU_Trait {
 		// Release assets are only used for the primary branch or a specific tag.
 		$use_release_asset = $this->type->primary_branch === $target || $is_tag;
 
-		/*
-		 * Do not gate on the cached release_assets list here: it is only populated
-		 * by get_release_assets(), which runs after this decision inside
-		 * construct_download_link(). An empty cache on first run is normal, not a
-		 * signal that the repo has no assets. The '0.0.0' newest_tag proxy stands in
-		 * for "repo has tags" until the release-assets API is actually queried.
-		 */
 		return (bool) ( $this->type->release_asset ?? false )
-			&& '0.0.0' !== ( $this->type->newest_tag ?? '0.0.0' )
 			&& $use_release_asset;
 	}
 

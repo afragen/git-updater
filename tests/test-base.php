@@ -1136,12 +1136,17 @@ class Test_Base_Get_Remote_Repo_Meta_Flow extends WP_UnitTestCase {
 
 	// Expired cache, old version == remote version: maybe_extend_repo_cache returns true
 	// → get_remote_api_info returns false → secondary calls block is skipped entirely.
+	// The fixture is a release-asset repo (Release Asset: true), so construct_download_link()
+	// still lazily resolves the release asset (one /releases request) instead of serving
+	// a zipball — the secondary fetch block (contents/assets/readme/changes/tags/branches/
+	// meta) is what is skipped.
 	public function test_versions_same_skips_secondary_calls(): void {
 		$this->seed_cache( '2.0.0' );
 
 		( new Base() )->get_remote_repo_meta( $this->config );
 
-		$this->assertSame( 1, $this->request_count );
+		// 1 = plugin-file fetch; 2 = lazy release-asset resolution (not a secondary call).
+		$this->assertSame( 2, $this->request_count );
 	}
 
 	// Expired cache, old version != remote version: maybe_extend_repo_cache returns false
