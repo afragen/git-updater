@@ -265,6 +265,16 @@ class Test_Additions_Settings_Load_Hooks extends WP_UnitTestCase {
 				unregister_block_bindings_source( $name );
 			}
 		}
+		/*
+		 * WP 7.1 registers the default icon collections/icons on `init`
+		 * (default-filters.php:818-819). They are already registered by the
+		 * time the test suite boots, so re-firing `init` below would make the
+		 * singleton registries emit "already registered" _doing_it_wrong
+		 * notices — mirror core's _unhook_font_registration() approach for
+		 * fonts. The collection hook runs at priority 0.
+		 */
+		remove_action( 'init', '_wp_register_default_icon_collections', 0 );
+		remove_action( 'init', '_wp_register_default_icons' );
 		do_action( 'init' );
 		$tabs = apply_filters( 'gu_add_settings_tabs', [] );
 		$this->assertArrayHasKey( 'git_updater_additions', $tabs );
