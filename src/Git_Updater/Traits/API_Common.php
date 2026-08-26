@@ -563,8 +563,11 @@ trait API_Common {
 	 * @param  string $request Query for API->api().
 	 * @return string|array<string, mixed>|false $response Release asset URI.
 	 */
+	/*
+	 * Read without TTL gating; see get_api_release_assets() for rationale.
+	 */
 	final public function get_api_release_asset( $git, $request ) {
-		$cache    = $this->get_repo_cache( $this->type->slug );
+		$cache    = $this->get_repo_cache( $this->type->slug, false );
 		$response = $cache['release_asset'] ?? false;
 
 		if ( ! $response ) {
@@ -598,7 +601,14 @@ trait API_Common {
 	 * @return array<string, mixed>|false $response Release asset URI.
 	 */
 	final public function get_api_release_assets( $git, $request ) {
-		$cache    = $this->get_repo_cache( $this->type->slug );
+		/*
+		 * Read without TTL gating: the release-asset entries are invalidated
+		 * explicitly by maybe_extend_repo_cache() when the remote version
+		 * changes. Honoring an expired timeout here makes every
+		 * construct_download_link() call in the same fetch cycle (per-branch
+		 * download links, then the repo download link) re-fetch /releases.
+		 */
+		$cache    = $this->get_repo_cache( $this->type->slug, false );
 		$response = $cache['release_assets'] ?? false;
 
 		if ( ! $response ) {

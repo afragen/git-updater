@@ -1775,6 +1775,50 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 	}
 
 	/**
+	 * get_release_assets() must serve the cached array even when the cache
+	 * timeout is expired: within a fetch cycle the timeout is stale by design,
+	 * and the release-asset entries are invalidated explicitly by
+	 * maybe_extend_repo_cache() when the remote version changes. TTL-gating the
+	 * read here makes every construct_download_link() call in the same cycle
+	 * (per-branch download links, then the repo download link) re-fetch
+	 * /releases.
+	 */
+	public function test_get_release_assets_returns_array_from_cache_with_expired_timeout(): void {
+		add_filter( 'gu_always_fetch_update', '__return_true' );
+
+		$call = 0;
+		add_filter(
+			'pre_http_request',
+			function () use ( &$call ) {
+				$call++;
+				return $this->mock_http_response( 200, [] );
+			},
+			10,
+			3
+		);
+
+		$cached = [
+			'assets'         => [ '1.0.0' => 'https://example.com/release.zip' ],
+			'created_at'     => [ '1.0.0' => '2024-06-01T12:00:00Z' ],
+			'dev_assets'     => [],
+			'dev_created_at' => [],
+		];
+		// Expired timeout; cache row otherwise intact.
+		update_site_option(
+			$this->api->get_cache_key( 'test-plugin' ),
+			[
+				'timeout'        => strtotime( '-1 hour' ),
+				'release_assets' => $cached,
+			]
+		);
+
+		$result = $this->api->get_release_assets();
+		$this->assertIsArray( $result );
+		$this->assertSame( $cached, $result );
+		$this->assertSame( 0, $call, 'No API call expected when cached data is available regardless of timeout' );
+	}
+
+	/**
 	 * When the remote version changes while the cache is still in force,
 	 * maybe_extend_repo_cache() drops the stale release-asset entries so the
 	 * lazy get_release_assets() re-fetches them. With gu_dev_release_asset on,

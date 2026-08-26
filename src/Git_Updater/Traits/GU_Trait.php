@@ -277,25 +277,35 @@ trait GU_Trait {
 		$cache_key = $this->get_cache_key( $repo->slug ?? false );
 		$cache     = get_site_option( $cache_key, [] );
 
-		if ( isset( $cache['ran'] ) && ! array_diff( self::expected_ran_steps(), $cache['ran'] ) ) {
-			if ( version_compare( $remote_headers['Version'], $old_version, '==' ) ) {
+		if ( version_compare( $remote_headers['Version'], $old_version, '==' ) ) {
+			// Only extend the timeout when the prior fetch cycle completed.
+			if ( isset( $cache['ran'] ) && ! array_diff( self::expected_ran_steps(), $cache['ran'] ) ) {
 				if ( ! $this->is_cache_timeout_valid( $cache['timeout'] ?? 0 ) ) {
 					$cache['timeout'] = strtotime( '+6 hours' );
 					update_site_option( $cache_key, $cache );
 				}
 				$return = true;
-			} else {
-				/*
-				 * Remote version changed. Release-asset data is only fetched lazily
-				 * and keyed on the cached asset versions, so drop the stale
-				 * release-asset entries now; get_api_release_assets() rebuilds them
-				 * from the new remote during this same fetch cycle.
-				 */
-				unset( $cache['release_assets'] );
-				unset( $cache['release_asset'] );
-				unset( $cache['release_asset_download'] );
-				update_site_option( $cache_key, $cache );
 			}
+		} elseif ( '' !== $old_version ) {
+			/*
+			 * Remote version changed. Release-asset data is only fetched lazily
+			 * and keyed on the cached asset versions, so drop the stale
+			 * release-asset entries now; get_api_release_assets() rebuilds them
+			 * from the new remote during this same fetch cycle.
+			 *
+			 * Deliberately not gated on 'ran' completeness: get_api_release_assets()
+			 * reads the cache without TTL gating, so this unset is the only
+			 * invalidation. An interrupted prior cycle can leave entries keyed to
+			 * the old version, and serving them for the new version is wrong.
+			 *
+			 * Guarded on a non-empty $old_version: with no baseline version
+			 * (first fetch) there is nothing stale to invalidate for a version
+			 * comparison that has no meaning.
+			 */
+			unset( $cache['release_assets'] );
+			unset( $cache['release_asset'] );
+			unset( $cache['release_asset_download'] );
+			update_site_option( $cache_key, $cache );
 		}
 
 		return $return;

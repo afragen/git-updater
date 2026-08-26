@@ -600,6 +600,38 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 		$this->assertFalse( $result );
 	}
 
+	/**
+	 * A version change must drop stale release-asset entries even when the
+	 * prior fetch cycle was incomplete ('ran' missing steps): those entries are
+	 * keyed on the old version's asset names, and get_api_release_assets()
+	 * serves them without TTL gating, so the unset below is the only
+	 * invalidation.
+	 */
+	public function test_maybe_extend_repo_cache_clears_release_assets_when_version_changes_and_ran_incomplete(): void {
+		$cache_key = $this->api->get_cache_key( 'test-plugin' );
+		update_site_option(
+			$cache_key,
+			[
+				'repo'                   => 'test-plugin',
+				'test-plugin'            => [ 'Version' => '1.0.0' ],
+				// Interrupted mid-sequence.
+				'ran'                    => [ 'contents', 'assets', 'readme', 'changes', 'tags' ],
+				'timeout'                => strtotime( '-1 hour' ),
+				'release_assets'         => [ 'assets' => [ '1.0.0' => 'url-stable' ], 'dev_assets' => [] ],
+				'release_asset'          => true,
+				'release_asset_download' => 'url-stale',
+			]
+		);
+
+		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '2.0.0' ], $this->type, '1.0.0' );
+		$this->assertFalse( $result );
+
+		$cache = get_site_option( $cache_key );
+		$this->assertArrayNotHasKey( 'release_assets', $cache );
+		$this->assertArrayNotHasKey( 'release_asset', $cache );
+		$this->assertArrayNotHasKey( 'release_asset_download', $cache );
+	}
+
 	// -------------------------------------------------------------------------
 	// delete_all_cached_data()
 	// -------------------------------------------------------------------------
