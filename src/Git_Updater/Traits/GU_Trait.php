@@ -361,7 +361,9 @@ trait GU_Trait {
 	 * is same as cached remote version?
 	 *
 	 * Uses is_fetch_complete() (which inspects the `ran` column) to determine if
-	 * all API calls have executed. If not complete, do not extend or set timeout.
+	 * all API calls have executed. If not complete, the timeout is not extended;
+	 * a remote version change still drops the stale release-asset columns so the
+	 * lazy fetch rebuilds them from the new remote.
 	 *
 	 * @param array<string, string> $remote_headers Remote headers data array.
 	 * @param stdClass              $repo           Repo data object.
@@ -375,23 +377,34 @@ trait GU_Trait {
 		$table   = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 		$timeout = (int) ( $table->get_repo( $slug, 'timeout' ) ?? 0 );
 
-		if ( $this->is_fetch_complete( $slug ) ) {
-			if ( version_compare( $remote_headers['Version'], $old_version, '==' ) ) {
+		if ( version_compare( $remote_headers['Version'], $old_version, '==' ) ) {
+			// Only extend the timeout when the prior fetch cycle completed.
+			if ( $this->is_fetch_complete( $slug ) ) {
 				if ( ! $this->is_cache_timeout_valid( $timeout ) ) {
 					$table->set_repo_timeout( $slug, strtotime( '+6 hours' ) );
 				}
 				$return = true;
-			} else {
-				/*
-				 * Remote version changed. Release-asset data is only fetched lazily
-				 * and keyed on the cached asset versions, so drop the stale
-				 * release-asset columns now; get_api_release_assets() rebuilds them
-				 * from the new remote during this same fetch cycle.
-				 */
-				$table->delete_entry( $slug, 'release_assets' );
-				$table->delete_entry( $slug, 'release_asset' );
-				$table->delete_entry( $slug, 'release_asset_download' );
 			}
+		} elseif ( '' !== $old_version ) {
+			/*
+			 * Remote version changed. Release-asset data is only fetched lazily
+			 * and keyed on the cached asset versions, so drop the stale
+			 * release-asset columns now; get_api_release_assets() rebuilds them
+			 * from the new remote during this same fetch cycle.
+			 *
+			 * Deliberately not gated on is_fetch_complete(): the non-gated reads
+			 * in get_api_release_assets()/get_api_release_asset() make this
+			 * unset the only invalidation. An interrupted prior cycle can leave
+			 * columns keyed to the old version, and serving them for the new
+			 * version is wrong.
+			 *
+			 * Guarded on a non-empty $old_version: with no baseline version
+			 * (first fetch) there is nothing stale to invalidate for a version
+			 * comparison that has no meaning.
+			 */
+			$table->delete_entry( $slug, 'release_assets' );
+			$table->delete_entry( $slug, 'release_asset' );
+			$table->delete_entry( $slug, 'release_asset_download' );
 		}
 
 		return $return;

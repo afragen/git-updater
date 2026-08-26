@@ -415,8 +415,17 @@ class GitHub_API extends API implements API_Interface {
 		if ( $this->validate_response( $response ) ) {
 			return [];
 		}
-		$branches = [];
+		/*
+		 * Seed type->branches before the loop so construct_download_link()
+		 * classifies branches versus tags during the per-branch download link
+		 * resolution. populate_api_data() fills the repo object later; without
+		 * this, every branch target is treated as a tag and release-asset repos
+		 * re-resolve /releases for each branch.
+		 */
+		$this->type->branches = [];
+		$branches             = [];
 		foreach ( (array) $response as $branch ) {
+			$this->type->branches[ $branch->name ] = [];
 			$branches[ $branch->name ]['download']    = $this->construct_download_link( $branch->name );
 			$branches[ $branch->name ]['commit_hash'] = $branch->commit->sha;
 			$branches[ $branch->name ]['commit_api']  = $branch->commit->url;

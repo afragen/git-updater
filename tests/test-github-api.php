@@ -228,6 +228,67 @@ class Test_GitHub_API_Parse extends WP_UnitTestCase {
 		$this->assertSame( $api_url, $result['main']['commit_api'] );
 	}
 
+	/**
+	 * parse_branch_response() seeds type->branches before resolving per-branch
+	 * download links, so construct_download_link() classifies branch targets as
+	 * branches (not tags) during the loop. Without the seeding every branch is
+	 * treated as a tag and a release-asset repo re-fetches /releases for each
+	 * branch; the cached release assets are served even with an expired timeout,
+	 * so no API call is expected here.
+	 */
+	public function test_parse_branch_response_seeds_branches_and_only_primary_uses_release_asset(): void {
+		$asset_url                 = 'https://github.com/test-owner/test-plugin/releases/download/v1.0.0/plugin.zip';
+		$this->type->release_asset = true;
+		$this->type->newest_tag    = '1.0.0';
+		$this->type->tags          = [ '1.0.0' => 'https://github.com/test-owner/test-plugin/zipball/1.0.0' ];
+
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$table->add_entry( 'test-plugin', 'repo_headers', '', strtotime( '-1 hour' ) );
+		$table->add_entry(
+			'test-plugin',
+			'release_assets',
+			[
+				'assets'     => [ '1.0.0' => $asset_url ],
+				'dev_assets' => [],
+			]
+		);
+
+		$call = 0;
+		add_filter(
+			'pre_http_request',
+			function () use ( &$call ) {
+				$call++;
+				return [
+					'response' => [ 'code' => 200, 'message' => 'OK' ],
+					'body'     => '[]',
+					'headers'  => [],
+					'cookies'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		$branch = static fn( string $name, string $sha ) => (object) [
+			'name'   => $name,
+			'commit' => (object) [ 'sha' => $sha, 'url' => "https://api.github.com/repos/test-owner/test-plugin/commits/{$sha}" ],
+		];
+
+		$result = $this->api->parse_branch_response( [ $branch( 'master', 'aaa' ), $branch( 'develop', 'bbb' ) ] );
+
+		// type->branches seeded so is_tag_target()/use_release_asset() work during the loop.
+		$this->assertArrayHasKey( 'master', $this->type->branches );
+		$this->assertArrayHasKey( 'develop', $this->type->branches );
+
+		// Primary branch resolves via release asset; non-primary falls through to zipball.
+		$this->assertSame( $asset_url, $result['master']['download'] );
+		$this->assertStringContainsString( '/zipball/develop', $result['develop']['download'] );
+
+		// Cached release assets are served without TTL gating: no API call needed.
+		$this->assertSame( 0, $call );
+	}
+
 	// -------------------------------------------------------------------------
 	// parse_release_asset_response()
 	// -------------------------------------------------------------------------

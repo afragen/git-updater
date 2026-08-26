@@ -813,6 +813,30 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 		$this->assertFalse( $result );
 	}
 
+	/**
+	 * A version change must drop stale release-asset entries even when the
+	 * prior fetch cycle was incomplete ('ran' missing steps): those entries are
+	 * keyed on the old version's asset names, and the non-gated reads in
+	 * get_api_release_assets()/get_api_release_asset() make this unset the only
+	 * invalidation.
+	 */
+	public function test_maybe_extend_repo_cache_clears_release_assets_when_version_changes_and_ran_incomplete(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', [ 'Version' => '1.0.0' ], strtotime( '-1 hour' ) );
+		// Interrupted mid-sequence.
+		$table->add_entry( 'test-plugin', 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags' ] );
+		$table->add_entry( 'test-plugin', 'release_assets', [ 'assets' => [ '1.0.0' => 'url-stable' ], 'dev_assets' => [] ] );
+		$table->add_entry( 'test-plugin', 'release_asset', true );
+		$table->add_entry( 'test-plugin', 'release_asset_download', 'url-stale' );
+
+		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '2.0.0' ], $this->type, '1.0.0' );
+		$this->assertFalse( $result );
+
+		$this->assertNull( $table->get_repo( 'test-plugin', 'release_assets' ) );
+		$this->assertNull( $table->get_repo( 'test-plugin', 'release_asset' ) );
+		$this->assertNull( $table->get_repo( 'test-plugin', 'release_asset_download' ) );
+	}
+
 	// -------------------------------------------------------------------------
 	// is_fetch_complete()
 	// -------------------------------------------------------------------------
