@@ -415,6 +415,7 @@ class GitHub_API extends API implements API_Interface {
 		if ( $this->validate_response( $response ) ) {
 			return [];
 		}
+
 		/*
 		 * Seed type->branches before the loop so construct_download_link()
 		 * classifies branches versus tags during the per-branch download link
@@ -423,9 +424,12 @@ class GitHub_API extends API implements API_Interface {
 		 * re-resolve /releases for each branch.
 		 */
 		$this->type->branches = [];
-		$branches             = [];
 		foreach ( (array) $response as $branch ) {
 			$this->type->branches[ $branch->name ] = [];
+		}
+
+		$branches = [];
+		foreach ( (array) $response as $branch ) {
 			$branches[ $branch->name ]['download']    = $this->construct_download_link( $branch->name );
 			$branches[ $branch->name ]['commit_hash'] = $branch->commit->sha;
 			$branches[ $branch->name ]['commit_api']  = $branch->commit->url;
