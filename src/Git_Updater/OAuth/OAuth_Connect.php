@@ -271,7 +271,8 @@ class OAuth_Connect {
 				$provider,
 				$result['access_token'],
 				$result['refresh_token'] ?? null,
-				$result['expires_in'] ?? null
+				$result['expires_in'] ?? null,
+				$result['refresh_token_expires_in'] ?? null
 			);
 			// Clear any prior re-authorization notice now that we're reconnected.
 			$persist_options = get_site_option( 'git_updater', [] );
@@ -388,27 +389,38 @@ class OAuth_Connect {
 		}
 
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+		// Distinguish a transient rate-limited retrieve from a genuine grant
+		// failure so handle_callback() can surface the right status.
+		if ( 429 === (int) wp_remote_retrieve_response_code( $response )
+			|| in_array( $body['error'] ?? '', [ 'rate_limited', 'api_rate_limited' ], true )
+		) {
+			return null;
+		}
+
 		if ( empty( $body['access_token'] ) ) {
 			return null;
 		}
 
 		return [
-			'access_token'  => sanitize_text_field( $body['access_token'] ),
-			'refresh_token' => ! empty( $body['refresh_token'] ) ? sanitize_text_field( $body['refresh_token'] ) : null,
-			'expires_in'    => ! empty( $body['expires_in'] ) ? (int) $body['expires_in'] : null,
+			'access_token'             => wp_unslash( (string) $body['access_token'] ),
+			'refresh_token'            => ! empty( $body['refresh_token'] ) ? wp_unslash( (string) $body['refresh_token'] ) : null,
+			'expires_in'               => ! empty( $body['expires_in'] ) ? (int) $body['expires_in'] : null,
+			'refresh_token_expires_in' => ! empty( $body['refresh_token_expires_in'] ) ? (int) $body['refresh_token_expires_in'] : null,
 		];
 	}
 
 	/**
 	 * Save token and optional refresh token / expiry metadata to options.
 	 *
-	 * @param string      $provider      Provider slug.
-	 * @param string      $token         Access token.
-	 * @param string|null $refresh_token Refresh token, if available.
-	 * @param int|null    $expires_in    Seconds until token expiry, if known.
+	 * @param string      $provider                 Provider slug.
+	 * @param string      $token                    Access token.
+	 * @param string|null $refresh_token            Refresh token, if available.
+	 * @param int|null    $expires_in               Seconds until access-token expiry, if known.
+	 * @param int|null    $refresh_token_expires_in Seconds until refresh-token expiry, if known.
 	 * @return void
 	 */
-	private function save_token( string $provider, string $token, ?string $refresh_token = null, ?int $expires_in = null ): void {
+	private function save_token( string $provider, string $token, ?string $refresh_token = null, ?int $expires_in = null, ?int $refresh_token_expires_in = null ): void {
 		$config  = self::PROVIDERS[ $provider ];
 		$options = get_site_option( 'git_updater', [] );
 
@@ -421,11 +433,20 @@ class OAuth_Connect {
 			unset( $options[ $config['refresh_option_key'] ] );
 		}
 
+		// Access-token lifetime. A value of 0 is treated as "does not expire".
 		if ( $expires_in ) {
 			$options[ $provider . '_token_expires_in' ]  = $expires_in;
 			$options[ $provider . '_token_acquired_at' ] = time();
 		} else {
 			unset( $options[ $provider . '_token_expires_in' ], $options[ $provider . '_token_acquired_at' ] );
+		}
+
+		// Refresh-token lifetime, when the provider reports one.
+		if ( $refresh_token_expires_in ) {
+			$options[ $provider . '_refresh_token_expires_in' ]  = $refresh_token_expires_in;
+			$options[ $provider . '_refresh_token_acquired_at' ] = time();
+		} else {
+			unset( $options[ $provider . '_refresh_token_expires_in' ], $options[ $provider . '_refresh_token_acquired_at' ] );
 		}
 
 		update_site_option( 'git_updater', $options );
@@ -447,6 +468,8 @@ class OAuth_Connect {
 		unset( $options[ $config['refresh_option_key'] ] );
 		unset( $options[ $provider . '_token_expires_in' ] );
 		unset( $options[ $provider . '_token_acquired_at' ] );
+		unset( $options[ $provider . '_refresh_token_expires_in' ] );
+		unset( $options[ $provider . '_refresh_token_acquired_at' ] );
 		unset( $options[ $provider . '_is_oauth_token' ] );
 		unset( $options[ 'gu_oauth_revoked_' . $provider ] );
 		unset( $options[ 'gu_oauth_notified_' . $provider ] );
@@ -456,6 +479,7 @@ class OAuth_Connect {
 
 		delete_site_transient( $this->get_lock_transient_name( $provider ) );
 		delete_site_transient( $this->get_result_transient_name( $provider ) );
+		delete_site_transient( 'gu_oauth_refresh_retry_' . $provider );
 	}
 
 	/**
@@ -477,6 +501,14 @@ class OAuth_Connect {
 		$refresh_token = $options[ $config['refresh_option_key'] ] ?? null;
 
 		if ( ! $refresh_token ) {
+			return null;
+		}
+
+		// Honor a prior Retry-After without blocking the request: if a previous
+		// refresh was rate limited, short-circuit future attempts until the
+		// deadline passes. Crucially, this does NOT delete the token.
+		$retry_until = get_site_transient( 'gu_oauth_refresh_retry_' . $provider );
+		if ( $retry_until && time() < $retry_until ) {
 			return null;
 		}
 
@@ -529,8 +561,32 @@ class OAuth_Connect {
 			return null;
 		}
 
-		$body = json_decode( wp_remote_retrieve_body( $response ), true );
-		if ( empty( $body['access_token'] ) ) {
+		$body  = json_decode( wp_remote_retrieve_body( $response ), true );
+		$code  = (int) wp_remote_retrieve_response_code( $response );
+		$error = (string) ( $body['error'] ?? '' );
+
+		// Rate limited OR server error → keep the token, honor Retry-After,
+		// do NOT treat as revoked. The connector returns 429 for upstream rate
+		// limits and the client already persists Retry-After for backoff.
+		if ( 429 === $code || $code >= 500
+			|| in_array( $error, [ 'rate_limited', 'api_rate_limited', 'rate_limit_exceeded' ], true )
+		) {
+			$retry = (int) wp_remote_retrieve_header( $response, 'Retry-After' );
+			if ( $retry > 0 ) {
+				set_site_transient( 'gu_oauth_refresh_retry_' . $provider, time() + $retry, $retry );
+			}
+			delete_site_transient( $this->get_lock_transient_name( $provider ) );
+			set_site_transient( $this->get_result_transient_name( $provider ), 'failure', self::REFRESH_RESULT_TTL );
+			if ( $debug ) {
+				error_log( 'Git Updater: Token refresh rate limited for ' . $provider . '; token preserved.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			}
+			return null;
+		}
+
+		// Real re-auth required (invalid/expired/revoked grant): the connector
+		// forwards the machine error code (e.g. invalid_grant, bad_refresh_token).
+		// Treat any non-rate-limit error as a revocation → delete + email.
+		if ( ! in_array( $error, [ 'rate_limited', 'api_rate_limited', 'rate_limit_exceeded' ], true ) && ! empty( $error ) ) {
 			// Provider rejected the refresh (e.g. revoked/rotated refresh token):
 			// drop the now-invalid token so the Connect button reappears.
 			$this->delete_token( $provider );
@@ -544,17 +600,29 @@ class OAuth_Connect {
 			delete_site_transient( $this->get_lock_transient_name( $provider ) );
 			set_site_transient( $this->get_result_transient_name( $provider ), 'failure', self::REFRESH_RESULT_TTL );
 			if ( $debug ) {
+				error_log( 'Git Updater: Token refresh failed for ' . $provider . ': No access token received (' . $error . ').' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				error_log( 'Response body: ' . wp_remote_retrieve_body( $response ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			}
+			return null;
+		}
+
+		if ( empty( $body['access_token'] ) ) {
+			// No token and no recognized grant/reason — do NOT treat as revoked.
+			delete_site_transient( $this->get_lock_transient_name( $provider ) );
+			set_site_transient( $this->get_result_transient_name( $provider ), 'failure', self::REFRESH_RESULT_TTL );
+			if ( $debug ) {
 				error_log( 'Git Updater: Token refresh failed for ' . $provider . ': No access token received.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 				error_log( 'Response body: ' . wp_remote_retrieve_body( $response ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			}
 			return null;
 		}
 
-		$new_token         = sanitize_text_field( $body['access_token'] );
-		$new_refresh_token = ! empty( $body['refresh_token'] ) ? sanitize_text_field( $body['refresh_token'] ) : null;
-		$expires_in        = ! empty( $body['expires_in'] ) ? (int) $body['expires_in'] : null;
+		$new_token             = wp_unslash( (string) $body['access_token'] );
+		$new_refresh_token     = ! empty( $body['refresh_token'] ) ? wp_unslash( (string) $body['refresh_token'] ) : null;
+		$expires_in            = ! empty( $body['expires_in'] ) ? (int) $body['expires_in'] : null;
+		$refresh_token_expires = ! empty( $body['refresh_token_expires_in'] ) ? (int) $body['refresh_token_expires_in'] : null;
 
-		$this->save_token( $provider, $new_token, $new_refresh_token ?? $refresh_token, $expires_in );
+		$this->save_token( $provider, $new_token, $new_refresh_token ?? $refresh_token, $expires_in, $refresh_token_expires );
 
 		delete_site_transient( $this->get_lock_transient_name( $provider ) );
 		set_site_transient( $this->get_result_transient_name( $provider ), 'success', self::REFRESH_RESULT_TTL );
@@ -609,7 +677,21 @@ class OAuth_Connect {
 		$elapsed   = time() - (int) $acquired_at;
 		$remaining = (int) $expires_in - $elapsed;
 
-		return $remaining <= $buffer;
+		if ( $remaining <= $buffer ) {
+			return true;
+		}
+
+		// Also consider the refresh-token lifetime when the provider reports one,
+		// so we attempt a refresh before the refresh token itself is spent.
+		$refresh_expires_in  = $options[ $provider . '_refresh_token_expires_in' ] ?? null;
+		$refresh_acquired_at = $options[ $provider . '_refresh_token_acquired_at' ] ?? null;
+		if ( null !== $refresh_expires_in && null !== $refresh_acquired_at ) {
+			$refresh_elapsed   = time() - (int) $refresh_acquired_at;
+			$refresh_remaining = (int) $refresh_expires_in - $refresh_elapsed;
+			return $refresh_remaining <= $buffer;
+		}
+
+		return false;
 	}
 
 	/**
