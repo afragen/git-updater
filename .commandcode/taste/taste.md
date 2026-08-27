@@ -31,15 +31,10 @@ See [testing/taste.md](testing/taste.md)
 # WordPress
 - When an admin notification must persist until the user takes corrective action (e.g., reconnecting a revoked OAuth token), use a persistent site option flag instead of an expiring transient so the notice cannot silently vanish before the admin sees it. Confidence: 0.70
 
-# PHPStan
-- When fixing PHPStan return type errors, update the `@return` docblock to match the actual return type of the underlying method call, instead of changing the calling code's return behavior. Confidence: 0.75
-- When adding new error handling or authentication recovery logic, extract complex inline sections into focused, well-named protected/private helper methods (e.g., `should_attempt_token_refresh()`, `has_bad_credentials_message()`, `maybe_refresh_token_and_retry()`) to improve readability, testability, and separation of concerns. Confidence: 0.90
-- For string matching of error messages from external services, use case-insensitive comparison (e.g., `stripos()`) to be robust against provider variations. Confidence: 0.90
-- When implementing automatic retry mechanisms for API authentication, trigger token refresh on HTTP 401/403 OR when the response body contains auth error indicators (like "Bad Credentials") on 200 or 4xx codes, but never retry on 5xx server errors. Confidence: 0.85
-- PHPStan must stay fully clean (0 errors) across the whole project, and the code must remain compatible with the plugin's PHP 8.0 floor. When PHPStan flags a language construct as unsupported below the floor (e.g., `final protected const` inside a trait is PHP 8.2-only), convert the construct to the PHP-8.0-compatible equivalent (a `final protected static function` returning the value) and update all call sites — do not raise the PHP floor or suppress the error. The codebase documents this exact pattern: "Declared as a method (not a trait constant) because PHPStan flags constants inside traits." Confidence: 0.7
-
-# PHP
-- Keep reflection code forward-compatible with upcoming PHP versions: guard `ReflectionMethod::setAccessible()` / `ReflectionProperty::setAccessible()` calls with `PHP_VERSION_ID < 80100 && $reflection->setAccessible( true );` because the call is unnecessary on PHP 8.1+ and deprecated in PHP 8.5 — apply this guard in both source and tests rather than leaving bare calls. Confidence: 0.9
+# Phpstan
+See [phpstan/taste.md](phpstan/taste.md)
+# Php
+- Keep reflection code forward-compatible with upcoming PHP versions: guard `ReflectionMethod::setAccessible()` / `ReflectionProperty::setAccessible()` calls with `PHP_VERSION_ID < 80100 && $reflection->setAccessible( true );` because the call is unnecessary on PHP 8.1+ and deprecated in PHP 8.5 — apply this guard in both source and tests rather than leaving bare calls. Confidence: 0.90
 
 # architecture
 See [architecture/taste.md](architecture/taste.md)
