@@ -559,12 +559,11 @@ trait API_Common {
 	/**
 	 * Get API release asset download link.
 	 *
+	 * Read without TTL gating; see get_api_release_assets() for rationale.
+	 *
 	 * @param  string $git     Name of API, eg 'github'.
 	 * @param  string $request Query for API->api().
 	 * @return string|array<string, mixed>|false $response Release asset URI.
-	 */
-	/*
-	 * Read without TTL gating; see get_api_release_assets() for rationale.
 	 */
 	final public function get_api_release_asset( $git, $request ) {
 		$cache    = $this->get_repo_cache( $this->type->slug, false );
@@ -645,7 +644,7 @@ trait API_Common {
 		// Update newest_tag if using dev release assets and dev asset key doesn't match remote_version.
 		if ( is_array( $response ) && apply_filters( 'gu_dev_release_asset', false, $this->type ) ) {
 			$newest_tag_or_version = $this->get_newest_tag_or_remote_version( $response );
-			if ( '' !== $newest_tag_or_version && $newest_tag_or_version !== ( $this->type->newest_tag ?? '' ) ) {
+			if ( '' !== $newest_tag_or_version && ( $this->type->newest_tag ?? '' ) !== $newest_tag_or_version ) {
 				$this->type->newest_tag = $newest_tag_or_version;
 				$this->set_repo_cache( 'newest_tag', $newest_tag_or_version );
 			}

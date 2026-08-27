@@ -1037,7 +1037,7 @@ trait GU_Trait {
 		// Write the cleaned cron array back to the database.
 		_set_cron_array( $cron );
 
-		// Clear cache again to ensure wp_schedule_single_event() reads fresh data
+		// Clear cache again to ensure wp_schedule_single_event() reads fresh data.
 		wp_cache_delete( 'cron', 'options' );
 
 		// Schedule the single consolidated event using WordPress's built-in function

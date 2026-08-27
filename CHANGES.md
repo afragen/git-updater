@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 14.4.0 / 2026-08-27
 * don't use `newest_tag` as a proxy in `use_release_asset()` — release assets are always resolved for `release_asset` repos on the primary branch (or a switch to it); a missing release asset now fails the update with an empty download link instead of falling back to unbuilt branch/tag source (GitHub, Gitea)
 * fix `construct_download_link()` reading stale tag data — it now reads `tags` and `newest_tag` from the repo cache (`get_repo_cache()`) in place of `$this->type` values, so non-fetch callers (rollback, branch switch, REST update, branch listings) resolve the correct zipball endpoint and release-asset gate even when the repo object has not been hydrated by a fetch
 * compute the download link on the fly in `plugins_api()`, `themes_api()`, and `update_site_transient()` via `construct_download_link()` instead of reading the repo object's `download_link` — the object property could be empty or stale (tag-specific/non-release-asset), while the cache-backed computation always serves the canonical package URL without persisting anything
