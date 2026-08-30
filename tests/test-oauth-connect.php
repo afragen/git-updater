@@ -796,6 +796,32 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->assertNull( $this->oauth->refresh_token( 'gitlab' ) );
 	}
 
+	/**
+	 * A provider flagged as revoked (prior real grant failure) must short-circuit
+	 * without any HTTP call. Covers OAuth_Connect.php:502-507.
+	 */
+	public function test_refresh_token_returns_null_when_already_revoked(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'github_access_token'         => 'tok',
+			'github_refresh_token'        => 'ref',
+			'gu_oauth_revoked_github'     => time(),
+		] );
+
+		$http_called = false;
+		add_filter( 'pre_http_request', function () use ( &$http_called ) {
+			$http_called = true;
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [ 'access_token' => 'new_tok' ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$this->assertNull( $this->oauth->refresh_token( 'github' ) );
+		$this->assertFalse( $http_called, 'HTTP request should not be made when the token is already revoked.' );
+	}
+
 	public function test_refresh_token_returns_null_on_http_error(): void {
 		$this->oauth->connector_url = 'https://connector.example.com/';
 		update_site_option( 'git_updater', [ 'gitlab_access_token' => 'tok', 'gitlab_refresh_token' => 'ref' ] );
