@@ -496,8 +496,16 @@ class OAuth_Connect {
 			return null;
 		}
 
-		$config        = self::PROVIDERS[ $provider ];
-		$options       = get_site_option( 'git_updater', [] );
+		$config  = self::PROVIDERS[ $provider ];
+		$options = get_site_option( 'git_updater', [] );
+
+		// A prior refresh failed with a real grant error (bad_refresh_token /
+		// invalid_grant). The token was deleted and the admin notified; don't keep
+		// hammering the connector for a token we already know is dead.
+		if ( ! empty( $options[ 'gu_oauth_revoked_' . $provider ] ) ) {
+			return null;
+		}
+
 		$refresh_token = $options[ $config['refresh_option_key'] ] ?? null;
 
 		if ( ! $refresh_token ) {
