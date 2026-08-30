@@ -2231,4 +2231,231 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->assertArrayNotHasKey( 'gu_oauth_revoked_github', $options );
 		$this->assertArrayNotHasKey( 'gu_oauth_notified_github', $options );
 	}
+
+	// -------------------------------------------------------------------------
+	// fetch_token_from_connector() — rate-limited branch (OAuth_Connect.php:398)
+	// -------------------------------------------------------------------------
+
+	/**
+	 * A connector 429 short-circuits to null rather than being treated as a
+	 * revocation. Covers OAuth_Connect.php:395-398.
+	 */
+	public function test_fetch_token_from_connector_returns_null_on_rate_limit(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 429 ],
+				'body'     => wp_json_encode( [ 'error' => 'rate_limited' ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$method = new ReflectionMethod( OAuth_Connect::class, 'fetch_token_from_connector' );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
+
+		$this->assertNull( $method->invoke( $this->oauth, 'github', 'code' ) );
+	}
+
+	// -------------------------------------------------------------------------
+	// save_token() — stores refresh-token lifetime metadata (OAuth_Connect.php:446-447)
+	// -------------------------------------------------------------------------
+
+	/**
+	 * A non-null refresh_token_expires_in must persist both the lifetime and the
+	 * acquisition timestamp. Covers OAuth_Connect.php:445-450.
+	 */
+	public function test_save_token_stores_refresh_token_lifetime(): void {
+		$method = new ReflectionMethod( OAuth_Connect::class, 'save_token' );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
+
+		$method->invoke( $this->oauth, 'github', 'tok', 'ref', null, 7200 );
+
+		$options = get_site_option( 'git_updater', [] );
+		$this->assertSame( 7200, $options['github_refresh_token_expires_in'] );
+		$this->assertArrayHasKey( 'github_refresh_token_acquired_at', $options );
+	}
+
+	// -------------------------------------------------------------------------
+	// refresh_token() — Retry-After short-circuit (OAuth_Connect.php:512)
+	// -------------------------------------------------------------------------
+
+	/**
+	 * A pending refresh-retry backoff must skip the HTTP round-trip entirely.
+	 * Covers OAuth_Connect.php:510-513.
+	 */
+	public function test_refresh_token_short_circuits_on_retry_after(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'github_access_token' => 'tok', 'github_refresh_token' => 'ref' ] );
+		set_site_transient( 'gu_oauth_refresh_retry_github', time() + 300, 300 );
+
+		$http_called = false;
+		add_filter( 'pre_http_request', function () use ( &$http_called ) {
+			$http_called = true;
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [ 'access_token' => 'new_tok' ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$this->assertNull( $this->oauth->refresh_token( 'github' ) );
+		$this->assertFalse( $http_called, 'HTTP request should not be made while retry backoff is active.' );
+	}
+
+	// -------------------------------------------------------------------------
+	// refresh_token() — rate-limited: preserve token, honor Retry-After
+	// -------------------------------------------------------------------------
+
+	/**
+	 * 429 with Retry-After keeps the token, sets the backoff transient, does NOT
+	 * revoke. Covers OAuth_Connect.php:574-583.
+	 */
+	public function test_refresh_token_rate_limited_preserves_token_and_sets_retry(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'github_access_token' => 'tok', 'github_refresh_token' => 'ref' ] );
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 429 ],
+				'body'     => wp_json_encode( [ 'error' => 'rate_limited' ] ),
+				'headers'  => [ 'Retry-After' => 60 ],
+			];
+		}, 10, 3 );
+
+		$this->assertNull( $this->oauth->refresh_token( 'github' ) );
+
+		$this->assertNotFalse( get_site_transient( 'gu_oauth_refresh_retry_github' ), 'Retry-After backoff should be set.' );
+		$this->assertFalse( get_site_transient( 'gu_oauth_refresh_lock_github' ), 'Lock should be cleared.' );
+		$this->assertSame( 'failure', get_site_transient( 'gu_oauth_refresh_result_github' ) );
+
+		$options = get_site_option( 'git_updater', [] );
+		$this->assertSame( 'tok', $options['github_access_token'], 'Token must NOT be deleted on rate limit.' );
+		$this->assertArrayNotHasKey( 'gu_oauth_revoked_github', $options );
+	}
+
+	/**
+	 * A rate-limit reason delivered in the body (code 200) is still a rate limit,
+	 * not a revocation. Covers the error-name condition in 571-574.
+	 */
+	public function test_refresh_token_rate_limited_by_body_error_preserves_token(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'github_access_token' => 'tok', 'github_refresh_token' => 'ref' ] );
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [ 'error' => 'rate_limit_exceeded' ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$this->assertNull( $this->oauth->refresh_token( 'github' ) );
+
+		$options = get_site_option( 'git_updater', [] );
+		$this->assertSame( 'tok', $options['github_access_token'] );
+		$this->assertArrayNotHasKey( 'gu_oauth_revoked_github', $options );
+	}
+
+	/**
+	 * With the debug filter on, a rate-limited refresh logs the backoff message.
+	 * Covers OAuth_Connect.php:580-582.
+	 */
+	public function test_refresh_token_rate_limited_logs_when_debug_true(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'github_access_token' => 'tok', 'github_refresh_token' => 'ref' ] );
+
+		add_filter( 'gu_debug_token_refresh', '__return_true' );
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 429 ],
+				'body'     => wp_json_encode( [ 'error' => 'rate_limited' ] ),
+				'headers'  => [ 'Retry-After' => 60 ],
+			];
+		}, 10, 3 );
+
+		$log = $this->with_error_log_capture( function () {
+			$this->assertNull( $this->oauth->refresh_token( 'github' ) );
+		} );
+
+		$this->assertStringContainsString( 'rate limited', $log );
+	}
+
+	// -------------------------------------------------------------------------
+	// refresh_token() — empty access_token with no reason (preserve, no revoke)
+	// -------------------------------------------------------------------------
+
+	/**
+	 * A 200 with no access_token and no recognized error must NOT be treated as
+	 * a revocation. Covers OAuth_Connect.php:609-617.
+	 */
+	public function test_refresh_token_empty_access_token_no_error_preserves_token(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'github_access_token' => 'tok', 'github_refresh_token' => 'ref' ] );
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => '{}',
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$this->assertNull( $this->oauth->refresh_token( 'github' ) );
+
+		$this->assertFalse( get_site_transient( 'gu_oauth_refresh_lock_github' ), 'Lock should be cleared.' );
+		$this->assertSame( 'failure', get_site_transient( 'gu_oauth_refresh_result_github' ) );
+
+		$options = get_site_option( 'git_updater', [] );
+		$this->assertSame( 'tok', $options['github_access_token'], 'Token must NOT be deleted without a reason.' );
+		$this->assertArrayNotHasKey( 'gu_oauth_revoked_github', $options );
+	}
+
+	/**
+	 * With the debug filter on, the empty-access-token path logs both messages.
+	 * Covers OAuth_Connect.php:613-616.
+	 */
+	public function test_refresh_token_empty_access_token_logs_when_debug_true(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'github_access_token' => 'tok', 'github_refresh_token' => 'ref' ] );
+
+		add_filter( 'gu_debug_token_refresh', '__return_true' );
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => '{}',
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$log = $this->with_error_log_capture( function () {
+			$this->assertNull( $this->oauth->refresh_token( 'github' ) );
+		} );
+
+		$this->assertStringContainsString( 'No access token received', $log );
+		$this->assertStringContainsString( 'Response body:', $log );
+	}
+
+	// -------------------------------------------------------------------------
+	// is_token_expired() — refresh-token lifetime branch (OAuth_Connect.php:689-691)
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When the access token is fresh but the refresh token is about to expire,
+	 * the provider is considered expired so a refresh is attempted first.
+	 * Covers OAuth_Connect.php:686-692.
+	 */
+	public function test_is_token_expired_true_when_refresh_token_within_buffer(): void {
+		update_site_option( 'git_updater', [
+			'gitlab_access_token'              => 'tok',
+			'gitlab_token_expires_in'          => 7200,
+			'gitlab_token_acquired_at'         => time(),
+			'gitlab_refresh_token_expires_in'  => 7200,
+			'gitlab_refresh_token_acquired_at' => time() - 7000,
+		] );
+
+		// Access token has 7200s remaining (fresh); refresh token has 200s left
+		// (≤ 300 buffer) → expired so a refresh is attempted first.
+		$this->assertTrue( $this->oauth->is_token_expired( 'gitlab' ) );
+	}
 }

@@ -2743,6 +2743,59 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 	}
 
 	// -------------------------------------------------------------------------
+	// get_api_data() — dev-channel + cached release_asset_download (line 624)
+	// -------------------------------------------------------------------------
+
+	/**
+	 * With a release-asset plugin, a cached release_asset_download, and the dev
+	 * channel active, the download link resolves from the (non-empty) versions
+	 * array. Covers REST_API.php:623-625 (the `? reset( $versions )` branch).
+	 */
+	public function test_get_api_data_dev_channel_download_link_from_versions(): void {
+		$this->skip_if_fixture_absent();
+
+		new Base();
+		$GLOBALS['wp_rest_server'] = null;
+		$server                    = rest_get_server();
+
+		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
+
+		// Seed release_assets (stable + dev, dev newer) so $use_channel is true,
+		// and a release_asset_download so line 620's guard is satisfied.
+		$dev_url = 'https://example.com/dev-newest.zip';
+		$table   = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry(
+			self::SLUG,
+			'release_assets',
+			[
+				'assets'     => [ '2.0.0' => 'https://example.com/stable.zip' ],
+				'dev_assets' => [ '3.0.0-beta1' => $dev_url ],
+			],
+			strtotime( '+12 hours' )
+		);
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://example.com/cached-download.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_redirect' );
+
+		// channel param non-null → $channel=true; '2.0.0' < '3.0.0-beta1' → $use_channel=true.
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
+		$request->set_param( 'slug', self::SLUG );
+		$request->set_param( 'channel', 'dev' );
+		$response = $server->dispatch( $request );
+		$data     = (array) $response->get_data();
+
+		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
+		$table->delete_repo( self::SLUG );
+
+		if ( isset( $data['error'] ) ) {
+			$this->markTestSkipped( 'Fixture metadata unavailable: ' . $data['error'] );
+		}
+
+		// $versions is the dev array; reset() yields the newest dev asset URL.
+		$this->assertArrayNotHasKey( 'error', $data );
+		$this->assertSame( $dev_url, $data['download_link'] );
+	}
+
+	// -------------------------------------------------------------------------
 	// get_download_token() — sign_download_url line 813
 	// -------------------------------------------------------------------------
 

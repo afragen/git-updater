@@ -1093,6 +1093,35 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 			$this->assertTrue( true ); // No cache row means nothing was cached.
 		}
 	}
+
+	/**
+	 * A tag equal to the newest release asset version resolves to that asset
+	 * URL via the cached data (no HTTP round-trip).
+	 * Covers GitHub_API.php:237-240.
+	 */
+	public function test_resolve_release_asset_returns_asset_url_for_newest_tag(): void {
+		$type         = $this->make_type();
+		$type->branch = '1.0.0';
+
+		// Seed release_assets so get_newest_release_asset_version() returns
+		// '1.0.0' and get_release_asset_url_for_version() finds the URL.
+		$download_url = 'https://example.com/stable-1.0.0.zip';
+		$this->seed_cache(
+			[
+				'release_assets' => [
+					'assets'     => [ '1.0.0' => $download_url ],
+					'dev_assets' => [],
+				],
+			]
+		);
+
+		$rm = new ReflectionMethod( $this->api, 'resolve_release_asset' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+
+		// '1.0.0' is not a branch (branches only holds 'master') → is_tag_target()
+		// is true; it equals the newest release asset version → returns the cached URL.
+		$this->assertSame( $download_url, $rm->invoke( $this->api, '1.0.0' ) );
+	}
 }
 
 /**
@@ -1554,5 +1583,71 @@ class Test_GitHub_API_Settings extends WP_UnitTestCase {
 		delete_site_option( 'git_updater' );
 		Base::$options = [];
 		API::$options  = [];
+	}
+
+	// -------------------------------------------------------------------------
+	// resolve_release_asset() — branch target never uses a release asset
+	// -------------------------------------------------------------------------
+
+	/**
+	 * A non-primary, non-tag branch target must never resolve to a release asset.
+	 * Covers GitHub_API.php:245-246 — the early `return ''` before any API call.
+	 */
+	public function test_resolve_release_asset_returns_empty_for_branch_target(): void {
+		$type                 = new stdClass();
+		$type->slug           = 'test-plugin';
+		$type->git            = 'github';
+		$type->type           = 'plugin';
+		$type->owner          = 'test-owner';
+		$type->branch         = 'feature';
+		$type->primary_branch = 'master';
+		$type->enterprise     = false;
+		$type->enterprise_api = null;
+		$type->gist_id        = null;
+		$type->branches       = [ 'master' => 'x', 'feature' => 'y' ];
+
+		$api = new GitHub_API( $type );
+		$rm  = new ReflectionMethod( $api, 'resolve_release_asset' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+
+		// 'feature' is a branch (present in $type->branches), so is_tag_target() is
+		// false and the function returns '' without any HTTP/release-asset lookup.
+		$this->assertSame( '', $rm->invoke( $api, 'feature' ) );
+	}
+
+	/**
+	 * A tag that isn't the newest release asset falls through to the zipball
+	 * branch (returns ''). Covers GitHub_API.php:241-242.
+	 */
+	public function test_resolve_release_asset_returns_empty_for_non_newest_tag(): void {
+		$type                 = new stdClass();
+		$type->slug           = 'test-plugin';
+		$type->git            = 'github';
+		$type->type           = 'plugin';
+		$type->owner          = 'test-owner';
+		$type->branch         = '1.0.0';
+		$type->primary_branch = 'master';
+		$type->enterprise     = false;
+		$type->enterprise_api = null;
+		$type->gist_id        = null;
+		$type->branches       = [ 'master' => 'x' ];
+
+		// Force get_release_assets() to return an empty array so
+		// get_newest_release_asset_version() returns '' and the tag never matches.
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$api = new GitHub_API( $type );
+		$rm  = new ReflectionMethod( $api, 'resolve_release_asset' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+
+		// '1.0.0' is not a branch → is_tag_target() is true, but it doesn't match
+		// the (empty) newest release asset version, so it returns '' (zipball).
+		$this->assertSame( '', $rm->invoke( $api, '1.0.0' ) );
 	}
 }

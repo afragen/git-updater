@@ -751,4 +751,39 @@ class Test_Cache_Table extends WP_UnitTestCase {
 
 		$this->assertSame( 1, $queries, 'the error_cache/error_timeout combo must cache regardless of order' );
 	}
+
+	// -------------------------------------------------------------------------
+	// Abstract_Cache_Table::__construct() — line 100
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Instantiate a concrete subclass directly so the inherited constructor
+	 * (which news up Repo_Cache_Object) is attributed to the abstract base.
+	 * Covers Abstract_Cache_Table.php:99-101.
+	 */
+	public function test_abstract_constructor_initializes_object_cache(): void {
+		$instance = new class() extends Abstract_Cache_Table {
+			protected function schema(): string {
+				return 'CREATE TABLE IF NOT EXISTS test_ct ()';
+			}
+
+			public function add_entry( string $slug, string $column, $value, int $timeout = 0, int $error_timeout = 0 ): bool {
+				return true;
+			}
+
+			public function update_entry( string $slug, string $column, $value, int $timeout = 0, int $error_timeout = 0 ): bool {
+				return true;
+			}
+
+			public function delete_entry( string $slug, string $column ): bool {
+				return true;
+			}
+
+			public function get_entry( string $slug, string $column ) {
+				return null;
+			}
+		};
+
+		$this->assertInstanceOf( Abstract_Cache_Table::class, $instance );
+	}
 }
