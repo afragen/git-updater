@@ -226,6 +226,7 @@ class API {
 					[
 						'timeout'   => $timeout,
 						'http_code' => $code,
+						'url'       => $url,
 					],
 					$this->type->slug,
 					"+{$timeout} minutes"
@@ -465,8 +466,11 @@ class API {
 
 			$body             = json_decode( wp_remote_retrieve_body( $response ) );
 			$invalid_response = ! $body || ! property_exists( $body, 'name' ) || property_exists( $body, 'error' );
-			$added_to_mirror  = isset( $body->ac_origin ) && 'wp_org' === $body->ac_origin;
-			$response         = $invalid_response || ! $added_to_mirror ? 'not in dot org' : 'in dot org';
+			// ac_origin is a mirror-side origin marker only; the public
+			// api.wordpress.org JSON never sets it, so its absence must NOT
+			// disqualify a valid plugin/theme response.
+			$is_dot_org = ! isset( $body->ac_origin ) || 'wp_org' === $body->ac_origin;
+			$response   = $invalid_response || ! $is_dot_org ? 'not in dot org' : 'in dot org';
 
 			$this->set_repo_cache( 'dot_org', $response );
 		}

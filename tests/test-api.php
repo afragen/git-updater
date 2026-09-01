@@ -939,8 +939,22 @@ class Test_API_Dot_Org_Data extends WP_UnitTestCase {
 		$this->assertTrue( $result );
 	}
 
-	public function test_get_dot_org_data_returns_false_when_plugin_not_in_dot_org(): void {
-		$body = wp_json_encode( [ 'name' => 'Test Plugin' ] ); // no ac_origin
+	public function test_get_dot_org_data_returns_true_when_plugin_response_has_no_ac_origin(): void {
+		$body = wp_json_encode( [ 'name' => 'Test Plugin' ] ); // no ac_origin, standard wp.org response
+		add_filter(
+			'pre_http_request',
+			fn() => [ 'response' => [ 'code' => 200 ], 'body' => $body, 'headers' => [] ],
+			10,
+			3
+		);
+
+		$result = $this->call_get_dot_org_data();
+
+		$this->assertTrue( $result );
+	}
+
+	public function test_get_dot_org_data_returns_false_when_ac_origin_is_not_wp_org(): void {
+		$body = wp_json_encode( [ 'name' => 'Test Plugin', 'ac_origin' => 'github' ] );
 		add_filter(
 			'pre_http_request',
 			fn() => [ 'response' => [ 'code' => 200 ], 'body' => $body, 'headers' => [] ],
