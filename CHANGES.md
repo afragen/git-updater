@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 14.4.1 / 2026-09-01
+* update token revoked or missing email message to include filter to disable email
+
 #### 14.4.0 / 2026-08-27
 * don't use `newest_tag` as a proxy in `use_release_asset()` — release assets are always resolved for `release_asset` repos on the primary branch (or a switch to it); a missing release asset now fails the update with an empty download link instead of falling back to unbuilt branch/tag source (GitHub, Gitea)
 * fix `construct_download_link()` reading stale tag data — it now reads `tags` and `newest_tag` from the repo cache (`get_repo_cache()`) in place of `$this->type` values, so non-fetch callers (rollback, branch switch, REST update, branch listings) resolve the correct zipball endpoint and release-asset gate even when the repo object has not been hydrated by a fetch
