@@ -827,6 +827,13 @@ class OAuth_Connect {
 				$config['label'],
 				$settings_url
 			);
+			$message .= "\n\n" . sprintf(
+				/* translators: 1: provider label */
+				__( 'If you are receiving this email and are not using %s, please disregard this message. You can add a filter to disable this notification by adding the following to your site.', 'git-updater' ),
+				$config['label']
+			);
+			$message .= "\n\nadd_filter( 'git_updater_skip_oauth_reminder', function( \$skip, \$provider ) {\n    return '" . esc_attr( $provider ) . "' === \$provider ? true : \$skip;\n}, 10, 2 );";
+
 		} elseif ( function_exists( '\Fragen\Git_Updater\gu_fs' ) && \Fragen\Git_Updater\gu_fs()->can_use_premium_code() ) {
 			// Only premium license holders get the empty-token reminder.
 			$message = sprintf(
@@ -835,6 +842,13 @@ class OAuth_Connect {
 				$config['label'],
 				$settings_url
 			);
+			$message .= "\n\n" . sprintf(
+				/* translators: 1: provider label */
+				__( 'If you are receiving this email and are not using %s, please disregard this message. You can add a filter to disable this notification by adding the following to your site.', 'git-updater' ),
+				$config['label']
+			);
+			$message .= "\n\nadd_filter( 'git_updater_skip_oauth_reminder', function( \$skip, \$provider ) {\n    return '" . esc_attr( $provider ) . "' === \$provider ? true : \$skip;\n}, 10, 2 );";
+
 		} else {
 			// Free users: no empty-token reminder email.
 			return;
