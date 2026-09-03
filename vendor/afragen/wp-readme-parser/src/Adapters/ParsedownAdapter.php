@@ -24,7 +24,6 @@ class ParsedownAdapter implements MarkdownConverterInterface
     public function __construct()
     {
         $this->parsedown = new Parsedown();
-        $this->parsedown->setSafeMode(false);
     }
 
     public function toHtml(string $markdown): string

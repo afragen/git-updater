@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.4] / 2026-09-03
+
+### Changed
+- remove `$this->parsedown->setSafeMode(false);`
+
 ## [1.0.3] / 2026-05-16
 
 ### Added
