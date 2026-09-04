@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 14.4.2 / 2026-09-03
 * oauth: correctly detect a connector `wp_send_json_error()` response (wrapped under `data.error`) as a grant failure so an invalid/revoked refresh token triggers token deletion, the revoked-flag, and the admin email rather than an endless "No access token received" retry loop
 * oauth: send the OAuth token revocation reminder email daily instead of every 36 hours
 * update `wp-readme-parser` to remove `setSafeMode(false)`
