@@ -96,16 +96,16 @@
         },
         {
             "name": "afragen/wp-readme-parser",
-            "version": "1.0.3",
+            "version": "1.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wp-readme-parser.git",
-                "reference": "051bdf79fddf3fdde9affd0ae1d23fcf6119a45b"
+                "reference": "659b8b39e72d4bd290a216d995d895f3fd091801"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wp-readme-parser/zipball/051bdf79fddf3fdde9affd0ae1d23fcf6119a45b",
-                "reference": "051bdf79fddf3fdde9affd0ae1d23fcf6119a45b",
+                "url": "https://api.github.com/repos/afragen/wp-readme-parser/zipball/659b8b39e72d4bd290a216d995d895f3fd091801",
+                "reference": "659b8b39e72d4bd290a216d995d895f3fd091801",
                 "shasum": ""
             },
             "require": {
@@ -130,9 +130,9 @@
             "description": "A PHP library for parsing WordPress plugin readme.txt files into structured data.",
             "support": {
                 "issues": "https://github.com/afragen/wp-readme-parser/issues",
-                "source": "https://github.com/afragen/wp-readme-parser/tree/1.0.3"
+                "source": "https://github.com/afragen/wp-readme-parser/tree/1.0.4"
             },
-            "time": "2026-05-16T19:18:30+00:00"
+            "time": "2026-09-03T23:48:11+00:00"
         },
         {
             "name": "erusev/parsedown",
@@ -971,11 +971,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.2.9",
+            "version": "2.2.13",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/13d6b4f347bad222da436580c8304fa6f83e6bd0",
-                "reference": "13d6b4f347bad222da436580c8304fa6f83e6bd0",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/9ba9ac76ee9c5cf5b56d58eb5deec6315b7a0260",
+                "reference": "9ba9ac76ee9c5cf5b56d58eb5deec6315b7a0260",
                 "shasum": ""
             },
             "require": {
@@ -1031,7 +1031,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-08-22T07:38:16+00:00"
+            "time": "2026-09-03T20:38:19+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -2539,21 +2539,21 @@
         },
         {
             "name": "szepeviktor/phpstan-wordpress",
-            "version": "v2.0.3",
+            "version": "v2.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/szepeviktor/phpstan-wordpress.git",
-                "reference": "aa722f037b2d034828cd6c55ebe9e5c74961927e"
+                "reference": "84577e2ea1e4c2a95537fe5ea2ac8e18f4ceab1a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/szepeviktor/phpstan-wordpress/zipball/aa722f037b2d034828cd6c55ebe9e5c74961927e",
-                "reference": "aa722f037b2d034828cd6c55ebe9e5c74961927e",
+                "url": "https://api.github.com/repos/szepeviktor/phpstan-wordpress/zipball/84577e2ea1e4c2a95537fe5ea2ac8e18f4ceab1a",
+                "reference": "84577e2ea1e4c2a95537fe5ea2ac8e18f4ceab1a",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.4 || ^8.0",
-                "php-stubs/wordpress-stubs": "^6.6.2",
+                "php-stubs/wordpress-stubs": ">=6.6.2",
                 "phpstan/phpstan": "^2.0"
             },
             "require-dev": {
@@ -2596,9 +2596,9 @@
             ],
             "support": {
                 "issues": "https://github.com/szepeviktor/phpstan-wordpress/issues",
-                "source": "https://github.com/szepeviktor/phpstan-wordpress/tree/v2.0.3"
+                "source": "https://github.com/szepeviktor/phpstan-wordpress/tree/v2.0.4"
             },
-            "time": "2025-09-14T02:58:22+00:00"
+            "time": "2026-05-22T16:22:09+00:00"
         },
         {
             "name": "theseer/tokenizer",
