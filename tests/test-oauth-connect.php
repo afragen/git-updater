@@ -2014,6 +2014,57 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	}
 
 	/**
+	 * Test that a refresh failure using the connector's wp_send_json_error()
+	 * wrapped shape ({success:false,data:{error:...}}) is correctly detected as
+	 * a grant error → token deleted, revoked flag set, and admin email sent.
+	 * Regression test for the top-level vs data.error parsing bug.
+	 */
+	public function test_refresh_failure_recognizes_wrapped_error_and_deletes_token(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'bitbucket_access_token'       => 'bb_old',
+			'bitbucket_refresh_token'      => 'bbr_old',
+			'bitbucket_token_expires_in'   => 3600,
+			'bitbucket_token_acquired_at'  => time() - 3601,
+		] );
+
+		$mails = [];
+		$this->capture_wp_mail( $mails );
+
+		add_filter( 'pre_http_request', static function ( $preempt, $args, $url ) {
+			if ( strpos( $url, '/git-updater/bitbucket/oauth/refresh' ) !== false ) {
+				return [
+					'response' => [ 'code' => 401 ],
+					'body'     => wp_json_encode( [
+						'success' => false,
+						'data'    => [
+							'error'             => 'invalid_request',
+							'error_description' => 'Invalid refresh_token',
+						],
+					] ),
+					'headers'  => [],
+				];
+			}
+			return $preempt;
+		}, 10, 3 );
+
+		$this->assertNull( $this->oauth->refresh_token( 'bitbucket' ) );
+
+		// Token must be revoked + deleted so the Connect button reappears.
+		$options = get_site_option( 'git_updater', [] );
+		$this->assertArrayNotHasKey( 'bitbucket_access_token', $options );
+		$this->assertArrayNotHasKey( 'bitbucket_refresh_token', $options );
+		$this->assertNotEmpty( $options['gu_oauth_revoked_bitbucket'] );
+
+		// Admin must be notified.
+		$this->assertCount( 1, $mails );
+		$mail = $mails[0];
+		$this->assertStringContainsString( 'Bitbucket OAuth', $mail['subject'] );
+		$this->assertStringContainsString( 'unable to refresh', $mail['message'] );
+		$this->assertStringContainsString( 'revoked', $mail['message'] );
+	}
+
+	/**
 	 * Test no duplicate email on repeated failure within the daily window.
 	 */
 	public function test_refresh_failure_does_not_send_duplicate_email(): void {

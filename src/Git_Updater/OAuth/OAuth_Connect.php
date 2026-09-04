@@ -571,7 +571,7 @@ class OAuth_Connect {
 
 		$body  = json_decode( wp_remote_retrieve_body( $response ), true );
 		$code  = (int) wp_remote_retrieve_response_code( $response );
-		$error = (string) ( $body['error'] ?? '' );
+		$error = (string) ( $body['data']['error'] ?? $body['error'] ?? '' );
 
 		// Rate limited OR server error → keep the token, honor Retry-After,
 		// do NOT treat as revoked. The connector returns 429 for upstream rate
