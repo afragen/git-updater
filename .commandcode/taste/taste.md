@@ -14,11 +14,7 @@
 - When the user reports an intermittent production error by pasting the exact WP debug.log message (e.g., "Cron unschedule event error for hook: gu_get_remote_plugin, Error code: could_not_set, Error message: The cron event list could not be saved.") and asks "create a plan to fix... What is the issue and can it be fixed?", the expected response is a full root-cause investigation before any plan: locate the error string in its originating source — including WordPress core files (e.g., wp-includes/cron.php in the wp-env install under `~/.wp-env/`), not just the plugin's own code — to pin down the exact WP_Error condition (e.g., `_set_cron_array()` returning `could_not_set` when `update_option('cron')` fails), then trace the plugin-side trigger that calls the core function on a hot path (e.g., `merge_and_reschedule_cron_batch()` doing two sequential cron writes on nearly every load), state whether the error is benign or has real consequences (e.g., duplicate cron events), and deliver a written plan with the fix. Confidence: 0.7
 
 # Security
-- When a security fix is proposed (e.g., S4 token scoping in `Basic_Auth_Loader`), the user asks for both the fix approach AND the threat model ("explain how you would fix S4 and how a malicious/compromised repo header could occur") — they want the concrete attack vectors spelled out (how the exploit could actually happen in the current code, e.g., the "Enterprise" branch sending a GitHub PAT to any host named in a repo header) before implementation, not just the patch; ground the explanation in the actual source. Confidence: 0.65
-- Proactively offer security reviews for codebase changes. Confidence: 0.85
-- Admin settings save handlers must verify capability in addition to nonce verification — a nonce alone lets a low-privilege authenticated user with a minted nonce alter site settings, tokens, or config lists; apply the capability check to every POST save handler (e.g., `Settings::update_settings()`, `Additions/Settings`, `Lite_Domains`). The check must work in BOTH single-site and multisite: use the established dual-context pattern `current_user_can( is_multisite() ? 'manage_network_options' : 'manage_options' )` for network-wide settings, since `manage_options` alone is wrong on multisite. The user explicitly required this ("capabilities checks must work for both single site and multisite"). Confidence: 0.9
-- When the user asks to "explain the security issues in detail" after a list of findings has been verified, they expect a thorough, source-grounded breakdown rather than a summary or restatement: each finding traced to exact `file:line`, its root cause, the concrete attack chain, and an explicit live-vs-already-fixed status verified against the working tree AND git history (naming the fixing commits). Confidence: 0.55
-
+See [security/taste.md](security/taste.md)
 # Workflow
 See [workflow/taste.md](workflow/taste.md)
 
@@ -33,6 +29,7 @@ See [testing/taste.md](testing/taste.md)
 
 # WordPress
 - When an admin notification must persist until the user takes corrective action (e.g., reconnecting a revoked OAuth token), use a persistent site option flag instead of an expiring transient so the notice cannot silently vanish before the admin sees it. Confidence: 0.70
+- Return user-facing operation failures (e.g. a rejected install host) as a `WP_Error` with a readable, actionable message — naming the offending host and how to remedy it — instead of a bare plain-string failure, and keep the consuming paths accepting both a `WP_Error` and legacy strings (rendered escaped in admin, forwarded in CLI/REST) so the message always surfaces. The user flagged that a failure must be easy to message back to the admin. Confidence: 0.6
 
 # Phpstan
 See [phpstan/taste.md](phpstan/taste.md)
