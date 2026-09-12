@@ -866,6 +866,43 @@ class Test_Install_Install extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A resolved download_link on a host that is not authorized for the selected
+	 * API must be rejected with a readable WP_Error before the upgrader runs.
+	 *
+	 * @return void
+	 */
+	public function test_install_rejects_untrusted_download_host(): void {
+		add_filter(
+			'gu_install_remote_install',
+			function ( $install ) {
+				$install['download_link'] = 'https://attacker.example.net/releases/download/x/test-repo.zip';
+				return $install;
+			},
+			10,
+			2
+		);
+
+		$_POST = [
+			'option_page'        => 'git_updater_install',
+			'_wpnonce'           => wp_create_nonce( 'git_updater_install-options' ),
+			'git_updater_repo'   => 'https://github.com/owner/test-repo',
+			'git_updater_branch' => 'main',
+			'git_updater_api'    => 'github',
+		];
+
+		try {
+			ob_start();
+			$result = $this->install->install( 'plugin' );
+			$output = ob_get_clean();
+
+			$this->assertFalse( $result );
+			$this->assertStringContainsString( 'is not an allowed host', $output );
+		} finally {
+			remove_all_filters( 'gu_install_remote_install' );
+		}
+	}
+
+	/**
 	 * Plugin upgrader success: upgrader extracts a real zip and installs the plugin.
 	 * Covers the truthy branch of $upgrader->install() (line 222) and
 	 * Branch::set_branch_on_install() call (line 223).
@@ -885,6 +922,15 @@ class Test_Install_Install extends WP_UnitTestCase {
 
 		// Priority-15: override Install's priority-10 false return with the zip path.
 		add_filter( 'upgrader_pre_download', fn() => $zip_path, 15, 3 );
+
+		// Authorize the placeholder download host via the add-on host filter.
+		add_filter(
+			'gu_credential_hosts',
+			static function ( $hosts ) {
+				$hosts['gitea'] = array_merge( $hosts['gitea'] ?? [], [ 'example.com' ] );
+				return $hosts;
+			}
+		);
 
 		// Provide download_link via filter (gitea → no GitHub API block runs).
 		add_filter(
@@ -914,6 +960,7 @@ class Test_Install_Install extends WP_UnitTestCase {
 		} finally {
 			remove_all_filters( 'upgrader_pre_download' );
 			remove_all_filters( 'gu_install_remote_install' );
+			remove_all_filters( 'gu_credential_hosts' );
 			if ( file_exists( $zip_path ) ) {
 				unlink( $zip_path );
 			}

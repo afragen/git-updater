@@ -12,6 +12,9 @@
 
 namespace Fragen\Git_Updater\API;
 
+use Fragen\Singleton;
+use WP_Error;
+
 /*
  * Exit if called directly.
  */
@@ -124,7 +127,10 @@ class Zipfile_API {
 		// The posted URI becomes the upgrader's download_link, so it must not be
 		// able to point at an arbitrary host.
 		if ( ! $this->is_allowed_install_url( (string) $url ) ) {
-			$install['error']         = esc_html__( 'Zipfile install requires an https URL from an allowed git host.', 'git-updater' );
+			$install['error']         = new WP_Error(
+				'gu_install_host_not_allowed',
+				esc_html__( 'Zipfile install requires an https URL from an allowed git host.', 'git-updater' )
+			);
 			$install['download_link'] = '';
 
 			return $install;
@@ -162,28 +168,17 @@ class Zipfile_API {
 	/**
 	 * Hosts allowed as a zipfile install source.
 	 *
-	 * Self-hosted GitLab / Bitbucket Server / Gitea cannot be enumerated
-	 * statically, so configured hosts are derived from the site's own options
-	 * and repos, and the list is filterable.
+	 * Derived from the credential-host map contributed by the active API
+	 * add-ons (which already covers public, enterprise, and self-hosted
+	 * domains), plus the site's own host. Still filterable for back-compat.
 	 *
 	 * @return array<int, string>
 	 */
 	private function get_allowed_install_hosts(): array {
-		$hosts = [ 'github.com', 'gitlab.com', 'bitbucket.org' ];
-
-		$options = get_site_option( 'git_updater', [] );
-		if ( ! empty( $options['gitea_server'] ) ) {
-			$hosts[] = (string) wp_parse_url( $options['gitea_server'], PHP_URL_HOST );
-		}
-
-		$repos = array_merge(
-			\Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs(),
-			\Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs()
-		);
-		foreach ( $repos as $repo ) {
-			foreach ( [ $repo->enterprise ?? '', $repo->enterprise_api ?? '', $repo->uri ?? '' ] as $candidate ) {
-				$hosts[] = (string) wp_parse_url( (string) $candidate, PHP_URL_HOST );
-			}
+		$api   = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this );
+		$hosts = [];
+		foreach ( $api->get_credential_hosts() as $provider_hosts ) {
+			$hosts = array_merge( $hosts, (array) $provider_hosts );
 		}
 
 		$hosts[] = (string) wp_parse_url( home_url(), PHP_URL_HOST );

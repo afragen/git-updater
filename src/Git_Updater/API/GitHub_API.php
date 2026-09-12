@@ -13,6 +13,7 @@
 namespace Fragen\Git_Updater\API;
 
 use Fragen\Singleton;
+use WP_Error;
 use stdClass;
 
 /*
@@ -724,9 +725,21 @@ class GitHub_API extends API implements API_Interface {
 
 		$install['download_link'] = "{$base}/repos/{$install['git_updater_repo']}/zipball/{$install['git_updater_branch']}";
 
-		// If asset is entered install it.
+		// If asset is entered install it, but only from an authorized host so a
+		// posted URI cannot redirect the download to an arbitrary server.
 		if ( false !== stripos( $headers['uri'], 'releases/download' ) ) {
-			$install['download_link'] = $headers['uri'];
+			if ( $this->is_allowed_credential_host( (string) $headers['uri'], 'github' ) ) {
+				$install['download_link'] = $headers['uri'];
+			} else {
+				$install['error'] = new WP_Error(
+					'gu_install_host_not_allowed',
+					sprintf(
+						/* translators: %s: hostname of the install source. */
+						esc_html__( 'The install source %s is not an allowed host.', 'git-updater' ),
+						(string) wp_parse_url( (string) $headers['uri'], PHP_URL_HOST )
+					)
+				);
+			}
 		}
 
 		/*

@@ -21,6 +21,7 @@ use Plugin_Installer_Skin;
 use Plugin_Upgrader;
 use Theme_Installer_Skin;
 use Theme_Upgrader;
+use WP_Error;
 use WP_Upgrader_Skin;
 
 /*
@@ -219,8 +220,9 @@ class Install {
 
 			// A git host add-on can reject the install URL (e.g. Zipfile_API).
 			if ( ! empty( self::$install['error'] ) ) {
+				$error = self::$install['error'];
 				echo '<h3>';
-				echo esc_html( self::$install['error'] );
+				echo esc_html( is_wp_error( $error ) ? $error->get_error_message() : $error );
 				echo '</h3>';
 
 				return false;
@@ -230,7 +232,16 @@ class Install {
 				$this->save_options_on_install( self::$install['options'] );
 			}
 
-			$url      = self::$install['download_link'];
+			$url        = self::$install['download_link'];
+			$host_error = $this->validate_install_host( self::$install );
+			if ( is_wp_error( $host_error ) ) {
+				echo '<h3>';
+				echo esc_html( $host_error->get_error_message() );
+				echo '</h3>';
+
+				return false;
+			}
+
 			$upgrader = $this->get_upgrader( $type, $url );
 
 			// Load hook for adding authentication headers for download packages.
@@ -251,6 +262,38 @@ class Install {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Validate that the resolved install download host may receive credentials.
+	 *
+	 * @param array<string, mixed> $install Array of installation data.
+	 *
+	 * @return true|WP_Error
+	 */
+	private function validate_install_host( $install ) {
+		$api = $install['git_updater_api'] ?? '';
+		$url = $install['download_link'] ?? '';
+
+		// Zipfile installs are validated by Zipfile_API before this point.
+		if ( empty( $api ) || empty( $url ) || 'zipfile' === $api ) {
+			return true;
+		}
+
+		if ( $this->is_allowed_credential_host( (string) $url, (string) $api ) ) {
+			return true;
+		}
+
+		$host = (string) wp_parse_url( (string) $url, PHP_URL_HOST );
+
+		return new WP_Error(
+			'gu_install_host_not_allowed',
+			sprintf(
+				/* translators: %s: hostname of the install source. */
+				esc_html__( 'The install source %s is not an allowed host.', 'git-updater' ),
+				$host
+			)
+		);
 	}
 
 	/**

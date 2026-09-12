@@ -41,6 +41,11 @@
 * i18n: clarify the "Lite Client Domains" and "Uses Git Updater Lite" copy — domains are enforced for private packages, and `uses_lite` is a distribution flag, not a privacy marker
 * docs: correct `docs/lite-update-flow.md` to describe domain validation as enforced (not optional) for private packages, note the `Update URI` header requirement for lite clients, and document the credential now required for private packages on the API routes
 * docs: add `docs/private-package-rollout.md` covering the required client version, the publish-client-first enforcement order, the `class_exists` first-wins caveat, and the `gu_enforce_private_package_gate` escape hatch
+* security: scope package credentials to authorized hosts — `Basic_Auth_Loader` gains `get_credential_hosts()`/`is_allowed_credential_host()` and fails closed in `add_auth_header()`, so a stored provider token is never sent to a host that is not authorized for that credential type (covers both the install flow and the unattended update fetch); the remote-install branch of `get_type_for_credentials()` now requires a host match instead of trusting `$_POST['git_updater_api']` alone
+* security: `Install::install()` validates the resolved `download_link` host before running the upgrader and returns a readable `WP_Error` ("The install source %s is not an allowed host.") on rejection; `Zipfile_API` and `GitHub_API` now set a `WP_Error` instead of a bare string
+* security: `GitHub_API::remote_install()` only uses a posted `releases/download` URI as the `download_link` when its host is authorized, closing an arbitrary-host download/token-exfiltration path
+* add `gu_credential_hosts` filter so each API add-on contributes the hosts authorized to receive its credentials; public and enterprise/self-hosted hosts for non-bundled providers come from the active add-on and from registered repos
+
 
 #### 14.4.2 / 2026-09-03
 * oauth: correctly detect a connector `wp_send_json_error()` response (wrapped under `data.error`) as a grant failure so an invalid/revoked refresh token triggers token deletion, the revoked-flag, and the admin email rather than an endless "No access token received" retry loop

@@ -24,6 +24,7 @@ class Test_Zipfile_API extends WP_UnitTestCase {
 		remove_all_filters( 'gu_git_servers' );
 		remove_all_filters( 'gu_installed_apis' );
 		remove_all_filters( 'gu_install_remote_install' );
+		remove_all_filters( 'gu_credential_hosts' );
 		parent::tear_down();
 	}
 
@@ -112,6 +113,15 @@ class Test_Zipfile_API extends WP_UnitTestCase {
 	}
 
 	public function test_remote_install_falls_back_to_original_when_uri_empty(): void {
+		// Public hosts are contributed by the active API add-on.
+		add_filter(
+			'gu_credential_hosts',
+			static function ( $hosts ) {
+				$hosts['gitlab'] = array_merge( $hosts['gitlab'] ?? [], [ 'gitlab.com' ] );
+				return $hosts;
+			}
+		);
+
 		$headers = [ 'uri' => '', 'original' => 'https://gitlab.com/owner/file.zip' ];
 		$install = [ 'zipfile_slug' => 'my-plugin' ];
 
@@ -154,7 +164,7 @@ class Test_Zipfile_API extends WP_UnitTestCase {
 
 		$result = $this->api->remote_install( $headers, $install );
 
-		$this->assertNotEmpty( $result['error'] );
+		$this->assertInstanceOf( WP_Error::class, $result['error'] );
 	}
 
 	public function test_remote_install_allows_filtered_host(): void {
@@ -176,14 +186,18 @@ class Test_Zipfile_API extends WP_UnitTestCase {
 		$this->assertSame( 'https://example.com/my-plugin.zip', $result['download_link'] );
 	}
 
-	public function test_remote_install_allows_configured_gitea_server_host(): void {
-		update_site_option( 'git_updater', [ 'gitea_server' => 'https://gitea.example.com' ] );
+	public function test_remote_install_allows_host_contributed_by_api_addon(): void {
+		add_filter(
+			'gu_credential_hosts',
+			static function ( $hosts ) {
+				$hosts['gitea'] = array_merge( $hosts['gitea'] ?? [], [ 'gitea.example.com' ] );
+				return $hosts;
+			}
+		);
 
 		$headers = [ 'uri' => 'https://gitea.example.com/owner/my-plugin.zip', 'original' => '' ];
 		$install = [ 'zipfile_slug' => 'my-plugin' ];
 		$result  = $this->api->remote_install( $headers, $install );
-
-		delete_site_option( 'git_updater' );
 
 		$this->assertSame( 'https://gitea.example.com/owner/my-plugin.zip', $result['download_link'] );
 		$this->assertArrayNotHasKey( 'error', $result );

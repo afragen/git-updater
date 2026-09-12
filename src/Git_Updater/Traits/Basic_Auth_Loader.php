@@ -50,6 +50,10 @@ trait Basic_Auth_Loader {
 	/**
 	 * Add authentication header to wp_remote_get().
 	 *
+	 * Credentials are destination-scoped and fail-closed: a request to a host
+	 * that is not authorized for the resolved credential type is sent without
+	 * any Authorization header.
+	 *
 	 * @access public
 	 *
 	 * @param array<string, mixed> $args Args passed to the URL.
@@ -62,6 +66,13 @@ trait Basic_Auth_Loader {
 		if ( ! $credentials['isset'] || $credentials['api.wordpress'] ) {
 			return $args;
 		}
+
+		// Never attach credentials to a host that is not authorized for this
+		// credential type; skip the add-on auth header filter too.
+		if ( ! $this->is_allowed_credential_host( $url, $credentials['type'] ) ) {
+			return $args;
+		}
+
 		if ( null !== $credentials['token'] ) {
 			// Proactive refresh: check expiry before using the token.
 			$provider = $credentials['type'] ?? null;
@@ -254,7 +265,7 @@ trait Basic_Auth_Loader {
 	 * @param array<string, mixed> $repos Array of repositories.
 	 * @param string               $url   URL being called by API.
 	 *
-	 * @return string
+	 * @return string|null
 	 */
 	private function get_type_for_credentials( $slug, $repos, $url ) {
 		$type = $this->get_class_vars( 'Base', 'caller' );
@@ -273,15 +284,142 @@ trait Basic_Auth_Loader {
 			}
 		}
 
-		// Set for Remote Install.
+		// Set for Remote Install. The posted API can only select a credential
+		// type when it also owns the destination host.
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		$type = isset( $_POST['git_updater_api'], $_POST['git_updater_repo'] )
+		$posted_api = isset( $_POST['git_updater_api'] ) ? sanitize_text_field( wp_unslash( $_POST['git_updater_api'] ) ) : '';
+		$type       = $posted_api
+			&& isset( $_POST['git_updater_repo'] )
 			&& str_contains( $url, basename( sanitize_text_field( wp_unslash( $_POST['git_updater_repo'] ) ) ) )
-			? sanitize_text_field( wp_unslash( $_POST['git_updater_api'] ) )
+			&& $this->is_allowed_credential_host( $url, $posted_api )
+			? $posted_api
 			: $type;
 		// phpcs:enable
 
 		return $type;
+	}
+
+	/**
+	 * Hosts authorized to receive credentials, keyed by credential type.
+	 *
+	 * Public hosts are seeded for the bundled GitHub provider; every other
+	 * provider — public and enterprise/self-hosted — contributes through the
+	 * `gu_credential_hosts` filter, which each active API add-on registers.
+	 * Gist hosts are credited to the `github` set because Gist authenticates as
+	 * GitHub.
+	 *
+	 * @access public
+	 *
+	 * @return array<string, array<int, string>>
+	 */
+	final public function get_credential_hosts() {
+		// Minimal bundled floor: GitHub ships with git-updater, so its public
+		// hosts are seeded here. Every other provider — public and
+		// enterprise/self-hosted — is contributed by its active API add-on
+		// through the `gu_credential_hosts` filter below.
+		$hosts = [
+			'github' => [
+				'github.com',
+				'api.github.com',
+				'codeload.github.com',
+				'objects.githubusercontent.com',
+				'githubusercontent.com',
+			],
+		];
+
+		$installed_apis = $this->get_class_vars( 'Fragen\Git_Updater\Base', 'installed_apis' );
+
+		$repos = array_merge(
+			Singleton::get_instance( 'Plugin', $this )->get_plugin_configs(),
+			Singleton::get_instance( 'Theme', $this )->get_theme_configs()
+		);
+
+		// Enterprise / self-hosted domains are only known from registered repos.
+		foreach ( $repos as $repo ) {
+			$type = $repo->git ?? null;
+			if ( ! $type ) {
+				continue;
+			}
+			$hosts[ $type ] = $hosts[ $type ] ?? [];
+			$candidates     = [
+				$repo->enterprise ?? '',
+				$repo->enterprise_api ?? '',
+				$repo->uri ?? '',
+				$repo->base_uri ?? '',
+				$repo->base_download ?? '',
+				$repo->base_raw ?? '',
+			];
+			foreach ( $candidates as $candidate ) {
+				$host = wp_parse_url( (string) $candidate, PHP_URL_HOST );
+				if ( ! empty( $host ) ) {
+					$hosts[ $type ][] = (string) $host;
+				}
+			}
+		}
+
+		/**
+		 * Filter the hosts authorized to receive credentials per git provider.
+		 *
+		 * @since 14.4.3
+		 *
+		 * @param array<string, array<int, string>> $hosts          Provider => hostnames.
+		 * @param array<string, bool|string>        $installed_apis Active API add-ons.
+		 * @param array<string, \stdClass>          $repos          Configured repositories.
+		 */
+		$hosts = apply_filters( 'gu_credential_hosts', $hosts, $installed_apis, $repos );
+
+		foreach ( $hosts as $type => $list ) {
+			$list           = array_map(
+				static function ( $item ) {
+					return strtolower( (string) $item );
+				},
+				(array) $list
+			);
+			$hosts[ $type ] = array_values( array_unique( array_filter( $list ) ) );
+		}
+
+		return $hosts;
+	}
+
+	/**
+	 * Whether a URL's host is authorized to receive credentials for a type.
+	 *
+	 * @access public
+	 *
+	 * @param string      $url  The URL being requested.
+	 * @param string|null $type Credential type, e.g. 'github'.
+	 *
+	 * @return bool
+	 */
+	final public function is_allowed_credential_host( $url, $type = null ) {
+		if ( empty( $type ) ) {
+			return false;
+		}
+
+		// Gist authenticates as GitHub and shares the github host set.
+		$type  = 'gist' === $type ? 'github' : $type;
+		$hosts = $this->get_credential_hosts();
+		if ( empty( $hosts[ $type ] ) ) {
+			return false;
+		}
+
+		$host = wp_parse_url( (string) $url, PHP_URL_HOST );
+		if ( empty( $host ) ) {
+			return false;
+		}
+		$host = strtolower( (string) $host );
+
+		foreach ( $hosts[ $type ] as $allowed ) {
+			$allowed = strtolower( (string) $allowed );
+			if ( '' === $allowed ) {
+				continue;
+			}
+			if ( $host === $allowed || str_ends_with( $host, '.' . $allowed ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
