@@ -7,7 +7,6 @@
  * @link     https://github.com/afragen/git-updater
  * @package  git-updater
  *
- * @phpcs:disable WordPress.Security.NonceVerification.Missing
  * @phpcs:disable Squiz.PHP.DisallowMultipleAssignments.Found
  */
 
@@ -364,6 +363,7 @@ class Install {
 	 */
 	public function create_form( $type ) {
 		// Bail if installing.
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['option_page'] ) && 'git_updater_install' === $_POST['option_page'] ) {
 			return;
 		}
