@@ -724,6 +724,27 @@ class Test_GitHub_API_Links extends WP_UnitTestCase {
 		$this->assertSame( $release_url, $result['download_link'] );
 	}
 
+	/**
+	 * A releases/download override on a host that is not authorized for GitHub
+	 * credentials is rejected with a WP_Error instead of being used as-is.
+	 */
+	public function test_remote_install_rejects_release_asset_uri_on_untrusted_host(): void {
+		$headers = [
+			'host'     => 'github.com',
+			'uri'      => 'https://attacker.example.net/releases/download/v1.0.0/plugin.zip',
+			'base_uri' => '',
+		];
+		$install = [
+			'git_updater_repo'   => 'owner/repo',
+			'git_updater_branch' => 'main',
+		];
+
+		$result = $this->api->remote_install( $headers, $install );
+
+		$this->assertInstanceOf( WP_Error::class, $result['error'] );
+		$this->assertSame( 'gu_install_host_not_allowed', $result['error']->get_error_code() );
+	}
+
 	public function test_remote_install_saves_access_token_when_provided(): void {
 		$headers = [
 			'host'     => 'github.com',

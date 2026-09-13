@@ -903,6 +903,30 @@ class Test_Install_Install extends WP_UnitTestCase {
 	}
 
 	/**
+	 * validate_install_host() short-circuits to true when there is no API, no
+	 * download link, or the install is handled by Zipfile_API (which validates
+	 * its own host before this point).
+	 *
+	 * @return void
+	 */
+	public function test_validate_install_host_allows_missing_api_and_zipfile(): void {
+		$method = new ReflectionMethod( Install::class, 'validate_install_host' );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
+
+		$this->assertTrue( $method->invoke( $this->install, [] ) );
+		$this->assertTrue( $method->invoke( $this->install, [ 'git_updater_api' => 'github' ] ) );
+		$this->assertTrue(
+			$method->invoke(
+				$this->install,
+				[
+					'git_updater_api' => 'zipfile',
+					'download_link'   => 'https://attacker.example.net/plugin.zip',
+				]
+			)
+		);
+	}
+
+	/**
 	 * Plugin upgrader success: upgrader extracts a real zip and installs the plugin.
 	 * Covers the truthy branch of $upgrader->install() (line 222) and
 	 * Branch::set_branch_on_install() call (line 223).

@@ -412,7 +412,7 @@ trait Basic_Auth_Loader {
 		foreach ( $hosts[ $type ] as $allowed ) {
 			$allowed = strtolower( (string) $allowed );
 			if ( '' === $allowed ) {
-				continue;
+				continue; // @codeCoverageIgnore
 			}
 			if ( $host === $allowed || str_ends_with( $host, '.' . $allowed ) ) {
 				return true;
