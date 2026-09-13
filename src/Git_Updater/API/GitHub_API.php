@@ -157,22 +157,20 @@ class GitHub_API extends API implements API_Interface {
 		 * branch switch, REST update, branch listings) resolve the correct
 		 * endpoint even when $this->type has not been hydrated by a fetch.
 		 */
-		$cache      = $this->get_repo_cache( $this->type->slug, false, [ 'tags', 'newest_tag' ] );
+		$cache      = $this->get_repo_cache( $this->type->slug, false, [ 'tags', 'newest_tag' ] ) ?: [];
 		$tags       = $this->type->tags ?? [];
 		$newest_tag = $this->type->newest_tag ?? '0.0.0';
-		if ( is_array( $cache ) ) {
-			if ( is_array( $cache['tags'] ?? null ) && ! empty( $cache['tags'] ) ) {
-				$tags = $cache['tags'];
-			}
-			if ( ! empty( $cache['newest_tag'] ) ) {
-				$newest_tag = (string) $cache['newest_tag'];
-			} elseif ( is_array( $cache['tags'] ?? null ) && ! empty( $cache['tags'] ) ) {
-				// Missing newest_tag entry: derive newest from the cached tag list
-				// (a flat list of names; sort_tags() semantics).
-				$sorted = $cache['tags'];
-				usort( $sorted, fn ( $a, $b ) => version_compare( trim( $b, 'v' ), trim( $a, 'v' ) ) );
-				$newest_tag = (string) reset( $sorted );
-			}
+		if ( is_array( $cache['tags'] ?? null ) && ! empty( $cache['tags'] ) ) {
+			$tags = $cache['tags'];
+		}
+		if ( ! empty( $cache['newest_tag'] ) ) {
+			$newest_tag = (string) $cache['newest_tag'];
+		} elseif ( is_array( $cache['tags'] ?? null ) && ! empty( $cache['tags'] ) ) {
+			// Missing newest_tag entry: derive newest from the cached tag list
+			// (a flat list of names; sort_tags() semantics).
+			$sorted = $cache['tags'];
+			usort( $sorted, fn ( $a, $b ) => version_compare( trim( $b, 'v' ), trim( $a, 'v' ) ) );
+			$newest_tag = (string) reset( $sorted );
 		}
 
 		$target = false !== $branch_switch ? $branch_switch : $this->type->branch;
