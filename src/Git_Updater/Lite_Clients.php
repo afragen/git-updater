@@ -307,7 +307,7 @@ class Lite_Clients {
 		$grants = self::get_grants();
 
 		foreach ( $slugs as $slug ) {
-			$approved = isset( $grants[ $slug ] ) && is_array( $grants[ $slug ] ) ? $grants[ $slug ] : [];
+			$approved = $grants[ $slug ] ?? [];
 			$pending  = get_site_transient( self::PENDING_PREFIX . md5( $slug ) );
 			$pending  = is_array( $pending ) ? $pending : [];
 
