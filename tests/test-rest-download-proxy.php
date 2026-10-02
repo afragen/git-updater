@@ -449,27 +449,28 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		$this->assertSame( 403, $response->get_error_data()['status'] );
 	}
 
-	public function test_get_download_token_returns_403_for_private_repo_with_unauthorized_domain(): void {
+	public function test_get_download_token_returns_403_for_private_repo_with_unapproved_client_key(): void {
 		$this->rest->mock_metadata = [ 'download_link' => 'https://example.com/package.zip', 'is_private' => true ];
 
-		add_filter( 'git_updater_lite_authorized_domains', fn() => [ 'authorized-domain.com' ] );
+		add_filter( 'git_updater_lite_client_key', fn() => 'approved-client-key' );
 		$request = $this->make_token_request();
-		$request->set_header( 'X-GU-Site-Domain', 'unauthorized-domain.com' );
+		$request->set_header( 'X-GU-Lite-Key', 'someone-elses-key' );
 		$response = $this->rest->get_download_token( $request );
-		remove_all_filters( 'git_updater_lite_authorized_domains' );
+		remove_all_filters( 'git_updater_lite_client_key' );
+		delete_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
 
 		$this->assertWPError( $response );
 		$this->assertSame( 403, $response->get_error_data()['status'] );
 	}
 
-	public function test_get_download_token_returns_200_for_private_repo_with_authorized_domain(): void {
+	public function test_get_download_token_returns_200_for_private_repo_with_approved_client_key(): void {
 		$this->rest->mock_metadata = [ 'download_link' => 'https://example.com/package.zip', 'is_private' => true ];
 
-		add_filter( 'git_updater_lite_authorized_domains', fn() => [ 'authorized-domain.com' ] );
+		add_filter( 'git_updater_lite_client_key', fn() => 'approved-client-key' );
 		$request = $this->make_token_request();
-		$request->set_header( 'X-GU-Site-Domain', 'staging.authorized-domain.com' );
+		$request->set_header( 'X-GU-Lite-Key', 'approved-client-key' );
 		$response = $this->rest->get_download_token( $request );
-		remove_all_filters( 'git_updater_lite_authorized_domains' );
+		remove_all_filters( 'git_updater_lite_client_key' );
 
 		$this->assertNotWPError( $response );
 		$this->assertStringContainsString( 'signature=', $response->get_data()['download_link'] );

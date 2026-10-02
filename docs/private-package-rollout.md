@@ -1,9 +1,9 @@
 # Private Package Rollout: enforcing the REST API gate
 
 Git Updater withholds private repositories from every REST API route unless the caller
-presents the shared REST API key or an authorized Lite client domain for that slug.
-That gate is described in [lite-update-flow.md](./lite-update-flow.md). This note covers
-how to turn it on without breaking sites that are still running an older client.
+presents the shared REST API key or an **approved Lite client key** for that slug. That gate
+is described in [lite-update-flow.md](./lite-update-flow.md). This note covers how to turn it
+on without breaking sites that are still running an older client.
 
 ## Why order matters
 
@@ -22,24 +22,23 @@ affected site cannot pull down its own fix.
 
 | Client | Behaviour |
 |---|---|
-| `git-updater-lite` ≥ 3.1.0 | Sends `X-GU-Site-Domain` on the `update-api` request. Passes the gate when its domain is authorized. |
-| `git-updater-lite` < 3.1.0 | Sends no headers on `update-api`. Denied for private packages. |
+| New client (sends `X-GU-Lite-Key`) | Generates a key lazily on its first private package and sends it; the server lists it as a pending client to approve. |
+| Older client (sends no key) | No key on `update-api`. Denied for private packages. |
 
-No released client sends any header on `update-api` before 3.1.0, so **the presence of
-`X-GU-Site-Domain` on that request is itself the signal that a caller has the updated
-client.** You do not need a separate version marker to check coverage.
+A pending entry appearing on the **Lite Clients** tab is the signal that a caller has the
+updated client and has requested a private package. You do not need a separate version
+marker to check coverage.
 
 ## Recommended order
 
-1. **Publish `git-updater-lite` 3.1.0.** The header is inert against an older server —
-   servers ignore unknown request headers — so this is safe ahead of enforcement.
+1. **Publish the client version that sends `X-GU-Lite-Key`.** The header is inert against an
+   older server — servers ignore unknown request headers — so this is safe ahead of enforcement.
 2. **Re-vendor and ship.** Update the consuming plugin/theme's `vendor/` copy and release
    it. Your customers pick up the new client when they update that plugin/theme.
-3. **Check coverage.** Before enforcing, log the inbound `X-GU-Site-Domain` header on
-   `update-api` requests. Requests carrying it are clients that have the update; requests
-   carrying nothing are either legacy clients or non-Lite consumers.
-4. **Enforce.** The gate is on by default in this release. If your fleet is not ready,
-   see the escape hatch below.
+3. **Approve clients.** As each updated site requests a private package it appears as a
+   pending client on the **Lite Clients** tab; click **Approve** once per client per package.
+4. **Enforce.** The gate is on by default in this release. If your fleet is not ready, see
+   the escape hatch below.
 
 ## Escape hatch
 
@@ -71,11 +70,18 @@ Treat this as a **stopgap, not a steady state** — while it returns `false`, pr
 package metadata is readable by anyone who knows the slug. Note also that the
 `private_package` hard block on the Additions tab is **not** filterable; it always denies.
 
+## Migration from the removed domain allow-list
+
+The `X-GU-Site-Domain` header, the `git_updater_lite_domains` option, and the "Lite Client
+Domains" tab are gone (they were a self-asserted, non-security check). The obsolete option is
+deleted on upgrade. Configure private-package access exclusively through approved clients on
+the **Lite Clients** tab.
+
 ## Caveat: one site, several consumers
 
 `Lite` is defined behind a `class_exists()` guard, so **whichever consuming plugin or
 theme loads first defines the class for the whole site.** A site with two plugins that
-each vendor a different copy can hold a 3.1.0 bundle in one and have an older copy win.
+each vendor a different copy can hold an updated bundle in one and have an older copy win.
 
 The practical effect: updating a single plugin may not be enough for such a site, and the
 symptom is confusing — "one plugin updated fine, another silently stopped". If you ship

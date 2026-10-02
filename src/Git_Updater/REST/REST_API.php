@@ -625,12 +625,12 @@ class REST_API {
 		// once $repo_api_data is built above; denying before the release-asset
 		// block also skips that remote call.
 		//
-		// git-updater-lite presents X-GU-Site-Domain on its update-api request
-		// (Lite::run()), so a lite client passes via domain validation. Clients
-		// older than that release send no headers on this route and are denied;
-		// `gu_enforce_private_package_gate` is the staging opt-out for an author
-		// whose fleet has not caught up. The `private_package` hard block above
-		// still applies to every caller and is not filterable.
+		// git-updater-lite presents an approved X-GU-Lite-Key on its update-api
+		// and download-token requests, so an approved lite client passes. Clients
+		// without an approved key are denied; `gu_enforce_private_package_gate`
+		// is the staging opt-out for an author whose fleet has not caught up. The
+		// `private_package` hard block above still applies to every caller and is
+		// not filterable.
 		if ( apply_filters( 'gu_enforce_private_package_gate', true, $slug )
 			&& $this->requires_auth( (bool) $repo_api_data['is_private'] )
 			&& ! $this->request_is_authorized( $request, $slug ) ) {
@@ -825,7 +825,7 @@ class REST_API {
 	 * Whether the request presents a valid credential for the slug.
 	 *
 	 * Two independent credentials are accepted: the shared REST API key, or an
-	 * authorized git-updater-lite client domain for that slug.
+	 * approved git-updater-lite client key for that slug.
 	 *
 	 * @param WP_REST_Request $request REST API response.
 	 * @param string          $slug    The package slug.
@@ -838,19 +838,19 @@ class REST_API {
 			return true;
 		}
 
-		$incoming = sanitize_text_field( $request->get_header( 'X-GU-Site-Domain' ) );
-		$domains  = (array) apply_filters( 'git_updater_lite_authorized_domains', [], $slug );
-		if ( empty( $incoming ) || empty( $domains ) ) {
+		$provided = sanitize_text_field( $request->get_header( 'X-GU-Lite-Key' ) );
+		if ( '' === $provided ) {
 			return false;
 		}
 
-		foreach ( $domains as $base_domain ) {
-			$base_domain = strtolower( trim( $base_domain ) );
-			// Matches exact domain OR any subdomain (e.g., staging.example.com, www.example.com).
-			if ( $incoming === $base_domain || str_ends_with( $incoming, '.' . $base_domain ) ) {
-				return true;
-			}
+		$hash = hash( 'sha256', $provided );
+		if ( \Fragen\Git_Updater\Lite_Clients::is_approved_client_key( $slug, $hash ) ) {
+			return true;
 		}
+
+		// Unknown key: record it as a pending grant for admin approval, then deny.
+		$label = sanitize_text_field( $request->get_header( 'X-GU-Client-Label' ) );
+		\Fragen\Git_Updater\Lite_Clients::record_pending_client( $slug, $hash, $label );
 
 		return false;
 	}

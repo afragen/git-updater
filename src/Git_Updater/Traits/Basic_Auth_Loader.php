@@ -138,7 +138,6 @@ trait Basic_Auth_Loader {
 			'isset'         => false,
 			'token'         => null,
 			'type'          => null,
-			'enterprise'    => null,
 			'slug'          => null,
 		];
 
@@ -146,14 +145,10 @@ trait Basic_Auth_Loader {
 			return $credentials;
 		}
 
-		static $cached_repos = null;
-		if ( null === $cached_repos ) {
-			$cached_repos = array_merge(
-				Singleton::get_instance( 'Plugin', $this )->get_plugin_configs(),
-				Singleton::get_instance( 'Theme', $this )->get_theme_configs()
-			);
-		}
-		$repos = $cached_repos;
+		$repos = array_merge(
+			Singleton::get_instance( 'Plugin', $this )->get_plugin_configs(),
+			Singleton::get_instance( 'Theme', $this )->get_theme_configs()
+		);
 		$slug  = $this->get_slug_for_credentials( $headers, $repos, $url, $options );
 		$type  = $this->get_type_for_credentials( $slug, $repos, $url );
 
@@ -168,11 +163,10 @@ trait Basic_Auth_Loader {
 			$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $token;
 			$type  = 'github';
 
-			$credentials['type']       = $type;
-			$credentials['isset']      = true;
-			$credentials['token']      = $token ?? null;
-			$credentials['enterprise'] = ! in_array( $headers['host'], [ 'github.com', 'api.github.com' ], true );
-			$credentials['slug']       = $slug;
+			$credentials['type']  = $type;
+			$credentials['isset'] = true;
+			$credentials['token'] = $token ?? null;
+			$credentials['slug']  = $slug;
 		}
 
 		// Filter hook args.
@@ -215,6 +209,13 @@ trait Basic_Auth_Loader {
 		$slug     = ! $slug && isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : $slug;
 
 		$slug = str_contains( $slug, '/' ) ? dirname( $slug ) : $slug;
+
+		// Only honor a request-supplied slug when it names a known repository.
+		// Otherwise an arbitrary request value (e.g. 'gitlab_access_token') could be
+		// used as an option key to select which stored secret is sent upstream.
+		if ( $slug && ! array_key_exists( $slug, $repos ) ) {
+			$slug = false;
+		}
 
 		// Set for bulk upgrade.
 		if ( ! $slug ) {
@@ -287,10 +288,11 @@ trait Basic_Auth_Loader {
 		// Set for Remote Install. The posted API can only select a credential
 		// type when it also owns the destination host.
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		$posted_api = isset( $_POST['git_updater_api'] ) ? sanitize_text_field( wp_unslash( $_POST['git_updater_api'] ) ) : '';
-		$type       = $posted_api
-			&& isset( $_POST['git_updater_repo'] )
-			&& str_contains( $url, basename( sanitize_text_field( wp_unslash( $_POST['git_updater_repo'] ) ) ) )
+		$posted_api  = isset( $_POST['git_updater_api'] ) ? sanitize_text_field( wp_unslash( $_POST['git_updater_api'] ) ) : '';
+		$posted_repo = isset( $_POST['git_updater_repo'] ) ? basename( sanitize_text_field( wp_unslash( $_POST['git_updater_repo'] ) ) ) : '';
+		$type        = $posted_api
+			&& '' !== $posted_repo
+			&& str_contains( $url, $posted_repo )
 			&& $this->is_allowed_credential_host( $url, $posted_api )
 			? $posted_api
 			: $type;

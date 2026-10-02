@@ -1100,45 +1100,45 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 		remove_filter( 'pre_http_request', [ $this, 'mock_private_meta' ], 20 );
 	}
 
-	public function test_get_api_data_allows_private_repo_with_authorized_domain(): void {
+	public function test_get_api_data_allows_private_repo_with_approved_client_key(): void {
 		$this->skip_if_fixture_absent();
 		$this->make_private_repo();
 
-		// The lite client presents its own domain on every route, including
-		// update-api, so a configured domain must satisfy the gate uniformly.
-		add_filter( 'git_updater_lite_authorized_domains', fn() => [ 'authorized-domain.com' ] );
+		// A pre-approved client key satisfies the gate on every route.
+		add_filter( 'git_updater_lite_client_key', fn() => 'approved-client-key' );
 
 		foreach ( [ 'plugins-api', 'themes-api', 'update-api' ] as $route ) {
 			$request = new WP_REST_Request( 'GET', '/git-updater/v1/' . $route );
 			$request->set_param( 'slug', self::SLUG );
-			$request->set_header( 'X-GU-Site-Domain', 'staging.authorized-domain.com' );
+			$request->set_header( 'X-GU-Lite-Key', 'approved-client-key' );
 			$response = $this->server->dispatch( $request );
 
 			$this->assertSame( 200, $response->get_status(), "Expected 200 for {$route}" );
 			$this->assertArrayNotHasKey( 'error', (array) $response->get_data() );
 		}
 
-		remove_all_filters( 'git_updater_lite_authorized_domains' );
+		remove_all_filters( 'git_updater_lite_client_key' );
 		remove_filter( 'pre_http_request', [ $this, 'mock_private_meta' ], 20 );
 	}
 
-	public function test_get_api_data_denies_private_repo_with_unauthorized_domain(): void {
+	public function test_get_api_data_denies_private_repo_with_unapproved_client_key(): void {
 		$this->skip_if_fixture_absent();
 		$this->make_private_repo();
 
-		add_filter( 'git_updater_lite_authorized_domains', fn() => [ 'authorized-domain.com' ] );
+		add_filter( 'git_updater_lite_client_key', fn() => 'approved-client-key' );
 
 		foreach ( [ 'plugins-api', 'themes-api', 'update-api' ] as $route ) {
 			$request = new WP_REST_Request( 'GET', '/git-updater/v1/' . $route );
 			$request->set_param( 'slug', self::SLUG );
-			$request->set_header( 'X-GU-Site-Domain', 'someone-else.com' );
+			$request->set_header( 'X-GU-Lite-Key', 'someone-elses-key' );
 			$response = $this->server->dispatch( $request );
 
 			$this->assertSame( 403, $response->get_status(), "Expected 403 for {$route}" );
 		}
 
-		remove_all_filters( 'git_updater_lite_authorized_domains' );
+		remove_all_filters( 'git_updater_lite_client_key' );
 		remove_filter( 'pre_http_request', [ $this, 'mock_private_meta' ], 20 );
+		delete_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
 	}
 
 	public function test_get_api_data_gate_can_be_disabled_by_filter(): void {
@@ -3075,72 +3075,63 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'signature=', $data['download_link'] );
 	}
 
-	public function test_get_download_token_does_not_gate_public_repo_with_unmatched_domain(): void {
+	public function test_get_download_token_does_not_gate_public_repo_with_client_key(): void {
 		$this->skip_if_fixture_absent();
 
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
-		add_filter( 'git_updater_lite_authorized_domains', fn() => [ 'authorized-domain.com' ] );
+		add_filter( 'git_updater_lite_client_key', fn() => 'some-key' );
 
 		$GLOBALS['wp_rest_server'] = null;
 		$server = rest_get_server();
 
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/' . self::SLUG );
-		$request->set_header( 'X-GU-Site-Domain', 'unauthorized-domain.com' );
+		$request->set_header( 'X-GU-Lite-Key', 'an-unrelated-key' );
 		$response = $server->dispatch( $request );
 
-		remove_all_filters( 'git_updater_lite_authorized_domains' );
+		remove_all_filters( 'git_updater_lite_client_key' );
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
 
-		// The fixture repo is public, so the privacy gate does not apply even
-		// though domains are configured for the slug.
+		// The fixture repo is public, so the privacy gate does not apply.
 		$this->assertSame( 200, $response->get_status() );
 	}
 
-	public function test_get_download_token_returns_200_for_authorized_domain(): void {
+	public function test_get_download_token_returns_200_for_approved_client_key(): void {
 		$this->skip_if_fixture_absent();
 
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
-
-		// Set up authorized domain filter
-		add_filter( 'git_updater_lite_authorized_domains', function () {
-			return [ 'authorized-domain.com' ];
-		} );
+		add_filter( 'git_updater_lite_client_key', fn() => 'approved-client-key' );
 
 		new Base();
 		$GLOBALS['wp_rest_server'] = null;
 		$server = rest_get_server();
 
-		$request  = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/' . self::SLUG );
-		$request->set_header( 'X-GU-Site-Domain', 'authorized-domain.com' );
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/' . self::SLUG );
+		$request->set_header( 'X-GU-Lite-Key', 'approved-client-key' );
 		$response = $server->dispatch( $request );
 
-		remove_all_filters( 'git_updater_lite_authorized_domains' );
+		remove_all_filters( 'git_updater_lite_client_key' );
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
 
 		$this->assertSame( 200, $response->get_status() );
 	}
 
-	public function test_get_download_token_returns_200_for_subdomain(): void {
+	public function test_get_download_token_public_repo_with_client_label(): void {
 		$this->skip_if_fixture_absent();
 
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
-
-		// Set up authorized domain filter
-		add_filter( 'git_updater_lite_authorized_domains', function () {
-			return [ 'authorized-domain.com' ];
-		} );
 
 		new Base();
 		$GLOBALS['wp_rest_server'] = null;
 		$server = rest_get_server();
 
-		$request  = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/' . self::SLUG );
-		$request->set_header( 'X-GU-Site-Domain', 'staging.authorized-domain.com' );
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/' . self::SLUG );
+		$request->set_header( 'X-GU-Lite-Key', 'any-key' );
+		$request->set_header( 'X-GU-Client-Label', 'a.example.com (Acme)' );
 		$response = $server->dispatch( $request );
 
-		remove_all_filters( 'git_updater_lite_authorized_domains' );
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
 
+		// Public repo: client key/label are ignored and it is served.
 		$this->assertSame( 200, $response->get_status() );
 	}
 

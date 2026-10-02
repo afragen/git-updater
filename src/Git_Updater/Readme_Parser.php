@@ -107,7 +107,7 @@ class Readme_Parser extends Parser {
 		unset( $data['sections']['faq'] );
 		$data['sections']['faq'] = '';
 		foreach ( $data['faq'] as $question => $answer ) {
-			$data['sections']['faq'] .= "<h4>{$question}</h4>\n{$answer}\n";
+			$data['sections']['faq'] .= '<h4>' . esc_html( $question ) . "</h4>\n" . wp_kses_post( $answer ) . "\n";
 		}
 
 		return $data;

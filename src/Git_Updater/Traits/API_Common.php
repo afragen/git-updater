@@ -242,8 +242,11 @@ trait API_Common {
 			return null;
 		}
 
-		$parser   = new Parsedown();
-		$response = $parser->text( $response );
+		$parser = new Parsedown();
+		$parser->setSafeMode( true );
+		// Remote markdown is untrusted; kses the rendered HTML before caching
+		// so every consumer gets safe markup regardless of where it is echoed.
+		$response = wp_kses_post( $parser->text( $response ) );
 		$this->set_repo_cache( 'changes', $response );
 
 		return true;
@@ -300,6 +303,11 @@ trait API_Common {
 
 		$parser   = new Readme_Parser( $response, $this->type->slug );
 		$response = $parser->parse_data();
+		if ( isset( $response['sections'] ) && is_array( $response['sections'] ) ) {
+			foreach ( $response['sections'] as $key => $section ) {
+				$response['sections'][ $key ] = wp_kses_post( $section );
+			}
+		}
 		$this->set_repo_cache( 'readme', $response );
 
 		return true;

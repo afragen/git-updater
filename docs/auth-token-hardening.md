@@ -115,3 +115,33 @@ Earlier revisions of this document said 5 minutes; that was never the implemente
 7. git-updater-lite integration: install lite on separate site, confirm updates work
 8. `npm test` / `npm run test:multisite` — all existing tests pass
 9. `composer lint` — PHPCS clean
+
+## Accepted residuals
+
+Three low-severity residuals are accepted by design:
+
+1. **Token-backed metadata fetch before the private-package 403.** In `get_api_data()` the
+   private-package gate runs *after* `get_remote_repo_meta()`, and `gu_disable_wpcron` is forced
+   false, so an anonymous caller of a private slug can still trigger one upstream call using the
+   site's stored token before the 403 is returned. The package bytes are never served. An early
+   deny would require trusting a cached `is_private`, which conflicts with the chosen
+   fail-open-on-missing-signal trade-off. Accepted.
+
+2. **Authorization forwarded across cross-host redirects.** The credential is attached only when
+   the resolved host is in the provider's `gu_credential_hosts` set (destination-scoped
+   fail-closed), but WordPress' bundled Requests re-sends the original `Authorization` header on a
+   3xx to a different host. No `requests-requests.before_redirect` strip is installed: the initial
+   request is already host-scoped and the marginal risk is a host the site already trusts for code.
+   Accepted.
+
+3. **No replay protection on the Lite client key.** `X-GU-Lite-Key` is a static bearer key; a
+   captured key is replayable until its grant is revoked. Accepted over TLS on a short-lived
+   download URL.
+
+## Lite client key (private packages)
+
+Private packages are gated on an approved Lite client key, not the removed `X-GU-Site-Domain`
+header. Each `git-updater-lite` site generates its own 256-bit key lazily (only when it meets a
+private package) and sends it as `X-GU-Lite-Key`; the server stores only its SHA-256 hash and
+serves the package once an administrator approves the client. See
+[lite-update-flow.md](./lite-update-flow.md) and [private-package-rollout.md](./private-package-rollout.md).

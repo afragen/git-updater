@@ -32,7 +32,7 @@ final class GU_Upgrade {
 	 *
 	 * @var string
 	 */
-	private $db_version = '14.4.0'; // TODO: change number.
+	private $db_version = '14.4.4';
 
 	/**
 	 * Run update check against db_version.
@@ -52,6 +52,7 @@ final class GU_Upgrade {
 			case version_compare( $db_version, $this->db_version, '<' ):
 				$this->install_cache_table();
 				$this->drop_ghu_options();
+				$this->delete_legacy_options();
 				$this->delete_flush_cache();
 				$this->save_db_version( $options );
 				break;
@@ -86,6 +87,17 @@ final class GU_Upgrade {
 		foreach ( $ghu_options as $option ) {
 			delete_site_option( $option[ $column ] );
 		}
+	}
+
+	/**
+	 * Delete options made obsolete by feature removals.
+	 *
+	 * The Lite Client Domains allow-list was replaced by per-client keys.
+	 *
+	 * @return void
+	 */
+	private function delete_legacy_options() {
+		delete_site_option( 'git_updater_lite_domains' );
 	}
 
 	/**

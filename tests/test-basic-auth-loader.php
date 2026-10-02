@@ -29,12 +29,31 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 		new Base();
 		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		$this->api = new GitHub_API( $this->make_type() );
+
+		// Register test-plugin as a known repo so request-derived slugs resolve.
+		$plugin = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this->api );
+		$ref    = new ReflectionClass( $plugin );
+		$prop   = $ref->getProperty( 'config' );
+		PHP_VERSION_ID < 80100 && $prop->setAccessible( true );
+		$repo       = new stdClass();
+		$repo->slug = 'test-plugin';
+		$repo->git  = 'github';
+		$repo->type = 'plugin';
+		$prop->setValue( $plugin, [ 'test-plugin' => $repo ] );
 	}
 
 	public function tear_down(): void {
 		unset( $_REQUEST['slug'], $_REQUEST['plugin'], $_REQUEST['plugins'], $_REQUEST['themes'] );
 		unset( $_POST['git_updater_api'], $_POST['git_updater_repo'] );
 		remove_all_filters( 'gu_credential_hosts' );
+
+		if ( isset( $this->api ) ) {
+			$plugin = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this->api );
+			$prop   = ( new ReflectionClass( $plugin ) )->getProperty( 'config' );
+			PHP_VERSION_ID < 80100 && $prop->setAccessible( true );
+			$prop->setValue( $plugin, [] );
+		}
+
 		parent::tear_down();
 	}
 
@@ -145,7 +164,8 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 		$_REQUEST['slug'] = [ 'my-plugin/my-plugin.php' ];
 
 		$headers = [ 'host' => 'api.github.com' ];
-		$slug    = $this->get_slug_for_credentials( $headers, [], 'https://api.github.com/', [] );
+		$repos   = [ 'my-plugin' => new stdClass() ];
+		$slug    = $this->get_slug_for_credentials( $headers, $repos, 'https://api.github.com/', [] );
 
 		$this->assertSame(
 			'my-plugin',
@@ -161,7 +181,8 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 		$_REQUEST['slug'] = 'my-plugin/my-plugin.php';
 
 		$headers = [ 'host' => 'api.github.com' ];
-		$slug    = $this->get_slug_for_credentials( $headers, [], 'https://api.github.com/', [] );
+		$repos   = [ 'my-plugin' => new stdClass() ];
+		$slug    = $this->get_slug_for_credentials( $headers, $repos, 'https://api.github.com/', [] );
 
 		$this->assertSame( 'my-plugin', $slug );
 	}
@@ -175,7 +196,8 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 		$_REQUEST['plugin'] = 'my-plugin/my-plugin.php';
 
 		$headers = [ 'host' => 'api.github.com' ];
-		$slug    = $this->get_slug_for_credentials( $headers, [], 'https://api.github.com/', [] );
+		$repos   = [ 'my-plugin' => new stdClass() ];
+		$slug    = $this->get_slug_for_credentials( $headers, $repos, 'https://api.github.com/', [] );
 
 		$this->assertSame( 'my-plugin', $slug );
 	}
@@ -183,6 +205,18 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 	/**
 	 * When neither slug nor plugin is in the request, slug returns false.
 	 */
+	public function test_slug_extraction_rejects_unknown_request_slug(): void {
+		// An arbitrary request value (e.g. an option key) must not be honored.
+		$_REQUEST['slug'] = 'gitlab_access_token';
+
+		$headers = [ 'host' => 'api.github.com' ];
+		$repos   = [ 'real-repo' => new stdClass() ];
+		$options = [ 'gitlab_access_token' => 'secret' ];
+		$slug    = $this->get_slug_for_credentials( $headers, $repos, 'https://api.github.com/', $options );
+
+		$this->assertFalse( $slug );
+	}
+
 	public function test_slug_extraction_returns_false_when_no_request_keys(): void {
 		unset( $_REQUEST['slug'], $_REQUEST['plugin'], $_REQUEST['plugins'], $_REQUEST['themes'] );
 
