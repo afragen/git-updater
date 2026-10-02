@@ -287,7 +287,7 @@ class Settings {
 			[
 				'id'      => 'git_updater_additions_uses_lite',
 				'setting' => 'uses_lite',
-				'title'   => __( 'Check if this package is updated via git-updater-lite and requires domain validation. Domains are enforced for private packages; the package must also carry an `Update URI:` header.', 'git-updater' ),
+				'title'   => __( 'Check if this package is distributed to git-updater-lite clients. This is a distribution flag, not a privacy marker; the package must also carry an `Update URI:` header. Private packages are approved per client on the Lite Clients tab.', 'git-updater' ),
 			]
 		);
 	}

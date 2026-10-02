@@ -71,7 +71,7 @@ For private packages, your site generates a key automatically and appears on the
 ### For `git-updater` Developers (The Server)
 If you host private packages for your clients, use the **"Lite Clients"** tab in your Git
 Updater settings.
-- **Automatic Detection**: The system scans your private repositories and shows them for approval.
+- **Private packages only**: The tab lists only private packages — a public package never needs a key and never appears here, while private packages you added on the Additions tab are retained.
 - **Approved vs. pending**: Approve a client once per package; revoke to withdraw access.
 - **The "Uses Git Updater Lite" Checkbox**: In the **Additions** tab, you can flag a package
   for distribution to lite clients. It does not make a package private — privacy comes from the

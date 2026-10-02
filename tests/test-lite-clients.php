@@ -30,6 +30,14 @@ class Test_Lite_Clients extends WP_UnitTestCase {
 		delete_site_option( 'git_updater_lite_client_keys' );
 		delete_site_option( 'git_updater_additions' );
 		$this->lite_clients = new Lite_Clients();
+
+		// Keep tests order-independent: reset any repo config leaked by another test.
+		foreach ( [ 'Plugin', 'Theme' ] as $type ) {
+			$obj  = \Fragen\Singleton::get_instance( "Fragen\\Git_Updater\\{$type}", $this->lite_clients );
+			$prop = ( new ReflectionClass( $obj ) )->getProperty( 'config' );
+			PHP_VERSION_ID < 80100 && $prop->setAccessible( true );
+			$prop->setValue( $obj, [] );
+		}
 	}
 
 	public function tear_down(): void {
@@ -342,7 +350,8 @@ class Test_Lite_Clients extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_flagged_slugs includes additions, grants, and private repos.
+	 * Test get_flagged_slugs lists only private packages (retaining private
+	 * Additions entries), and never lists known-public packages.
 	 */
 	public function test_get_flagged_slugs_sources(): void {
 		update_site_option(
@@ -351,16 +360,24 @@ class Test_Lite_Clients extends WP_UnitTestCase {
 				[
 					'ID'              => '123',
 					'type'            => 'github_plugin',
-					'slug'            => 'my-plugin/my-plugin.php',
-					'uri'             => 'https://github.com/test/my-plugin',
+					'slug'            => 'private-add/private-add.php',
+					'uri'             => 'https://github.com/test/private-add',
 					'uses_lite'       => true,
 					'private_package' => false,
 				],
 				[
 					'ID'              => '456',
+					'type'            => 'github_plugin',
+					'slug'            => 'public-add/public-add.php',
+					'uri'             => 'https://github.com/test/public-add',
+					'uses_lite'       => true,
+					'private_package' => false,
+				],
+				[
+					'ID'              => '789',
 					'type'            => 'github_theme',
-					'slug'            => 'my-theme',
-					'uri'             => 'https://github.com/test/my-theme',
+					'slug'            => 'unknown-add',
+					'uri'             => 'https://github.com/test/unknown-add',
 					'uses_lite'       => true,
 					'private_package' => false,
 				],
@@ -370,29 +387,49 @@ class Test_Lite_Clients extends WP_UnitTestCase {
 		$hash = hash( 'sha256', 'k' );
 		update_site_option(
 			'git_updater_lite_client_keys',
-			[ 'existing-slug' => [ $hash => [ 'status' => 'approved' ] ] ]
+			[
+				'existing-slug' => [ $hash => [ 'status' => 'approved' ] ],
+				'public-grant'  => [ $hash => [ 'status' => 'approved' ] ],
+			]
 		);
 
-		$mock_repo = new \stdClass();
-		$mock_repo->slug = 'private-with-uri';
-		$mock_repo->is_private = true;
-		$mock_repo->update_uri = 'https://github.com/test/private-with-uri';
-		$mock_repo->private_package = false;
+		$repo = static function ( $slug, $is_private, $update_uri = '' ) {
+			$obj                    = new \stdClass();
+			$obj->slug              = $slug;
+			$obj->is_private        = $is_private;
+			$obj->update_uri        = $update_uri;
+			$obj->private_package   = false;
+			return $obj;
+		};
 
 		$mock_plugin = \Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this->lite_clients );
 		$reflection  = new ReflectionClass( $mock_plugin );
 		$config_prop = $reflection->getProperty( 'config' );
 		PHP_VERSION_ID < 80100 && $config_prop->setAccessible( true );
-		$config_prop->setValue( $mock_plugin, [ 'private-with-uri' => $mock_repo ] );
+		$config_prop->setValue(
+			$mock_plugin,
+			[
+				'private-with-uri' => $repo( 'private-with-uri', true, 'https://github.com/test/private-with-uri' ),
+				'private-add'      => $repo( 'private-add', true ),
+				'public-add'       => $repo( 'public-add', false ),
+				'public-grant'     => $repo( 'public-grant', false ),
+			]
+		);
 
 		$method = new ReflectionMethod( $this->lite_clients, 'get_flagged_slugs' );
 		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 		$flagged = $method->invoke( $this->lite_clients );
 
-		$this->assertContains( 'my-plugin', $flagged );
-		$this->assertContains( 'my-theme', $flagged );
-		$this->assertContains( 'existing-slug', $flagged );
+		// Private packages are listed, whether auto-detected or added via Additions.
 		$this->assertContains( 'private-with-uri', $flagged );
+		$this->assertContains( 'private-add', $flagged );
+		// Unknown privacy is retained (never dropped as if public).
+		$this->assertContains( 'unknown-add', $flagged );
+		// An existing grant stays revocable.
+		$this->assertContains( 'existing-slug', $flagged );
+		// Known-public packages never need a key.
+		$this->assertNotContains( 'public-add', $flagged );
+		$this->assertNotContains( 'public-grant', $flagged );
 
 		$config_prop->setValue( $mock_plugin, [] );
 	}

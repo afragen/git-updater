@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-3.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 14.4.2.3\n"
+"Project-Id-Version: Git Updater 14.4.2.4\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/git-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-02T22:27:00+00:00\n"
+"POT-Creation-Date: 2026-10-02T23:09:14+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: git-updater\n"
@@ -137,7 +137,7 @@ msgid "Uses Git Updater Lite"
 msgstr ""
 
 #: src/Git_Updater/Additions/Settings.php:290
-msgid "Check if this package is updated via git-updater-lite and requires domain validation. Domains are enforced for private packages; the package must also carry an `Update URI:` header."
+msgid "Check if this package is distributed to git-updater-lite clients. This is a distribution flag, not a privacy marker; the package must also carry an `Update URI:` header. Private packages are approved per client on the Lite Clients tab."
 msgstr ""
 
 #: src/Git_Updater/Additions/Settings.php:324

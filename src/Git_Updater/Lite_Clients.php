@@ -416,22 +416,35 @@ class Lite_Clients {
 	 * @return array<string> Array of slugs.
 	 */
 	private function get_flagged_slugs() {
-		$flagged = [];
-
-		// 1. Additions flagged 'uses_lite'.
-		$additions = get_site_option( 'git_updater_additions', [] );
-		foreach ( $additions as $addition ) {
-			if ( ! empty( $addition['uses_lite'] ) && ! empty( $addition['slug'] ) ) {
-				$slug      = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];
-				$flagged[] = $slug;
-			}
-		}
-
-		// 2. Private repos with an Update URI header.
 		$gu_plugins = \Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
 		$gu_themes  = \Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
 		$gu_repos   = array_merge( $gu_plugins, $gu_themes );
 
+		// slug => is_private, for repos we know about. A slug absent from this map
+		// has unknown privacy and is treated as private (kept), never dropped.
+		$private_map = [];
+		foreach ( $gu_repos as $repo ) {
+			if ( ! empty( $repo->slug ) ) {
+				$private_map[ $repo->slug ] = ! empty( $repo->is_private );
+			}
+		}
+
+		$flagged = [];
+
+		// 1. Additions flagged 'uses_lite' — retained for private packages (and
+		// packages whose privacy is not yet known); a known-public package never
+		// needs a client key, so it is excluded.
+		$additions = get_site_option( 'git_updater_additions', [] );
+		foreach ( $additions as $addition ) {
+			if ( ! empty( $addition['uses_lite'] ) && ! empty( $addition['slug'] ) ) {
+				$slug = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];
+				if ( false !== ( $private_map[ $slug ] ?? true ) ) {
+					$flagged[] = $slug;
+				}
+			}
+		}
+
+		// 2. Private repos with an Update URI header.
 		foreach ( $gu_repos as $repo ) {
 			if ( ! empty( $repo->is_private )
 				&& empty( $repo->private_package )
@@ -441,10 +454,13 @@ class Lite_Clients {
 			}
 		}
 
-		// 3. Slugs that already have a grant or a pending request.
+		// 3. Slugs that already have a grant, so an admin can revoke — unless the
+		// repo is known to be public.
 		$grants = self::get_grants();
 		foreach ( array_keys( $grants ) as $configured_slug ) {
-			$flagged[] = $configured_slug;
+			if ( false !== ( $private_map[ $configured_slug ] ?? true ) ) {
+				$flagged[] = $configured_slug;
+			}
 		}
 
 		return array_unique( array_filter( $flagged ) );

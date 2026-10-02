@@ -37,6 +37,8 @@ marker to check coverage.
    it. Your customers pick up the new client when they update that plugin/theme.
 3. **Approve clients.** As each updated site requests a private package it appears as a
    pending client on the **Lite Clients** tab; click **Approve** once per client per package.
+   Only private packages are listed (public packages never need a key), and private packages
+   added via Additions are retained.
 4. **Enforce.** The gate is on by default in this release. If your fleet is not ready, see
    the escape hatch below.
 

@@ -51,6 +51,7 @@
 * remove the never-read `$credentials['enterprise']` from `Basic_Auth_Loader`; the host allow-list already gates credential attachment (`is_allowed_credential_host()`)
 * upgrade: delete the obsolete `git_updater_lite_domains` site option (`GU_Upgrade`)
 * docs: rewrite `docs/lite-update-flow.md` and `docs/private-package-rollout.md` for the client-key flow, and record the accepted residuals (pre-403 metadata fetch, cross-host redirect forwarding, static-key replay) in `docs/auth-token-hardening.md`
+* Lite Clients: show only private packages on the Lite Clients tab — `Lite_Clients::get_flagged_slugs()` builds a `slug => is_private` map and drops a slug only when it is known public, so a public package (which never needs a key) is not listed while private packages added via Additions are retained; also reword the Additions "Uses Git Updater Lite" help text to drop the removed domain-validation copy
 
 
 #### 14.4.2 / 2026-09-03
