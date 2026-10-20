@@ -371,6 +371,38 @@ class Base {
 	}
 
 	/**
+	 * Flush and synchronously refetch a single repository's cached API data.
+	 *
+	 * Unlike the `flush-repo-cache` REST endpoint (which only invalidates), this
+	 * blocks until the per-repo fetch cycle has run, so callers that need fresh
+	 * data immediately (webhook updates) never read the stale cache.
+	 *
+	 * `delete_repo_api_data()` preserves the tracked `current_branch`; a branch
+	 * switch clears it so the previous branch is not carried forward.
+	 *
+	 * @param stdClass $repo          Repo object.
+	 * @param bool     $branch_switch Whether the refresh accompanies a branch switch.
+	 *
+	 * @return bool True when the fetch cycle completed.
+	 */
+	public function refresh_repo( $repo, $branch_switch = false ) {
+		if ( ! isset( $repo->slug, $repo->type ) ) {
+			return false;
+		}
+
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo_api_data( $repo->slug );
+
+		if ( $branch_switch ) {
+			$table->delete_entry( $repo->slug, 'current_branch' );
+		}
+
+		$this->get_remote_repo_meta( $repo );
+
+		return $this->is_fetch_complete( $repo->slug );
+	}
+
+	/**
 	 * Set default values for plugin/theme.
 	 *
 	 * @param string $type (plugin|theme).

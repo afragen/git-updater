@@ -296,8 +296,10 @@ class Rest_Update {
 			}
 
 			if ( $plugin ) {
+				$this->flush_repo_cache( $plugin, 'plugin', (bool) $override );
 				$this->update_plugin( $plugin, $tag );
 			} elseif ( $theme ) {
+				$this->flush_repo_cache( $theme, 'theme', (bool) $override );
 				$this->update_theme( $theme, $tag );
 			} else {
 				throw new UnexpectedValueException( 'No plugin or theme specified for update.' );
@@ -478,5 +480,30 @@ class Rest_Update {
 			wp_die( wp_send_json_error( $response, $code ) );
 		}
 		// phpcs:enable
+	}
+
+	/**
+	 * Flush and refresh a single repository's cache before updating it.
+	 *
+	 * Runs in-process (no loopback REST request) so the refreshed cache is
+	 * guaranteed to be available to update_plugin()/update_theme() immediately.
+	 *
+	 * @param string $slug          Repository slug.
+	 * @param string $type          plugin|theme.
+	 * @param bool   $branch_switch Whether this update switches branches.
+	 *
+	 * @return bool True when the refresh completed.
+	 */
+	private function flush_repo_cache( $slug, $type = 'plugin', $branch_switch = false ) {
+		$configs = 'theme' === $type
+			? (array) Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs()
+			: (array) Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
+
+		$repo = $configs[ $slug ] ?? null;
+		if ( ! $repo ) {
+			return false;
+		}
+
+		return Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->refresh_repo( $repo, $branch_switch );
 	}
 }
