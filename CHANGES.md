@@ -1,4 +1,5 @@
 #### [unreleased]
+* fix webhook updates using stale repo data — the REST update path now flushes and synchronously refetches that repository's cached API data (`Base::refresh_repo()`) before running the upgrader, replacing the fire-and-forget loopback request to `flush-repo-cache`; newly pushed tags/release assets are now resolved by the update, and the tracked `current_branch` is preserved unless the webhook switches branches (`override`)
 
 #### 14.4.2 / 2026-09-03
 * oauth: correctly detect a connector `wp_send_json_error()` response (wrapped under `data.error`) as a grant failure so an invalid/revoked refresh token triggers token deletion, the revoked-flag, and the admin email rather than an endless "No access token received" retry loop

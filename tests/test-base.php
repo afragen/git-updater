@@ -1161,3 +1161,165 @@ class Test_Base_Get_Remote_Repo_Meta_Flow extends WP_UnitTestCase {
 		$this->assertNotEmpty( $cache['ran'] );
 	}
 }
+
+/**
+ * Class Test_Base_Refresh_Repo
+ *
+ * Covers Base::refresh_repo(): invalidation ordering, the "wait for the fetch"
+ * return contract, and current_branch preservation. Remote calls are stubbed
+ * with pre_http_request; the complete ran set is written from the
+ * get_remote_repo_meta action so the contract is deterministic.
+ */
+class Test_Base_Refresh_Repo extends WP_UnitTestCase {
+
+	private string $slug      = 'test-refresh-plugin';
+	private string $cache_key;
+	private Base   $base;
+
+	/** @var array<string, mixed> */
+	private array $cache_during_fetch = [];
+
+	private int $fetch_count = 0;
+
+	public function set_up(): void {
+		parent::set_up();
+		$this->base               = new Base();
+		$this->cache_key          = 'ghu-' . md5( $this->slug );
+		$this->cache_during_fetch = [];
+		$this->fetch_count        = 0;
+
+		add_filter( 'pre_http_request', [ $this, 'mock_http' ] );
+	}
+
+	public function tear_down(): void {
+		delete_site_option( $this->cache_key );
+		remove_all_filters( 'pre_http_request' );
+		remove_all_actions( 'get_remote_repo_meta' );
+		parent::tear_down();
+	}
+
+	public function mock_http( $preempt = null, $args = [], $url = '' ) {
+		return [
+			'headers'  => [],
+			'body'     => '[]',
+			'response' => [ 'code' => 200, 'message' => 'OK' ],
+			'cookies'  => [],
+			'filename' => null,
+		];
+	}
+
+	private function make_repo(): stdClass {
+		return (object) [
+			'slug'           => $this->slug,
+			'type'           => 'plugin',
+			'git'            => 'github',
+			'file'           => $this->slug . '/' . $this->slug . '.php',
+			'owner'          => 'afragen',
+			'repo'           => $this->slug,
+			'branch'         => 'main',
+			'primary_branch' => 'main',
+			'uri'            => 'https://github.com/afragen/' . $this->slug,
+			'release_asset'  => false,
+			'enterprise'     => null,
+			'enterprise_api' => null,
+			'gist_id'        => null,
+		];
+	}
+
+	/**
+	 * Capture the option state at fetch time and optionally write a ran set.
+	 *
+	 * @param array<int, string> $ran Ran steps to write at the end of the fetch.
+	 * @return void
+	 */
+	private function capture_fetch( array $ran = [] ): void {
+		add_action(
+			'get_remote_repo_meta',
+			function ( $repo ) use ( $ran ) {
+				if ( $this->slug !== $repo->slug ) {
+					return;
+				}
+				++$this->fetch_count;
+				$this->cache_during_fetch = (array) get_site_option( $this->cache_key, [] );
+				if ( ! empty( $ran ) ) {
+					$cache        = (array) get_site_option( $this->cache_key, [] );
+					$cache['ran'] = $ran;
+					update_site_option( $this->cache_key, $cache );
+				}
+			}
+		);
+	}
+
+	/**
+	 * @return array<int, string>
+	 */
+	private function complete_ran(): array {
+		return [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
+	}
+
+	public function test_refresh_repo_returns_false_without_slug(): void {
+		$result = $this->base->refresh_repo( (object) [ 'type' => 'plugin' ] );
+
+		$this->assertFalse( $result );
+		$this->assertSame( 0, $this->fetch_count );
+	}
+
+	public function test_refresh_repo_flushes_cache_before_fetch(): void {
+		update_site_option(
+			$this->cache_key,
+			[
+				'stale_marker' => 'old',
+				'timeout'      => time() + HOUR_IN_SECONDS,
+			]
+		);
+		$this->capture_fetch( $this->complete_ran() );
+
+		$result = $this->base->refresh_repo( $this->make_repo() );
+
+		$this->assertTrue( $result );
+		$this->assertSame( 1, $this->fetch_count );
+		$this->assertArrayNotHasKey( 'stale_marker', $this->cache_during_fetch );
+	}
+
+	public function test_refresh_repo_returns_true_when_ran_bookkeeping_is_complete(): void {
+		$this->capture_fetch( $this->complete_ran() );
+
+		$this->assertTrue( $this->base->refresh_repo( $this->make_repo() ) );
+	}
+
+	public function test_refresh_repo_returns_false_when_ran_bookkeeping_is_incomplete(): void {
+		$this->capture_fetch( [ 'contents' ] );
+
+		$this->assertFalse( $this->base->refresh_repo( $this->make_repo() ) );
+	}
+
+	public function test_refresh_repo_preserves_current_branch(): void {
+		update_site_option( $this->cache_key, [ 'current_branch' => 'develop' ] );
+		$this->capture_fetch( $this->complete_ran() );
+
+		$this->base->refresh_repo( $this->make_repo() );
+
+		$cache = get_site_option( $this->cache_key );
+		$this->assertSame( 'develop', $cache['current_branch'] );
+	}
+
+	public function test_refresh_repo_drops_current_branch_on_branch_switch(): void {
+		update_site_option( $this->cache_key, [ 'current_branch' => 'develop' ] );
+		$this->capture_fetch( $this->complete_ran() );
+
+		$this->base->refresh_repo( $this->make_repo(), true );
+
+		$cache = (array) get_site_option( $this->cache_key );
+		$this->assertArrayNotHasKey( 'current_branch', $cache );
+	}
+
+	public function test_refresh_repo_preserves_current_branch_when_fetch_fails(): void {
+		update_site_option( $this->cache_key, [ 'current_branch' => 'develop' ] );
+
+		$result = $this->base->refresh_repo( $this->make_repo() );
+
+		$cache = get_site_option( $this->cache_key );
+		$this->assertFalse( $result );
+		$this->assertSame( 'develop', $cache['current_branch'] );
+	}
+}

@@ -318,10 +318,12 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 	private ?string $plugin_file_backup  = null;
 	private array   $theme_file_backups  = [];
 	private array   $saved_request;
+	private array   $requested_urls = [];
 
 	public function set_up(): void {
 		parent::set_up();
-		$this->saved_request = $_REQUEST;
+		$this->saved_request  = $_REQUEST;
+		$this->requested_urls = [];
 
 		// Force AJAX context so wp_send_json_success/error() calls wp_die() instead of die;.
 		// Also override wp_die_ajax_handler so wp_die() throws WPDieException (the test
@@ -366,6 +368,7 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 
 	public function tear_down(): void {
 		remove_filter( 'pre_http_request', [ $this, 'mock_http' ], 10 );
+		remove_filter( 'pre_http_request', [ $this, 'mock_http_full' ], 10 );
 		remove_all_filters( 'upgrader_pre_download' );
 		remove_all_filters( 'site_transient_update_plugins' );
 		remove_all_filters( 'site_transient_update_themes' );
@@ -373,6 +376,8 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 		remove_all_filters( 'wp_doing_ajax' );
 		remove_all_filters( 'wp_die_ajax_handler' );
 		delete_site_option( 'git_updater_api_key' );
+		delete_site_option( 'ghu-' . md5( self::PLUGIN_SLUG ) );
+		delete_site_option( 'ghu-' . md5( self::THEME_SLUG ) );
 
 		foreach ( [ $this->zip_path, $this->theme_zip_path ] as $path ) {
 			if ( $path && file_exists( $path ) ) {
@@ -502,6 +507,8 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 	 * @return mixed
 	 */
 	public function mock_http( mixed $preempt, mixed $args, string $url ): mixed {
+		$this->requested_urls[] = $url;
+
 		if ( str_contains( $url, 'api.wordpress.org/plugins/update-check' ) ) {
 			return $this->http_response( json_encode( [ 'plugins' => [], 'translations' => [], 'no_update' => [] ] ) );
 		}
@@ -530,6 +537,168 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 			'cookies'  => [],
 			'filename' => null,
 		];
+	}
+
+	/**
+	 * Full GitHub fixture mock for the refresh cycle.
+	 *
+	 * @param mixed  $preempt Existing preempt value.
+	 * @param mixed  $args    Request args.
+	 * @param string $url     Request URL.
+	 * @return mixed
+	 */
+	public function mock_http_full( mixed $preempt, mixed $args, string $url ): mixed {
+		$this->requested_urls[] = $url;
+
+		if ( str_contains( $url, 'api.wordpress.org/plugins/update-check' ) ) {
+			return $this->http_response( json_encode( [ 'plugins' => [], 'translations' => [], 'no_update' => [] ] ) );
+		}
+		if ( str_contains( $url, 'api.wordpress.org/themes/update-check' ) ) {
+			return $this->http_response( json_encode( [ 'themes' => [], 'translations' => [], 'no_update' => [] ] ) );
+		}
+		if ( str_contains( $url, 'api.wordpress.org' ) ) {
+			return $this->http_response( json_encode( [ 'error' => 'Plugin not found.' ] ) );
+		}
+
+		if ( ! str_contains( $url, 'api.github.com/repos/afragen/test-gu-plugin' ) ) {
+			return $this->http_response( '[]' );
+		}
+
+		$path = (string) parse_url( $url, PHP_URL_PATH );
+
+		if ( str_contains( $path, '/contents/test-gu-plugin.php' ) ) {
+			return $this->http_response(
+				json_encode(
+					[
+						'content'  => base64_encode( $this->fixture_plugin_content() ),
+						'encoding' => 'base64',
+					]
+				)
+			);
+		}
+		if ( str_contains( $path, '/contents/readme.txt' ) ) {
+			return $this->http_response(
+				json_encode(
+					[
+						'content'  => base64_encode( "# Test GU Plugin\n\nMinimal readme." ),
+						'encoding' => 'base64',
+					]
+				)
+			);
+		}
+		if ( str_contains( $path, '/contents/CHANGES.md' ) ) {
+			return $this->http_response(
+				json_encode(
+					[
+						'content'  => base64_encode( "# Changelog\n\n## 2.0.0\n* Test release." ),
+						'encoding' => 'base64',
+					]
+				)
+			);
+		}
+		if ( str_contains( $path, '/contents/assets' ) ) {
+			return $this->http_response( json_encode( [ [ 'name' => 'banner-772x250.png', 'type' => 'file', 'download_url' => 'https://example.com/banner.png' ] ] ) );
+		}
+		if ( '/repos/afragen/test-gu-plugin/contents' === $path ) {
+			return $this->http_response(
+				json_encode(
+					[
+						[ 'name' => 'test-gu-plugin.php', 'type' => 'file' ],
+						[ 'name' => 'readme.txt', 'type' => 'file' ],
+						[ 'name' => 'CHANGES.md', 'type' => 'file' ],
+						[ 'name' => 'assets', 'type' => 'dir' ],
+					]
+				)
+			);
+		}
+		if ( str_ends_with( $path, '/tags' ) ) {
+			return $this->http_response(
+				json_encode(
+					[
+						[
+							'name'        => '2.0.0',
+							'zipball_url' => 'https://github.com/afragen/test-gu-plugin/zipball/2.0.0',
+							'commit'      => [ 'sha' => 'abc123def456' ],
+						],
+					]
+				)
+			);
+		}
+		if ( str_ends_with( $path, '/branches' ) ) {
+			return $this->http_response(
+				json_encode(
+					[
+						[
+							'name'   => 'main',
+							'commit' => [ 'sha' => 'abc123def456', 'url' => '' ],
+						],
+					]
+				)
+			);
+		}
+		if ( '/repos/afragen/test-gu-plugin' === $path ) {
+			return $this->http_response(
+				json_encode(
+					[
+						'private'     => false,
+						'pushed_at'   => '2024-06-01T12:00:00Z',
+						'created_at'  => '2023-01-01T00:00:00Z',
+						'watchers'    => 0,
+						'forks'       => 0,
+						'open_issues' => 0,
+					]
+				)
+			);
+		}
+
+		return $this->http_response( '[]' );
+	}
+
+	private function fixture_plugin_content(): string {
+		return implode(
+			"\n",
+			[
+				'<?php',
+				'/**',
+				' * Plugin Name:       Test GU Plugin',
+				' * Plugin URI:        https://github.com/afragen/test-gu-plugin',
+				' * Description:       Minimal fixture plugin for PHPUnit integration tests.',
+				' * Version:           2.0.0',
+				' * Author:            Test Author',
+				' * License:           GPL-3.0-or-later',
+				' * GitHub Plugin URI: https://github.com/afragen/test-gu-plugin',
+				' * Primary Branch:    main',
+				' */',
+			]
+		);
+	}
+
+	private function use_full_http_mock(): void {
+		remove_filter( 'pre_http_request', [ $this, 'mock_http' ], 10 );
+		add_filter( 'pre_http_request', [ $this, 'mock_http_full' ], 10, 3 );
+	}
+
+	/**
+	 * Invoke the private flush_repo_cache() method.
+	 *
+	 * @param Rest_Update $rest          REST update instance.
+	 * @param string      $slug          Repository slug.
+	 * @param string      $type          plugin|theme.
+	 * @param bool        $branch_switch Whether this is a branch switch.
+	 * @return bool
+	 */
+	private function invoke_flush_repo_cache( Rest_Update $rest, string $slug, string $type = 'plugin', bool $branch_switch = false ): bool {
+		$method = new ReflectionMethod( Rest_Update::class, 'flush_repo_cache' );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
+
+		return (bool) $method->invoke( $rest, $slug, $type, $branch_switch );
+	}
+
+	private function seed_repo_option( string $slug, array $data ): void {
+		update_site_option(
+			'ghu-' . md5( $slug ),
+			array_merge( [ 'timeout' => time() + HOUR_IN_SECONDS ], $data )
+		);
 	}
 
 	// -------------------------------------------------------------------------
@@ -779,6 +948,137 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 		$rest     = new Rest_Update();
 
 		$this->assert_wp_die_thrown( fn() => $rest->process_request( null ) );
+	}
+
+	// -------------------------------------------------------------------------
+	// flush_repo_cache() — in-process refresh, no REST loopback
+	// -------------------------------------------------------------------------
+
+	public function test_flush_repo_cache_refreshes_target_repo(): void {
+		$this->skip_if_plugin_absent();
+		$this->use_full_http_mock();
+		$this->seed_repo_option(
+			self::PLUGIN_SLUG,
+			[
+				self::PLUGIN_SLUG => [ 'Version' => '1.0.0' ],
+				'ran'             => [],
+			]
+		);
+
+		$rest = new Rest_Update();
+		$this->invoke_flush_repo_cache( $rest, self::PLUGIN_SLUG );
+
+		$cache = get_site_option( 'ghu-' . md5( self::PLUGIN_SLUG ) );
+		$this->assertSame( '2.0.0', $cache[ self::PLUGIN_SLUG ]['Version'] );
+		$this->assertContains( 'contents', $cache['ran'] );
+		$this->assertContains( 'tags', $cache['ran'] );
+		$this->assertContains( 'branches', $cache['ran'] );
+	}
+
+	public function test_flush_repo_cache_makes_no_rest_loopback_request(): void {
+		$this->skip_if_plugin_absent();
+		$this->use_full_http_mock();
+		$this->seed_repo_option( self::PLUGIN_SLUG, [ self::PLUGIN_SLUG => [ 'Version' => '1.0.0' ] ] );
+
+		$rest = new Rest_Update();
+		$this->invoke_flush_repo_cache( $rest, self::PLUGIN_SLUG );
+
+		$loopback = array_filter( $this->requested_urls, fn( $url ) => str_contains( $url, 'flush-repo-cache' ) );
+		$github   = array_filter( $this->requested_urls, fn( $url ) => str_contains( $url, 'api.github.com' ) );
+		$this->assertSame( [], array_values( $loopback ) );
+		$this->assertNotEmpty( $github );
+	}
+
+	public function test_flush_repo_cache_returns_false_for_unknown_slug(): void {
+		$rest = new Rest_Update();
+
+		$this->assertFalse( $this->invoke_flush_repo_cache( $rest, 'no-such-slug' ) );
+		$this->assertSame( [], $this->requested_urls );
+	}
+
+	public function test_flush_repo_cache_leaves_other_repo_cache_untouched(): void {
+		$this->skip_if_plugin_absent();
+		$this->use_full_http_mock();
+		$this->seed_repo_option( self::PLUGIN_SLUG, [ self::PLUGIN_SLUG => [ 'Version' => '1.0.0' ] ] );
+
+		$other_slug = 'another-gu-repo';
+		update_site_option( 'ghu-' . md5( $other_slug ), [ 'marker' => 'keep' ] );
+
+		$rest = new Rest_Update();
+		$this->invoke_flush_repo_cache( $rest, self::PLUGIN_SLUG );
+
+		$other = get_site_option( 'ghu-' . md5( $other_slug ) );
+		$this->assertSame( 'keep', $other['marker'] );
+		delete_site_option( 'ghu-' . md5( $other_slug ) );
+	}
+
+	public function test_flush_repo_cache_preserves_current_branch(): void {
+		$this->skip_if_plugin_absent();
+		$this->use_full_http_mock();
+		$this->seed_repo_option(
+			self::PLUGIN_SLUG,
+			[
+				self::PLUGIN_SLUG => [ 'Version' => '1.0.0' ],
+				'current_branch'  => 'main',
+			]
+		);
+
+		$rest = new Rest_Update();
+		$this->invoke_flush_repo_cache( $rest, self::PLUGIN_SLUG, 'plugin', false );
+
+		$cache = get_site_option( 'ghu-' . md5( self::PLUGIN_SLUG ) );
+		$this->assertSame( 'main', $cache['current_branch'] );
+	}
+
+	public function test_flush_repo_cache_drops_current_branch_on_branch_switch(): void {
+		$this->skip_if_plugin_absent();
+		$this->use_full_http_mock();
+		$this->seed_repo_option(
+			self::PLUGIN_SLUG,
+			[
+				self::PLUGIN_SLUG => [ 'Version' => '1.0.0' ],
+				'current_branch'  => 'main',
+			]
+		);
+
+		$rest = new Rest_Update();
+		$this->invoke_flush_repo_cache( $rest, self::PLUGIN_SLUG, 'plugin', true );
+
+		$cache = (array) get_site_option( 'ghu-' . md5( self::PLUGIN_SLUG ) );
+		$this->assertArrayNotHasKey( 'current_branch', $cache );
+	}
+
+	public function test_process_request_refreshes_cache_before_updating(): void {
+		$this->skip_if_plugin_absent();
+		$this->use_full_http_mock();
+		$this->seed_repo_option(
+			self::PLUGIN_SLUG,
+			[
+				self::PLUGIN_SLUG => [ 'Version' => '1.0.0' ],
+				'ran'             => [],
+				'current_branch'  => 'main',
+			]
+		);
+
+		$_REQUEST = [
+			'key'    => 'test-full-path-key',
+			'plugin' => self::PLUGIN_SLUG,
+			'tag'    => 'main',
+		];
+
+		$spy = new class extends Rest_Update {
+			public $cache_at_update = null;
+			public function update_plugin( $slug, $tag = 'master' ) {
+				$this->cache_at_update = get_site_option( 'ghu-' . md5( $slug ) );
+			}
+			public function update_theme( $slug, $tag = 'master' ) {}
+		};
+
+		$this->assert_wp_die_thrown( fn() => $spy->process_request( null ) );
+
+		$this->assertSame( '2.0.0', $spy->cache_at_update[ self::PLUGIN_SLUG ]['Version'] );
+		$this->assertArrayHasKey( 'ran', $spy->cache_at_update );
+		$this->assertSame( 'main', $spy->cache_at_update['current_branch'] );
 	}
 }
 
