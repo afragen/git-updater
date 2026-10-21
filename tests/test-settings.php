@@ -126,6 +126,12 @@ trait Settings_Test_Helper {
 		remove_all_actions( 'gu_add_settings' );
 		remove_all_actions( 'gu_add_admin_page' );
 		remove_all_actions( 'gu_update_settings' );
+		if ( function_exists( 'wp_unregister_icon_collection' )
+			&& class_exists( 'WP_Icon_Collections_Registry' )
+			&& WP_Icon_Collections_Registry::get_instance()->is_registered( 'git-updater' )
+		) {
+			wp_unregister_icon_collection( 'git-updater' );
+		}
 		unset(
 			$_GET['tab'],
 			$_GET['subtab'],
@@ -688,7 +694,7 @@ class Test_Settings_Gu_Tokens extends GU_Test_Case {
 		$this->assertSame( '', $field['title'] );
 	}
 
-	public function test_gu_tokens_uses_appearance_dashicon_for_theme(): void {
+	public function test_gu_tokens_uses_theme_icon(): void {
 		$settings = $this->settings;
 		$theme    = $this->make_theme_obj( [ 'remote_version' => '0.0.0' ] );
 		$this->inject_plugin_config( [] );
@@ -710,6 +716,11 @@ class Test_Settings_Gu_Tokens extends GU_Test_Case {
 		$this->settings->gu_tokens();
 		$this->assertNotNull( $captured_args );
 		$this->assertSame( 'theme', $captured_args->type );
+
+		global $wp_settings_fields;
+		$field = $wp_settings_fields['git_updater_github_install_settings']['github_id']['test-theme'] ?? null;
+		$this->assertNotNull( $field );
+		$this->assertStringContainsString( 'gu-icon-theme', $field['title'] );
 	}
 
 	public function test_gu_tokens_calls_create_error_message_when_waiting(): void {
@@ -889,7 +900,7 @@ class Test_Settings_Print_Section extends GU_Test_Case {
 		$this->settings->print_section_gu_settings();
 		$output = ob_get_clean();
 		$this->assertStringContainsString( 'Test Plugin', $output );
-		$this->assertStringContainsString( 'dashicons-admin-plugins', $output );
+		$this->assertStringContainsString( 'gu-icon-plugin', $output );
 	}
 
 	public function test_display_dot_org_overrides_shows_theme_in_override_list(): void {
@@ -900,7 +911,7 @@ class Test_Settings_Print_Section extends GU_Test_Case {
 		$this->settings->print_section_gu_settings();
 		$output = ob_get_clean();
 		$this->assertStringContainsString( 'Test Theme', $output );
-		$this->assertStringContainsString( 'dashicons-admin-appearance', $output );
+		$this->assertStringContainsString( 'gu-icon-theme', $output );
 	}
 
 	public function test_display_dot_org_overrides_includes_skip_updates_slugs(): void {
@@ -1307,7 +1318,7 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		$this->call_private( 'display_gu_repos', [ 'github' ] );
 		$output = ob_get_clean();
 		$this->assertStringContainsString( 'Test Plugin', $output );
-		$this->assertStringContainsString( 'dashicons-admin-plugins', $output );
+		$this->assertStringContainsString( 'gu-icon-plugin', $output );
 	}
 
 	public function test_display_gu_repos_shows_lock_icon_for_private_repo(): void {
@@ -1317,7 +1328,7 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		ob_start();
 		$this->call_private( 'display_gu_repos', [ 'github' ] );
 		$output = ob_get_clean();
-		$this->assertStringContainsString( 'dashicons-lock', $output );
+		$this->assertStringContainsString( 'gu-icon-private', $output );
 	}
 
 	public function test_display_gu_repos_shows_broken_icon_for_zero_version(): void {
@@ -1327,7 +1338,7 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		ob_start();
 		$this->call_private( 'display_gu_repos', [ 'github' ] );
 		$output = ob_get_clean();
-		$this->assertStringContainsString( 'dashicons-warning', $output );
+		$this->assertStringContainsString( 'gu-icon-broken', $output );
 	}
 
 	public function test_display_gu_repos_shows_broken_icon_when_no_remote_version(): void {
@@ -1338,7 +1349,7 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		ob_start();
 		$this->call_private( 'display_gu_repos', [ 'github' ] );
 		$output = ob_get_clean();
-		$this->assertStringContainsString( 'dashicons-warning', $output );
+		$this->assertStringContainsString( 'gu-icon-broken', $output );
 	}
 
 	public function test_display_gu_repos_shows_dot_org_icon_when_not_overridden(): void {
@@ -1348,7 +1359,7 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		ob_start();
 		$this->call_private( 'display_gu_repos', [ 'github' ] );
 		$output = ob_get_clean();
-		$this->assertStringContainsString( 'dashicons-wordpress', $output );
+		$this->assertStringContainsString( 'gu-icon-dot-org', $output );
 	}
 
 	public function test_display_gu_repos_hides_dot_org_icon_when_overridden(): void {
@@ -1359,7 +1370,7 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		ob_start();
 		$this->call_private( 'display_gu_repos', [ 'github' ] );
 		$output = ob_get_clean();
-		$this->assertStringNotContainsString( 'dashicons-wordpress', $output );
+		$this->assertStringNotContainsString( 'gu-icon-dot-org', $output );
 	}
 
 	public function test_display_gu_repos_shows_dismiss_icon(): void {
@@ -1369,17 +1380,17 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		ob_start();
 		$this->call_private( 'display_gu_repos', [ 'github' ] );
 		$output = ob_get_clean();
-		$this->assertStringContainsString( 'dashicons-dismiss', $output );
+		$this->assertStringContainsString( 'gu-icon-dismiss', $output );
 	}
 
-	public function test_display_gu_repos_uses_appearance_dashicon_for_theme(): void {
+	public function test_display_gu_repos_uses_theme_icon(): void {
 		$theme = $this->make_theme_obj();
 		$this->inject_plugin_config( [] );
 		$this->inject_theme_config( [ 'test-theme' => $theme ] );
 		ob_start();
 		$this->call_private( 'display_gu_repos', [ 'github' ] );
 		$output = ob_get_clean();
-		$this->assertStringContainsString( 'dashicons-admin-appearance', $output );
+		$this->assertStringContainsString( 'gu-icon-theme', $output );
 	}
 
 	public function test_display_gu_repos_applies_gu_display_repos_filter(): void {
@@ -1416,6 +1427,32 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		// Broken indicator is rendered (hidden) so JS can reveal it after a flush.
 		$this->assertStringContainsString( 'gu-repo-broken', $output );
 		$this->assertStringContainsString( 'display:none', $output );
+		$this->assertStringContainsString( 'gu-icon-plugin', $output );
+	}
+
+	public function test_display_gu_repos_broken_icon_is_red(): void {
+		$plugin = $this->make_plugin_obj( [ 'remote_version' => '0.0.0' ] );
+		$this->inject_plugin_config( [ 'test-plugin' => $plugin ] );
+		$this->inject_theme_config( [] );
+		ob_start();
+		$this->call_private( 'display_gu_repos', [ 'github' ] );
+		$output = ob_get_clean();
+		$this->assertStringContainsString( 'color:#f00', $output );
+		$this->assertStringContainsString( 'gu-icon-broken', $output );
+	}
+
+	public function test_display_gu_repos_renders_svg_survives_kses(): void {
+		if ( ! \Fragen\Git_Updater\Icons::is_available() ) {
+			$this->markTestSkipped( 'WordPress 7.2 core-admin icon set is not available.' );
+		}
+		$plugin = $this->make_plugin_obj();
+		$this->inject_plugin_config( [ 'test-plugin' => $plugin ] );
+		$this->inject_theme_config( [] );
+		ob_start();
+		$this->call_private( 'display_gu_repos', [ 'github' ] );
+		$output = ob_get_clean();
+		$this->assertStringContainsString( '<svg', $output );
+		$this->assertStringContainsString( 'gu-icon-plugin', $output );
 	}
 }
 

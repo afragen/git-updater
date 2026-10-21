@@ -114,3 +114,8 @@ button.gu-flush-repo.dashicons-no-decoration {
 	opacity: 0.5;
 	pointer-events: none;
 }
+
+/* Icons API / Dashicon fallback */
+.gu-icon {
+	vertical-align: middle;
+}

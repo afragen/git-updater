@@ -72,7 +72,7 @@ class Test_GUTrait extends \WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * When $repo is an array (icon/dashicon context), override_dot_org() must
+	 * When $repo is an array (Settings icon context), override_dot_org() must
 	 * cast it to object and treat dot_org_master as true.  With no filter
 	 * overrides registered, the return value is false (do not override
 	 * dot-org updates for the icon rendering path).

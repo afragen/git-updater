@@ -120,8 +120,8 @@ class Test_Repo_List_Table_Methods extends WP_UnitTestCase {
 	}
 
 	public function test_column_default_returns_release_asset_value(): void {
-		$item = $this->make_item( [ 'release_asset' => '<span>yes</span>' ] );
-		$this->assertSame( '<span>yes</span>', $this->table->column_default( $item, 'release_asset' ) );
+		$item = $this->make_item( [ 'release_asset' => true ] );
+		$this->assertStringContainsString( 'gu-icon-yes', $this->table->column_default( $item, 'release_asset' ) );
 	}
 
 	public function test_column_default_escapes_html_in_field_values(): void {
@@ -376,11 +376,36 @@ class Test_Repo_List_Table_Extended extends WP_UnitTestCase {
 			'primary_branch' => 'master',
 			'release_asset' => false,
 			'private_package' => false,
-			'uses_lite' => '<span class="dashicons dashicons-yes"></span>',
+			'uses_lite' => true,
 		];
 
 		$result = $this->table->column_default( $item, 'uses_lite' );
-		$this->assertStringContainsString( 'dashicons-yes', $result );
+		$this->assertStringContainsString( 'gu-icon-yes', $result );
+		if ( \Fragen\Git_Updater\Icons::is_available() ) {
+			$this->assertStringContainsString( '<svg', $result );
+		}
+	}
+
+	public function test_constructor_keeps_flag_columns_boolean(): void {
+		$option = [
+			'ID' => 'abc',
+			'type' => 'github_plugin',
+			'slug' => 'test-plugin/test-plugin.php',
+			'uri' => 'https://github.com/test/plugin',
+			'source' => 'github',
+			'primary_branch' => 'main',
+			'release_asset' => true,
+			'private_package' => true,
+			'uses_lite' => true,
+		];
+		$table = new Repo_List_Table( [ $option ] );
+		$table->prepare_items();
+		$items = $table->items;
+		$item  = reset( $items );
+
+		$this->assertTrue( $item['release_asset'] );
+		$this->assertTrue( $item['private_package'] );
+		$this->assertTrue( $item['uses_lite'] );
 	}
 
 	public function test_column_default_renders_uses_lite_false(): void {

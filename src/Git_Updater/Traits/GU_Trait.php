@@ -652,7 +652,7 @@ trait GU_Trait {
 	 * @return bool
 	 */
 	final public function override_dot_org( $type, $repo ) {
-		// Correctly account for dashicon in Settings page.
+		// Correctly account for icon in Settings page.
 		$icon           = is_array( $repo );
 		$repo           = is_array( $repo ) ? (object) $repo : $repo;
 		$dot_org_master = ! $icon ? property_exists( $repo, 'dot_org' ) && $repo->dot_org && $repo->primary_branch === $repo->branch : true;

@@ -498,7 +498,7 @@ class Settings {
 		$gu_tokens       = array_merge( $gu_plugins, $gu_themes );
 
 		foreach ( $gu_tokens as $token ) {
-			$type                            = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;';
+			$type                            = Icons::get( 'plugin' ) . '&nbsp;';
 			$setting_field                   = [];
 			$gu_options_keys[ $token->slug ] = null;
 
@@ -510,7 +510,7 @@ class Settings {
 			}
 
 			if ( 'theme' === $token->type ) {
-				$type = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;';
+				$type = Icons::get( 'theme' ) . '&nbsp;';
 			}
 
 			$setting_field['id']    = $token->slug;
@@ -622,10 +622,10 @@ class Settings {
 	 * @return void
 	 */
 	private function display_dot_org_overrides() {
-		$plugins         = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
-		$themes          = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
-		$dashicon_plugin = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
-		$dashicon_theme  = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;';
+		$plugins     = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
+		$themes      = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
+		$icon_plugin = Icons::get( 'plugin' ) . '&nbsp;&nbsp;';
+		$icon_theme  = Icons::get( 'theme' ) . '&nbsp;&nbsp;';
 
 		/**
 		 * Filter to return array of overrides to dot org.
@@ -648,12 +648,12 @@ class Settings {
 
 			foreach ( $plugins as $plugin ) {
 				if ( in_array( $plugin->file, $overrides, true ) && isset( $plugin->name ) ) {
-					echo '<p>' . wp_kses_post( $dashicon_plugin . $plugin->name ) . '</p>';
+					echo '<p>' . wp_kses( $icon_plugin . esc_html( $plugin->name ), Icons::allowed_html() ) . '</p>';
 				}
 			}
 			foreach ( $themes as $theme ) {
 				if ( in_array( $theme->slug, $overrides, true ) && isset( $theme->name ) ) {
-					echo '<p>' . wp_kses_post( $dashicon_theme . $theme->name ) . '</p>';
+					echo '<p>' . wp_kses( $icon_theme . esc_html( $theme->name ), Icons::allowed_html() ) . '</p>';
 				}
 			}
 			echo '<br>';
@@ -861,8 +861,8 @@ class Settings {
 
 	/**
 	 * Write out listing of installed plugins and themes using Git Updater.
-	 * Places a lock dashicon after the repo name if it's a private repo.
-	 * Places a WordPress dashicon after the repo name if it's in dot org.
+	 * Places a lock icon after the repo name if it's a private repo.
+	 * Places a WordPress icon after the repo name if it's in dot org.
 	 *
 	 * @param string $git Name of API, eg 'github'.
 	 * @return void
@@ -912,17 +912,16 @@ class Settings {
 			$type_repos
 		);
 
-		$lock    = '&nbsp;<span title="' . $lock_title . '" class="dashicons dashicons-lock"></span>';
-		$dot_org = '&nbsp;<span title="' . $dot_org_title . '" class="dashicons dashicons-wordpress"></span></span>';
-		$dismiss = '&nbsp;<span title="' . $dismiss_title . '" class="dashicons dashicons-dismiss"></span></span>';
+		$lock    = '&nbsp;<span title="' . $lock_title . '">' . Icons::get( 'private', [ 'label' => $lock_title ] ) . '</span>';
+		$dot_org = '&nbsp;<span title="' . $dot_org_title . '">' . Icons::get( 'dot-org', [ 'label' => $dot_org_title ] ) . '</span>';
+		$dismiss = '&nbsp;<span title="' . $dismiss_title . '">' . Icons::get( 'dismiss', [ 'label' => $dismiss_title ] ) . '</span>';
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'git-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
-			$dashicon      = str_contains( $data['type'], 'theme' )
-			? '<span class="dashicons dashicons-admin-appearance dashicons-no-decoration"></span>&nbsp;&nbsp;'
-			: '<span class="dashicons dashicons-admin-plugins dashicons-no-decoration"></span>&nbsp;&nbsp;';
+			$type_key      = str_contains( $data['type'], 'theme' ) ? 'theme' : 'plugin';
+			$dashicon      = Icons::get( $type_key ) . '&nbsp;&nbsp;';
 			$is_private    = $data['private'] ? $lock : null;
 			$broken_hidden = $data['broken'] ? '' : 'display:none;';
-			$is_broken     = '&nbsp;<span title="' . $broken_title . '" class="dashicons dashicons-warning gu-repo-broken" style="color:#f00;' . $broken_hidden . '"></span>';
+			$is_broken     = '&nbsp;<span title="' . $broken_title . '" class="gu-repo-broken" style="color:#f00;' . $broken_hidden . '">' . Icons::get( 'broken' ) . '</span>';
 			$override      = $this->override_dot_org( $data['type'], $data );
 			$is_dot_org    = $data['dot_org'] && ! $override ? $dot_org : null;
 			$is_dismissed  = $data['dismiss'] ? $dismiss : null;
@@ -937,7 +936,8 @@ class Settings {
 			/* translators: %s is the name of the plugin or theme. */
 			$tooltip        = sprintf( __( 'Flush %s cache', 'git-updater' ), $data['name'] );
 			$dashicon_flush = '<button type="button" class="button-link gu-flush-repo dashicons-no-decoration" data-flush-url="' . esc_url( $flush_endpoint ) . '" title="' . esc_attr( $tooltip ) . '">' . $dashicon . '</button>';
-			printf( '<p>' . wp_kses_post( $dashicon_flush . $data['name'] . $is_private . $is_dot_org . $is_broken . $is_dismissed ) . '</p>' );
+			$row            = $dashicon_flush . esc_html( $data['name'] ) . $is_private . $is_dot_org . $is_broken . $is_dismissed;
+			printf( '<p>%s</p>', wp_kses( $row, Icons::allowed_html() ) );
 		}
 	}
 }
