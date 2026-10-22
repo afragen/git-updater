@@ -24,9 +24,30 @@
 	$timestamp = time();
 
 	$context_params = array(
+        // Plugin information
 		'plugin_id'         => $fs->get_id(),
 		'plugin_public_key' => $fs->get_public_key(),
 		'plugin_version'    => $fs->get_plugin_version(),
+
+        // React pricing app context
+        'contact_url'            => $fs->contact_url(),
+        'is_production'          => ( defined( 'WP_FS__IS_PRODUCTION_MODE' ) ? WP_FS__IS_PRODUCTION_MODE : null ),
+        'menu_slug'              => $fs->get_menu_slug(),
+        'mode'                   => 'dashboard',
+        'fs_wp_endpoint_url'     => WP_FS__ADDRESS,
+        'request_handler_url'    => admin_url(
+            'admin-ajax.php?' . http_build_query( array(
+                'module_id' => $fs->get_id(),
+                'action'    => $fs->get_ajax_action( 'pricing_ajax_action' ),
+                'security'  => $fs->get_ajax_security( 'pricing_ajax_action' )
+            ) )
+        ),
+        'selector'               => '#fs_pricing_wrapper',
+        'unique_affix'           => $fs->get_unique_affix(),
+        'show_annual_in_monthly' => $fs->apply_filters( 'pricing/show_annual_in_monthly', true ),
+        'license'                => $fs->has_active_valid_license() ? $fs->_get_license() : null,
+        'plugin_icon'            => $fs->get_local_icon_url(),
+        'disable_single_package' => $fs->apply_filters( 'pricing/disable_single_package', false ),
 	);
 
 	$bundle_id = $fs->get_bundle_id();
@@ -54,15 +75,22 @@
 		);
 	}
 
-	$query_params = array_merge( $context_params, $_GET, array(
+	$query_params = array_merge( $_GET, array(
 		'next'             => $fs->_get_sync_license_url( false, false ),
-		'plugin_version'   => $fs->get_plugin_version(),
 		// Billing cycle.
 		'billing_cycle'    => fs_request_get( 'billing_cycle', WP_FS__PERIOD_ANNUALLY ),
 		'is_network_admin' => fs_is_network_admin() ? 'true' : 'false',
         'currency'         => $fs->apply_filters( 'default_currency', 'usd' ),
         'discounts_model'  => $fs->apply_filters( 'pricing/discounts_model', 'absolute' ),
 	) );
+
+	$has_tabs = $fs->_add_tabs_before_content();
+
+	if ( $has_tabs ) {
+		$query_params['tabs'] = 'true';
+	}
+
+    $pricing_config = array_merge( $query_params, $context_params );
 
     $pricing_js_url = fs_asset_url( $fs->get_pricing_js_path() );
 
@@ -72,39 +100,10 @@
     if ( is_string( $pricing_css_path ) ) {
         wp_enqueue_style( 'freemius-pricing', fs_asset_url( $pricing_css_path ) );
     }
-
-	$has_tabs = $fs->_add_tabs_before_content();
-
-	if ( $has_tabs ) {
-		$query_params['tabs'] = 'true';
-	}
 ?>
 	<div id="fs_pricing" class="wrap fs-section fs-full-size-wrapper">
         <div id="fs_pricing_wrapper" data-public-url="<?php echo trailingslashit( dirname( $pricing_js_url ) ) ?>"></div>
-        <?php
-        $pricing_config = array_merge( array(
-            'contact_url'            => $fs->contact_url(),
-            'is_production'          => ( defined( 'WP_FS__IS_PRODUCTION_MODE' ) ? WP_FS__IS_PRODUCTION_MODE : null ),
-            'menu_slug'              => $fs->get_menu_slug(),
-            'mode'                   => 'dashboard',
-            'fs_wp_endpoint_url'     => WP_FS__ADDRESS,
-            'request_handler_url'    => admin_url(
-                'admin-ajax.php?' . http_build_query( array(
-                    'module_id' => $fs->get_id(),
-                    'action'    => $fs->get_ajax_action( 'pricing_ajax_action' ),
-                    'security'  => $fs->get_ajax_security( 'pricing_ajax_action' )
-                ) )
-            ),
-            'selector'               => '#fs_pricing_wrapper',
-            'unique_affix'           => $fs->get_unique_affix(),
-            'show_annual_in_monthly' => $fs->apply_filters( 'pricing/show_annual_in_monthly', true ),
-            'license'                => $fs->has_active_valid_license() ? $fs->_get_license() : null,
-            'plugin_icon'            => $fs->get_local_icon_url(),
-            'disable_single_package' => $fs->apply_filters( 'pricing/disable_single_package', false ),
-        ), $query_params );
-
-        wp_add_inline_script( 'freemius-pricing', 'Freemius.pricing.new( ' . json_encode( $pricing_config ) . ' )' );
-        ?>
+        <?php wp_add_inline_script( 'freemius-pricing', 'Freemius.pricing.new( ' . json_encode( $pricing_config ) . ' )' ); ?>
 	</div>
 <?php
 	if ( $has_tabs ) {

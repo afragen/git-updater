@@ -4540,28 +4540,6 @@
             }
 
             if ( $this->is_user_in_admin() ) {
-                if ( $this->is_registered() && fs_request_has( 'purchase_completed' ) ) {
-                    $this->_admin_notices->add_sticky(
-                        sprintf(
-                        /* translators: %s: License type (e.g. you have a professional license) */
-                            $this->get_text_inline( 'You have purchased a %s license.', 'you-have-x-license' ),
-                            fs_request_get( 'purchased_plan' )
-                        ) .
-                        sprintf(
-                            $this->get_text_inline(" The %s's %sdownload link%s, license key, and installation instructions have been sent to %s. If you can't find the email after 5 min, please check your spam box.", 'post-purchase-email-sent-message' ),
-                            $this->get_module_label( true ),
-                            ( FS_Plugin::is_valid_id( $this->get_bundle_id() ) ? "products' " : '' ),
-                            ( FS_Plugin::is_valid_id( $this->get_bundle_id() ) ? 's' : '' ),
-                            sprintf(
-                                '<strong>%s</strong>',
-                                fs_request_get( 'purchase_email' )
-                            )
-                        ),
-                        'plan_purchased',
-                        $this->get_text_x_inline( 'Yee-haw', 'interjection expressing joy or exuberance', 'yee-haw' ) . '!'
-                    );
-                }
-
                 if ( $this->is_addon() ) {
                     if ( ! $this->is_parent_plugin_installed() ) {
                         $parent_name = $this->get_option( $plugin_info, 'parent_name', null );
@@ -4863,9 +4841,10 @@
             ) {
                 $code = empty( $result->error->code ) ? '' : " Code: {$result->error->code}";
 
-                $error_message .= "<b>{$result->error->message}{$code}</b>";
+                // We do not send HTML from exceptions from Freemius servers, but we escape it nonetheless.
+                $error_message .= "<b>" . esc_html( $result->error->message . $code ) . "</b>";
             } else {
-                $error_message .= var_export( $result, true );
+                $error_message .= esc_html( var_export( $result, true ) );
             }
 
             return $error_message;
@@ -6797,9 +6776,11 @@
                 $email_address = $current_user->user_email;
             }
 
+            $escaped_email_address = esc_html( $email_address );
+
             $formatted_message_args = array(
                 "<b>{$this->get_plugin_name()}</b>",
-                "<b>{$email_address}</b>",
+                "<b>{$escaped_email_address}</b>",
             );
 
             if ( ! $has_upgrade_context || ! fs_is_network_admin() ) {
@@ -6844,7 +6825,7 @@
                 }
 
                 $formatted_message_args[] = ( ! empty( $support_email_address ) ) ?
-                    ( "<b>{$support_email_address}</b>" ) :
+                    ( "<b>" . esc_html( $support_email_address ) . "</b>" ) :
                     $this->get_text_x_inline(
                         "the product's support email address",
                         'Part of the message that tells the user to check their spam folder for a specific email.',
@@ -17564,6 +17545,11 @@
                 return;
             }
 
+            // Only site administrators who can activate plugins may opt-in.
+            if ( ! $this->is_user_admin() ) {
+                return;
+            }
+
             $has_pending_activation_confirmation_param = fs_request_has( 'pending_activation' );
 
             $this->update_license_required_permissions_if_anonymous();
@@ -18143,7 +18129,7 @@
                 if ( ! $silent ) {
                     $this->_admin_notices->add(
                         sprintf( $this->get_text_inline( 'Couldn\'t activate %s.', 'could-not-activate-x' ), $this->get_plugin_name() ) . ' ' .
-                        $this->get_text_inline( 'Please contact us with the following message:', 'contact-us-with-error-message' ) . ' ' . '<b>' . $result->error->message . '</b>',
+                        $this->get_text_inline( 'Please contact us with the following message:', 'contact-us-with-error-message' ) . ' ' . '<b>' . esc_html( $result->error->message ) . '</b>',
                         $this->get_text_x_inline( 'Oops', 'exclamation', 'oops' ) . '...',
                         'error'
                     );
@@ -18263,7 +18249,7 @@
 
                     $this->_admin_notices->add(
                         sprintf( $this->get_text_inline( 'Couldn\'t activate %s.', 'could-not-activate-x' ), $this->get_plugin_name() ) . ' ' .
-                        $this->get_text_inline( 'Please contact us with the following message:', 'contact-us-with-error-message' ) . ' ' . '<b>' . $error_message . '</b>',
+                        $this->get_text_inline( 'Please contact us with the following message:', 'contact-us-with-error-message' ) . ' ' . '<b>' . esc_html( $error_message ) . '</b>',
                         $this->get_text_x_inline( 'Oops', 'exclamation', 'oops' ) . '...',
                         'error'
                     );
@@ -18440,7 +18426,7 @@
             if ( isset( $parent_install->error ) ) {
                 $this->_admin_notices->add(
                     sprintf( $this->get_text_inline( 'Couldn\'t activate %s.', 'could-not-activate-x' ), $this->get_plugin_name() ) . ' ' .
-                    $this->get_text_inline( 'Please contact us with the following message:', 'contact-us-with-error-message' ) . ' ' . '<b>' . $parent_install->error->message . '</b>',
+                    $this->get_text_inline( 'Please contact us with the following message:', 'contact-us-with-error-message' ) . ' ' . '<b>' . esc_html( $parent_install->error->message ) . '</b>',
                     $this->get_text_x_inline( 'Oops', 'exclamation', 'oops' ) . '...',
                     'error'
                 );
@@ -21158,7 +21144,7 @@
                         } else if ( is_object( $result ) ) {
                             // Authentication params are broken.
                             $this->_admin_notices->add(
-                                $this->get_text_inline( 'It seems like one of the authentication parameters is wrong. Update your Public Key, Secret Key & User ID, and try again.', 'wrong-authentication-param-message' ) . '<br> ' . $this->get_text_inline( 'Error received from the server:', 'server-error-message' ) . var_export( $result->error, true ),
+                                $this->get_text_inline( 'It seems like one of the authentication parameters is wrong. Update your Public Key, Secret Key & User ID, and try again.', 'wrong-authentication-param-message' ) . '<br> ' . $this->get_text_inline( 'Error received from the server:', 'server-error-message' ) . esc_html( var_export( $result->error, true ) ),
                                 '',
                                 'error'
                             );
@@ -21479,7 +21465,7 @@
                             $this->get_text_inline( 'Your license has been cancelled. If you think it\'s a mistake, please contact support.', 'license-cancelled' ) . ' ' .
                             sprintf(
                                 '<a href="%s">%s</a>',
-                                $this->contact_url( 'bug' ),
+                                esc_url( $this->contact_url( 'bug' ) ),
                                 $this->get_text_inline( 'Please contact us here', 'contact-us-here' )
                             ),
                             $hmm_text,
@@ -21572,7 +21558,7 @@
                 "<div>{$error_message}</div>" .
                 '<div class="fs-api-request-error-details" style="display: none">' .
                     '<strong>' . $this->get_text_inline( 'Error received from the server:', 'server-error-message' ) . '</strong><br>' .
-                    $result->error->message .
+                    esc_html( $result->error->message ) .
                 '</div>';
 
             return $error_message;
@@ -21677,10 +21663,10 @@
                         '%s %s',
                         $this->get_text_inline( 'It looks like the license could not be activated.', 'license-activation-failed-message' ),
                         ( is_object( $license ) && isset( $license->error ) ?
-                            $license->error->message :
+                            esc_html( $license->error->message ) :
                             sprintf( '%s<br><code>%s</code>',
                                 $this->get_text_inline( 'Error received from the server:', 'server-error-message' ),
-                                var_export( $license, true )
+                                esc_html( var_export( $license, true ) )
                             )
                         )
                     ),
@@ -21768,7 +21754,7 @@
             if ( isset( $license->error ) ) {
                 $this->_admin_notices->add(
                     $this->get_text_inline( 'It looks like the license deactivation failed.', 'license-deactivation-failed-message' ) . '<br> ' .
-                    $this->get_text_inline( 'Error received from the server:', 'server-error-message' ) . ' ' . var_export( $license->error, true ),
+                    $this->get_text_inline( 'Error received from the server:', 'server-error-message' ) . ' ' . esc_html( var_export( $license->error, true ) ),
                     $hmm_text,
                     'error'
                 );
@@ -22417,7 +22403,7 @@
                             $update->version,
                             sprintf(
                                 '<a href="%s" target="_blank" rel="noopener">%s</a>',
-                                $this->get_account_url( 'download_latest' ),
+                                esc_url( $this->get_account_url( 'download_latest' ) ),
                                 sprintf(
                                 /* translators: %s: plan name (e.g. latest "Professional" version) */
                                     $this->get_text_inline( 'the latest %s version here', 'latest-x-version' ),
@@ -22835,7 +22821,7 @@
             if ( ! isset( $result->error ) ) {
                 $this->_admin_notices->add( sprintf(
                     $this->get_text_inline( 'Verification mail was just sent to %s. If you can\'t find it after 5 min, please check your spam box.', 'verification-email-sent-message' ),
-                    sprintf( '<a href="mailto:%1$s">%2$s</a>', esc_url( $this->_user->email ), $this->_user->email )
+                    sprintf( '<a href="mailto:%1$s">%2$s</a>', esc_url( $this->_user->email ), esc_html( $this->_user->email ) )
                 ) );
             } else {
                 // handle different error cases.
@@ -23159,9 +23145,9 @@
 
                             if ( $this->init_change_owner( $candidate_email, $transfer_type ) ) {
                                 if ( 'transfer' === $transfer_type ) {
-                                    $this->_admin_notices->add( sprintf( $this->get_text_inline( 'A confirmation email was just sent to %s. The email owner must confirm the update within the next 4 hours.', 'change-owner-request-sent-x-transfer' ), '<b>' . $this->_user->email . '</b>' ) );
+                                    $this->_admin_notices->add( sprintf( $this->get_text_inline( 'A confirmation email was just sent to %s. The email owner must confirm the update within the next 4 hours.', 'change-owner-request-sent-x-transfer' ), '<b>' . esc_html( $this->_user->email ) . '</b>' ) );
                                 } else {
-                                    $this->_admin_notices->add( sprintf( $this->get_text_inline( 'A confirmation email was just sent to %s. You must confirm the update within the next 4 hours. If you cannot find the email, please check your spam folder.', 'change-owner-request-sent-x' ), '<b>' . $this->_user->email . '</b>' ) );
+                                    $this->_admin_notices->add( sprintf( $this->get_text_inline( 'A confirmation email was just sent to %s. You must confirm the update within the next 4 hours. If you cannot find the email, please check your spam folder.', 'change-owner-request-sent-x' ), '<b>' . esc_html( $this->_user->email ) . '</b>' ) );
                                 }
                             }
                             break;
@@ -23173,13 +23159,13 @@
                                 return;
                             }
 
-                            $this->_admin_notices->add( sprintf( $this->get_text_inline( 'Thanks for confirming the ownership change. An email was just sent to %s for final approval.', 'change-owner-request_owner-confirmed' ), '<b>' . $candidate_email . '</b>' ) );
+                            $this->_admin_notices->add( sprintf( $this->get_text_inline( 'Thanks for confirming the ownership change. An email was just sent to %s for final approval.', 'change-owner-request_owner-confirmed' ), '<b>' . esc_html( $candidate_email ) . '</b>' ) );
                             break;
                         case 'candidate_confirmed':
                             // We do not need to validate the authenticity of this request here, because the `complete_change_owner` does that for us through API calls.
                             if ( $this->complete_change_owner() ) {
                                 $this->_admin_notices->add_sticky(
-                                    sprintf( $this->get_text_inline( '%s is the new owner of the account.', 'change-owner-request_candidate-confirmed' ), '<b>' . $this->_user->email . '</b>' ),
+                                    sprintf( $this->get_text_inline( '%s is the new owner of the account.', 'change-owner-request_candidate-confirmed' ), '<b>' . esc_html( $this->_user->email ) . '</b>' ),
                                     'ownership_changed',
                                     $this->get_text_x_inline( 'Congrats', 'as congratulations', 'congrats' ) . '!'
                                 );
