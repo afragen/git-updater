@@ -72,6 +72,12 @@ class Repo_List_Table extends WP_List_Table {
 		];
 		// self::$examples = $examples;
 		foreach ( (array) $options as $key => $option ) {
+			// Persisted option rows must be arrays before their fields are read.
+			if ( ! is_array( $option ) ) {
+				unset( $options[ $key ] );
+				continue;
+			}
+
 			$option['ID']              = $option['ID'] ?: null;
 			$option['type']            = $option['type'] ?: null;
 			$option['slug']            = $option['slug'] ?: null;
