@@ -72,17 +72,7 @@ class Repo_List_Table extends WP_List_Table {
 		];
 		// self::$examples = $examples;
 		foreach ( (array) $options as $key => $option ) {
-			$option['ID']              = $option['ID'] ?: null;
-			$option['type']            = $option['type'] ?: null;
-			$option['slug']            = $option['slug'] ?: null;
-			$option['uri']             = $option['uri'] ?: null;
-			$option['source']          = $option['source'] ?: null;
-			$option['primary_branch']  = ! empty( $option['primary_branch'] ) ? $option['primary_branch'] : 'master';
-			$option['release_asset']   = ! empty( $option['release_asset'] );
-			$option['private_package'] = ! empty( $option['private_package'] );
-			$option['uses_lite']       = ! empty( $option['uses_lite'] );
-
-			$options[ $key ] = $option;
+			$options[ $key ] = self::normalize_item( $option );
 		}
 		self::$options = (array) $options;
 
@@ -94,6 +84,136 @@ class Repo_List_Table extends WP_List_Table {
 				'ajax'     => false,      // does this table support ajax?
 			]
 		);
+	}
+
+	/**
+	 * Normalize a saved addition into the shape the table renders.
+	 *
+	 * @param array<string, mixed> $option A saved addition.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public static function normalize_item( $option ) {
+		$option['ID']              = $option['ID'] ?: null;
+		$option['type']            = $option['type'] ?: null;
+		$option['slug']            = $option['slug'] ?: null;
+		$option['uri']             = $option['uri'] ?: null;
+		$option['source']          = $option['source'] ?: null;
+		$option['primary_branch']  = ! empty( $option['primary_branch'] ) ? $option['primary_branch'] : 'master';
+		$option['release_asset']   = ! empty( $option['release_asset'] );
+		$option['private_package'] = ! empty( $option['private_package'] );
+		$option['uses_lite']       = ! empty( $option['uses_lite'] );
+
+		return $option;
+	}
+
+	/**
+	 * Render a single row, exposing its editable values for Quick Edit.
+	 *
+	 * @param array<string, mixed> $item A singular item (one full row's worth of data).
+	 *
+	 * @return void
+	 */
+	public function single_row( $item ) {
+		$fields = [ 'ID', 'type', 'slug', 'uri', 'primary_branch', 'release_asset', 'private_package', 'uses_lite' ];
+		$data   = array_intersect_key( $item, array_flip( $fields ) );
+
+		printf(
+			'<tr id="gu-addition-%1$s" data-gu-addition="%2$s">',
+			esc_attr( (string) $item['ID'] ),
+			esc_attr( (string) wp_json_encode( $data ) )
+		);
+		$this->single_row_columns( $item );
+		echo '</tr>';
+	}
+
+	/**
+	 * Render a single row outside of a full table display, e.g. for an AJAX response.
+	 *
+	 * @param array<string, mixed> $item A saved addition.
+	 *
+	 * @return string Row HTML.
+	 */
+	public function render_row( $item ) {
+		$this->_column_headers = [ $this->get_columns(), [], $this->get_sortable_columns(), 'slug' ];
+
+		ob_start();
+		$this->single_row( self::normalize_item( $item ) );
+
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Print the hidden Quick Edit row that the Quick Edit script clones.
+	 *
+	 * Inputs carry `data-field` instead of `name` so they are never submitted
+	 * with the surrounding list table form.
+	 *
+	 * @return void
+	 */
+	public function inline_edit() {
+		$types = (array) apply_filters( 'gua_addition_types', Settings::$addition_types );
+		?>
+		<table style="display:none"><tbody>
+		<tr id="gu-addition-inline-edit" class="inline-edit-row quick-edit-row inline-editor" style="display:none">
+			<td colspan="<?php echo (int) count( $this->get_columns() ); ?>" class="colspanchange">
+				<div class="inline-edit-wrapper" role="region" aria-labelledby="gu-addition-quick-edit-legend">
+				<fieldset class="inline-edit-col-left">
+					<legend class="inline-edit-legend" id="gu-addition-quick-edit-legend"><?php esc_html_e( 'Quick Edit', 'git-updater' ); ?></legend>
+					<div class="inline-edit-col">
+						<label>
+							<span class="title"><?php esc_html_e( 'Slug', 'git-updater' ); ?></span>
+							<span class="input-text-wrap"><input type="text" data-field="slug" value="" placeholder="plugin-slug/plugin-slug.php"></span>
+						</label>
+						<label>
+							<span class="title"><?php esc_html_e( 'URL', 'git-updater' ); ?></span>
+							<span class="input-text-wrap"><input type="text" data-field="uri" value=""></span>
+						</label>
+						<label>
+							<span class="title"><?php esc_html_e( 'Primary Branch', 'git-updater' ); ?></span>
+							<span class="input-text-wrap"><input type="text" data-field="primary_branch" value="" placeholder="master"></span>
+						</label>
+					</div>
+				</fieldset>
+				<fieldset class="inline-edit-col-right">
+					<div class="inline-edit-col">
+						<label class="inline-edit-type">
+							<span class="title"><?php esc_html_e( 'Type', 'git-updater' ); ?></span>
+							<select data-field="type">
+								<?php foreach ( $types as $type ) : ?>
+									<option value="<?php echo esc_attr( $type ); ?>"><?php echo esc_html( $type ); ?></option>
+								<?php endforeach; ?>
+							</select>
+						</label>
+						<label class="alignleft">
+							<input type="checkbox" data-field="release_asset" value="1">
+							<span class="checkbox-title"><?php esc_html_e( 'Release Asset', 'git-updater' ); ?></span>
+						</label>
+						<br class="clear">
+						<label class="alignleft">
+							<input type="checkbox" data-field="private_package" value="1">
+							<span class="checkbox-title"><?php esc_html_e( 'Private Package', 'git-updater' ); ?></span>
+						</label>
+						<br class="clear">
+						<label class="alignleft">
+							<input type="checkbox" data-field="uses_lite" value="1">
+							<span class="checkbox-title"><?php esc_html_e( 'Uses Git Updater Lite', 'git-updater' ); ?></span>
+						</label>
+					</div>
+				</fieldset>
+				<div class="submit inline-edit-save">
+					<button type="button" class="button button-primary save"><?php esc_html_e( 'Update', 'git-updater' ); ?></button>
+					<button type="button" class="button cancel"><?php esc_html_e( 'Cancel', 'git-updater' ); ?></button>
+					<span class="spinner"></span>
+					<div class="notice notice-error notice-alt inline hidden">
+						<p class="error"></p>
+					</div>
+				</div>
+				</div>
+			</td>
+		</tr>
+		</tbody></table>
+		<?php
 	}
 
 	/** ************************************************************************
@@ -164,7 +284,13 @@ class Repo_List_Table extends WP_List_Table {
 		// Build row actions.
 		$actions = [
 			// 'edit'   => sprintf( '<a href="%s&action=%s&slug=%s">Edit</a>', $location, 'edit', $item['ID'] ),
-			'delete' => sprintf( '<a href="%s&action=%s&slug=%s">Delete</a>', wp_nonce_url( $location, 'delete_row_item', '_wpnonce_row_action_delete' ), 'delete_row_item', $item['ID'] ),
+			'inline hide-if-no-js' => sprintf(
+				'<button type="button" class="button-link gu-quick-edit" aria-expanded="false" aria-label="%1$s">%2$s</button>',
+				/* translators: %s: addition slug. */
+				esc_attr( sprintf( __( 'Quick edit &#8220;%s&#8221; inline', 'git-updater' ), (string) $item['slug'] ) ),
+				esc_html__( 'Quick Edit', 'git-updater' )
+			),
+			'delete'               => sprintf( '<a href="%s&action=%s&slug=%s">Delete</a>', wp_nonce_url( $location, 'delete_row_item', '_wpnonce_row_action_delete' ), 'delete_row_item', $item['ID'] ),
 		];
 
 		// Return the title contents.
@@ -481,6 +607,7 @@ class Repo_List_Table extends WP_List_Table {
 		// Now we can render the completed list table.
 		$this->display();
 		echo '</form>';
+		$this->inline_edit();
 		echo '</div>';
 	}
 }

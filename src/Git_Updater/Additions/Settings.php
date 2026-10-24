@@ -74,6 +74,112 @@ class Settings {
 			10,
 			2
 		);
+
+		add_action( 'wp_ajax_gu_additions_quick_edit', [ $this, 'ajax_quick_edit' ] );
+	}
+
+	/**
+	 * AJAX handler for saving a Quick Edit of an addition.
+	 *
+	 * @uses 'wp_ajax_gu_additions_quick_edit' action hook
+	 *
+	 * @return void
+	 */
+	public function ajax_quick_edit() {
+		check_ajax_referer( 'gu_additions_quick_edit' );
+
+		if ( ! current_user_can( is_multisite() ? 'manage_network_options' : 'manage_options' ) ) {
+			wp_send_json_error( [ 'message' => esc_html__( 'Sorry, you are not allowed to edit additions.', 'git-updater' ) ], 403 );
+		}
+
+		$original_id = isset( $_POST['original_id'] ) ? sanitize_key( wp_unslash( $_POST['original_id'] ) ) : '';
+		$input       = isset( $_POST['git_updater_additions'] ) && is_array( $_POST['git_updater_additions'] )
+			? wp_unslash( $_POST['git_updater_additions'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized in update_addition().
+			: [];
+
+		$addition = $this->update_addition( $original_id, $input );
+		if ( is_wp_error( $addition ) ) {
+			wp_send_json_error( [ 'message' => $addition->get_error_message() ] );
+		}
+
+		wp_send_json_success( [ 'row' => ( new Repo_List_Table( self::$options_additions ) )->render_row( $addition ) ] );
+	}
+
+	/**
+	 * Validate and save changes to an existing addition.
+	 *
+	 * Flushes the repo cache for both the previous and the updated repository
+	 * so a changed URI or primary branch takes effect on the next update check.
+	 *
+	 * @param string               $original_id ID of the addition being edited.
+	 * @param array<string, mixed> $input       Submitted field values.
+	 *
+	 * @return array<string, mixed>|\WP_Error The saved addition, or an error.
+	 */
+	public function update_addition( $original_id, $input ) {
+		$options = (array) get_site_option( 'git_updater_additions', [] );
+		$key     = null;
+		foreach ( $options as $option_key => $option ) {
+			if ( isset( $option['ID'] ) && $original_id === $option['ID'] ) {
+				$key = $option_key;
+				break;
+			}
+		}
+		if ( null === $key ) {
+			return new \WP_Error( 'gu_addition_not_found', esc_html__( 'This addition no longer exists. Reload the page and try again.', 'git-updater' ) );
+		}
+		$original = $options[ $key ];
+
+		$fields = [ 'type', 'slug', 'uri', 'primary_branch', 'release_asset', 'private_package', 'uses_lite' ];
+		$input  = array_filter( array_intersect_key( (array) $input, array_flip( $fields ) ), 'is_scalar' );
+		$input  = array_merge(
+			[
+				'type' => '',
+				'slug' => '',
+				'uri'  => '',
+			],
+			$input
+		);
+
+		$new                  = $this->sanitize( $input )[0];
+		$new['release_asset'] = ! empty( $new['release_asset'] );
+		$new['source']        = $original['source'] ?? $new['source'];
+
+		if ( empty( $new['slug'] ) || empty( $new['uri'] ) ) {
+			return new \WP_Error( 'gu_addition_required', esc_html__( 'Repository slug and URI are required.', 'git-updater' ) );
+		}
+
+		$types = (array) apply_filters( 'gua_addition_types', self::$addition_types );
+		if ( ! in_array( $new['type'], $types, true ) && ( $original['type'] ?? null ) !== $new['type'] ) {
+			return new \WP_Error( 'gu_addition_type', esc_html__( 'Invalid repository type.', 'git-updater' ) );
+		}
+
+		$is_plugin_slug = str_contains( $new['slug'], '/' );
+		$is_plugin_type = str_contains( $new['type'], 'plugin' );
+		if ( $is_plugin_type && ! $is_plugin_slug ) {
+			return new \WP_Error( 'gu_addition_slug', esc_html__( 'A plugin slug must include the main plugin file, e.g. plugin-slug/plugin-slug.php.', 'git-updater' ) );
+		}
+		if ( ! $is_plugin_type && $is_plugin_slug ) {
+			return new \WP_Error( 'gu_addition_slug', esc_html__( 'A theme slug must be the theme directory name only.', 'git-updater' ) );
+		}
+
+		foreach ( $options as $option_key => $option ) {
+			if ( $option_key !== $key && isset( $option['ID'] ) && $new['ID'] === $option['ID'] ) {
+				return new \WP_Error( 'gu_addition_duplicate', esc_html__( 'An addition with this slug already exists.', 'git-updater' ) );
+			}
+		}
+
+		$options[ $key ] = array_merge( $original, $new );
+		update_site_option( 'git_updater_additions', $options );
+		self::$options_additions = $options;
+
+		// The repo cache is keyed by repository name, the last segment of the URI.
+		$repos = array_unique( array_filter( [ basename( (string) ( $original['uri'] ?? '' ) ), basename( $new['uri'] ) ] ) );
+		foreach ( $repos as $repo ) {
+			\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( $repo );
+		}
+
+		return $options[ $key ];
 	}
 
 	/**
@@ -167,6 +273,22 @@ class Settings {
 					'tab'  => $tab,
 				],
 				$action
+			);
+			wp_enqueue_script(
+				'gu-additions-quick-edit',
+				plugin_dir_url( \Fragen\Git_Updater\PLUGIN_FILE ) . 'js/gu-additions-quick-edit.js',
+				[],
+				\Fragen\Git_Updater\Settings::get_plugin_version(),
+				[ 'in_footer' => true ]
+			);
+			wp_localize_script(
+				'gu-additions-quick-edit',
+				'guAdditionsQuickEdit',
+				[
+					'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+					'nonce'   => wp_create_nonce( 'gu_additions_quick_edit' ),
+					'error'   => __( 'Error while saving the changes.', 'git-updater' ),
+				]
 			);
 			( new Repo_List_Table( self::$options_additions ) )->render_list_table();
 			?>
