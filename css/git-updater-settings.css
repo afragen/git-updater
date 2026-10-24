@@ -119,3 +119,12 @@ button.gu-flush-repo.dashicons-no-decoration {
 .gu-icon {
 	vertical-align: middle;
 }
+
+/* Additions Quick Edit */
+.gu-addition-editor fieldset label span.title {
+	width: 8em;
+}
+
+.gu-addition-editor fieldset label span.input-text-wrap {
+	margin-left: 8em;
+}
