@@ -1223,7 +1223,7 @@
                 );
 
                 foreach ( $product_titles as $product_title ) {
-                    $products_list .= sprintf( '<li>%s</li>', $product_title );
+                    $products_list .= sprintf( '<li>%s</li>', esc_html( $product_title ) );
                 }
 
                 $products_list = '<ol>' . $products_list . '</ol>';
@@ -1231,8 +1231,8 @@
                 foreach ( $site_urls as $site_url ) {
                     $sites_list .= sprintf(
                         '<li><a href="%s" target="_blank">%s</a></li>',
-                        $site_url,
-                        fs_strip_url_protocol( $site_url )
+                        esc_url( $site_url ),
+                        esc_html( fs_strip_url_protocol( $site_url ) )
                     );
                 }
 
@@ -1242,15 +1242,15 @@
             $remote_site_link = '<b>' . (1 === $total_sites ?
                 sprintf(
                     '<a href="%s" target="_blank">%s</a>',
-                    $site_urls[0],
-                    fs_strip_url_protocol( $site_urls[0] )
+                    esc_url( $site_urls[0] ),
+                    esc_html( fs_strip_url_protocol( $site_urls[0] ) )
                 ) :
                 fs_text_inline( 'the above-mentioned sites', 'above-mentioned-sites' )) . '</b>';
 
             $current_site_link = sprintf(
                 '<b><a href="%s" target="_blank">%s</a></b>',
-                $current_url,
-                fs_strip_url_protocol( $current_url )
+                esc_url( $current_url ),
+                esc_html( fs_strip_url_protocol( $current_url ) )
             );
 
             $button_template = '<button class="button" data-clone-action="%s">%s</button>';
@@ -1323,7 +1323,7 @@
                 sprintf( '<div class="fs-clone-documentation-container">Unsure what to do? <a href="%s" target="_blank">Read more here</a>.</div>', $doc_url ),
                 // %1$s
                 ( 1 === $total_products ?
-                    sprintf( '<b>%s</b>', $product_titles[0] ) :
+                    sprintf( '<b>%s</b>', esc_html( $product_titles[0] ) ) :
                     ( 1 === $total_sites ?
                         sprintf( '<div>%s</div>', $products_list ) :
                         sprintf( '<div><p><strong>%s</strong>:</p>%s</div>', fs_esc_html_x_inline( 'Products', 'Clone resolution admin notice products list label', 'products' ), $products_list ) )

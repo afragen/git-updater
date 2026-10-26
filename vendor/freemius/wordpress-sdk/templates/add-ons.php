@@ -122,8 +122,9 @@
 
 						$open_addon = ( $open_addon || ( $open_addon_slug === $addon->slug ) );
 
-						$price     = 0;
-						$has_trial = false;
+						$price         = 0;
+                        $min_price     = 999999;
+						$has_trial     = false;
 						$has_free_plan = false;
 						$has_paid_plan = false;
 
@@ -141,11 +142,9 @@
 										continue;
 									}
 
-
 									$has_paid_plan = true;
 									$has_trial     = $has_trial || ( is_numeric( $plan->trial_period ) && ( $plan->trial_period > 0 ) );
 
-									$min_price = 999999;
 									foreach ( $plan->pricing as $pricing ) {
                                         $pricing = new FS_Pricing( $pricing );
 
@@ -163,13 +162,14 @@
 											$min_price = min( $min_price, $pricing->annual_price );
 										} else if ( $pricing->has_monthly() ) {
 											$min_price = min( $min_price, 12 * $pricing->monthly_price );
-										}
+										} else if ( $pricing->has_lifetime() ) {
+                                            $min_price = min( $min_price, $pricing->lifetime_price );
+                                        }
 									}
 
 									if ( $min_price < 999999 ) {
 										$price = $min_price;
 									}
-
 								}
 							}
 
