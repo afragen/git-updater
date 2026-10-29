@@ -622,13 +622,18 @@ class Repo_List_Table extends WP_List_Table {
 	 *
 	 * Explicitly calls prepare_items() and display().
 	 *
+	 * @param string $new_url Optional. URL of the Add Package page; adds the button beside the title.
+	 *
 	 * @return void
 	 */
-	public function render_list_table() {
+	public function render_list_table( $new_url = '' ) {
 		// Fetch, prepare, sort, and filter our data...
 		$this->prepare_items();
 		echo '<div class="wrap">';
-		echo '<h2>' . esc_html__( 'Addition Packages List Table', 'git-updater' ) . '</h2>';
+		echo '<h2 class="wp-heading-inline">' . esc_html__( 'Addition Packages List Table', 'git-updater' ) . '</h2>';
+		if ( '' !== $new_url ) {
+			echo ' <a href="' . esc_url( $new_url ) . '" class="page-title-action">' . esc_html__( 'Add Package', 'git-updater' ) . '</a>';
+		}
 
 		// Forms are NOT created automatically, so you need to wrap the table in one to use features like bulk actions.
 		echo '<form id="sites-list" method="get">';

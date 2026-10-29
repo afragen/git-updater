@@ -129,6 +129,12 @@ button.gu-flush-repo.dashicons-no-decoration {
 	margin-left: 8em;
 }
 
+/* Additions: keep the Add Package button beside the list title */
+.git-updater-settings h2.wp-heading-inline {
+	display: inline-block;
+	margin-right: 5px;
+}
+
 /* Additions: refresh button beside the served version */
 .gu-refresh-addition {
 	vertical-align: middle;
