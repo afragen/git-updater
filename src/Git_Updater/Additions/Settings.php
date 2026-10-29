@@ -22,6 +22,13 @@ class Settings {
 	public static $options_additions;
 
 	/**
+	 * Values to refill the Add Package form with after a failed save.
+	 *
+	 * @var array<string, mixed> $form_values
+	 */
+	protected static $form_values = [];
+
+	/**
 	 * Supported types.
 	 *
 	 * @var array<int, string> $addition_types
@@ -74,6 +81,241 @@ class Settings {
 			10,
 			2
 		);
+
+		add_action( 'wp_ajax_gu_additions_quick_edit', [ $this, 'ajax_quick_edit' ] );
+		add_action( 'wp_ajax_gu_additions_refresh', [ $this, 'ajax_refresh' ] );
+	}
+
+	/**
+	 * AJAX handler for saving a Quick Edit of an addition.
+	 *
+	 * @uses 'wp_ajax_gu_additions_quick_edit' action hook
+	 *
+	 * @return void
+	 */
+	public function ajax_quick_edit() {
+		check_ajax_referer( 'gu_additions_quick_edit' );
+
+		if ( ! current_user_can( is_multisite() ? 'manage_network_options' : 'manage_options' ) ) {
+			wp_send_json_error( [ 'message' => esc_html__( 'Sorry, you are not allowed to edit additions.', 'git-updater' ) ], 403 );
+		}
+
+		$original_id = isset( $_POST['original_id'] ) ? sanitize_key( wp_unslash( $_POST['original_id'] ) ) : '';
+		$input       = isset( $_POST['git_updater_additions'] ) && is_array( $_POST['git_updater_additions'] )
+			? wp_unslash( $_POST['git_updater_additions'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized in update_addition().
+			: [];
+
+		$addition = $this->update_addition( $original_id, $input );
+		if ( is_wp_error( $addition ) ) {
+			wp_send_json_error( [ 'message' => $addition->get_error_message() ] );
+		}
+
+		wp_send_json_success( [ 'row' => ( new Repo_List_Table( self::$options_additions ) )->render_row( $addition ) ] );
+	}
+
+	/**
+	 * AJAX handler for refreshing an addition's repo cache from the git host.
+	 *
+	 * @uses 'wp_ajax_gu_additions_refresh' action hook
+	 *
+	 * @return void
+	 */
+	public function ajax_refresh() {
+		check_ajax_referer( 'gu_additions_refresh' );
+
+		if ( ! current_user_can( is_multisite() ? 'manage_network_options' : 'manage_options' ) ) {
+			wp_send_json_error( [ 'message' => esc_html__( 'Sorry, you are not allowed to refresh additions.', 'git-updater' ) ], 403 );
+		}
+
+		$id       = isset( $_POST['id'] ) ? sanitize_key( wp_unslash( $_POST['id'] ) ) : '';
+		$addition = null;
+		foreach ( (array) get_site_option( 'git_updater_additions', [] ) as $option ) {
+			if ( isset( $option['ID'] ) && $id === $option['ID'] ) {
+				$addition = $option;
+				break;
+			}
+		}
+		if ( null === $addition ) {
+			wp_send_json_error( [ 'message' => esc_html__( 'This addition no longer exists.', 'git-updater' ) ] );
+		}
+
+		$result = $this->refresh_addition( $addition );
+		$row    = ( new Repo_List_Table( self::$options_additions ) )->render_row( $addition );
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error(
+				[
+					'message' => $result->get_error_message(),
+					'row'     => $row,
+				]
+			);
+		}
+
+		wp_send_json_success( [ 'row' => $row ] );
+	}
+
+	/**
+	 * Flush an addition's repo cache and refetch it from the git host.
+	 *
+	 * @param array<string, mixed> $addition A saved addition.
+	 *
+	 * @return true|\WP_Error True when the fetch cycle completed.
+	 */
+	public function refresh_addition( $addition ) {
+		// The repo cache and repo configs are keyed by repository name, the last segment of the URI.
+		$repo    = basename( (string) ( $addition['uri'] ?? '' ) );
+		$configs = str_contains( (string) ( $addition['type'] ?? '' ), 'theme' )
+			? \Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs()
+			: \Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
+
+		if ( '' === $repo || ! isset( $configs[ $repo ] ) ) {
+			return new \WP_Error( 'gu_addition_not_loaded', esc_html__( 'Git Updater has not loaded this repository. Check its slug and URL.', 'git-updater' ) );
+		}
+
+		add_filter( 'gu_disable_wpcron', '__return_false' );
+		$complete = \Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->refresh_repo( $configs[ $repo ] );
+		remove_filter( 'gu_disable_wpcron', '__return_false' );
+
+		if ( ! $complete ) {
+			return new \WP_Error( 'gu_addition_refresh_incomplete', esc_html__( 'Could not fetch everything from the git host. Try again in a few minutes.', 'git-updater' ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validate and save changes to an existing addition.
+	 *
+	 * Flushes the repo cache for both the previous and the updated repository
+	 * so a changed URI or primary branch takes effect on the next update check.
+	 *
+	 * @param string               $original_id ID of the addition being edited.
+	 * @param array<string, mixed> $input       Submitted field values.
+	 *
+	 * @return array<string, mixed>|\WP_Error The saved addition, or an error.
+	 */
+	public function update_addition( $original_id, $input ) {
+		$options = (array) get_site_option( 'git_updater_additions', [] );
+		$key     = null;
+		foreach ( $options as $option_key => $option ) {
+			if ( isset( $option['ID'] ) && $original_id === $option['ID'] ) {
+				$key = $option_key;
+				break;
+			}
+		}
+		if ( null === $key ) {
+			return new \WP_Error( 'gu_addition_not_found', esc_html__( 'This addition no longer exists. Reload the page and try again.', 'git-updater' ) );
+		}
+		$original = $options[ $key ];
+
+		$new           = $this->prepare_addition( $input );
+		$new['source'] = $original['source'] ?? $new['source'];
+
+		$valid = $this->validate_addition( $new, $options, $key );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
+		}
+
+		$options[ $key ] = array_merge( $original, $new );
+		update_site_option( 'git_updater_additions', $options );
+		self::$options_additions = $options;
+
+		// The repo cache is keyed by repository name, the last segment of the URI.
+		$repos = array_unique( array_filter( [ basename( (string) ( $original['uri'] ?? '' ) ), basename( $new['uri'] ) ] ) );
+		foreach ( $repos as $repo ) {
+			\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( $repo );
+		}
+
+		return $options[ $key ];
+	}
+
+	/**
+	 * Validate and save a new addition.
+	 *
+	 * @param array<string, mixed> $input Submitted field values.
+	 *
+	 * @return array<string, mixed>|\WP_Error The saved addition, or an error.
+	 */
+	public function add_addition( $input ) {
+		$options  = (array) get_site_option( 'git_updater_additions', [] );
+		$addition = $this->prepare_addition( $input );
+
+		$valid = $this->validate_addition( $addition, $options );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
+		}
+
+		$options = array_filter( array_merge( $options, [ $addition ] ) );
+		update_site_option( 'git_updater_additions', $options );
+		self::$options_additions = $options;
+
+		// Drop any stale cache left by a previously deleted addition of the same repository.
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( basename( $addition['uri'] ) );
+
+		return $addition;
+	}
+
+	/**
+	 * Sanitize submitted addition fields into a storable addition.
+	 *
+	 * @param array<string, mixed> $input Submitted field values.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function prepare_addition( $input ) {
+		$fields = [ 'type', 'slug', 'uri', 'primary_branch', 'release_asset', 'private_package', 'uses_lite' ];
+		$input  = array_filter( array_intersect_key( (array) $input, array_flip( $fields ) ), 'is_scalar' );
+		$input  = array_merge(
+			[
+				'type' => '',
+				'slug' => '',
+				'uri'  => '',
+			],
+			$input
+		);
+
+		$addition                  = $this->sanitize( $input )[0];
+		$addition['release_asset'] = ! empty( $addition['release_asset'] );
+
+		return $addition;
+	}
+
+	/**
+	 * Validate an addition against the saved additions.
+	 *
+	 * @param array<string, mixed>                    $addition    Sanitized addition.
+	 * @param array<int|string, array<string, mixed>> $options     Saved additions.
+	 * @param int|string|null                         $exclude_key Key of the addition being edited, if any.
+	 *
+	 * @return true|\WP_Error
+	 */
+	private function validate_addition( $addition, $options, $exclude_key = null ) {
+		if ( empty( $addition['slug'] ) || empty( $addition['uri'] ) ) {
+			return new \WP_Error( 'gu_addition_required', esc_html__( 'Repository slug and URI are required.', 'git-updater' ) );
+		}
+
+		// An edited addition may keep a type that is no longer registered.
+		$types         = (array) apply_filters( 'gua_addition_types', self::$addition_types );
+		$original_type = null !== $exclude_key ? ( $options[ $exclude_key ]['type'] ?? null ) : null;
+		if ( ! in_array( $addition['type'], $types, true ) && $original_type !== $addition['type'] ) {
+			return new \WP_Error( 'gu_addition_type', esc_html__( 'Invalid repository type.', 'git-updater' ) );
+		}
+
+		$is_plugin_slug = str_contains( $addition['slug'], '/' );
+		$is_plugin_type = str_contains( $addition['type'], 'plugin' );
+		if ( $is_plugin_type && ! $is_plugin_slug ) {
+			return new \WP_Error( 'gu_addition_slug', esc_html__( 'A plugin slug must include the main plugin file, e.g. plugin-slug/plugin-slug.php.', 'git-updater' ) );
+		}
+		if ( ! $is_plugin_type && $is_plugin_slug ) {
+			return new \WP_Error( 'gu_addition_slug', esc_html__( 'A theme slug must be the theme directory name only.', 'git-updater' ) );
+		}
+
+		foreach ( $options as $option_key => $option ) {
+			if ( $option_key !== $exclude_key && isset( $option['ID'] ) && $addition['ID'] === $option['ID'] ) {
+				return new \WP_Error( 'gu_addition_duplicate', esc_html__( 'An addition with this slug already exists.', 'git-updater' ) );
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -93,32 +335,30 @@ class Settings {
 		) {
 			return;
 		}
-		$options   = (array) get_site_option( 'git_updater_additions', [] );
-		$duplicate = false;
-		$bad_input = false;
 		if ( isset( $post_data['option_page'] ) &&
 			'git_updater_additions' === $post_data['option_page']
 		) {
-			$new_options = $post_data['git_updater_additions'] ?? [];
-			$new_options = $this->sanitize( $new_options );
-			$bad_input   = empty( $new_options[0]['slug'] ) || empty( $new_options[0]['uri'] );
+			$input    = isset( $post_data['git_updater_additions'] ) && is_array( $post_data['git_updater_additions'] )
+				? wp_unslash( $post_data['git_updater_additions'] )
+				: [];
+			$addition = $this->add_addition( $input );
 
-			foreach ( $options as $option ) {
-				$is_plugin_slug = preg_match( '@/@', $new_options[0]['slug'] );
-				$type_plugin    = preg_match( '/plugin/', $new_options[0]['type'] );
-				$bad_input      = $type_plugin && ! $is_plugin_slug;
-				$bad_input      = ! $bad_input ? ! $type_plugin && $is_plugin_slug : $bad_input;
-				$duplicate      = in_array( $new_options[0]['ID'], $option, true );
-				if ( $duplicate || $bad_input ) {
-					$_POST['action'] = false;
-					break;
-				}
-			}
-
-			if ( ! $duplicate && ! $bad_input ) {
-				$options = array_merge( $options, $new_options );
-				$options = array_filter( $options );
-				update_site_option( 'git_updater_additions', $options );
+			if ( is_wp_error( $addition ) ) {
+				$this->set_notice(
+					[
+						'type'    => 'error',
+						'message' => $addition->get_error_message(),
+						'values'  => array_filter( $input, 'is_scalar' ),
+					]
+				);
+			} else {
+				$this->set_notice(
+					[
+						'type'    => 'success',
+						/* translators: %s: addition slug. */
+						'message' => sprintf( esc_html__( 'Package %s added.', 'git-updater' ), '<code>' . esc_html( $addition['slug'] ) . '</code>' ),
+					]
+				);
 			}
 
 			add_filter(
@@ -127,7 +367,44 @@ class Settings {
 					return array_merge( $option_page, [ 'git_updater_additions' ] );
 				}
 			);
+
+			// Back to the list when added, or back to the Add Package form to fix an error.
+			$is_error = is_wp_error( $addition );
+			add_filter(
+				'gu_save_redirect_args',
+				function ( $args ) use ( $is_error ) {
+					$args['updated'] = false;
+					if ( $is_error ) {
+						$args['view'] = 'new';
+					}
+					return $args;
+				}
+			);
 		}
+	}
+
+	/**
+	 * Hold an Additions notice for the current user's next page load.
+	 *
+	 * @param array<string, mixed> $notice Notice with 'type', 'message' and optional 'values'.
+	 *
+	 * @return void
+	 */
+	private function set_notice( $notice ) {
+		set_site_transient( 'gu_additions_notice_' . get_current_user_id(), $notice, 5 * MINUTE_IN_SECONDS );
+	}
+
+	/**
+	 * Get and clear the current user's pending Additions notice.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function pop_notice() {
+		$key    = 'gu_additions_notice_' . get_current_user_id();
+		$notice = get_site_transient( $key );
+		delete_site_transient( $key );
+
+		return is_array( $notice ) ? $notice : [];
 	}
 
 	/**
@@ -168,17 +445,101 @@ class Settings {
 				],
 				$action
 			);
-			( new Repo_List_Table( self::$options_additions ) )->render_list_table();
-			?>
-			<form class="settings" method="post" action="<?php echo esc_attr( $action ); ?>">
-				<?php
-				settings_fields( 'git_updater_additions' );
-				do_settings_sections( 'git_updater_additions' );
-				submit_button();
-				?>
-			</form>
-			<?php
+			wp_enqueue_script(
+				'gu-additions-quick-edit',
+				plugin_dir_url( \Fragen\Git_Updater\PLUGIN_FILE ) . 'js/gu-additions-quick-edit.js',
+				[],
+				\Fragen\Git_Updater\Settings::get_plugin_version(),
+				[ 'in_footer' => true ]
+			);
+			wp_localize_script(
+				'gu-additions-quick-edit',
+				'guAdditionsQuickEdit',
+				[
+					'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
+					'nonce'        => wp_create_nonce( 'gu_additions_quick_edit' ),
+					'error'        => __( 'Error while saving the changes.', 'git-updater' ),
+					'refreshNonce' => wp_create_nonce( 'gu_additions_refresh' ),
+					'refreshing'   => __( 'Refreshing…', 'git-updater' ),
+					'refreshError' => __( 'Refresh failed.', 'git-updater' ),
+				]
+			);
+			$notice            = $this->pop_notice();
+			self::$form_values = (array) ( $notice['values'] ?? [] );
+
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$view = isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : '';
+			if ( 'new' === $view ) {
+				$this->render_new_page( $action, $notice );
+				return;
+			}
+
+			$this->render_notice( $notice );
+			( new Repo_List_Table( self::$options_additions ) )->render_list_table( self::get_page_url( [ 'view' => 'new' ] ) );
 		}
+	}
+
+	/**
+	 * Get the Additions tab URL.
+	 *
+	 * @param array<string, string> $args Extra query args.
+	 *
+	 * @return string
+	 */
+	public static function get_page_url( $args = [] ) {
+		return add_query_arg(
+			array_merge(
+				[
+					'page' => 'git-updater',
+					'tab'  => 'git_updater_additions',
+				],
+				$args
+			),
+			is_multisite() ? network_admin_url( 'settings.php' ) : admin_url( 'options-general.php' )
+		);
+	}
+
+	/**
+	 * Render the Add Package page.
+	 *
+	 * @param string               $action Form action.
+	 * @param array<string, mixed> $notice Pending notice, if any.
+	 *
+	 * @return void
+	 */
+	private function render_new_page( $action, $notice ) {
+		?>
+		<div class="wrap">
+			<h2 class="wp-heading-inline"><?php esc_html_e( 'Add Package', 'git-updater' ); ?></h2>
+			<?php $this->render_notice( $notice ); ?>
+			<?php $this->print_section_additions(); ?>
+			<form class="settings" method="post" action="<?php echo esc_attr( $action ); ?>">
+				<?php settings_fields( 'git_updater_additions' ); ?>
+				<table class="form-table" role="presentation">
+					<?php do_settings_fields( 'git_updater_additions', 'git_updater_additions' ); ?>
+				</table>
+				<?php submit_button( esc_html__( 'Add Package', 'git-updater' ) ); ?>
+			</form>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render a pending Additions notice.
+	 *
+	 * @param array<string, mixed> $notice Notice with 'type' and 'message'.
+	 *
+	 * @return void
+	 */
+	private function render_notice( $notice ) {
+		if ( empty( $notice['message'] ) ) {
+			return;
+		}
+		printf(
+			'<div class="notice notice-%1$s is-dismissible"><p>%2$s</p></div>',
+			'error' === ( $notice['type'] ?? '' ) ? 'error' : 'success',
+			wp_kses( (string) $notice['message'], [ 'code' => [] ] )
+		);
 	}
 
 	/**
@@ -336,7 +697,7 @@ class Settings {
 		$placeholder = $args['placeholder'] ?? null;
 		?>
 		<label for="<?php echo esc_attr( $args['id'] ); ?>">
-			<input type="text" style="width:50%;" id="<?php echo esc_attr( $args['id'] ); ?>" name="git_updater_additions[<?php echo esc_attr( $args['setting'] ); ?>]" value="" placeholder="<?php echo esc_attr( $placeholder ); ?>">
+			<input type="text" style="width:50%;" id="<?php echo esc_attr( $args['id'] ); ?>" name="git_updater_additions[<?php echo esc_attr( $args['setting'] ); ?>]" value="<?php echo esc_attr( (string) ( self::$form_values[ $args['setting'] ] ?? '' ) ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>">
 			<br>
 			<span class="description">
 				<?php echo esc_attr( $args['title'] ); ?>
@@ -353,7 +714,7 @@ class Settings {
 	 * @return void
 	 */
 	public function callback_dropdown( $args ) {
-		$options['type'] = [ 'github_plugin' ];
+		$current = (string) ( self::$form_values[ $args['setting'] ] ?? '' );
 		?>
 		<label for="<?php echo esc_attr( $args['id'] ); ?>">
 		<select id="<?php echo esc_attr( $args['id'] ); ?>" name="git_updater_additions[<?php echo esc_attr( $args['setting'] ); ?>]">
@@ -363,7 +724,7 @@ class Settings {
 			printf(
 				'<option value="%s" %s>%s</option>',
 				esc_attr( $item ),
-				selected( 'plugin', $item, false ),
+				selected( $current, $item, false ),
 				esc_html( $item )
 			);
 
@@ -382,7 +743,7 @@ class Settings {
 	 * @return void
 	 */
 	public function callback_checkbox( $args ) {
-		$checked = self::$options_additions[ $args['id'] ] ?? null;
+		$checked = self::$form_values[ $args['setting'] ] ?? self::$options_additions[ $args['id'] ] ?? null;
 		?>
 		<label for="<?php echo esc_attr( $args['id'] ); ?>">
 			<input type="checkbox" id="<?php echo esc_attr( $args['id'] ); ?>" name="git_updater_additions[<?php echo esc_attr( $args['setting'] ); ?>]" value="1" <?php checked( 1, intval( $checked ), true ); ?> <?php disabled( '-1', $checked, true ); ?> >

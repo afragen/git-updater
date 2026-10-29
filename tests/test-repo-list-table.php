@@ -26,6 +26,7 @@ class Test_Repo_List_Table_Methods extends WP_UnitTestCase {
 
 	public function tear_down(): void {
 		unset( $_REQUEST['order'], $_REQUEST['orderby'] );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'served-repo' );
 		parent::tear_down();
 	}
 
@@ -57,8 +58,74 @@ class Test_Repo_List_Table_Methods extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'private_package', $this->table->get_columns() );
 	}
 
-	public function test_get_columns_returns_exactly_seven_columns(): void {
-		$this->assertCount( 7, $this->table->get_columns() );
+	public function test_get_columns_returns_exactly_eight_columns(): void {
+		$this->assertCount( 8, $this->table->get_columns() );
+	}
+
+	public function test_get_columns_includes_version(): void {
+		$this->assertArrayHasKey( 'version', $this->table->get_columns() );
+	}
+
+	// -------------------------------------------------------------------------
+	// column_version()
+	// -------------------------------------------------------------------------
+
+	public function test_column_version_returns_cached_remote_version(): void {
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( 'served-repo', 'repo_headers', [ 'Version' => '2.4.1' ] );
+		$item = [ 'uri' => 'https://github.com/owner/served-repo' ];
+		$this->assertStringContainsString( '2.4.1', $this->table->column_version( $item ) );
+	}
+
+	public function test_column_version_ignores_expired_cache(): void {
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( 'served-repo', 'repo_headers', [ 'Version' => '2.4.1' ], strtotime( '-1 hour' ) );
+		$item = [ 'uri' => 'https://github.com/owner/served-repo' ];
+		$this->assertStringContainsString( '2.4.1', $this->table->column_version( $item ) );
+	}
+
+	public function test_column_version_lowercases_version_like_update_api(): void {
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( 'served-repo', 'repo_headers', [ 'Version' => '3.0.0-RC1' ] );
+		$item = [ 'uri' => 'https://github.com/owner/served-repo' ];
+		$this->assertStringContainsString( '3.0.0-rc1', $this->table->column_version( $item ) );
+	}
+
+	public function test_column_version_handles_trailing_slash_uri(): void {
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( 'served-repo', 'repo_headers', [ 'Version' => '1.0.0' ] );
+		$item = [ 'uri' => 'https://bitbucket.org/owner/served-repo/' ];
+		$this->assertStringContainsString( '1.0.0', $this->table->column_version( $item ) );
+	}
+
+	public function test_column_version_escapes_html(): void {
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( 'served-repo', 'repo_headers', [ 'Version' => '<b>1.0</b>' ] );
+		$item = [ 'uri' => 'https://github.com/owner/served-repo' ];
+		$this->assertStringNotContainsString( '<b>', $this->table->column_version( $item ) );
+	}
+
+	public function test_column_version_shows_dash_when_not_cached(): void {
+		$item   = [ 'uri' => 'https://github.com/owner/served-repo' ];
+		$result = $this->table->column_version( $item );
+		$this->assertStringContainsString( '&#8212;', $result );
+		$this->assertStringContainsString( 'screen-reader-text', $result );
+	}
+
+	public function test_column_version_shows_dash_for_placeholder_version(): void {
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( 'served-repo', 'repo_headers', [ 'Version' => '0.0.0' ] );
+		$item = [ 'uri' => 'https://github.com/owner/served-repo' ];
+		$this->assertStringContainsString( '&#8212;', $this->table->column_version( $item ) );
+	}
+
+	public function test_column_version_shows_dash_when_uri_missing(): void {
+		$this->assertStringContainsString( '&#8212;', $this->table->column_version( [ 'uri' => null ] ) );
+	}
+
+	public function test_column_version_includes_refresh_button(): void {
+		$item   = [
+			'slug' => 'served-repo/served-repo.php',
+			'uri'  => 'https://github.com/owner/served-repo',
+		];
+		$result = $this->table->column_version( $item );
+		$this->assertStringContainsString( 'gu-refresh-addition', $result );
+		$this->assertStringContainsString( 'gu-icon-refresh', $result );
+		$this->assertStringContainsString( 'aria-label="Refresh &#8220;served-repo/served-repo.php&#8221; from the git host"', $result );
 	}
 
 	// -------------------------------------------------------------------------
