@@ -128,3 +128,9 @@ button.gu-flush-repo.dashicons-no-decoration {
 .gu-addition-editor fieldset label span.input-text-wrap {
 	margin-left: 8em;
 }
+
+/* Additions: keep the Add Package button beside the list title */
+.git-updater-settings h2.wp-heading-inline {
+	display: inline-block;
+	margin-right: 5px;
+}
