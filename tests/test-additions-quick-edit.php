@@ -8,16 +8,28 @@
 use Fragen\Git_Updater\Additions\Settings as Additions_Settings;
 use Fragen\Git_Updater\Additions\Repo_List_Table;
 use Fragen\Git_Updater\DB\Repo_Cache_Table;
+use Fragen\Git_Updater\Plugin;
+use Fragen\Git_Updater\Theme;
+use Fragen\Singleton;
 
 class Test_Additions_Quick_Edit extends WP_UnitTestCase {
 
 	private Additions_Settings $settings;
+
+	/** @var array<string, array<string, stdClass>> */
+	private array $saved_configs = [];
 
 	public function set_up(): void {
 		parent::set_up();
 		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 		Additions_Settings::$options_additions = [];
 		$this->settings = new Additions_Settings();
+
+		foreach ( [ Plugin::class, Theme::class ] as $class ) {
+			$rp                              = new ReflectionProperty( $class, 'config' );
+			PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
+			$this->saved_configs[ $class ] = $rp->getValue( Singleton::get_instance( $class, $this ) ) ?? [];
+		}
 	}
 
 	public function tear_down(): void {
@@ -29,6 +41,14 @@ class Test_Additions_Quick_Edit extends WP_UnitTestCase {
 		delete_site_option( 'git_updater_additions' );
 		Repo_Cache_Table::instance()->delete_repo( 'qe-plugin' );
 		Repo_Cache_Table::instance()->delete_repo( 'qe-renamed' );
+		Repo_Cache_Table::instance()->delete_repo( 'qe-theme' );
+		unset( $_POST['id'] );
+		remove_all_actions( 'wp_ajax_gu_additions_refresh' );
+		remove_all_actions( 'get_remote_repo_meta' );
+		remove_filter( 'pre_http_request', [ $this, 'mock_http' ] );
+		foreach ( $this->saved_configs as $class => $config ) {
+			$this->inject_config( $class, $config );
+		}
 		Additions_Settings::$options_additions = [];
 		wp_dequeue_script( 'gu-additions-quick-edit' );
 		wp_deregister_script( 'gu-additions-quick-edit' );
@@ -62,6 +82,74 @@ class Test_Additions_Quick_Edit extends WP_UnitTestCase {
 
 	private function seed( array $items ): void {
 		update_site_option( 'git_updater_additions', $items );
+	}
+
+	/**
+	 * Replace a Plugin or Theme singleton's repo config.
+	 *
+	 * @param string                  $class  Plugin::class or Theme::class.
+	 * @param array<string, stdClass> $config Repo configs keyed by repo slug.
+	 */
+	private function inject_config( string $class, array $config ): void {
+		$rp = new ReflectionProperty( $class, 'config' );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
+		$rp->setValue( Singleton::get_instance( $class, $this ), $config );
+	}
+
+	private function make_repo( string $slug, string $type = 'plugin' ): stdClass {
+		return (object) [
+			'slug'           => $slug,
+			'type'           => $type,
+			'git'            => 'github',
+			'file'           => 'plugin' === $type ? "{$slug}/{$slug}.php" : $slug,
+			'owner'          => 'owner',
+			'repo'           => $slug,
+			'branch'         => 'master',
+			'primary_branch' => 'master',
+			'uri'            => "https://github.com/owner/{$slug}",
+			'release_asset'  => false,
+			'enterprise'     => null,
+			'enterprise_api' => null,
+			'gist_id'        => null,
+		];
+	}
+
+	public function mock_http(): array {
+		return [
+			'headers'  => [],
+			'body'     => '[]',
+			'response' => [
+				'code'    => 200,
+				'message' => 'OK',
+			],
+			'cookies'  => [],
+			'filename' => null,
+		];
+	}
+
+	/**
+	 * Stub remote calls and record a fetch that writes the given version and ran set.
+	 *
+	 * @param string             $version Remote Version header to cache.
+	 * @param array<int, string> $ran     Ran steps to write.
+	 */
+	private function stub_fetch( string $version, array $ran ): void {
+		add_filter( 'pre_http_request', [ $this, 'mock_http' ] );
+		add_action(
+			'get_remote_repo_meta',
+			static function ( $repo ) use ( $version, $ran ) {
+				$table = Repo_Cache_Table::instance();
+				$table->add_entry( $repo->slug, 'repo_headers', [ 'Version' => $version ], strtotime( '+12 hours' ) );
+				$table->add_entry( $repo->slug, 'ran', $ran, strtotime( '+12 hours' ) );
+			}
+		);
+	}
+
+	/**
+	 * @return array<int, string>
+	 */
+	private function complete_ran(): array {
+		return [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
 	}
 
 	/**
@@ -368,6 +456,133 @@ class Test_Additions_Quick_Edit extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'id="gu-addition-' . $item['ID'] . '"', $response['data']['row'] );
 		$this->assertStringContainsString( 'develop', $response['data']['row'] );
 		$this->assertSame( 'develop', get_site_option( 'git_updater_additions' )[0]['primary_branch'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// Refresh
+	// -------------------------------------------------------------------------
+
+	public function test_refresh_button_is_in_version_column_not_row_actions(): void {
+		$table = new Repo_List_Table( [] );
+		$this->assertStringContainsString( 'gu-refresh-addition', $table->column_version( $this->make_item() ) );
+		$this->assertStringNotContainsString( 'gu-refresh-addition', $table->column_slug( $this->make_item() ) );
+	}
+
+	public function test_load_hooks_registers_refresh_ajax_action(): void {
+		$this->settings->load_hooks();
+		$this->assertSame( 10, has_action( 'wp_ajax_gu_additions_refresh', [ $this->settings, 'ajax_refresh' ] ) );
+	}
+
+	public function test_refresh_addition_errors_when_repo_not_loaded(): void {
+		$this->inject_config( Plugin::class, [] );
+
+		$result = $this->settings->refresh_addition( $this->make_item() );
+		$this->assertWPError( $result );
+		$this->assertSame( 'gu_addition_not_loaded', $result->get_error_code() );
+	}
+
+	public function test_refresh_addition_errors_when_uri_missing(): void {
+		$this->inject_config( Plugin::class, [ 'qe-plugin' => $this->make_repo( 'qe-plugin' ) ] );
+
+		$result = $this->settings->refresh_addition( $this->make_item( [ 'uri' => '' ] ) );
+		$this->assertWPError( $result );
+	}
+
+	public function test_refresh_addition_flushes_and_refetches_plugin(): void {
+		Repo_Cache_Table::instance()->add_entry( 'qe-plugin', 'repo_headers', [ 'Version' => '1.0.0' ], strtotime( '+12 hours' ) );
+		$this->inject_config( Plugin::class, [ 'qe-plugin' => $this->make_repo( 'qe-plugin' ) ] );
+		$this->stub_fetch( '2.0.0', $this->complete_ran() );
+
+		$this->assertTrue( $this->settings->refresh_addition( $this->make_item() ) );
+		$this->assertSame( '2.0.0', Repo_Cache_Table::instance()->get_repo( 'qe-plugin', 'repo_headers' )['Version'] );
+	}
+
+	public function test_refresh_addition_uses_theme_configs_for_themes(): void {
+		$this->inject_config( Plugin::class, [] );
+		$this->inject_config( Theme::class, [ 'qe-theme' => $this->make_repo( 'qe-theme', 'theme' ) ] );
+		$this->stub_fetch( '3.0.0', $this->complete_ran() );
+
+		$item = $this->make_item(
+			[
+				'type' => 'github_theme',
+				'slug' => 'qe-theme',
+				'uri'  => 'https://github.com/owner/qe-theme',
+			]
+		);
+		$this->assertTrue( $this->settings->refresh_addition( $item ) );
+	}
+
+	public function test_refresh_addition_errors_when_fetch_incomplete(): void {
+		$this->inject_config( Plugin::class, [ 'qe-plugin' => $this->make_repo( 'qe-plugin' ) ] );
+		$this->stub_fetch( '2.0.0', [ 'contents' ] );
+
+		$result = $this->settings->refresh_addition( $this->make_item() );
+		$this->assertWPError( $result );
+		$this->assertSame( 'gu_addition_refresh_incomplete', $result->get_error_code() );
+	}
+
+	public function test_refresh_addition_does_not_leave_wpcron_filter(): void {
+		$this->inject_config( Plugin::class, [ 'qe-plugin' => $this->make_repo( 'qe-plugin' ) ] );
+		$this->stub_fetch( '2.0.0', $this->complete_ran() );
+
+		$this->settings->refresh_addition( $this->make_item() );
+		$this->assertFalse( has_filter( 'gu_disable_wpcron', '__return_false' ) );
+	}
+
+	public function test_ajax_refresh_rejects_bad_nonce(): void {
+		wp_set_current_user( $this->make_admin() );
+		$_REQUEST['_ajax_nonce'] = 'bad';
+
+		$this->assertSame( [], $this->run_ajax( 'ajax_refresh' ) );
+	}
+
+	public function test_ajax_refresh_rejects_non_admin(): void {
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'editor' ] ) );
+		$_REQUEST['_ajax_nonce'] = wp_create_nonce( 'gu_additions_refresh' );
+
+		$response = $this->run_ajax( 'ajax_refresh' );
+		$this->assertFalse( $response['success'] );
+	}
+
+	public function test_ajax_refresh_errors_for_unknown_addition(): void {
+		wp_set_current_user( $this->make_admin() );
+		$this->seed( [ $this->make_item() ] );
+		$_REQUEST['_ajax_nonce'] = wp_create_nonce( 'gu_additions_refresh' );
+		$_POST['id']             = 'missing';
+
+		$response = $this->run_ajax( 'ajax_refresh' );
+		$this->assertFalse( $response['success'] );
+		$this->assertArrayNotHasKey( 'row', $response['data'] );
+	}
+
+	public function test_ajax_refresh_returns_row_with_served_version(): void {
+		wp_set_current_user( $this->make_admin() );
+		$item = $this->make_item();
+		$this->seed( [ $item ] );
+		$this->inject_config( Plugin::class, [ 'qe-plugin' => $this->make_repo( 'qe-plugin' ) ] );
+		$this->stub_fetch( '2.0.0', $this->complete_ran() );
+		$_REQUEST['_ajax_nonce'] = wp_create_nonce( 'gu_additions_refresh' );
+		$_POST['id']             = $item['ID'];
+
+		$response = $this->run_ajax( 'ajax_refresh' );
+		$this->assertTrue( $response['success'] );
+		$this->assertStringContainsString( 'id="gu-addition-' . $item['ID'] . '"', $response['data']['row'] );
+		$this->assertStringContainsString( '2.0.0', $response['data']['row'] );
+	}
+
+	public function test_ajax_refresh_returns_row_and_message_when_incomplete(): void {
+		wp_set_current_user( $this->make_admin() );
+		$item = $this->make_item();
+		$this->seed( [ $item ] );
+		$this->inject_config( Plugin::class, [ 'qe-plugin' => $this->make_repo( 'qe-plugin' ) ] );
+		$this->stub_fetch( '2.0.0', [ 'contents' ] );
+		$_REQUEST['_ajax_nonce'] = wp_create_nonce( 'gu_additions_refresh' );
+		$_POST['id']             = $item['ID'];
+
+		$response = $this->run_ajax( 'ajax_refresh' );
+		$this->assertFalse( $response['success'] );
+		$this->assertNotEmpty( $response['data']['message'] );
+		$this->assertStringContainsString( 'id="gu-addition-' . $item['ID'] . '"', $response['data']['row'] );
 	}
 
 	// -------------------------------------------------------------------------

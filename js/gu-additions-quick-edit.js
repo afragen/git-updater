@@ -1,5 +1,5 @@
 /**
- * Vanilla Javascript to handle Quick Edit on the Addition Packages list table.
+ * Vanilla Javascript to handle Quick Edit and Refresh on the Addition Packages list table.
  *
  * @package git-updater
  */
@@ -153,9 +153,89 @@
 			} );
 	}
 
+	/**
+	 * Flush and refetch an addition's repo cache, then swap in the re-rendered row.
+	 *
+	 * @param {HTMLButtonElement} button The row's Refresh button.
+	 */
+	function refresh( button ) {
+		const row = button.closest( 'tr' );
+		if ( ! row || button.disabled ) {
+			return;
+		}
+		const data  = JSON.parse( row.dataset.guAddition || '{}' );
+		const label = button.getAttribute( 'aria-label' );
+		const body  = new FormData();
+		body.append( 'action', 'gu_additions_refresh' );
+		body.append( '_ajax_nonce', settings.refreshNonce );
+		body.append( 'id', data.ID || '' );
+
+		const previous = button.parentNode.querySelector( '.gu-refresh-error' );
+		if ( previous ) {
+			previous.remove();
+		}
+		button.disabled = true;
+		button.classList.add( 'is-refreshing' );
+		button.setAttribute( 'aria-label', settings.refreshing );
+		button.title = settings.refreshing;
+
+		/**
+		 * Show a failure beside the current row's Refresh button.
+		 *
+		 * @param {HTMLButtonElement} target  The Refresh button to update.
+		 * @param {string}            message The failure message.
+		 */
+		function fail( target, message ) {
+			target.disabled = false;
+			target.classList.remove( 'is-refreshing' );
+			target.setAttribute( 'aria-label', label );
+			target.title = label;
+			const error = document.createElement( 'span' );
+			error.className   = 'gu-refresh-error';
+			error.setAttribute( 'role', 'alert' );
+			error.textContent = message || settings.refreshError;
+			target.after( error );
+		}
+
+		fetch( settings.ajaxUrl, { method: 'POST', credentials: 'same-origin', body: body } )
+			.then( function ( response ) {
+				return response.json();
+			} )
+			.then( function ( response ) {
+				const payload = ( response && response.data ) || {};
+				let target    = button;
+				if ( payload.row ) {
+					const template = document.createElement( 'template' );
+					template.innerHTML = payload.row.trim();
+					const newRow = template.content.firstElementChild;
+					row.replaceWith( newRow );
+					target = newRow.querySelector( '.gu-refresh-addition' ) || button;
+					target.focus();
+				}
+				if ( ! response || ! response.success ) {
+					fail( target, payload.message );
+					return;
+				}
+				target.disabled = false;
+				target.classList.remove( 'is-refreshing' );
+				target.setAttribute( 'aria-label', label );
+				target.title = label;
+			} )
+			.catch( function () {
+				fail( button, settings.refreshError );
+			} );
+	}
+
 	document.addEventListener(
 		'click',
 		function ( event ) {
+			const refreshButton = event.target.closest( '.gu-refresh-addition' );
+			if ( refreshButton ) {
+				event.preventDefault();
+				refresh( refreshButton );
+				return;
+			}
+
 			const quickEdit = event.target.closest( '.gu-quick-edit' );
 			if ( quickEdit ) {
 				event.preventDefault();
