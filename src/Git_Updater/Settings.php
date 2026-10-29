@@ -878,10 +878,18 @@ class Settings {
 		$themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
 		$repos   = array_merge( $plugins, $themes );
 
+		// Additions are listed, and refreshed, on the Additions tab.
+		$additions = array_map(
+			function ( $addition ) {
+				return basename( (string) ( $addition['uri'] ?? '' ) );
+			},
+			(array) get_site_option( 'git_updater_additions', [] )
+		);
+
 		$type_repos = array_filter(
 			$repos,
-			function ( $e ) use ( $git ) {
-				return false !== stripos( $e->git, $git );
+			function ( $e ) use ( $git, $additions ) {
+				return false !== stripos( $e->git, $git ) && ! in_array( $e->slug, $additions, true );
 			}
 		);
 

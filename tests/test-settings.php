@@ -1454,6 +1454,30 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		$this->assertStringContainsString( '<svg', $output );
 		$this->assertStringContainsString( 'gu-icon-plugin', $output );
 	}
+
+	public function test_display_gu_repos_hides_additions(): void {
+		$plugin = $this->make_plugin_obj( [ 'name' => 'Addition Plugin' ] );
+		$this->inject_plugin_config( [ 'test-plugin' => $plugin ] );
+		$this->inject_theme_config( [] );
+		update_site_option( 'git_updater_additions', [ [ 'uri' => 'https://github.com/owner/test-plugin' ] ] );
+		ob_start();
+		$this->call_private( 'display_gu_repos', [ 'github' ] );
+		$output = ob_get_clean();
+		delete_site_option( 'git_updater_additions' );
+		$this->assertStringNotContainsString( 'Addition Plugin', $output );
+	}
+
+	public function test_display_gu_repos_keeps_repos_that_are_not_additions(): void {
+		$plugin = $this->make_plugin_obj();
+		$this->inject_plugin_config( [ 'test-plugin' => $plugin ] );
+		$this->inject_theme_config( [] );
+		update_site_option( 'git_updater_additions', [ [ 'uri' => 'https://github.com/owner/other-plugin' ] ] );
+		ob_start();
+		$this->call_private( 'display_gu_repos', [ 'github' ] );
+		$output = ob_get_clean();
+		delete_site_option( 'git_updater_additions' );
+		$this->assertStringContainsString( 'Test Plugin', $output );
+	}
 }
 
 // =============================================================================
