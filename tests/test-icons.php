@@ -60,7 +60,7 @@ class Test_Icons extends WP_UnitTestCase {
 		$map = $this->get_map();
 
 		$this->assertSame(
-			[ 'plugin', 'theme', 'private', 'dot-org', 'dismiss', 'broken', 'yes' ],
+			[ 'plugin', 'theme', 'private', 'dot-org', 'dismiss', 'broken', 'yes', 'refresh' ],
 			array_keys( $map )
 		);
 		$this->assertSame( 'core-admin/plugins', $map['plugin']['icon'] );
@@ -70,6 +70,7 @@ class Test_Icons extends WP_UnitTestCase {
 		$this->assertSame( 'core/error', $map['dismiss']['icon'] );
 		$this->assertSame( 'core/caution', $map['broken']['icon'] );
 		$this->assertSame( 'core/check', $map['yes']['icon'] );
+		$this->assertSame( 'core-admin/update', $map['refresh']['icon'] );
 
 		$this->assertSame( 'admin-plugins', $map['plugin']['dashicon'] );
 		$this->assertSame( 'admin-appearance', $map['theme']['dashicon'] );
@@ -78,6 +79,7 @@ class Test_Icons extends WP_UnitTestCase {
 		$this->assertSame( 'dismiss', $map['dismiss']['dashicon'] );
 		$this->assertSame( 'warning', $map['broken']['dashicon'] );
 		$this->assertSame( 'yes', $map['yes']['dashicon'] );
+		$this->assertSame( 'update', $map['refresh']['dashicon'] );
 	}
 
 	public function test_is_available_matches_core_admin_icon(): void {

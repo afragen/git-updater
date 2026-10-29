@@ -306,6 +306,39 @@ class Repo_List_Table extends WP_List_Table {
 		);
 	}
 
+	/**
+	 * Render the version the update API is currently serving for an addition.
+	 *
+	 * Mirrors the `version` returned by the update-api REST endpoint: the
+	 * Version header of the remote main file, read from the repo cache without
+	 * a freshness check so rendering never triggers a remote request. Followed
+	 * by a button that refetches it from the git host.
+	 *
+	 * @param array<string, mixed> $item A singular item (one full row's worth of data).
+	 *
+	 * @return string
+	 */
+	public function column_version( $item ) {
+		// The repo cache is keyed by repository name, the last segment of the URI.
+		$repo    = basename( (string) ( $item['uri'] ?? '' ) );
+		$headers = '' !== $repo ? \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $repo, 'repo_headers' ) : null;
+		$version = is_array( $headers ) && ! empty( $headers['Version'] ) ? strtolower( (string) $headers['Version'] ) : '';
+
+		$version = '' === $version || '0.0.0' === $version
+			? '<span aria-hidden="true">&#8212;</span><span class="screen-reader-text">' . esc_html__( 'Not yet fetched', 'git-updater' ) . '</span>'
+			: esc_html( $version );
+
+		/* translators: %s: addition slug. */
+		$label = sprintf( __( 'Refresh &#8220;%s&#8221; from the git host', 'git-updater' ), (string) ( $item['slug'] ?? '' ) );
+
+		return sprintf(
+			'%1$s <button type="button" class="button-link gu-refresh-addition hide-if-no-js" aria-label="%2$s" title="%2$s">%3$s</button>',
+			$version,
+			esc_attr( $label ),
+			Icons::get( 'refresh', [ 'size' => 20 ] )
+		);
+	}
+
 	/** ************************************************************************
 	 * REQUIRED if displaying checkboxes or using bulk actions! The 'cb' column
 	 * is given special treatment when columns are processed. It ALWAYS needs to
@@ -344,6 +377,7 @@ class Repo_List_Table extends WP_List_Table {
 			'slug'            => esc_html__( 'Slug', 'git-updater' ),
 			'uri'             => esc_html__( 'URL', 'git-updater' ),
 			'primary_branch'  => esc_html__( 'Primary Branch', 'git-updater' ),
+			'version'         => esc_html__( 'Served Version', 'git-updater' ),
 			'release_asset'   => esc_html__( 'Release Asset', 'git-updater' ),
 			'private_package' => esc_html__( 'Private Package', 'git-updater' ),
 			'uses_lite'       => esc_html__( 'Lite Client', 'git-updater' ),

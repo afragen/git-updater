@@ -76,6 +76,7 @@ class Settings {
 		);
 
 		add_action( 'wp_ajax_gu_additions_quick_edit', [ $this, 'ajax_quick_edit' ] );
+		add_action( 'wp_ajax_gu_additions_refresh', [ $this, 'ajax_refresh' ] );
 	}
 
 	/**
@@ -103,6 +104,75 @@ class Settings {
 		}
 
 		wp_send_json_success( [ 'row' => ( new Repo_List_Table( self::$options_additions ) )->render_row( $addition ) ] );
+	}
+
+	/**
+	 * AJAX handler for refreshing an addition's repo cache from the git host.
+	 *
+	 * @uses 'wp_ajax_gu_additions_refresh' action hook
+	 *
+	 * @return void
+	 */
+	public function ajax_refresh() {
+		check_ajax_referer( 'gu_additions_refresh' );
+
+		if ( ! current_user_can( is_multisite() ? 'manage_network_options' : 'manage_options' ) ) {
+			wp_send_json_error( [ 'message' => esc_html__( 'Sorry, you are not allowed to refresh additions.', 'git-updater' ) ], 403 );
+		}
+
+		$id       = isset( $_POST['id'] ) ? sanitize_key( wp_unslash( $_POST['id'] ) ) : '';
+		$addition = null;
+		foreach ( (array) get_site_option( 'git_updater_additions', [] ) as $option ) {
+			if ( isset( $option['ID'] ) && $id === $option['ID'] ) {
+				$addition = $option;
+				break;
+			}
+		}
+		if ( null === $addition ) {
+			wp_send_json_error( [ 'message' => esc_html__( 'This addition no longer exists.', 'git-updater' ) ] );
+		}
+
+		$result = $this->refresh_addition( $addition );
+		$row    = ( new Repo_List_Table( self::$options_additions ) )->render_row( $addition );
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error(
+				[
+					'message' => $result->get_error_message(),
+					'row'     => $row,
+				]
+			);
+		}
+
+		wp_send_json_success( [ 'row' => $row ] );
+	}
+
+	/**
+	 * Flush an addition's repo cache and refetch it from the git host.
+	 *
+	 * @param array<string, mixed> $addition A saved addition.
+	 *
+	 * @return true|\WP_Error True when the fetch cycle completed.
+	 */
+	public function refresh_addition( $addition ) {
+		// The repo cache and repo configs are keyed by repository name, the last segment of the URI.
+		$repo    = basename( (string) ( $addition['uri'] ?? '' ) );
+		$configs = str_contains( (string) ( $addition['type'] ?? '' ), 'theme' )
+			? \Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs()
+			: \Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
+
+		if ( '' === $repo || ! isset( $configs[ $repo ] ) ) {
+			return new \WP_Error( 'gu_addition_not_loaded', esc_html__( 'Git Updater has not loaded this repository. Check its slug and URL.', 'git-updater' ) );
+		}
+
+		add_filter( 'gu_disable_wpcron', '__return_false' );
+		$complete = \Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->refresh_repo( $configs[ $repo ] );
+		remove_filter( 'gu_disable_wpcron', '__return_false' );
+
+		if ( ! $complete ) {
+			return new \WP_Error( 'gu_addition_refresh_incomplete', esc_html__( 'Could not fetch everything from the git host. Try again in a few minutes.', 'git-updater' ) );
+		}
+
+		return true;
 	}
 
 	/**
@@ -285,9 +355,12 @@ class Settings {
 				'gu-additions-quick-edit',
 				'guAdditionsQuickEdit',
 				[
-					'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-					'nonce'   => wp_create_nonce( 'gu_additions_quick_edit' ),
-					'error'   => __( 'Error while saving the changes.', 'git-updater' ),
+					'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
+					'nonce'        => wp_create_nonce( 'gu_additions_quick_edit' ),
+					'error'        => __( 'Error while saving the changes.', 'git-updater' ),
+					'refreshNonce' => wp_create_nonce( 'gu_additions_refresh' ),
+					'refreshing'   => __( 'Refreshing…', 'git-updater' ),
+					'refreshError' => __( 'Refresh failed.', 'git-updater' ),
 				]
 			);
 			( new Repo_List_Table( self::$options_additions ) )->render_list_table();

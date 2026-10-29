@@ -128,3 +128,31 @@ button.gu-flush-repo.dashicons-no-decoration {
 .gu-addition-editor fieldset label span.input-text-wrap {
 	margin-left: 8em;
 }
+
+/* Additions: refresh button beside the served version */
+.gu-refresh-addition {
+	vertical-align: middle;
+	line-height: 1;
+}
+
+.gu-refresh-addition.is-refreshing .gu-icon {
+	animation: gu-refresh-spin 1s linear infinite;
+}
+
+.gu-refresh-error {
+	display: block;
+	color: #d63638;
+}
+
+@keyframes gu-refresh-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.gu-refresh-addition.is-refreshing .gu-icon {
+		animation: none;
+		opacity: 0.5;
+	}
+}
