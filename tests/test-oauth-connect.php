@@ -195,6 +195,8 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$output = ob_get_clean();
 		$this->assertStringContainsString( 'Connected', $output );
 		$this->assertStringContainsString( 'Disconnect', $output );
+		$this->assertStringContainsString( 'admin-post.php', $output );
+		$this->assertStringNotContainsString( 'network/admin-post.php', $output );
 		$this->assertStringContainsString( 'gu_oauth_disconnect', $output );
 	}
 
@@ -654,10 +656,10 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	}
 
 	/**
-	 * Test get_callback_url uses network_admin_url on multisite.
+	 * Test get_callback_url uses the admin-post endpoint on multisite.
 	 * @group ms-required
 	 */
-	public function test_get_callback_url_uses_network_admin_on_multisite(): void {
+	public function test_get_callback_url_uses_admin_post_endpoint_on_multisite(): void {
 		if ( ! is_multisite() ) {
 			$this->markTestSkipped( 'Multisite only test' );
 		}
@@ -667,15 +669,15 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$url = $method->invoke( $this->oauth, 'github' );
 
-		$this->assertStringContainsString( 'network/admin-post.php', $url );
+		$this->assertStringContainsString( 'admin-post.php', $url );
+		$this->assertStringNotContainsString( 'network/admin-post.php', $url );
 		$this->assertStringContainsString( 'action=gu_oauth_callback', $url );
 		$this->assertStringContainsString( '_wpnonce', $url );
 	}
 
 	/**
-	 * Test get_callback_url uses admin_url on single-site (the : branch of
-	 * the is_multisite() ternary). Skipped under multisite, where the
-	 * ? branch (network_admin_url) runs instead.
+	 * Test get_callback_url uses admin_url on single-site. Skipped under
+	 * multisite, where the same admin-post endpoint is used.
 	 *
 	 * @group ms-excluded
 	 */
@@ -1570,6 +1572,8 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->oauth->render_remove_token_field( [ 'provider' => 'github' ] );
 		$output = ob_get_clean();
 		$this->assertStringContainsString( 'Remove Token', $output );
+		$this->assertStringContainsString( 'admin-post.php', $output );
+		$this->assertStringNotContainsString( 'network/admin-post.php', $output );
 		$this->assertStringContainsString( 'gu_remove_token', $output );
 	}
 

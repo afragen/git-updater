@@ -141,9 +141,7 @@ class OAuth_Connect {
 			return;
 		}
 
-		$base       = is_multisite()
-			? network_admin_url( 'admin-post.php' )
-			: admin_url( 'admin-post.php' );
+		$base       = admin_url( 'admin-post.php' );
 		$remove_url = add_query_arg(
 			[
 				'action'   => 'gu_remove_token',
@@ -162,9 +160,7 @@ class OAuth_Connect {
 	 * @return void
 	 */
 	private function render_connected_state( string $provider ): void {
-		$base           = is_multisite()
-			? network_admin_url( 'admin-post.php' )
-			: admin_url( 'admin-post.php' );
+		$base           = admin_url( 'admin-post.php' );
 		$disconnect_url = add_query_arg(
 			[
 				'action'   => 'gu_oauth_disconnect',
@@ -354,9 +350,9 @@ class OAuth_Connect {
 	 * @return string
 	 */
 	private function get_callback_url( string $provider ): string {
-		$base = is_multisite()
-			? network_admin_url( 'admin-post.php' ) // @codeCoverageIgnore
-			: admin_url( 'admin-post.php' );
+		// admin-post.php stays at the wp-admin root on multisite; network_admin_url()
+		// adds a /network/ segment that does not contain this script.
+		$base = admin_url( 'admin-post.php' );
 		return add_query_arg(
 			[
 				'action'   => 'gu_oauth_callback',

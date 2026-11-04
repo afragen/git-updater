@@ -33,6 +33,29 @@ class Test_Repo_List_Table_Methods extends WP_UnitTestCase {
 	// get_columns()
 	// -------------------------------------------------------------------------
 
+	public function test_constructor_skips_malformed_saved_option_rows(): void {
+		$options = [
+			[
+				'ID'              => md5( 'synthetic-plugin/synthetic-plugin.php' ),
+				'type'            => 'github_plugin',
+				'slug'            => 'synthetic-plugin/synthetic-plugin.php',
+				'uri'             => 'https://github.com/example/synthetic-plugin',
+				'source'          => 'synthetic-source',
+				'primary_branch'  => 'main',
+				'release_asset'   => false,
+				'private_package' => false,
+				'uses_lite'       => false,
+			],
+			'malformed saved row',
+		];
+
+		$table = new Repo_List_Table( $options );
+		$table->prepare_items();
+
+		$this->assertCount( 1, $table->items );
+		$this->assertSame( 'synthetic-plugin/synthetic-plugin.php', $table->items[0]['slug'] );
+	}
+
 	public function test_get_columns_includes_slug(): void {
 		$this->assertArrayHasKey( 'slug', $this->table->get_columns() );
 	}
