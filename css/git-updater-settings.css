@@ -119,3 +119,46 @@ button.gu-flush-repo.dashicons-no-decoration {
 .gu-icon {
 	vertical-align: middle;
 }
+
+/* Additions Quick Edit */
+.gu-addition-editor fieldset label span.title {
+	width: 8em;
+}
+
+.gu-addition-editor fieldset label span.input-text-wrap {
+	margin-left: 8em;
+}
+
+/* Additions: keep the Add Package button beside the list title */
+.git-updater-settings h2.wp-heading-inline {
+	display: inline-block;
+	margin-right: 5px;
+}
+
+/* Additions: refresh button beside the served version */
+.gu-refresh-addition {
+	vertical-align: middle;
+	line-height: 1;
+}
+
+.gu-refresh-addition.is-refreshing .gu-icon {
+	animation: gu-refresh-spin 1s linear infinite;
+}
+
+.gu-refresh-error {
+	display: block;
+	color: #d63638;
+}
+
+@keyframes gu-refresh-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.gu-refresh-addition.is-refreshing .gu-icon {
+		animation: none;
+		opacity: 0.5;
+	}
+}

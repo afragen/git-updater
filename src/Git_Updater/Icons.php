@@ -66,6 +66,10 @@ final class Icons {
 				'icon'     => 'core/check',
 				'dashicon' => 'yes',
 			],
+			'refresh' => [
+				'icon'     => 'core-admin/update',
+				'dashicon' => 'update',
+			],
 		];
 	}
 
