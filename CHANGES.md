@@ -1,4 +1,5 @@
 #### [unreleased]
+* add `get_credential_hosts()` and `is_allowed_credential_host()` to `Basic_Auth_Loader` so the API add-ons' `develop` branches can guard remote installs without a fatal on `master`; honors the `gu_credential_hosts` filter each add-on registers
 
 #### 14.4.3 / 2026-10-26
 * update wordpress-sdk/freemius
