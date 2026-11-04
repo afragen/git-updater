@@ -367,6 +367,53 @@ class Base {
 	}
 
 	/**
+	 * Flush and synchronously refetch a single repository's cached API data.
+	 *
+	 * Unlike the `flush-repo-cache` REST endpoint (which only invalidates), this
+	 * blocks until the per-repo fetch cycle has run, so callers that need fresh
+	 * data immediately (webhook updates) never read the stale cache.
+	 *
+	 * The user's tracked `current_branch` is preserved unless this refresh is part
+	 * of a branch switch.
+	 *
+	 * @param stdClass $repo          Repo object.
+	 * @param bool     $branch_switch Whether the refresh accompanies a branch switch.
+	 *
+	 * @return bool True when the fetch cycle completed.
+	 */
+	public function refresh_repo( $repo, $branch_switch = false ) {
+		if ( ! isset( $repo->slug, $repo->type ) ) {
+			return false;
+		}
+
+		$cache_key = $this->get_cache_key( $repo->slug );
+		$cache     = (array) get_site_option( $cache_key, [] );
+		$keep      = ! $branch_switch && isset( $cache['current_branch'] )
+			? $cache['current_branch']
+			: null;
+
+		delete_site_option( $cache_key );
+
+		$this->get_remote_repo_meta( $repo );
+
+		// Restore the tracked branch after the fetch so its timeout bookkeeping is
+		// untouched by the invalidation. Merge directly rather than via
+		// set_repo_cache() so a failed fetch doesn't stamp a fresh timeout on an
+		// otherwise empty row. On a switch, process_request() persists the new
+		// branch once the update succeeds.
+		if ( null !== $keep ) {
+			$cache                   = (array) get_site_option( $cache_key, [] );
+			$cache['current_branch'] = $keep;
+			update_site_option( $cache_key, $cache );
+		}
+
+		$cache = $this->get_repo_cache( $repo->slug, false );
+		$ran   = is_array( $cache ) ? (array) ( $cache['ran'] ?? [] ) : [];
+
+		return [] === array_diff( self::expected_ran_steps(), $ran );
+	}
+
+	/**
 	 * Set default values for plugin/theme.
 	 *
 	 * @param string $type (plugin|theme).
