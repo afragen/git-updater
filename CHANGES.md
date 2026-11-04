@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 14.5.0 / 2026-11-04
 * add `get_credential_hosts()` and `is_allowed_credential_host()` to `Basic_Auth_Loader` so the API add-ons' `develop` branches can guard remote installs without a fatal on `master`; honors the `gu_credential_hosts` filter each add-on registers
 * fix webhook updates using stale repo data — the REST update path now flushes and synchronously refetches that repository's cached API data (`Base::refresh_repo()`) before running the upgrader, replacing the fire-and-forget loopback request to `flush-repo-cache`; newly pushed tags/release assets are now resolved by the update, and the tracked `current_branch` is preserved unless the webhook switches branches (`override`)
 
