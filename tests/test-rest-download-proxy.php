@@ -456,11 +456,30 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		$request = $this->make_token_request();
 		$request->set_header( 'X-GU-Lite-Key', 'someone-elses-key' );
 		$response = $this->rest->get_download_token( $request );
+		$pending  = (array) get_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
 		remove_all_filters( 'git_updater_lite_client_key' );
 		delete_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
 
 		$this->assertWPError( $response );
 		$this->assertSame( 403, $response->get_error_data()['status'] );
+		$this->assertArrayHasKey( hash( 'sha256', 'someone-elses-key' ), $pending );
+	}
+
+	public function test_get_download_token_does_not_record_pending_for_approved_client_key(): void {
+		$this->rest->mock_metadata = [ 'download_link' => 'https://example.com/package.zip', 'is_private' => true ];
+		delete_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
+
+		add_filter( 'git_updater_lite_client_key', fn() => 'approved-client-key' );
+		$request = $this->make_token_request();
+		$request->set_header( 'X-GU-Lite-Key', 'approved-client-key' );
+		$response = $this->rest->get_download_token( $request );
+		$pending  = (array) get_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
+
+		remove_all_filters( 'git_updater_lite_client_key' );
+		delete_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
+
+		$this->assertNotWPError( $response );
+		$this->assertArrayNotHasKey( hash( 'sha256', 'approved-client-key' ), $pending );
 	}
 
 	public function test_get_download_token_returns_200_for_private_repo_with_approved_client_key(): void {
@@ -493,17 +512,17 @@ class Test_REST_Download_Proxy extends GU_Test_Case {
 		$this->assertNotWPError( $response );
 	}
 
-	public function test_get_download_token_gate_can_be_disabled_by_filter(): void {
+	public function test_get_download_token_gate_cannot_be_disabled_by_filter(): void {
 		$this->rest->mock_metadata = [ 'download_link' => 'https://example.com/package.zip', 'is_private' => true ];
 
-		// Same rollout escape hatch as get_api_data(), so a staged rollout
-		// cannot leave the two endpoints disagreeing.
+		// The former rollout escape hatch is gone; a leftover filter is inert.
 		add_filter( 'gu_enforce_private_package_gate', '__return_false' );
 		$response = $this->rest->get_download_token( $this->make_token_request() );
 		remove_all_filters( 'gu_enforce_private_package_gate' );
 
-		$this->assertNotWPError( $response );
-		$this->assertStringContainsString( 'signature=', $response->get_data()['download_link'] );
+		$this->assertWPError( $response );
+		$this->assertSame( 'gu_unauthorized_domain', $response->get_error_code() );
+		$this->assertSame( 403, $response->get_error_data()['status'] );
 	}
 
 	// -------------------------------------------------------------------------

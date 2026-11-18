@@ -1136,17 +1136,59 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 			$this->assertSame( 403, $response->get_status(), "Expected 403 for {$route}" );
 		}
 
+		$pending = (array) get_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
+
 		remove_all_filters( 'git_updater_lite_client_key' );
 		remove_filter( 'pre_http_request', [ $this, 'mock_private_meta' ], 20 );
 		delete_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
+
+		$this->assertArrayHasKey( hash( 'sha256', 'someone-elses-key' ), $pending );
 	}
 
-	public function test_get_api_data_gate_can_be_disabled_by_filter(): void {
+	public function test_get_api_data_does_not_record_pending_for_approved_client_key(): void {
+		$this->skip_if_fixture_absent();
+		$this->make_private_repo();
+		delete_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
+
+		add_filter( 'git_updater_lite_client_key', fn() => 'approved-client-key' );
+
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
+		$request->set_param( 'slug', self::SLUG );
+		$request->set_header( 'X-GU-Lite-Key', 'approved-client-key' );
+		$response = $this->server->dispatch( $request );
+
+		$pending = (array) get_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
+
+		remove_all_filters( 'git_updater_lite_client_key' );
+		remove_filter( 'pre_http_request', [ $this, 'mock_private_meta' ], 20 );
+		delete_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertArrayNotHasKey( hash( 'sha256', 'approved-client-key' ), $pending );
+	}
+
+	public function test_get_api_data_does_not_record_pending_for_public_repo(): void {
+		$this->skip_if_fixture_absent();
+		delete_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG );
+
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
+		$request->set_param( 'slug', self::SLUG );
+		$request->set_header( 'X-GU-Lite-Key', 'some-key' );
+		$response = $this->server->dispatch( $request );
+
+		$pending = get_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
+		delete_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertFalse( $pending );
+	}
+
+	public function test_get_api_data_gate_cannot_be_disabled_by_filter(): void {
 		$this->skip_if_fixture_absent();
 		$this->make_private_repo();
 
-		// Rollout escape hatch: an author whose fleet is still on an older
-		// vendored client can stage enforcement.
+		// The former rollout escape hatch is gone; a leftover filter is inert.
 		add_filter( 'gu_enforce_private_package_gate', '__return_false' );
 
 		foreach ( [ 'plugins-api', 'themes-api', 'update-api' ] as $route ) {
@@ -1154,7 +1196,7 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 			$request->set_param( 'slug', self::SLUG );
 			$response = $this->server->dispatch( $request );
 
-			$this->assertSame( 200, $response->get_status(), "Expected 200 for {$route}" );
+			$this->assertSame( 403, $response->get_status(), "Expected 403 for {$route}" );
 		}
 
 		remove_all_filters( 'gu_enforce_private_package_gate' );

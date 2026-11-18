@@ -625,14 +625,15 @@ class REST_API {
 		// once $repo_api_data is built above; denying before the release-asset
 		// block also skips that remote call.
 		//
-		// git-updater-lite presents an approved X-GU-Lite-Key on its update-api
-		// and download-token requests, so an approved lite client passes. Clients
-		// without an approved key are denied; `gu_enforce_private_package_gate`
-		// is the staging opt-out for an author whose fleet has not caught up. The
-		// `private_package` hard block above still applies to every caller and is
-		// not filterable.
-		if ( apply_filters( 'gu_enforce_private_package_gate', true, $slug )
-			&& $this->requires_auth( (bool) $repo_api_data['is_private'] )
+		// A presented X-GU-Lite-Key is recorded as pending before the gate so a
+		// shimmed legacy client or a proactive Lite client can be approved even
+		// though its first request is denied. The `private_package` hard block
+		// above still applies to every caller and is not filterable.
+		if ( ! empty( $repo_api_data['is_private'] ) ) {
+			$this->maybe_record_pending_client( $request, $slug );
+		}
+
+		if ( $this->requires_auth( (bool) $repo_api_data['is_private'] )
 			&& ! $this->request_is_authorized( $request, $slug ) ) {
 			return new WP_Error(
 				'gu_private_package',
@@ -843,16 +844,34 @@ class REST_API {
 			return false;
 		}
 
-		$hash = hash( 'sha256', $provided );
-		if ( \Fragen\Git_Updater\Lite_Clients::is_approved_client_key( $slug, $hash ) ) {
-			return true;
+		return \Fragen\Git_Updater\Lite_Clients::is_approved_client_key( $slug, hash( 'sha256', $provided ) );
+	}
+
+	/**
+	 * Record an unapproved lite client key as pending for a slug.
+	 *
+	 * Runs before the enforcement gate so shimmed legacy clients and proactive
+	 * Lite clients can be approved even though their first request is denied.
+	 * Only called for private packages.
+	 *
+	 * @param WP_REST_Request $request REST API response.
+	 * @param string          $slug    The package slug.
+	 *
+	 * @return void
+	 */
+	private function maybe_record_pending_client( WP_REST_Request $request, string $slug ): void {
+		$provided = sanitize_text_field( $request->get_header( 'X-GU-Lite-Key' ) );
+		if ( '' === $provided ) {
+			return;
 		}
 
-		// Unknown key: record it as a pending grant for admin approval, then deny.
+		$hash = hash( 'sha256', $provided );
+		if ( \Fragen\Git_Updater\Lite_Clients::is_approved_client_key( $slug, $hash ) ) {
+			return;
+		}
+
 		$label = sanitize_text_field( $request->get_header( 'X-GU-Client-Label' ) );
 		\Fragen\Git_Updater\Lite_Clients::record_pending_client( $slug, $hash, $label );
-
-		return false;
 	}
 
 	/**
@@ -938,11 +957,13 @@ class REST_API {
 		}
 
 		// Private repos are withheld unless the caller presents the REST API key
-		// or an authorized lite client domain for this slug. Kept in step with
-		// get_api_data() via the same filter so a staged rollout cannot leave the
-		// two endpoints disagreeing.
-		if ( apply_filters( 'gu_enforce_private_package_gate', true, $slug )
-			&& $this->requires_auth( (bool) $repo_api_data['is_private'] )
+		// or an approved lite client key for this slug. Record a presented key
+		// before the gate so it can be approved after the denial.
+		if ( ! empty( $repo_api_data['is_private'] ) ) {
+			$this->maybe_record_pending_client( $request, $slug );
+		}
+
+		if ( $this->requires_auth( (bool) $repo_api_data['is_private'] )
 			&& ! $this->request_is_authorized( $request, $slug ) ) {
 			return new WP_Error(
 				'gu_unauthorized_domain',

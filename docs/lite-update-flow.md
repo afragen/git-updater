@@ -94,9 +94,10 @@ Updater settings.
 - **The `X-GU-Site-Domain` header and the "Lite Client Domains" tab were removed.** The old
   domain check was self-asserted (any caller could claim an authorized domain), so it provided
   no confidentiality. It is replaced by the per-client key + one-time approval above.
-- **git-updater-lite must be a version that sends `X-GU-Lite-Key`** for private packages.
-  Earlier clients send no key on that route and are denied once the gate applies. See
-  `docs/private-package-rollout.md` for the enforcement order.
+- **git-updater-lite must send `X-GU-Lite-Key`** for private packages. 3.3.0+ detects
+  `is_private` on a successful response and generates the key proactively; 3.2.x generates it
+  after the first 403. Earlier clients send no key on that route and are denied. Use the
+  provisioned-key shim in `docs/private-package-rollout.md` for those clients.
 - **The key reset on the Remote Management tab is POST-only** (nonce and capability were
   already required).
 
