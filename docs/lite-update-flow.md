@@ -4,7 +4,7 @@ This document explains how `git-updater-lite` handles plugin and theme updates a
 private packages are protected.
 
 ## The Problem: "Why were my updates failing?"
-Previously, when `git-updater-lite` checked for an update, the server provided a download link that was valid for **12 hours**. However, `git-updater-lite` caches this information for **6 hours** to prevent slowing down your site.
+Previously, when `git-updater-lite` checked for an update, the server provided a download link that was valid for **12 hours**. However, `git-updater-lite` caches this information for **6 hours** to prevent slowing down your site. Clicking **Dashboard → Updates → Check again** refreshes that client-side cache immediately (for users who can update the package's type), without waiting for it to expire.
 
 If a user waited longer than 12 hours to click the "Update Now" button (even though the update notice was still cached), the download link would expire, resulting in a `403: Download link has expired` error.
 
