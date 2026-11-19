@@ -27,6 +27,8 @@ See [wordpress/taste.md](wordpress/taste.md)
 See [phpstan/taste.md](phpstan/taste.md)
 
 # Php
+- When the user asks for a snippet/example, give the minimal idiomatic form they asked for — a multi-line, defensive implementation (persistence via options, early-return guards, `static function` wrappers) is rejected with "Just a single line filter …"; prefer a one-liner with arrow function syntax (e.g., `add_filter( 'hook', fn() => bin2hex( random_bytes( 32 ) ) );`) plus a brief caveat note if a trade-off exists. Confidence: 0.6
+- Brevity must not come at the cost of correct behavior: do NOT hand back a minimal snippet you know behaves wrongly (e.g., a key generated fresh on every request) and merely annotate the flaw in a caveat — the user rejects that with a terse requirement restating the intended behavior ("I want the same key returned"). Keep the snippet compact but implement the behavior the user actually needs (e.g., read/persist the value via `get_site_option`/`update_site_option`). Confidence: 0.65
 - Keep reflection code forward-compatible with upcoming PHP versions: guard `ReflectionMethod::setAccessible()` / `ReflectionProperty::setAccessible()` calls with `PHP_VERSION_ID < 80100 && $reflection->setAccessible( true );` because the call is unnecessary on PHP 8.1+ and deprecated in PHP 8.5 — apply this guard in both source and tests rather than leaving bare calls. Confidence: 0.90
 
 # architecture
