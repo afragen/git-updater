@@ -71,11 +71,11 @@ class REST_API {
 	 * token outlives its signature and every download then fails with
 	 * `403 gu_invalid_signature` until the entry expires.
 	 *
-	 * @param \WP_HTTP_Response $response Response to send.
-	 * @param \WP_REST_Server   $server   Server instance.
-	 * @param \WP_REST_Request  $request  Request used to generate the response.
+	 * @param mixed            $response Response to send.
+	 * @param \WP_REST_Server  $server   Server instance.
+	 * @param \WP_REST_Request $request  Request used to generate the response.
 	 *
-	 * @return \WP_HTTP_Response
+	 * @return mixed
 	 */
 	public function add_nocache_headers( $response, $server, $request ) {
 		if ( ! $response instanceof \WP_HTTP_Response ) {
