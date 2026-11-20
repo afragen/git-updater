@@ -924,7 +924,7 @@ class Settings {
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'git-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
 			$type_key      = str_contains( $data['type'], 'theme' ) ? 'theme' : 'plugin';
-			$dashicon      = Icons::get( $type_key ) . '&nbsp;&nbsp;';
+			$type_icon     = Icons::get( $type_key ) . '&nbsp;&nbsp;';
 			$is_private    = $data['private'] ? $lock : null;
 			$broken_hidden = $data['broken'] ? '' : 'display:none;';
 			$is_broken     = '&nbsp;<span title="' . $broken_title . '" class="gu-repo-broken" style="color:#f00;' . $broken_hidden . '">' . Icons::get( 'broken' ) . '</span>';
@@ -940,9 +940,9 @@ class Settings {
 				home_url( 'wp-json/' . $this->get_class_vars( 'REST\REST_API', 'namespace' ) . '/flush-repo-cache/' )
 			);
 			/* translators: %s is the name of the plugin or theme. */
-			$tooltip        = sprintf( __( 'Flush %s cache', 'git-updater' ), $data['name'] );
-			$dashicon_flush = '<button type="button" class="button-link gu-flush-repo dashicons-no-decoration" data-flush-url="' . esc_url( $flush_endpoint ) . '" title="' . esc_attr( $tooltip ) . '">' . $dashicon . '</button>';
-			$row            = $dashicon_flush . esc_html( $data['name'] ) . $is_private . $is_dot_org . $is_broken . $is_dismissed;
+			$tooltip = sprintf( __( 'Flush %s cache', 'git-updater' ), $data['name'] );
+			$flush   = '&nbsp;<button type="button" class="button-link gu-flush-repo" data-flush-url="' . esc_url( $flush_endpoint ) . '" aria-label="' . esc_attr( $tooltip ) . '" title="' . esc_attr( $tooltip ) . '">' . Icons::get( 'refresh', [ 'size' => 20 ] ) . '</button>';
+			$row     = $type_icon . esc_html( $data['name'] ) . $is_private . $is_dot_org . $is_broken . $is_dismissed . $flush;
 			printf( '<p>%s</p>', wp_kses( $row, Icons::allowed_html() ) );
 		}
 	}

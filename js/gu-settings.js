@@ -20,7 +20,7 @@
 				return;
 			}
 
-			button.classList.add( 'gu-flush-disabled' );
+			button.classList.add( 'gu-flush-disabled', 'is-refreshing' );
 			fetch( url, { credentials: 'same-origin' } )
 				.then( function ( response ) {
 					return response.json();
@@ -42,7 +42,7 @@
 					button.title = 'Flush failed';
 				} )
 				.finally( function () {
-					button.classList.remove( 'gu-flush-disabled' );
+					button.classList.remove( 'gu-flush-disabled', 'is-refreshing' );
 				} );
 		}
 	);
