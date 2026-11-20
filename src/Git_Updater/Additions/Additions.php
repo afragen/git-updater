@@ -54,6 +54,32 @@ class Additions {
 	}
 
 	/**
+	 * Get the saved Additions rows.
+	 *
+	 * The option is written only by this plugin, but a manual edit, a migration,
+	 * or a filter on site_option_git_updater_additions can leave non-array
+	 * entries behind. Drop anything that is not a row array.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function get_saved_additions(): array {
+		$rows = get_site_option( 'git_updater_additions', [] );
+		if ( ! is_array( $rows ) ) {
+			return [];
+		}
+
+		$valid = [];
+		foreach ( $rows as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+			$valid[] = $row;
+		}
+
+		return $valid;
+	}
+
+	/**
 	 * Add Git Updater headers to plugins/themes via a filter hooks.
 	 *
 	 * @access public

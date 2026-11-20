@@ -74,7 +74,7 @@ add_action(
 add_filter(
 	'gu_additions',
 	static function ( $listing, $repos, $type ) {
-		$config    = get_site_option( 'git_updater_additions', [] );
+		$config    = Additions::get_saved_additions();
 		$additions = new Additions();
 		$additions->register( $config, $repos, $type );
 		$additions->add_to_git_updater = array_merge( (array) $additions->add_to_git_updater, (array) $listing );

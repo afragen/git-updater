@@ -471,6 +471,17 @@ class Test_Additions_Settings_Save_Settings extends WP_UnitTestCase {
 		$this->assertCount( 1, get_site_option( 'git_updater_additions' ) );
 	}
 
+	public function test_save_settings_ignores_malformed_existing_rows(): void {
+		update_site_option( 'git_updater_additions', [ 'garbage' ] );
+		$_POST['_wpnonce'] = wp_create_nonce( 'git_updater_additions-options' );
+
+		$this->settings->save_settings( $this->make_post_data() );
+
+		$saved = get_site_option( 'git_updater_additions' );
+		$this->assertCount( 1, $saved );
+		$this->assertSame( 'owner/plugin.php', $saved[0]['slug'] );
+	}
+
 	public function test_save_settings_saves_option_when_valid_and_existing_options_present(): void {
 		$existing = [
 			[

@@ -44,7 +44,7 @@ class Settings {
 	 * @return void
 	 */
 	private function load_options() {
-		self::$options_additions = get_site_option( 'git_updater_additions', [] );
+		self::$options_additions = Additions::get_saved_additions();
 	}
 
 	/**
@@ -93,7 +93,7 @@ class Settings {
 		) {
 			return;
 		}
-		$options   = (array) get_site_option( 'git_updater_additions', [] );
+		$options   = Additions::get_saved_additions();
 		$duplicate = false;
 		$bad_input = false;
 		if ( isset( $post_data['option_page'] ) &&

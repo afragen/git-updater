@@ -576,7 +576,7 @@ class REST_API {
 		$gu_repos   = array_merge( $gu_plugins, $gu_themes );
 
 		// Don't allow non-shared repos via this API. Set via Additions tab.
-		$additions ??= (array) get_site_option( 'git_updater_additions', [] );
+		$additions ??= Additions::get_saved_additions();
 		if ( $this->is_hard_blocked( $slug, $additions ) ) {
 			return [ 'error' => 'Specified repo is not shared.' ];
 		}
@@ -744,7 +744,7 @@ class REST_API {
 		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
 		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
 		$gu_tokens  = array_merge( $gu_plugins, $gu_themes );
-		$additions  = (array) get_site_option( 'git_updater_additions', [] );
+		$additions  = Additions::get_saved_additions();
 
 		foreach ( $additions as $addition ) {
 			$slug = $this->get_addition_slug( (array) $addition );
@@ -769,7 +769,7 @@ class REST_API {
 	 * @return array<int, array<string, mixed>>
 	 */
 	public function get_additions_data() {
-		$additions = get_site_option( 'git_updater_additions', [] );
+		$additions = Additions::get_saved_additions();
 		$additions = array_filter(
 			$additions,
 			function ( $addition ) {
@@ -815,7 +815,7 @@ class REST_API {
 	 * @return bool
 	 */
 	private function has_uses_lite( string $slug, ?array $additions = null ): bool {
-		$additions ??= (array) get_site_option( 'git_updater_additions', [] );
+		$additions ??= Additions::get_saved_additions();
 		foreach ( $additions as $addition ) {
 			if ( $this->get_addition_slug( (array) $addition ) === $slug && ! empty( $addition['uses_lite'] ) ) {
 				return true;
@@ -851,7 +851,7 @@ class REST_API {
 	 * @return bool
 	 */
 	private function is_hard_blocked( string $slug, ?array $additions = null ): bool {
-		$additions ??= (array) get_site_option( 'git_updater_additions', [] );
+		$additions ??= Additions::get_saved_additions();
 		foreach ( $additions as $addition ) {
 			if ( $this->get_addition_slug( (array) $addition ) === $slug ) {
 				return ! empty( $addition['private_package'] );
@@ -1225,7 +1225,7 @@ class REST_API {
 		$gu_repos   = array_merge( $gu_plugins, $gu_themes );
 
 		// Don't allow non-shared repos via this API. Set via Additions tab.
-		$additions = get_site_option( 'git_updater_additions', [] );
+		$additions = Additions::get_saved_additions();
 		if ( $this->is_hard_blocked( $slug, $additions ) ) {
 			return new WP_Error(
 				'gu_private_package',

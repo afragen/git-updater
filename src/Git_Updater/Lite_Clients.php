@@ -11,6 +11,7 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Git_Updater\Traits\GU_Trait;
+use Fragen\Git_Updater\Additions\Additions;
 
 /**
  * Class Lite_Clients
@@ -434,7 +435,7 @@ class Lite_Clients {
 		// 1. Additions flagged 'uses_lite' — retained for private packages (and
 		// packages whose privacy is not yet known); a known-public package never
 		// needs a client key, so it is excluded.
-		$additions = get_site_option( 'git_updater_additions', [] );
+		$additions = Additions::get_saved_additions();
 		foreach ( $additions as $addition ) {
 			if ( ! empty( $addition['uses_lite'] ) && ! empty( $addition['slug'] ) ) {
 				$slug = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];

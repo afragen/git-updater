@@ -51,7 +51,7 @@ class Repo_List_Table extends WP_List_Table {
 	/**
 	 * Constructor.
 	 *
-	 * @param array<int, array<string, mixed>> $options Array of saved options.
+	 * @param array<int|string, mixed> $options Array of saved options.
 	 */
 	public function __construct( $options ) {
 		global $status, $page;
@@ -71,20 +71,24 @@ class Repo_List_Table extends WP_List_Table {
 			],
 		];
 		// self::$examples = $examples;
-		foreach ( (array) $options as $key => $option ) {
-			$option['ID']              = $option['ID'] ?: null;
-			$option['type']            = $option['type'] ?: null;
-			$option['slug']            = $option['slug'] ?: null;
-			$option['uri']             = $option['uri'] ?: null;
-			$option['source']          = $option['source'] ?: null;
+		$rows = [];
+		foreach ( (array) $options as $option ) {
+			if ( ! is_array( $option ) ) {
+				continue;
+			}
+			$option['ID']              = $option['ID'] ?? null;
+			$option['type']            = $option['type'] ?? null;
+			$option['slug']            = $option['slug'] ?? null;
+			$option['uri']             = $option['uri'] ?? null;
+			$option['source']          = $option['source'] ?? null;
 			$option['primary_branch']  = ! empty( $option['primary_branch'] ) ? $option['primary_branch'] : 'master';
 			$option['release_asset']   = ! empty( $option['release_asset'] );
 			$option['private_package'] = ! empty( $option['private_package'] );
 			$option['uses_lite']       = ! empty( $option['uses_lite'] );
 
-			$options[ $key ] = $option;
+			$rows[] = $option;
 		}
-		self::$options = (array) $options;
+		self::$options = $rows;
 
 		// Set parent defaults.
 		parent::__construct(

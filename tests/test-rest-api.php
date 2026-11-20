@@ -1561,6 +1561,30 @@ class Test_REST_API_Additions extends WP_UnitTestCase {
 
 		$this->assertNotEmpty( $data );
 	}
+
+	public function test_get_additions_data_skips_malformed_rows(): void {
+		update_site_option(
+			'git_updater_additions',
+			[
+				'garbage',
+				[
+					'slug'            => 'my-public-addon/my-public-addon.php',
+					'type'            => 'plugin',
+					'private_package' => false,
+					'release_asset'   => false,
+					'ID'              => 'did:test:pub1',
+					'source'          => 'manual',
+				],
+			]
+		);
+
+		$request  = new WP_REST_Request( 'GET', '/git-updater/v1/get-additions-data' );
+		$response = $this->server->dispatch( $request );
+		$data     = array_values( (array) $response->get_data() );
+
+		$this->assertCount( 1, $data );
+		$this->assertSame( 'my-public-addon/my-public-addon.php', $data[0]['slug'] );
+	}
 }
 
 // ---------------------------------------------------------------------------

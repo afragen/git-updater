@@ -357,6 +357,7 @@ class Test_Lite_Clients extends WP_UnitTestCase {
 		update_site_option(
 			'git_updater_additions',
 			[
+				'garbage',
 				[
 					'ID'              => '123',
 					'type'            => 'github_plugin',

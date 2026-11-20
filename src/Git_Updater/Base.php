@@ -11,6 +11,7 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
+use Fragen\Git_Updater\Additions\Additions;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
 use Fragen\Git_Updater\API\Language_Pack_API;
@@ -178,7 +179,7 @@ class Base {
 			$gu_plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
 			$gu_themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
 			$live_slugs = array_merge( array_keys( $gu_plugins ), array_keys( $gu_themes ) );
-			$additions  = (array) get_site_option( 'git_updater_additions', [] );
+			$additions  = Additions::get_saved_additions();
 			foreach ( $additions as $addition ) {
 				$live_slugs[] = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];
 			}

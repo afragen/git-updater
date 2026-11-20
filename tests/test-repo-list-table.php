@@ -33,6 +33,45 @@ class Test_Repo_List_Table_Methods extends WP_UnitTestCase {
 	// get_columns()
 	// -------------------------------------------------------------------------
 
+	public function test_constructor_skips_malformed_saved_option_rows(): void {
+		$options = [
+			[
+				'ID'              => md5( 'synthetic-plugin/synthetic-plugin.php' ),
+				'type'            => 'github_plugin',
+				'slug'            => 'synthetic-plugin/synthetic-plugin.php',
+				'uri'             => 'https://github.com/example/synthetic-plugin',
+				'source'          => 'synthetic-source',
+				'primary_branch'  => 'main',
+				'release_asset'   => false,
+				'private_package' => false,
+				'uses_lite'       => false,
+			],
+			'malformed saved row',
+		];
+
+		$table = new Repo_List_Table( $options );
+		$table->prepare_items();
+
+		$this->assertCount( 1, $table->items );
+		$this->assertSame( 'synthetic-plugin/synthetic-plugin.php', $table->items[0]['slug'] );
+	}
+
+	public function test_constructor_tolerates_scalar_options(): void {
+		$table = new Repo_List_Table( 'garbage' );
+		$table->prepare_items();
+
+		$this->assertSame( [], $table->items );
+	}
+
+	public function test_constructor_does_not_warn_for_missing_row_keys(): void {
+		$table = new Repo_List_Table( [ [ 'slug' => 'legacy-addon' ] ] );
+		$table->prepare_items();
+
+		$this->assertSame( 'legacy-addon', $table->items[0]['slug'] );
+		$this->assertNull( $table->items[0]['source'] );
+		$this->assertSame( 'master', $table->items[0]['primary_branch'] );
+	}
+
 	public function test_get_columns_includes_slug(): void {
 		$this->assertArrayHasKey( 'slug', $this->table->get_columns() );
 	}
