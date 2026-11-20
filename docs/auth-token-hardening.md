@@ -118,7 +118,7 @@ Earlier revisions of this document said 5 minutes; that was never the implemente
 
 ## Accepted residuals
 
-Three low-severity residuals are accepted by design:
+Five low-severity residuals are accepted by design:
 
 1. **Token-backed metadata fetch before the private-package 403.** In `get_api_data()` the
    private-package gate runs *after* `get_remote_repo_meta()`, and `gu_disable_wpcron` is forced
@@ -137,6 +137,21 @@ Three low-severity residuals are accepted by design:
 3. **No replay protection on the Lite client key.** `X-GU-Lite-Key` is a static bearer key; a
    captured key is replayable until its grant is revoked. Accepted over TLS on a short-lived
    download URL.
+
+4. **Nocache headers are advisory, not enforceable.** Core sends nocache headers only to
+   authenticated requests (`rest_send_nocache_headers` defaults to `is_user_logged_in()`), so
+   `REST_API::add_nocache_headers()` marks `update-api`, `plugins-api`, `themes-api` and
+   `download-token/{slug}` uncacheable on `rest_post_dispatch` for anonymous callers. A page cache
+   that ignores `Cache-Control` can still replay a token — Batcache, for example, sizes its own TTL
+   from the `max-age` digit and may serve a stale entry via `use_stale` while regenerating. The
+   blunt instrument (`DONOTCACHEPAGE` / `batcache_cancel()`) is deliberately not used; revisit if
+   the Atomic failure recurs. The `download/{slug}` route is intentionally not marked: its
+   `expires` and `signature` are query arguments, so the cache key already differs per signature
+   and a hit can only replay the identical URL. Accepted.
+
+5. **Route-matched, not blanket, suppression.** `is_uncacheable_route()` enumerates the four
+   routes rather than suppressing caching for the whole namespace, so a new client-facing route
+   that returns a signed URL must be added to that list. Accepted.
 
 ## Lite client key (private packages)
 

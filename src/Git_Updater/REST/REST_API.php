@@ -47,6 +47,7 @@ class REST_API {
 	 */
 	public function load_hooks() {
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_filter( 'rest_post_dispatch', [ $this, 'add_nocache_headers' ], 10, 3 );
 
 		/*
 		 * Deprecated AJAX request. The `nopriv` variant is intentional — external CI / webhook
@@ -58,6 +59,58 @@ class REST_API {
 		 */
 		add_action( 'wp_ajax_git-updater-update', [ Singleton::get_instance( 'REST\Rest_Update', $this ), 'process_request' ] );
 		add_action( 'wp_ajax_nopriv_git-updater-update', [ Singleton::get_instance( 'REST\Rest_Update', $this ), 'process_request' ] );
+	}
+
+	/**
+	 * Mark client-facing update responses as uncacheable.
+	 *
+	 * Core only sends nocache headers to authenticated requests
+	 * (rest_send_nocache_headers defaults to is_user_logged_in()), so an
+	 * anonymous Lite client's response — including a 60-second signed download
+	 * token — is cacheable by any page cache in front of the site. A cached
+	 * token outlives its signature and every download then fails with
+	 * `403 gu_invalid_signature` until the entry expires.
+	 *
+	 * @param \WP_HTTP_Response $response Response to send.
+	 * @param \WP_REST_Server   $server   Server instance.
+	 * @param \WP_REST_Request  $request  Request used to generate the response.
+	 *
+	 * @return \WP_HTTP_Response
+	 */
+	public function add_nocache_headers( $response, $server, $request ) {
+		if ( ! $response instanceof \WP_HTTP_Response ) {
+			return $response;
+		}
+
+		if ( ! $this->is_uncacheable_route( (string) $request->get_route() ) ) {
+			return $response;
+		}
+
+		foreach ( wp_get_nocache_headers() as $name => $value ) {
+			if ( ! empty( $value ) ) {
+				$response->header( $name, $value );
+			}
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Whether a REST route must never be cached by a page cache.
+	 *
+	 * The `download` route is deliberately absent: its `expires` and `signature`
+	 * are query arguments, so the cache key already differs per signature and a
+	 * cache hit can only replay the identical URL.
+	 *
+	 * @param string $route The route being served.
+	 *
+	 * @return bool
+	 */
+	private function is_uncacheable_route( string $route ): bool {
+		return (bool) preg_match(
+			'#^/git-updater/v1/(update-api|plugins-api|themes-api|download-token/)#',
+			$route
+		);
 	}
 
 	/**

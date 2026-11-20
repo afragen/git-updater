@@ -92,6 +92,89 @@ class Test_REST_API_Load_Hooks extends WP_UnitTestCase {
 }
 
 // ---------------------------------------------------------------------------
+// Nocache headers on client-facing update responses (#1198)
+// ---------------------------------------------------------------------------
+
+/**
+ * Tests that the routes exposing signed download URLs are marked uncacheable.
+ *
+ * Core only sends nocache headers to authenticated requests, so an anonymous
+ * Lite client's response would otherwise be stored by any page cache and replay
+ * a token that has already expired.
+ */
+class Test_REST_API_Nocache_Headers extends WP_UnitTestCase {
+
+	private REST_API $rest;
+
+	public function set_up(): void {
+		parent::set_up();
+		$this->rest = new REST_API();
+	}
+
+	/**
+	 * @dataProvider data_routes
+	 *
+	 * @param string $route    The REST route being served.
+	 * @param bool   $expected Whether nocache headers are expected.
+	 */
+	public function test_add_nocache_headers( $route, $expected ) {
+		$response = new WP_REST_Response( [ 'download_link' => 'https://example.com/x.zip' ] );
+		$request  = new WP_REST_Request( 'GET', $route );
+
+		$result  = $this->rest->add_nocache_headers( $response, rest_get_server(), $request );
+		$headers = $result->get_headers();
+
+		if ( ! $expected ) {
+			$this->assertArrayNotHasKey( 'Cache-Control', $headers );
+			$this->assertArrayNotHasKey( 'Expires', $headers );
+			return;
+		}
+
+		$this->assertSame(
+			'no-cache, must-revalidate, max-age=0, no-store, private',
+			$headers['Cache-Control']
+		);
+		$this->assertSame( 'Wed, 11 Jan 1984 05:00:00 GMT', $headers['Expires'] );
+	}
+
+	public function data_routes() {
+		return [
+			'update-api'       => [ '/git-updater/v1/update-api', true ],
+			'plugins-api'      => [ '/git-updater/v1/plugins-api', true ],
+			'themes-api'       => [ '/git-updater/v1/themes-api', true ],
+			'download-token'   => [ '/git-updater/v1/download-token/my-plugin', true ],
+			'download'         => [ '/git-updater/v1/download/my-plugin', false ],
+			'repos'            => [ '/git-updater/v1/repos', false ],
+			'test'             => [ '/git-updater/v1/test', false ],
+			'reset-branch'     => [ '/git-updater/v1/reset-branch', false ],
+			'deprecated-update' => [ '/github-updater/v1/update', false ],
+		];
+	}
+
+	public function test_add_nocache_headers_returns_non_response_unchanged(): void {
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/my-plugin' );
+
+		$this->assertSame( [], $this->rest->add_nocache_headers( [], rest_get_server(), $request ) );
+	}
+
+	public function test_add_nocache_headers_skips_empty_header_values(): void {
+		$response = new WP_REST_Response();
+		$request  = new WP_REST_Request( 'GET', '/git-updater/v1/update-api' );
+
+		$result = $this->rest->add_nocache_headers( $response, rest_get_server(), $request );
+
+		$this->assertArrayNotHasKey( 'Last-Modified', $result->get_headers() );
+	}
+
+	public function test_load_hooks_registers_nocache_filter(): void {
+		$api = new REST_API();
+		$api->load_hooks();
+
+		$this->assertSame( 10, has_filter( 'rest_post_dispatch', [ $api, 'add_nocache_headers' ] ) );
+	}
+}
+
+// ---------------------------------------------------------------------------
 // Test_REST_API_Dispatch
 // ---------------------------------------------------------------------------
 
