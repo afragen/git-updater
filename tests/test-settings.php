@@ -1430,6 +1430,28 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		$this->assertStringContainsString( 'gu-icon-plugin', $output );
 	}
 
+	public function test_display_gu_repos_shows_remote_version(): void {
+		$plugin                 = $this->make_plugin_obj();
+		$plugin->remote_version = '2.4.0-RC1';
+		$this->inject_plugin_config( [ 'test-plugin' => $plugin ] );
+		$this->inject_theme_config( [] );
+		ob_start();
+		$this->call_private( 'display_gu_repos', [ 'github' ] );
+		$output = ob_get_clean();
+		$this->assertStringContainsString( '<span class="gu-repo-version">2.4.0-rc1</span>', $output );
+	}
+
+	public function test_display_gu_repos_hides_unfetched_version(): void {
+		$plugin                 = $this->make_plugin_obj();
+		$plugin->remote_version = '0.0.0';
+		$this->inject_plugin_config( [ 'test-plugin' => $plugin ] );
+		$this->inject_theme_config( [] );
+		ob_start();
+		$this->call_private( 'display_gu_repos', [ 'github' ] );
+		$output = ob_get_clean();
+		$this->assertStringNotContainsString( 'gu-repo-version', $output );
+	}
+
 	public function test_display_gu_repos_broken_icon_is_red(): void {
 		$plugin = $this->make_plugin_obj( [ 'remote_version' => '0.0.0' ] );
 		$this->inject_plugin_config( [ 'test-plugin' => $plugin ] );

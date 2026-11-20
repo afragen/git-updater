@@ -785,17 +785,23 @@ class Settings {
 			$arr['tab']    = ! empty( $arr['tab'] ) ? $arr['tab'] : 'git_updater_settings';
 			$arr['subtab'] = ! empty( $arr['subtab'] ) ? $arr['subtab'] : 'git_updater';
 
-			$location = add_query_arg(
-				[
-					'page'               => 'git-updater',
-					'tab'                => $arr['tab'],
-					'subtab'             => $arr['subtab'],
-					'refresh_transients' => $refresh_transients,
-					'reset'              => $reset_api_key,
-					'updated'            => $update,
-				],
-				$redirect_url
-			);
+			$args = [
+				'page'               => 'git-updater',
+				'tab'                => $arr['tab'],
+				'subtab'             => $arr['subtab'],
+				'refresh_transients' => $refresh_transients,
+				'reset'              => $reset_api_key,
+				'updated'            => $update,
+			];
+
+			/**
+			 * Filter the query args of the redirect after saving settings.
+			 *
+			 * @since 14.4.3
+			 * @param array<string, mixed> $args Query args.
+			 */
+			$args     = (array) apply_filters( 'gu_save_redirect_args', $args );
+			$location = add_query_arg( $args, $redirect_url );
 			$location = add_query_arg( '_wpnonce', wp_create_nonce( 'gu_settings' ), $location );
 			wp_safe_redirect( $location );
 			exit; // @codeCoverageIgnore
@@ -907,6 +913,7 @@ class Settings {
 					'broken'  => ! isset( $e->remote_version ) || '0.0.0' === $e->remote_version,
 					'dot_org' => $e->dot_org ?? false,
 					'dismiss' => $e->dismiss ?? false,
+					'version' => isset( $e->remote_version ) && '0.0.0' !== $e->remote_version ? strtolower( (string) $e->remote_version ) : '',
 				];
 			},
 			$type_repos
@@ -918,7 +925,7 @@ class Settings {
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'git-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
 			$type_key      = str_contains( $data['type'], 'theme' ) ? 'theme' : 'plugin';
-			$dashicon      = Icons::get( $type_key ) . '&nbsp;&nbsp;';
+			$type_icon     = Icons::get( $type_key ) . '&nbsp;&nbsp;';
 			$is_private    = $data['private'] ? $lock : null;
 			$broken_hidden = $data['broken'] ? '' : 'display:none;';
 			$is_broken     = '&nbsp;<span title="' . $broken_title . '" class="gu-repo-broken" style="color:#f00;' . $broken_hidden . '">' . Icons::get( 'broken' ) . '</span>';
@@ -934,9 +941,10 @@ class Settings {
 				home_url( 'wp-json/' . $this->get_class_vars( 'REST\REST_API', 'namespace' ) . '/flush-repo-cache/' )
 			);
 			/* translators: %s is the name of the plugin or theme. */
-			$tooltip        = sprintf( __( 'Flush %s cache', 'git-updater' ), $data['name'] );
-			$dashicon_flush = '<button type="button" class="button-link gu-flush-repo dashicons-no-decoration" data-flush-url="' . esc_url( $flush_endpoint ) . '" title="' . esc_attr( $tooltip ) . '">' . $dashicon . '</button>';
-			$row            = $dashicon_flush . esc_html( $data['name'] ) . $is_private . $is_dot_org . $is_broken . $is_dismissed;
+			$tooltip = sprintf( __( 'Flush %s cache', 'git-updater' ), $data['name'] );
+			$flush   = '&nbsp;<button type="button" class="button-link gu-flush-repo" data-flush-url="' . esc_url( $flush_endpoint ) . '" aria-label="' . esc_attr( $tooltip ) . '" title="' . esc_attr( $tooltip ) . '">' . Icons::get( 'refresh', [ 'size' => 20 ] ) . '</button>';
+			$version = '' !== $data['version'] ? '&nbsp;<span class="gu-repo-version">' . esc_html( $data['version'] ) . '</span>' : '';
+			$row     = $type_icon . esc_html( $data['name'] ) . $version . $is_private . $is_dot_org . $is_broken . $is_dismissed . $flush;
 			printf( '<p>%s</p>', wp_kses( $row, Icons::allowed_html() ) );
 		}
 	}
