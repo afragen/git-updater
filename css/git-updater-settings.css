@@ -94,6 +94,11 @@ div.hide-git-updater-settings {
 	line-height: 1;
 }
 
+/* GitHub tab: repo version */
+.gu-repo-version {
+	color: #646970;
+}
+
 .gu-flush-disabled {
 	opacity: 0.5;
 	pointer-events: none;

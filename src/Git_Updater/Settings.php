@@ -913,6 +913,7 @@ class Settings {
 					'broken'  => ! isset( $e->remote_version ) || '0.0.0' === $e->remote_version,
 					'dot_org' => $e->dot_org ?? false,
 					'dismiss' => $e->dismiss ?? false,
+					'version' => isset( $e->remote_version ) && '0.0.0' !== $e->remote_version ? strtolower( (string) $e->remote_version ) : '',
 				];
 			},
 			$type_repos
@@ -942,7 +943,8 @@ class Settings {
 			/* translators: %s is the name of the plugin or theme. */
 			$tooltip = sprintf( __( 'Flush %s cache', 'git-updater' ), $data['name'] );
 			$flush   = '&nbsp;<button type="button" class="button-link gu-flush-repo" data-flush-url="' . esc_url( $flush_endpoint ) . '" aria-label="' . esc_attr( $tooltip ) . '" title="' . esc_attr( $tooltip ) . '">' . Icons::get( 'refresh', [ 'size' => 20 ] ) . '</button>';
-			$row     = $type_icon . esc_html( $data['name'] ) . $is_private . $is_dot_org . $is_broken . $is_dismissed . $flush;
+			$version = '' !== $data['version'] ? '&nbsp;<span class="gu-repo-version">' . esc_html( $data['version'] ) . '</span>' : '';
+			$row     = $type_icon . esc_html( $data['name'] ) . $version . $is_private . $is_dot_org . $is_broken . $is_dismissed . $flush;
 			printf( '<p>%s</p>', wp_kses( $row, Icons::allowed_html() ) );
 		}
 	}
