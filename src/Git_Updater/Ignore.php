@@ -30,7 +30,7 @@ class Ignore {
 	 * @param string $slug Repository slug.
 	 * @param string $file Repository file, 'test-plugin/plugin.php' or 'test-child/style.css'.
 	 */
-	public function __construct( $slug = null, $file = null ) {
+	public function __construct( $slug = '', $file = null ) {
 		self::$repos[ $slug ] = $file;
 		$this->load_hooks();
 	}
