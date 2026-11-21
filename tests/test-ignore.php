@@ -23,6 +23,11 @@ class Test_Ignore extends WP_UnitTestCase {
 		parent::tear_down();
 	}
 
+	public function test_no_arg_construction_registers_empty_string_slug(): void {
+		new Ignore();
+		$this->assertArrayHasKey( '', Ignore::$repos );
+	}
+
 	public function test_config_pre_process_removes_ignored_slug_from_config(): void {
 		new Ignore( 'my-plugin', 'my-plugin/plugin.php' );
 		$config = [

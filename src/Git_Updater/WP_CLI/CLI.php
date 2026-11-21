@@ -43,7 +43,7 @@ class CLI extends WP_CLI_Command {
 	 * @return void
 	 */
 	public function cache( $args ) {
-		list($action) = $args;
+		[ $action ] = $args;
 		switch ( true ) {
 			case 'delete' === $action:
 				Singleton::get_instance( 'CLI_Common', $this )->delete_all_cached_data();

@@ -1293,8 +1293,8 @@ trait GU_Trait {
 	 * @return string
 	 */
 	final public function get_file_without_did_hash( $did, $plugin ): string {
-		list( $slug, $file ) = explode( '/', $plugin, 2 );
-		$slug                = str_replace( '-' . $this->get_did_hash( $did ), '', $slug );
+		[ $slug, $file ] = explode( '/', $plugin, 2 );
+		$slug            = str_replace( '-' . $this->get_did_hash( $did ), '', $slug );
 
 		return $slug . '/' . $file;
 	}

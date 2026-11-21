@@ -92,7 +92,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 * @return void
 	 */
 	public function install_plugin( $args, $assoc_args ) {
-		list($uri)  = $args;
+		[ $uri ]    = $args;
 		$cli_config = $this->process_args( $uri, $assoc_args );
 		( new Install() )->install( 'plugin', $cli_config );
 
@@ -164,7 +164,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 * @return void
 	 */
 	public function install_theme( $args, $assoc_args ) {
-		list($uri)  = $args;
+		[ $uri ]    = $args;
 		$cli_config = $this->process_args( $uri, $assoc_args );
 		( new Install() )->install( 'theme', $cli_config );
 
@@ -200,10 +200,10 @@ class CLI_Integration extends WP_CLI_Command {
 	 * @return void
 	 */
 	public function branch_switch( $args = null ) {
-		list( $slug, $branch ) = $args;
-		$plugins               = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
-		$themes                = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
-		$configs               = array_merge( $plugins, $themes );
+		[ $slug, $branch ] = $args;
+		$plugins           = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
+		$themes            = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
+		$configs           = array_merge( $plugins, $themes );
 
 		$repo = $configs[ $slug ] ?? false;
 		if ( ! $repo ) {

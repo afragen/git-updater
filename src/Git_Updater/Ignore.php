@@ -22,7 +22,7 @@ class Ignore {
 	 *
 	 * @var array<string, string|null>
 	 */
-	public static $repos;
+	public static $repos = [];
 
 	/**
 	 * Constructor.

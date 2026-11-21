@@ -75,6 +75,21 @@ jobs:
         run: |
           WP_MULTISITE=1 phpunit --config=phpunit.xml
 
+  deprecations:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: ["8.5", "8.6"]
+    name: PHP ${{ matrix.php-versions }} deprecation check
+    steps:
+      - uses: actions/checkout@master
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          coverage: none
+      - run: bash bin/check-php-deprecations.sh
+
   phpstan:
     runs-on: ubuntu-latest
     name: PHPStan Static Analysis

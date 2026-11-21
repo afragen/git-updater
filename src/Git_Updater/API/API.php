@@ -210,7 +210,7 @@ class API {
 
 			// Determine if we should attempt token refresh.
 			if ( $this->should_attempt_token_refresh( $code, $response ) ) {
-				list( $response, $code ) = $this->maybe_refresh_token_and_retry( $url, $response, $code );
+				[ $response, $code ] = $this->maybe_refresh_token_and_retry( $url, $response, $code );
 				if ( is_wp_error( $response ) ) {
 					Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
 
@@ -645,9 +645,9 @@ class API {
 
 		// Normalize 'tested' version.
 		if ( ! empty( $readme['tested'] ) ) {
-			list( $version ) = explode( '-', get_bloginfo( 'version' ) );
-			$version_arr     = explode( '.', $version );
-			$tested_arr      = explode( '.', $readme['tested'] );
+			[ $version ] = explode( '-', get_bloginfo( 'version' ) );
+			$version_arr = explode( '.', $version );
+			$tested_arr  = explode( '.', $readme['tested'] );
 			if ( isset( $version_arr[2] ) ) {
 				$tested_arr[2] = $version_arr[2];
 			}

@@ -744,7 +744,7 @@ class GitHub_API extends API implements API_Interface {
 		 * Add/Save access token if present.
 		 */
 		if ( ! empty( $install['github_access_token'] ) ) {
-			$install['options'][ $install['repo'] ] = $install['github_access_token'];
+			$install['options'][ (string) $install['repo'] ] = $install['github_access_token'];
 		}
 
 		return $install;
