@@ -31,7 +31,8 @@ class Ignore {
 	 * @param string $file Repository file, 'test-plugin/plugin.php' or 'test-child/style.css'.
 	 */
 	public function __construct( $slug = '', $file = null ) {
-		self::$repos[ $slug ] = $file;
+		// Singleton::get_instance() instantiates with an explicit null option.
+		self::$repos[ (string) $slug ] = $file;
 		$this->load_hooks();
 	}
 

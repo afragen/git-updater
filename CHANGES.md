@@ -61,7 +61,7 @@
 * fix webhook updates using stale repo data — the REST update path now flushes and synchronously refetches that repository's cached API data (`Base::refresh_repo()`) before running the upgrader, replacing the fire-and-forget loopback request to `flush-repo-cache`; newly pushed tags/release assets are now resolved by the update, and the tracked `current_branch` is preserved unless the webhook switches branches (`override`)
 * admin: replace the Dashicons used by the Settings page and the Additions repo list with the WordPress Icons API — on WordPress 7.2+ the core `core-admin`/`core` SVG icons are rendered with `wp_get_icon()` (plus a `git-updater/lock` icon in the same style for the private-repo indicator, which has no core-admin equivalent), falling back to the original Dashicons on older WordPress or when an icon is unavailable; output is sanitized with an SVG-aware KSES allowlist, and the broken indicator keeps its red color via `currentColor`
 * fix PHP 8.6 deprecation: replace the deprecated `list()` destructuring with short-array destructuring in `API`, `GU_Trait`, `CLI`, and `CLI_Integration`
-* fix PHP 8.5 deprecations — `Ignore::__construct()` defaults `$slug` to `''` and `Ignore::$repos` is initialized to an array (no null array offset), and the remote-install options key is cast to string
+* fix PHP 8.5 deprecations — `Ignore::__construct()` keys `$repos` with a string-cast slug (so `Singleton::get_instance()`, which instantiates with an explicit `null` option, no longer triggers a null array offset) and the remote-install options key is cast to string
 * ci: add a PHP 8.5/8.6 deprecation check (`bin/check-php-deprecations.sh`) that fails on parse errors or compile-time `Deprecated:` output
 
 
