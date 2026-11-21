@@ -325,8 +325,10 @@ class Test_Additions_Settings_Save_Settings extends WP_UnitTestCase {
 	public function tear_down(): void {
 		unset( $_POST['_wpnonce'], $_POST['action'] );
 		delete_site_option( 'git_updater_additions' );
+		delete_site_transient( 'gu_additions_notice_' . $this->admin_id );
 		wp_set_current_user( 0 );
 		remove_all_filters( 'gu_save_redirect' );
+		remove_all_filters( 'gu_save_redirect_args' );
 		parent::tear_down();
 	}
 

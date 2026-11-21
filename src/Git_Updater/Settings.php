@@ -785,17 +785,23 @@ class Settings {
 			$arr['tab']    = ! empty( $arr['tab'] ) ? $arr['tab'] : 'git_updater_settings';
 			$arr['subtab'] = ! empty( $arr['subtab'] ) ? $arr['subtab'] : 'git_updater';
 
-			$location = add_query_arg(
-				[
-					'page'               => 'git-updater',
-					'tab'                => $arr['tab'],
-					'subtab'             => $arr['subtab'],
-					'refresh_transients' => $refresh_transients,
-					'reset'              => $reset_api_key,
-					'updated'            => $update,
-				],
-				$redirect_url
-			);
+			$args = [
+				'page'               => 'git-updater',
+				'tab'                => $arr['tab'],
+				'subtab'             => $arr['subtab'],
+				'refresh_transients' => $refresh_transients,
+				'reset'              => $reset_api_key,
+				'updated'            => $update,
+			];
+
+			/**
+			 * Filter the query args of the redirect after saving settings.
+			 *
+			 * @since 14.4.3
+			 * @param array<string, mixed> $args Query args.
+			 */
+			$args     = (array) apply_filters( 'gu_save_redirect_args', $args );
+			$location = add_query_arg( $args, $redirect_url );
 			$location = add_query_arg( '_wpnonce', wp_create_nonce( 'gu_settings' ), $location );
 			wp_safe_redirect( $location );
 			exit; // @codeCoverageIgnore
