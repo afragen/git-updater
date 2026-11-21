@@ -915,7 +915,14 @@ class Settings {
 		$lock    = '&nbsp;<span title="' . $lock_title . '">' . Icons::get( 'private', [ 'label' => $lock_title ] ) . '</span>';
 		$dot_org = '&nbsp;<span title="' . $dot_org_title . '">' . Icons::get( 'dot-org', [ 'label' => $dot_org_title ] ) . '</span>';
 		$dismiss = '&nbsp;<span title="' . $dismiss_title . '">' . Icons::get( 'dismiss', [ 'label' => $dismiss_title ] ) . '</span>';
+
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'git-updater' ) . '</h2>' );
+		printf(     /* translators: %s is plugin or theme icon. */
+			'<p>' . esc_html__( 'Flush individual repository caches by clicking the %1$s or %2$s icons.', 'git-updater' ) . '</p>',
+			wp_kses( Icons::get( 'plugin' ), Icons::allowed_html() ),
+			wp_kses( Icons::get( 'theme' ), Icons::allowed_html() )
+		);
+
 		foreach ( $display_data as $data ) {
 			$type_key      = str_contains( $data['type'], 'theme' ) ? 'theme' : 'plugin';
 			$dashicon      = Icons::get( $type_key ) . '&nbsp;&nbsp;';
