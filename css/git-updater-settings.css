@@ -89,25 +89,14 @@ div.hide-git-updater-settings {
 }
 
 /* Flush Repo button */
-button.gu-flush-repo.dashicons-no-decoration {
-	color: inherit;
-	text-decoration: none;
-	box-shadow: none;
-	outline: none;
+.gu-flush-repo {
+	vertical-align: middle;
+	line-height: 1;
 }
 
-button.gu-flush-repo.dashicons-no-decoration:hover,
-button.gu-flush-repo.dashicons-no-decoration:focus {
-	color: inherit;
-	text-decoration: none;
-	box-shadow: none;
-}
-
-button.gu-flush-repo.dashicons-no-decoration {
-	background: none;
-	border: 0;
-	padding: 0;
-	cursor: pointer;
+/* GitHub tab: repo version */
+.gu-repo-version {
+	color: #646970;
 }
 
 .gu-flush-disabled {
@@ -118,4 +107,49 @@ button.gu-flush-repo.dashicons-no-decoration {
 /* Icons API / Dashicon fallback */
 .gu-icon {
 	vertical-align: middle;
+}
+
+/* Additions Quick Edit */
+.gu-addition-editor fieldset label span.title {
+	width: 8em;
+}
+
+.gu-addition-editor fieldset label span.input-text-wrap {
+	margin-left: 8em;
+}
+
+/* Additions: keep the Add Package button beside the list title */
+.git-updater-settings h2.wp-heading-inline {
+	display: inline-block;
+	margin-right: 5px;
+}
+
+/* Additions: refresh button beside the served version */
+.gu-refresh-addition {
+	vertical-align: middle;
+	line-height: 1;
+}
+
+.gu-refresh-addition.is-refreshing .gu-icon,
+.gu-flush-repo.is-refreshing .gu-icon {
+	animation: gu-refresh-spin 1s linear infinite;
+}
+
+.gu-refresh-error {
+	display: block;
+	color: #d63638;
+}
+
+@keyframes gu-refresh-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.gu-refresh-addition.is-refreshing .gu-icon,
+	.gu-flush-repo.is-refreshing .gu-icon {
+		animation: none;
+		opacity: 0.5;
+	}
 }
