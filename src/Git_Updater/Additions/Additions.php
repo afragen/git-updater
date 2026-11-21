@@ -80,6 +80,59 @@ class Additions {
 	}
 
 	/**
+	 * Derive an addition's canonical ID from its slug.
+	 *
+	 * This is the ID written on save. Use get_addition_id() to resolve the
+	 * identity of a row that may predate that ID.
+	 *
+	 * @param string $slug Addition slug.
+	 *
+	 * @return string
+	 */
+	public static function get_id_from_slug( $slug ) {
+		return md5( (string) $slug );
+	}
+
+	/**
+	 * Get an addition's identifier.
+	 *
+	 * Saved rows normally carry an ID, but a row written by a filter or an
+	 * older migration may not. Fall back to the canonical slug hash so every
+	 * caller gets one stable identity per addition.
+	 *
+	 * @param array<string, mixed> $addition A saved addition.
+	 *
+	 * @return string
+	 */
+	public static function get_addition_id( $addition ) {
+		$id = isset( $addition['ID'] ) ? (string) $addition['ID'] : '';
+
+		return '' !== $id ? $id : self::get_id_from_slug( $addition['slug'] ?? '' );
+	}
+
+	/**
+	 * Derive the repo cache key from an addition URI.
+	 *
+	 * The cache is keyed by the repository name as parsed from the URI path,
+	 * ignoring any `.git` suffix, query or fragment, matching
+	 * GU_Trait::parse_header_uri(). basename() does none of that, so a flush
+	 * could miss the row the updater actually reads.
+	 *
+	 * @param string $uri Repository URI.
+	 *
+	 * @return string Repository cache slug, or an empty string.
+	 */
+	public static function get_repo_cache_slug( $uri ) {
+		$info = pathinfo( (string) wp_parse_url( (string) $uri, PHP_URL_PATH ) );
+
+		if ( empty( $info['basename'] ) ) {
+			return '';
+		}
+
+		return isset( $info['extension'] ) && 'git' === $info['extension'] ? $info['filename'] : $info['basename'];
+	}
+
+	/**
 	 * Add Git Updater headers to plugins/themes via a filter hooks.
 	 *
 	 * @access public

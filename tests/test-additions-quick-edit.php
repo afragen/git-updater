@@ -21,7 +21,17 @@ class Test_Additions_Quick_Edit extends WP_UnitTestCase {
 	}
 
 	public function tear_down(): void {
-		unset( $_POST['_ajax_nonce'], $_POST['original_id'], $_POST['git_updater_additions'], $_REQUEST['_ajax_nonce'] );
+		unset(
+			$_POST['_ajax_nonce'],
+			$_POST['original_id'],
+			$_POST['git_updater_additions'],
+			$_POST['action'],
+			$_REQUEST['_ajax_nonce'],
+			$_REQUEST['action'],
+			$_REQUEST['original_id'],
+			$_REQUEST['page'],
+			$_REQUEST['tab']
+		);
 		remove_all_filters( 'gua_addition_types' );
 		remove_all_filters( 'wp_doing_ajax' );
 		remove_all_filters( 'wp_die_ajax_handler' );
@@ -314,6 +324,69 @@ class Test_Additions_Quick_Edit extends WP_UnitTestCase {
 		$this->assertEmpty( $cache->get_entry( 'qe-renamed', 'current_branch' ) );
 	}
 
+	public function test_update_addition_flushes_repo_cache_for_dot_git_uri(): void {
+		$cache = Repo_Cache_Table::instance();
+		$cache->add_entry( 'qe-plugin', 'current_branch', 'develop' );
+
+		$item = $this->make_item( [ 'uri' => 'https://github.com/owner/qe-plugin.git' ] );
+		$this->seed( [ $item ] );
+		$this->settings->update_addition( $item['ID'], [ 'type' => 'github_plugin', 'slug' => $item['slug'], 'uri' => $item['uri'] ] );
+
+		$this->assertEmpty( $cache->get_entry( 'qe-plugin', 'current_branch' ) );
+	}
+
+	public function test_update_addition_flushes_repo_cache_for_uri_with_query(): void {
+		$cache = Repo_Cache_Table::instance();
+		$cache->add_entry( 'qe-plugin', 'current_branch', 'develop' );
+
+		$item = $this->make_item( [ 'uri' => 'https://github.com/owner/qe-plugin?tab=readme' ] );
+		$this->seed( [ $item ] );
+		$this->settings->update_addition( $item['ID'], [ 'type' => 'github_plugin', 'slug' => $item['slug'], 'uri' => $item['uri'] ] );
+
+		$this->assertEmpty( $cache->get_entry( 'qe-plugin', 'current_branch' ) );
+	}
+
+	public function test_update_addition_matches_row_without_id(): void {
+		$legacy = [
+			'type' => 'github_plugin',
+			'slug' => 'qe-plugin/qe-plugin.php',
+			'uri'  => 'https://github.com/owner/qe-plugin',
+		];
+		$this->seed( [ $legacy ] );
+
+		$result = $this->settings->update_addition(
+			md5( $legacy['slug'] ),
+			[
+				'type'           => 'github_plugin',
+				'slug'           => $legacy['slug'],
+				'uri'            => $legacy['uri'],
+				'primary_branch' => 'develop',
+			]
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertSame( md5( $legacy['slug'] ), $result['ID'] );
+		$saved = get_site_option( 'git_updater_additions' );
+		$this->assertSame( md5( $legacy['slug'] ), $saved[0]['ID'] );
+		$this->assertSame( 'develop', $saved[0]['primary_branch'] );
+	}
+
+	public function test_render_row_without_id_uses_unique_slug_hash(): void {
+		$table = new Repo_List_Table( [] );
+		$row_a = $table->render_row( [ 'type' => 'github_plugin', 'slug' => 'legacy-a/legacy-a.php', 'uri' => 'https://github.com/o/legacy-a' ] );
+		$row_b = $table->render_row( [ 'type' => 'github_plugin', 'slug' => 'legacy-b/legacy-b.php', 'uri' => 'https://github.com/o/legacy-b' ] );
+
+		$id_a = md5( 'legacy-a/legacy-a.php' );
+		$id_b = md5( 'legacy-b/legacy-b.php' );
+
+		$this->assertStringContainsString( 'id="gu-addition-' . $id_a . '"', $row_a );
+		$this->assertStringContainsString( 'id="gu-addition-' . $id_b . '"', $row_b );
+
+		preg_match( '/data-gu-addition="([^"]*)"/', $row_a, $matches );
+		$data = json_decode( html_entity_decode( $matches[1] ), true );
+		$this->assertSame( $id_a, $data['ID'] );
+	}
+
 	// -------------------------------------------------------------------------
 	// ajax_quick_edit()
 	// -------------------------------------------------------------------------
@@ -368,6 +441,23 @@ class Test_Additions_Quick_Edit extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'id="gu-addition-' . $item['ID'] . '"', $response['data']['row'] );
 		$this->assertStringContainsString( 'develop', $response['data']['row'] );
 		$this->assertSame( 'develop', get_site_option( 'git_updater_additions' )[0]['primary_branch'] );
+	}
+
+	public function test_ajax_row_delete_link_targets_additions_page(): void {
+		// admin-ajax.php has no page/tab request args; the row must not depend on them.
+		$_REQUEST = [
+			'action'      => 'gu_additions_quick_edit',
+			'original_id' => md5( 'qe-plugin/qe-plugin.php' ),
+		];
+
+		$row = ( new Repo_List_Table( [] ) )->render_row( $this->make_item() );
+
+		preg_match( '/<a href="([^"]*)"[^>]*>Delete<\/a>/', $row, $matches );
+		$href = html_entity_decode( $matches[1] ?? '' );
+
+		$this->assertStringContainsString( 'page=git-updater', $href );
+		$this->assertStringContainsString( 'tab=git_updater_additions', $href );
+		$this->assertStringContainsString( 'action=delete_row_item', $href );
 	}
 
 	// -------------------------------------------------------------------------

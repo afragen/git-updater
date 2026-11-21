@@ -40,7 +40,7 @@ class Test_Additions_New_Page extends WP_UnitTestCase {
 
 	private function reset_form_values(): void {
 		$prop = new ReflectionProperty( Additions_Settings::class, 'form_values' );
-		$prop->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $prop->setAccessible( true );
 		$prop->setValue( null, [] );
 	}
 

@@ -122,9 +122,11 @@ class Repo_List_Table extends WP_List_Table {
 		$fields = [ 'ID', 'type', 'slug', 'uri', 'primary_branch', 'release_asset', 'private_package', 'uses_lite' ];
 		$data   = array_intersect_key( $item, array_flip( $fields ) );
 
+		$data['ID'] = Additions::get_addition_id( $item );
+
 		printf(
 			'<tr id="gu-addition-%1$s" data-gu-addition="%2$s">',
-			esc_attr( (string) $item['ID'] ),
+			esc_attr( $data['ID'] ),
 			esc_attr( (string) wp_json_encode( $data ) )
 		);
 		$this->single_row_columns( $item );
@@ -273,28 +275,21 @@ class Repo_List_Table extends WP_List_Table {
 	 * @return string Text to be placed inside the column <td> (site title only)
 	 **************************************************************************/
 	public function column_slug( $item ) {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$page = isset( $_REQUEST['page'] ) ? sanitize_title_with_dashes( wp_unslash( $_REQUEST['page'] ) ) : null;
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$tab      = isset( $_REQUEST['tab'] ) ? sanitize_title_with_dashes( wp_unslash( $_REQUEST['tab'] ) ) : null;
-		$location = add_query_arg(
-			[
-				'page' => $page,
-				'tab'  => $tab,
-			],
-			''
-		);
+		$item_id = Additions::get_addition_id( $item );
+		// Use the canonical Additions URL; the current request has no page/tab
+		// during an AJAX row render, which would break the Delete link.
+		$location = Settings::get_page_url();
 
 		// Build row actions.
 		$actions = [
-			// 'edit'   => sprintf( '<a href="%s&action=%s&slug=%s">Edit</a>', $location, 'edit', $item['ID'] ),
+			// 'edit'   => sprintf( '<a href="%s&action=%s&slug=%s">Edit</a>', $location, 'edit', $item_id ),
 			'inline hide-if-no-js' => sprintf(
 				'<button type="button" class="button-link gu-quick-edit" aria-expanded="false" aria-label="%1$s">%2$s</button>',
 				/* translators: %s: addition slug. */
 				esc_attr( sprintf( __( 'Quick edit &#8220;%s&#8221; inline', 'git-updater' ), (string) $item['slug'] ) ),
 				esc_html__( 'Quick Edit', 'git-updater' )
 			),
-			'delete'               => sprintf( '<a href="%s&action=%s&slug=%s">Delete</a>', wp_nonce_url( $location, 'delete_row_item', '_wpnonce_row_action_delete' ), 'delete_row_item', $item['ID'] ),
+			'delete'               => sprintf( '<a href="%s&action=%s&slug=%s">Delete</a>', wp_nonce_url( $location, 'delete_row_item', '_wpnonce_row_action_delete' ), 'delete_row_item', esc_attr( $item_id ) ),
 		];
 
 		// Return the title contents.
@@ -304,7 +299,7 @@ class Repo_List_Table extends WP_List_Table {
 			/*$1%s*/
 			esc_html( (string) $item['slug'] ),
 			/*$2%s*/
-			esc_html( (string) $item['ID'] ),
+			esc_html( $item_id ),
 			/*$3%s*/
 			$this->row_actions( $actions )
 		);
@@ -436,10 +431,16 @@ class Repo_List_Table extends WP_List_Table {
 		}
 		foreach ( $slugs as $slug ) {
 			foreach ( self::$options as $key => $option ) {
-				if ( in_array( $slug, $option, true ) ) {
-					unset( self::$options[ $key ] );
-					update_site_option( 'git_updater_additions', self::$options );
-					\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( $slug );
+				if ( Additions::get_addition_id( $option ) !== $slug ) {
+					continue;
+				}
+				unset( self::$options[ $key ] );
+				update_site_option( 'git_updater_additions', self::$options );
+
+				// The cache is keyed by repository name, not the row ID.
+				$repo = Additions::get_repo_cache_slug( $option['uri'] ?? '' );
+				if ( '' !== $repo ) {
+					\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( $repo );
 				}
 			}
 		}

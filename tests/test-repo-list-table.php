@@ -11,6 +11,7 @@ use Fragen\Git_Updater\Additions\Additions;
 use Fragen\Git_Updater\Additions\Settings;
 use Fragen\Git_Updater\Additions\Bootstrap;
 use Fragen\Git_Updater\Additions\Repo_List_Table;
+use Fragen\Git_Updater\DB\Repo_Cache_Table;
 
 class Test_Repo_List_Table_Methods extends WP_UnitTestCase {
 
@@ -298,6 +299,53 @@ class Test_Repo_List_Table_Extended extends WP_UnitTestCase {
 		$item   = $this->make_item();
 		$result = $this->table->column_slug( $item );
 		$this->assertStringContainsString( 'Delete', $result );
+	}
+
+	public function test_column_slug_without_id_uses_slug_hash(): void {
+		$item = $this->make_item();
+		unset( $item['ID'] );
+
+		$result = $this->table->column_slug( $item );
+
+		$this->assertStringContainsString( 'slug=' . md5( 'test-plugin/test-plugin.php' ), $result );
+	}
+
+	public function test_process_bulk_action_deletes_entry_without_id(): void {
+		wp_set_current_user( $this->make_admin() );
+
+		$option = $this->make_item();
+		unset( $option['ID'] );
+
+		$table = new Repo_List_Table( [ $option ] );
+		update_site_option( 'git_updater_additions', [ $option ] );
+
+		$_REQUEST['_wpnonce_row_action_delete'] = wp_create_nonce( 'delete_row_item' );
+		$_REQUEST['slug']                       = md5( 'test-plugin/test-plugin.php' );
+
+		$table->process_bulk_action();
+
+		$this->assertEmpty( get_site_option( 'git_updater_additions' ) );
+	}
+
+	public function test_process_bulk_action_flushes_repo_cache_for_deleted_entry(): void {
+		wp_set_current_user( $this->make_admin() );
+
+		$cache = Repo_Cache_Table::instance();
+		$cache->add_entry( 'test-plugin', 'current_branch', 'develop' );
+
+		$id     = md5( 'test-plugin/test-plugin.php' );
+		$option = $this->make_item( [ 'ID' => $id ] );
+
+		$table = new Repo_List_Table( [ $option ] );
+		update_site_option( 'git_updater_additions', [ $option ] );
+
+		$_REQUEST['_wpnonce_row_action_delete'] = wp_create_nonce( 'delete_row_item' );
+		$_REQUEST['slug']                       = $id;
+
+		$table->process_bulk_action();
+
+		$this->assertEmpty( get_site_option( 'git_updater_additions' ) );
+		$this->assertEmpty( $cache->get_entry( 'test-plugin', 'current_branch' ) );
 	}
 
 	public function test_process_bulk_action_returns_without_nonce(): void {

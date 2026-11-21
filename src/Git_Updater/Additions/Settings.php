@@ -127,7 +127,7 @@ class Settings {
 		$options = Additions::get_saved_additions();
 		$key     = null;
 		foreach ( $options as $option_key => $option ) {
-			if ( isset( $option['ID'] ) && $original_id === $option['ID'] ) {
+			if ( Additions::get_addition_id( $option ) === $original_id ) {
 				$key = $option_key;
 				break;
 			}
@@ -149,8 +149,8 @@ class Settings {
 		update_site_option( 'git_updater_additions', $options );
 		self::$options_additions = $options;
 
-		// The repo cache is keyed by repository name, the last segment of the URI.
-		$repos = array_unique( array_filter( [ basename( (string) ( $original['uri'] ?? '' ) ), basename( $new['uri'] ) ] ) );
+		// The repo cache is keyed by repository name, the last segment of the URI path.
+		$repos = array_unique( array_filter( [ Additions::get_repo_cache_slug( $original['uri'] ?? '' ), Additions::get_repo_cache_slug( $new['uri'] ) ] ) );
 		foreach ( $repos as $repo ) {
 			\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( $repo );
 		}
@@ -179,7 +179,10 @@ class Settings {
 		self::$options_additions = $options;
 
 		// Drop any stale cache left by a previously deleted addition of the same repository.
-		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( basename( $addition['uri'] ) );
+		$repo = Additions::get_repo_cache_slug( $addition['uri'] );
+		if ( '' !== $repo ) {
+			\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( $repo );
+		}
 
 		return $addition;
 	}
@@ -594,7 +597,7 @@ class Settings {
 			$new_input[0][ $key ] = 'uri' === $key ? untrailingslashit( esc_url_raw( trim( $value ) ) ) : sanitize_text_field( $value );
 		}
 		$new_input[0]['primary_branch']  = ! empty( $new_input[0]['primary_branch'] ) ? $new_input[0]['primary_branch'] : 'master';
-		$new_input[0]['ID']              = md5( $new_input[0]['slug'] );
+		$new_input[0]['ID']              = Additions::get_id_from_slug( $new_input[0]['slug'] );
 		$new_input[0]['source']          = md5( home_url() );
 		$new_input[0]['private_package'] = ! empty( $new_input[0]['private_package'] ) ? true : false;
 		$new_input[0]['uses_lite']       = ! empty( $new_input[0]['uses_lite'] ) ? true : false;
