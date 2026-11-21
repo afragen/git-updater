@@ -232,7 +232,7 @@ class Test_Cache_Table extends WP_UnitTestCase {
 
 	public function test_schema_contains_slug_unique_index(): void {
 		$ref    = new ReflectionMethod( Repo_Cache_Table::class, 'schema' );
-		$ref->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $ref->setAccessible( true );
 		$schema = $ref->invoke( Repo_Cache_Table::instance() );
 		$this->assertStringContainsString( 'UNIQUE KEY slug', $schema );
 		$this->assertStringContainsString( 'error_timeout', $schema );

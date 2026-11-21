@@ -1813,7 +1813,7 @@ class Test_Plugin_Meta_HTTP_Mock extends WP_UnitTestCase {
 		// matching primary_branch/current_branch and skip both upserts.
 		$writes = $this->count_cache_table_writes( function () {
 			$rm = new ReflectionMethod( new Plugin(), 'get_plugin_meta' );
-			$rm->setAccessible( true );
+			PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 			$rm->invoke( new Plugin() );
 		} );
 
@@ -1828,7 +1828,7 @@ class Test_Plugin_Meta_HTTP_Mock extends WP_UnitTestCase {
 
 		$writes = $this->count_cache_table_writes( function () {
 			$rm = new ReflectionMethod( new Plugin(), 'get_plugin_meta' );
-			$rm->setAccessible( true );
+			PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 			$rm->invoke( new Plugin() );
 		} );
 

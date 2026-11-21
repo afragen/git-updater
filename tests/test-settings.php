@@ -1741,7 +1741,7 @@ class Test_Settings_Redirect_Refresh_Transients extends GU_Test_Case {
 			1
 		);
 		$rm = new ReflectionMethod( Settings::class, 'redirect_on_save' );
-		$rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		try {
 			$rm->invoke( $this->settings );
 			$this->fail( 'Expected redirect exception' );
@@ -1750,4 +1750,3 @@ class Test_Settings_Redirect_Refresh_Transients extends GU_Test_Case {
 		}
 	}
 }
-

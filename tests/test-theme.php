@@ -1638,7 +1638,7 @@ class Test_Theme_Config_Discovery extends WP_UnitTestCase {
 		// matching primary_branch/current_branch and skip both upserts.
 		$writes = $this->count_cache_table_writes( function () {
 			$rm = new ReflectionMethod( new Theme(), 'get_theme_meta' );
-			$rm->setAccessible( true );
+			PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 			$rm->invoke( new Theme() );
 		} );
 
@@ -1653,7 +1653,7 @@ class Test_Theme_Config_Discovery extends WP_UnitTestCase {
 
 		$writes = $this->count_cache_table_writes( function () {
 			$rm = new ReflectionMethod( new Theme(), 'get_theme_meta' );
-			$rm->setAccessible( true );
+			PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 			$rm->invoke( new Theme() );
 		} );
 

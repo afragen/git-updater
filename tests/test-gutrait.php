@@ -1284,7 +1284,7 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 		$table->delete_repo( 'test-plugin' );
 		$rp = new ReflectionProperty( $this->api, 'base' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		$rp->setValue( $this->api, Singleton::get_instance( 'Fragen\Git_Updater\Base', $this->api ) );
 		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
 		$result = $rm->invoke( $this->api, (object) [ 'slug' => 'test-plugin', 'git' => 'github' ] );
@@ -1295,7 +1295,7 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 		$this->force_config_with_repo( 'test-plugin' );
 		$this->seed_cache( [ 'ran' => [ 'tags' ] ] );
 		$rp = new ReflectionProperty( $this->api, 'base' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		$rp->setValue( $this->api, Singleton::get_instance( 'Fragen\Git_Updater\Base', $this->api ) );
 		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
 		$result = $rm->invoke( $this->api, (object) [ 'slug' => 'test-plugin', 'git' => 'github' ] );
@@ -1309,7 +1309,7 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 		$table->set_error_cache( 'test-plugin', [ 'http_code' => 500 ], 300 );
 		$rp = new ReflectionProperty( $this->api, 'base' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		$rp->setValue( $this->api, Singleton::get_instance( 'Fragen\Git_Updater\Base', $this->api ) );
 		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
 		$result = $rm->invoke( $this->api, (object) [ 'slug' => 'test-plugin', 'git' => 'github' ] );
@@ -1347,7 +1347,7 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 		$this->assertTrue( $flags['test-plugin'], '404 must be visible via get_cached_error_flags() on the plain slug' );
 
 		$rp = new ReflectionProperty( $this->api, 'base' );
-		$rp->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
 		$rp->setValue( $this->api, Singleton::get_instance( 'Fragen\Git_Updater\Base', $this->api ) );
 		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
 		$result = $rm->invoke( $this->api, (object) [ 'slug' => 'test-plugin', 'git' => 'github' ] );

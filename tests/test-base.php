@@ -326,9 +326,9 @@ class Test_Base_Set_Defaults extends WP_UnitTestCase {
 		delete_site_option( 'git_updater' );
 		$this->base      = new Base();
 		$this->rm        = new \ReflectionMethod( Base::class, 'set_defaults' );
-		$this->rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $this->rm->setAccessible( true );
 		$this->rp_plugin = new \ReflectionProperty( Base::class, 'plugin' );
-		$this->rp_plugin->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $this->rp_plugin->setAccessible( true );
 	}
 
 	public function tear_down(): void {
@@ -892,7 +892,7 @@ class Test_Base_Fix_Misnamed_Directory extends WP_UnitTestCase {
 		new Base();
 		$this->base = new Base();
 		$this->rm   = new \ReflectionMethod( Base::class, 'fix_misnamed_directory' );
-		$this->rm->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $this->rm->setAccessible( true );
 
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		WP_Filesystem();
