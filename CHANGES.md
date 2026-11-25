@@ -1,7 +1,7 @@
 #### [unreleased]
-* fix PHPStan `booleanAnd.rightAlwaysTrue` on `wp_doing_ajax() && check_ajax_referer( 'updates' )` — current stubs type the nonce check as `int<1,2>` (it exits on failure), so the call is now a statement in `Base::upgrader_source_selection()` and `GU_Trait::get_repo_slugs()`
 
 #### 15.0.0 / 2026-11-25
+* fix PHPStan `booleanAnd.rightAlwaysTrue` on `wp_doing_ajax() && check_ajax_referer( 'updates' )` — current stubs type the nonce check as `int<1,2>` (it exits on failure), so the call is now a statement in `Base::upgrader_source_selection()` and `GU_Trait::get_repo_slugs()`
 * update `Additions` to have `Quick Edit` and separate page for adding packages, thqnks @helgatheviking
 * fix: read the `git_updater_additions` option through one normalizing accessor that drops non-array rows. A corrupted entry (manual edit, migration, or `site_option_git_updater_additions` filter) previously caused a fatal `Cannot access offset of type string on string` on the Additions tab, plugins/themes screens, REST routes, and Lite Clients; the next addition save or delete now also clears the bad rows
 * fix: OAuth callback, Disconnect, and Remove Token links now target the root `wp-admin/admin-post.php` on multisite. `network_admin_url( 'admin-post.php' )` produced `/wp-admin/network/admin-post.php`, which WordPress does not ship, so all three actions 404'd and the OAuth flow could not complete
