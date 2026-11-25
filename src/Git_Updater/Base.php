@@ -515,9 +515,12 @@ class Base {
 			if ( isset( $hook_extra['plugin'] ) ) {
 				$slug       = dirname( $hook_extra['plugin'] );
 				$new_source = trailingslashit( $remote_source ) . $slug;
-			} elseif ( wp_doing_ajax() && check_ajax_referer( 'updates' ) && isset( $_POST['slug'] ) ) {
-				$slug       = sanitize_key( wp_unslash( $_POST['slug'] ) );
-				$new_source = trailingslashit( $remote_source ) . $slug;
+			} elseif ( wp_doing_ajax() ) {
+				check_ajax_referer( 'updates' );
+				if ( isset( $_POST['slug'] ) ) {
+					$slug       = sanitize_key( wp_unslash( $_POST['slug'] ) );
+					$new_source = trailingslashit( $remote_source ) . $slug;
+				}
 			}
 		}
 
@@ -529,9 +532,12 @@ class Base {
 			if ( isset( $hook_extra['theme'] ) ) {
 				$slug       = $hook_extra['theme'];
 				$new_source = trailingslashit( $remote_source ) . $slug;
-			} elseif ( wp_doing_ajax() && check_ajax_referer( 'updates' ) && isset( $_POST['slug'] ) ) {
-				$slug       = sanitize_key( wp_unslash( $_POST['slug'] ) );
-				$new_source = trailingslashit( $remote_source ) . $slug;
+			} elseif ( wp_doing_ajax() ) {
+				check_ajax_referer( 'updates' );
+				if ( isset( $_POST['slug'] ) ) {
+					$slug       = sanitize_key( wp_unslash( $_POST['slug'] ) );
+					$new_source = trailingslashit( $remote_source ) . $slug;
+				}
 			}
 		}
 

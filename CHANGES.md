@@ -1,4 +1,5 @@
 #### [unreleased]
+* fix PHPStan `booleanAnd.rightAlwaysTrue` on `wp_doing_ajax() && check_ajax_referer( 'updates' )` — current stubs type the nonce check as `int<1,2>` (it exits on failure), so the call is now a statement in `Base::upgrader_source_selection()` and `GU_Trait::get_repo_slugs()`
 
 #### 15.0.0 / 2026-11-25
 * update `Additions` to have `Quick Edit` and separate page for adding packages, thqnks @helgatheviking
