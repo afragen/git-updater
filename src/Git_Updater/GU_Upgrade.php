@@ -32,7 +32,7 @@ final class GU_Upgrade {
 	 *
 	 * @var string
 	 */
-	private $db_version = '14.4.4';
+	private $db_version = '15.0.0';
 
 	/**
 	 * Run update check against db_version.
