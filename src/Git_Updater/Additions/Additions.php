@@ -54,6 +54,85 @@ class Additions {
 	}
 
 	/**
+	 * Get the saved Additions rows.
+	 *
+	 * The option is written only by this plugin, but a manual edit, a migration,
+	 * or a filter on site_option_git_updater_additions can leave non-array
+	 * entries behind. Drop anything that is not a row array.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function get_saved_additions(): array {
+		$rows = get_site_option( 'git_updater_additions', [] );
+		if ( ! is_array( $rows ) ) {
+			return [];
+		}
+
+		$valid = [];
+		foreach ( $rows as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+			$valid[] = $row;
+		}
+
+		return $valid;
+	}
+
+	/**
+	 * Derive an addition's canonical ID from its slug.
+	 *
+	 * This is the ID written on save. Use get_addition_id() to resolve the
+	 * identity of a row that may predate that ID.
+	 *
+	 * @param string $slug Addition slug.
+	 *
+	 * @return string
+	 */
+	public static function get_id_from_slug( $slug ) {
+		return md5( (string) $slug );
+	}
+
+	/**
+	 * Get an addition's identifier.
+	 *
+	 * Saved rows normally carry an ID, but a row written by a filter or an
+	 * older migration may not. Fall back to the canonical slug hash so every
+	 * caller gets one stable identity per addition.
+	 *
+	 * @param array<string, mixed> $addition A saved addition.
+	 *
+	 * @return string
+	 */
+	public static function get_addition_id( $addition ) {
+		$id = isset( $addition['ID'] ) ? (string) $addition['ID'] : '';
+
+		return '' !== $id ? $id : self::get_id_from_slug( $addition['slug'] ?? '' );
+	}
+
+	/**
+	 * Derive the repo cache key from an addition URI.
+	 *
+	 * The cache is keyed by the repository name as parsed from the URI path,
+	 * ignoring any `.git` suffix, query or fragment, matching
+	 * GU_Trait::parse_header_uri(). basename() does none of that, so a flush
+	 * could miss the row the updater actually reads.
+	 *
+	 * @param string $uri Repository URI.
+	 *
+	 * @return string Repository cache slug, or an empty string.
+	 */
+	public static function get_repo_cache_slug( $uri ) {
+		$info = pathinfo( (string) wp_parse_url( (string) $uri, PHP_URL_PATH ) );
+
+		if ( empty( $info['basename'] ) ) {
+			return '';
+		}
+
+		return isset( $info['extension'] ) && 'git' === $info['extension'] ? $info['filename'] : $info['basename'];
+	}
+
+	/**
 	 * Add Git Updater headers to plugins/themes via a filter hooks.
 	 *
 	 * @access public
@@ -128,55 +207,5 @@ class Additions {
 		if ( $pre_config !== $config ) {
 			update_site_option( 'git_updater_additions', $config );
 		}
-	}
-
-	/**
-	 * Remove duplicate $options to unique values.
-	 * Caches created in Fragen\Git_Updater\Federation::load_additions().
-	 *
-	 * @param array<int, array<string, mixed>> $options Array of Additions options.
-	 *
-	 * @return array<int, array<string, mixed>>
-	 */
-	public function deduplicate( $options ) {
-		if ( empty( $options ) ) {
-			return $options;
-		}
-
-		$plugin_addons = $this->get_repo_cache( 'git_updater_repository_add_plugin' );
-		$plugin_addons = ! empty( $plugin_addons['git_updater_repository_add_plugin'] ) ? $plugin_addons['git_updater_repository_add_plugin'] : [];
-
-		$theme_addons = $this->get_repo_cache( 'git_updater_repository_add_theme' );
-		$theme_addons = ! empty( $theme_addons['git_updater_repository_add_theme'] ) ? $theme_addons['git_updater_repository_add_theme'] : [];
-
-		$packages = array_merge( $plugin_addons, $theme_addons );
-
-		foreach ( $packages as $key => $item ) {
-			foreach ( $options as $option ) {
-				if ( $item['ID'] === $option['ID'] && $item['source'] !== $option['source'] ) {
-					unset( $packages[ $key ] );
-				}
-			}
-		}
-
-		$collections = get_site_option( 'git_updater_collections' );
-		$collections = $collections ?: [];
-		foreach ( $collections as $collection ) {
-			foreach ( $options as $key => $item ) {
-				if ( $item['source'] === $collection['ID'] ) {
-					unset( $options[ $key ] );
-				}
-			}
-		}
-
-		$options = array_merge( $options, $packages );
-		foreach ( array_keys( $options ) as $key ) {
-			$options[ $key ]['release_asset']   = ! empty( $options[ $key ]['release_asset'] ) ? true : false;
-			$options[ $key ]['private_package'] = ! empty( $options[ $key ]['private_package'] ) ? true : false;
-			ksort( $options[ $key ] );
-		}
-		$options = array_map( 'unserialize', array_unique( array_map( 'serialize', $options ) ) );
-
-		return $options;
 	}
 }

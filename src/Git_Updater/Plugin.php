@@ -127,7 +127,6 @@ class Plugin {
 		}
 
 		$extra_header_keys = array_keys( self::$extra_headers );
-		$options_modified  = false;
 		$plugins           = array_filter(
 			$repos_arr,
 			function ( $repo ) use ( $extra_header_keys ) {
@@ -167,16 +166,30 @@ class Plugin {
 				$header = $this->parse_header_uri( $plugin[ $key ] );
 			}
 
-			$header         = $this->parse_extra_headers( $header, $plugin, $header_parts );
-			$current_branch = isset( $header['repo'] ) ? "current_branch_{$header['repo']}" : null;
+			$header = $this->parse_extra_headers( $header, $plugin, $header_parts );
 
-			if ( isset( self::$options[ $current_branch ] )
-			&& ( 'master' === self::$options[ $current_branch ] && 'master' !== $header['primary_branch'] )
-			) {
-				unset( self::$options[ $current_branch ] );
-				$options_modified = true;
-			}
-			$branch = self::$options[ $current_branch ] ?? $header['primary_branch'];
+			/**
+			 * Filter config to fix repo slug.
+			 * Eg change Gist ID to slug.
+			 *
+			 * @since 10.0.0
+			 * @param array $plugin_meta Plugin meta array.
+			 */
+			$git_plugin = apply_filters(
+				'gu_fix_repo_slug',
+				[
+					'git'  => $repo_parts['git_server'],
+					'slug' => $header['repo'],
+					'file' => $slug,
+				]
+			);
+
+			$repo_slug = $git_plugin['slug'] ?? $header['repo'];
+
+			// Resolve the active branch from the cache table, falling back to the header's primary branch.
+			$cache_branch  = $this->get_repo_cache( $repo_slug ?? '', false, 'current_branch' );
+			$cache_primary = $this->get_repo_cache( $repo_slug ?? '', false, 'primary_branch' );
+			$branch        = $cache_branch ?: $header['primary_branch'];
 
 			$git_plugin['type']           = 'plugin';
 			$git_plugin['git']            = $repo_parts['git_server'];
@@ -185,7 +198,7 @@ class Plugin {
 			$git_plugin['enterprise']     = $header['enterprise_uri'];
 			$git_plugin['enterprise_api'] = $header['enterprise_api'];
 			$git_plugin['owner']          = $header['owner'];
-			$git_plugin['slug']           = $header['repo'];
+			$git_plugin['slug']           = $repo_slug;
 			$git_plugin['slug_did']       = $git_plugin['did'] ? $git_plugin['slug'] . '-' . $this->get_did_hash( $git_plugin['did'] ) : null;
 			$git_plugin['file']           = $slug;
 			$git_plugin['branch']         = $branch;
@@ -221,20 +234,17 @@ class Plugin {
 				}
 			}
 
-			/**
-			 * Filter config to fix repo slug.
-			 * Eg change Gist ID to slug.
-			 *
-			 * @since 10.0.0
-			 * @param array $plugin Plugin meta array.
-			 */
-			$git_plugin = apply_filters( 'gu_fix_repo_slug', $git_plugin );
+			// Only write when the resolved value differs from the cached one.
+			// Empty/missing cache row already seeded both columns above, so a
+			// `null !== $value` first-run still triggers both writes here.
+			if ( $cache_primary !== $header['primary_branch'] ) {
+				$this->set_repo_cache( 'primary_branch', $header['primary_branch'], $git_plugin['slug'] );
+			}
+			if ( $cache_branch !== $git_plugin['branch'] ) {
+				$this->set_repo_cache( 'current_branch', $git_plugin['branch'], $git_plugin['slug'] );
+			}
 
 			$git_plugins[ $git_plugin['slug'] ] = (object) $git_plugin;
-		}
-
-		if ( $options_modified ) {
-			update_site_option( 'git_updater', self::$options );
 		}
 
 		return $git_plugins;

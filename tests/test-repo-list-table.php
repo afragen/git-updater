@@ -11,6 +11,7 @@ use Fragen\Git_Updater\Additions\Additions;
 use Fragen\Git_Updater\Additions\Settings;
 use Fragen\Git_Updater\Additions\Bootstrap;
 use Fragen\Git_Updater\Additions\Repo_List_Table;
+use Fragen\Git_Updater\DB\Repo_Cache_Table;
 
 class Test_Repo_List_Table_Methods extends WP_UnitTestCase {
 
@@ -32,6 +33,45 @@ class Test_Repo_List_Table_Methods extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 	// get_columns()
 	// -------------------------------------------------------------------------
+
+	public function test_constructor_skips_malformed_saved_option_rows(): void {
+		$options = [
+			[
+				'ID'              => md5( 'synthetic-plugin/synthetic-plugin.php' ),
+				'type'            => 'github_plugin',
+				'slug'            => 'synthetic-plugin/synthetic-plugin.php',
+				'uri'             => 'https://github.com/example/synthetic-plugin',
+				'source'          => 'synthetic-source',
+				'primary_branch'  => 'main',
+				'release_asset'   => false,
+				'private_package' => false,
+				'uses_lite'       => false,
+			],
+			'malformed saved row',
+		];
+
+		$table = new Repo_List_Table( $options );
+		$table->prepare_items();
+
+		$this->assertCount( 1, $table->items );
+		$this->assertSame( 'synthetic-plugin/synthetic-plugin.php', $table->items[0]['slug'] );
+	}
+
+	public function test_constructor_tolerates_scalar_options(): void {
+		$table = new Repo_List_Table( 'garbage' );
+		$table->prepare_items();
+
+		$this->assertSame( [], $table->items );
+	}
+
+	public function test_constructor_does_not_warn_for_missing_row_keys(): void {
+		$table = new Repo_List_Table( [ [ 'slug' => 'legacy-addon' ] ] );
+		$table->prepare_items();
+
+		$this->assertSame( 'legacy-addon', $table->items[0]['slug'] );
+		$this->assertNull( $table->items[0]['source'] );
+		$this->assertSame( 'master', $table->items[0]['primary_branch'] );
+	}
 
 	public function test_get_columns_includes_slug(): void {
 		$this->assertArrayHasKey( 'slug', $this->table->get_columns() );
@@ -120,8 +160,8 @@ class Test_Repo_List_Table_Methods extends WP_UnitTestCase {
 	}
 
 	public function test_column_default_returns_release_asset_value(): void {
-		$item = $this->make_item( [ 'release_asset' => '<span>yes</span>' ] );
-		$this->assertSame( '<span>yes</span>', $this->table->column_default( $item, 'release_asset' ) );
+		$item = $this->make_item( [ 'release_asset' => true ] );
+		$this->assertStringContainsString( 'gu-icon-yes', $this->table->column_default( $item, 'release_asset' ) );
 	}
 
 	public function test_column_default_escapes_html_in_field_values(): void {
@@ -261,6 +301,53 @@ class Test_Repo_List_Table_Extended extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'Delete', $result );
 	}
 
+	public function test_column_slug_without_id_uses_slug_hash(): void {
+		$item = $this->make_item();
+		unset( $item['ID'] );
+
+		$result = $this->table->column_slug( $item );
+
+		$this->assertStringContainsString( 'slug=' . md5( 'test-plugin/test-plugin.php' ), $result );
+	}
+
+	public function test_process_bulk_action_deletes_entry_without_id(): void {
+		wp_set_current_user( $this->make_admin() );
+
+		$option = $this->make_item();
+		unset( $option['ID'] );
+
+		$table = new Repo_List_Table( [ $option ] );
+		update_site_option( 'git_updater_additions', [ $option ] );
+
+		$_REQUEST['_wpnonce_row_action_delete'] = wp_create_nonce( 'delete_row_item' );
+		$_REQUEST['slug']                       = md5( 'test-plugin/test-plugin.php' );
+
+		$table->process_bulk_action();
+
+		$this->assertEmpty( get_site_option( 'git_updater_additions' ) );
+	}
+
+	public function test_process_bulk_action_flushes_repo_cache_for_deleted_entry(): void {
+		wp_set_current_user( $this->make_admin() );
+
+		$cache = Repo_Cache_Table::instance();
+		$cache->add_entry( 'test-plugin', 'current_branch', 'develop' );
+
+		$id     = md5( 'test-plugin/test-plugin.php' );
+		$option = $this->make_item( [ 'ID' => $id ] );
+
+		$table = new Repo_List_Table( [ $option ] );
+		update_site_option( 'git_updater_additions', [ $option ] );
+
+		$_REQUEST['_wpnonce_row_action_delete'] = wp_create_nonce( 'delete_row_item' );
+		$_REQUEST['slug']                       = $id;
+
+		$table->process_bulk_action();
+
+		$this->assertEmpty( get_site_option( 'git_updater_additions' ) );
+		$this->assertEmpty( $cache->get_entry( 'test-plugin', 'current_branch' ) );
+	}
+
 	public function test_process_bulk_action_returns_without_nonce(): void {
 		unset( $_REQUEST['_wpnonce_row_action_delete'] );
 		$this->table->process_bulk_action();
@@ -376,11 +463,36 @@ class Test_Repo_List_Table_Extended extends WP_UnitTestCase {
 			'primary_branch' => 'master',
 			'release_asset' => false,
 			'private_package' => false,
-			'uses_lite' => '<span class="dashicons dashicons-yes"></span>',
+			'uses_lite' => true,
 		];
 
 		$result = $this->table->column_default( $item, 'uses_lite' );
-		$this->assertStringContainsString( 'dashicons-yes', $result );
+		$this->assertStringContainsString( 'gu-icon-yes', $result );
+		if ( \Fragen\Git_Updater\Icons::is_available() ) {
+			$this->assertStringContainsString( '<svg', $result );
+		}
+	}
+
+	public function test_constructor_keeps_flag_columns_boolean(): void {
+		$option = [
+			'ID' => 'abc',
+			'type' => 'github_plugin',
+			'slug' => 'test-plugin/test-plugin.php',
+			'uri' => 'https://github.com/test/plugin',
+			'source' => 'github',
+			'primary_branch' => 'main',
+			'release_asset' => true,
+			'private_package' => true,
+			'uses_lite' => true,
+		];
+		$table = new Repo_List_Table( [ $option ] );
+		$table->prepare_items();
+		$items = $table->items;
+		$item  = reset( $items );
+
+		$this->assertTrue( $item['release_asset'] );
+		$this->assertTrue( $item['private_package'] );
+		$this->assertTrue( $item['uses_lite'] );
 	}
 
 	public function test_column_default_renders_uses_lite_false(): void {

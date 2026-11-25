@@ -11,6 +11,7 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Git_Updater\Traits\GU_Trait;
+use Fragen\Git_Updater\DB\Repo_Cache_Table;
 use WP_Error;
 
 /**
@@ -31,7 +32,7 @@ final class GU_Upgrade {
 	 *
 	 * @var string
 	 */
-	private $db_version = '14.3.0'; // TODO: change number.
+	private $db_version = '15.0.0';
 
 	/**
 	 * Run update check against db_version.
@@ -40,7 +41,7 @@ final class GU_Upgrade {
 	 */
 	public function run() {
 		$options    = $this->get_class_vars( 'Base', 'options' );
-		$db_version = isset( $options['db_version'] ) && ! is_integer( $options['db_version'] ) ? $options['db_version'] : '6.0.0';
+		$db_version = isset( $options['db_version'] ) && ! is_float( $options['db_version'] ) ? $options['db_version'] : '6.0.0';
 		$this->schedule_access_token_cleanup();
 
 		if ( version_compare( $db_version, $this->db_version, '=' ) ) {
@@ -49,12 +50,54 @@ final class GU_Upgrade {
 
 		switch ( true ) {
 			case version_compare( $db_version, $this->db_version, '<' ):
+				$this->install_cache_table();
+				$this->drop_ghu_options();
+				$this->delete_legacy_options();
 				$this->delete_flush_cache();
 				$this->save_db_version( $options );
 				break;
 			default:
 				break;
 		}
+	}
+
+	/**
+	 * Install the repository cache table.
+	 *
+	 * @return void
+	 */
+	private function install_cache_table() {
+		Repo_Cache_Table::instance()->install_table();
+	}
+
+	/**
+	 * Drop legacy `ghu-` prefixed cache options (clean break).
+	 *
+	 * @return void
+	 */
+	private function drop_ghu_options() {
+		global $wpdb;
+
+		$table  = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
+		$column = is_multisite() ? 'meta_key' : 'option_name';
+		$query  = "SELECT {$column} FROM {$table} WHERE {$column} LIKE %s";
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$ghu_options = $wpdb->get_results( $wpdb->prepare( $query, [ '%ghu-%' ] ), ARRAY_A ); // phpcs:ignore
+		foreach ( $ghu_options as $option ) {
+			delete_site_option( $option[ $column ] );
+		}
+	}
+
+	/**
+	 * Delete options made obsolete by feature removals.
+	 *
+	 * The Lite Client Domains allow-list was replaced by per-client keys.
+	 *
+	 * @return void
+	 */
+	private function delete_legacy_options() {
+		delete_site_option( 'git_updater_lite_domains' );
 	}
 
 	/**
@@ -138,7 +181,7 @@ final class GU_Upgrade {
 		$new_options  = array_filter(
 			$options,
 			static function ( $value, $key ) use ( &$options, $base_options ) {
-				if ( in_array( $key, $base_options, true ) || str_contains( $key, 'current_branch' ) ) {
+				if ( in_array( $key, $base_options, true ) ) {
 					return $options[ $key ];
 				}
 			},

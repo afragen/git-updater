@@ -15,6 +15,7 @@
  */
 
 use Fragen\Git_Updater\API\GitHub_API;
+use Fragen\Git_Updater\API\Language_Pack_API;
 use Fragen\Git_Updater\Base;
 
 class Test_API_Common extends WP_UnitTestCase {
@@ -31,7 +32,9 @@ class Test_API_Common extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		$this->type = $this->make_type();
 		$this->api  = new GitHub_API( $this->type );
 	}
@@ -40,8 +43,7 @@ class Test_API_Common extends WP_UnitTestCase {
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'gu_parse_api_branches' );
 		remove_all_filters( 'gu_always_fetch_update' );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		parent::tear_down();
 	}
 
@@ -88,12 +90,13 @@ class Test_API_Common extends WP_UnitTestCase {
 	 */
 	public function test_get_remote_api_tag_with_failed_api_returns_false(): void {
 		// Seed an in-force error cache so api() returns false immediately.
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin_error' ),
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->set_error_cache(
+			'test-plugin',
 			[
-				'error_cache' => $this->mock_http_response( 403, [ 'message' => 'Rate limited' ] ),
-				'timeout'     => strtotime( '+1 hour' ),
-			]
+				'timeout'   => 60,
+				'http_code' => 403,
+			],
+			60
 		);
 
 		$result = $this->api->get_remote_tag();
@@ -198,12 +201,13 @@ class Test_API_Common extends WP_UnitTestCase {
 	 * !$response branch and returns null — counted as complete.
 	 */
 	public function test_get_remote_api_branches_with_failed_api_returns_false(): void {
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin_error' ),
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->set_error_cache(
+			'test-plugin',
 			[
-				'error_cache' => $this->mock_http_response( 403, [ 'message' => 'Rate limited' ] ),
-				'timeout'     => strtotime( '+1 hour' ),
-			]
+				'timeout'   => 60,
+				'http_code' => 403,
+			],
+			60
 		);
 
 		$result = $this->api->get_remote_branches();
@@ -222,7 +226,9 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		$this->type = $this->make_type();
 		$this->api  = new GitHub_API( $this->type );
 	}
@@ -231,8 +237,7 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'gu_always_fetch_update' );
 		remove_all_filters( 'gu_parse_api_branches' );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		parent::tear_down();
 	}
 
@@ -270,10 +275,15 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 	}
 
 	private function seed_cache( array $extra ): void {
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin' ),
-			array_merge( [ 'timeout' => strtotime( '+12 hours' ) ], $extra )
-		);
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$table->add_entry( 'test-plugin', 'repo_headers', '', strtotime( '+12 hours' ) );
+		foreach ( $extra as $column => $value ) {
+			if ( 'timeout' === $column ) {
+				continue;
+			}
+			$table->add_entry( 'test-plugin', $column, $value );
+		}
 	}
 
 	// -------------------------------------------------------------------------
@@ -420,14 +430,13 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 	public function test_get_remote_api_info_returns_false_when_maybe_extend_cache_returns_true(): void {
 		// Pre-seed with an expired timeout so api() is called, but the old cached version
 		// and ran are readable via get_repo_cache($slug, false) for maybe_extend_repo_cache.
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin' ),
-			[
-				'timeout'     => strtotime( '-1 hour' ),
-				'repo'        => 'test-plugin',
-				'test-plugin' => [ 'Version' => '1.0.0' ],
-				'ran'         => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-			]
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$table->add_entry( 'test-plugin', 'repo_headers', [ 'Version' => '1.0.0' ], strtotime( '-1 hour' ) );
+		$table->add_entry(
+			'test-plugin',
+			'ran',
+			[ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ]
 		);
 
 		$plugin_header = implode(
@@ -1106,7 +1115,9 @@ class Test_API_Common_Extended extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		$this->type = $this->make_type();
 		$this->api  = new GitHub_API( $this->type );
 	}
@@ -1114,8 +1125,7 @@ class Test_API_Common_Extended extends WP_UnitTestCase {
 	public function tear_down(): void {
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'gu_always_fetch_update' );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		parent::tear_down();
 	}
 
@@ -1161,13 +1171,11 @@ class Test_API_Common_Extended extends WP_UnitTestCase {
 	 * outbound call to api.wordpress.org.
 	 */
 	private function seed_dot_org_cache(): void {
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'dot_org' => 'not in dot org',
-				'timeout' => strtotime( '+12 hours' ),
-			]
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'dot_org',
+			'not in dot org',
+			strtotime( '+12 hours' )
 		);
 	}
 
@@ -1175,12 +1183,13 @@ class Test_API_Common_Extended extends WP_UnitTestCase {
 	 * Seed the error cache so api() returns false immediately without HTTP.
 	 */
 	private function seed_error_cache(): void {
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin_error' ),
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->set_error_cache(
+			'test-plugin',
 			[
-				'error_cache' => $this->mock_http_response( 403, [ 'message' => 'Rate limited' ] ),
-				'timeout'     => strtotime( '+1 hour' ),
-			]
+				'timeout'   => 60,
+				'http_code' => 403,
+			],
+			60
 		);
 	}
 
@@ -1351,6 +1360,49 @@ class Test_API_Common_Extended extends WP_UnitTestCase {
 		$this->assertArrayHasKey( '1.0.0', $result['assets'] );
 	}
 
+	/**
+	 * get_release_assets() must serve the cached array even when the cache
+	 * timeout is expired: within a fetch cycle the timeout is stale by design,
+	 * and the release-asset entries are invalidated explicitly by
+	 * maybe_extend_repo_cache() when the remote version changes. TTL-gating the
+	 * read here makes every construct_download_link() call in the same cycle
+	 * (per-branch download links, then the repo download link) re-fetch
+	 * /releases.
+	 */
+	public function test_get_release_assets_returns_array_from_cache_with_expired_timeout(): void {
+		$call = 0;
+		add_filter(
+			'pre_http_request',
+			function () use ( &$call ) {
+				$call++;
+				return $this->mock_http_response( 200, [] );
+			},
+			10,
+			3
+		);
+
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$table->add_entry( 'test-plugin', 'repo_headers', '', strtotime( '-1 hour' ) );
+		$table->add_entry(
+			'test-plugin',
+			'release_assets',
+			[
+				'assets'         => [ '1.0.0' => 'https://example.com/release.zip' ],
+				'created_at'     => [ '1.0.0' => '2024-06-01T12:00:00Z' ],
+				'dev_assets'     => [],
+				'dev_created_at' => [],
+			]
+		);
+
+		$cached = $this->api->get_repo_cache( 'test-plugin', false, 'release_assets' );
+		$result = $this->api->get_release_assets();
+
+		$this->assertIsArray( $result );
+		$this->assertSame( $cached, $result );
+		$this->assertSame( 0, $call, 'No API call expected when cached data is available regardless of timeout' );
+	}
+
 	// -------------------------------------------------------------------------
 	// get_remote_api_contents()  via  get_repo_contents()
 	// -------------------------------------------------------------------------
@@ -1402,7 +1454,9 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		$this->type = $this->make_type();
 		$this->api  = new GitHub_API( $this->type );
 	}
@@ -1410,8 +1464,7 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 	public function tear_down(): void {
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'gu_always_fetch_update' );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		parent::tear_down();
 	}
 
@@ -1453,10 +1506,15 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 	}
 
 	private function seed_main_cache( array $data ): void {
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin' ),
-			array_merge( [ 'timeout' => strtotime( '+12 hours' ) ], $data )
-		);
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$table->add_entry( 'test-plugin', 'repo_headers', '', strtotime( '+12 hours' ) );
+		foreach ( $data as $column => $value ) {
+			if ( 'timeout' === $column ) {
+				continue;
+			}
+			$table->add_entry( 'test-plugin', $column, $value );
+		}
 	}
 
 	// -------------------------------------------------------------------------
@@ -1773,219 +1831,313 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 		$this->assertIsArray( $result );
 		$this->assertSame( $cached, $result );
 	}
+}
+
+/**
+ * Class Test_API_Common_ReleaseAssetHelpers
+ *
+ * Covers remaining lines in API_Common trait release asset helper methods:
+ * - get_release_asset_url_for_version()         lines 477
+ * - get_release_asset_url_for_version_from_data() lines 498-502
+ * - get_newest_release_asset_version()           line 516
+ * - get_newest_release_asset_version_from_data() lines 538-541
+ * - get_newest_tag_or_remote_version()           lines 557, 564, 568, 577
+ * - get_api_release_assets()                     lines 639-640
+ */
+class Test_API_Common_ReleaseAssetHelpers extends WP_UnitTestCase {
+
+	/** @var GitHub_API */
+	private GitHub_API $api;
+
+	/** @var stdClass */
+	private stdClass $type;
+
+	public function set_up(): void {
+		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		new Base();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
+		$this->type = $this->make_type();
+		$this->api  = new GitHub_API( $this->type );
+	}
+
+	public function tear_down(): void {
+		remove_all_filters( 'pre_http_request' );
+		remove_all_filters( 'gu_dev_release_asset' );
+		remove_all_filters( 'gu_always_fetch_update' );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
+		parent::tear_down();
+	}
+
+	private function make_type(): stdClass {
+		$type                 = new stdClass();
+		$type->slug           = 'test-plugin';
+		$type->git            = 'github';
+		$type->type           = 'plugin';
+		$type->owner          = 'test-owner';
+		$type->branch         = 'master';
+		$type->primary_branch = 'master';
+		$type->enterprise     = false;
+		$type->enterprise_api = null;
+		$type->gist_id        = null;
+		$type->release_asset  = true;
+		$type->newest_tag     = '1.0.0';
+		$type->tags           = [ '1.0.0' => 'https://example.com/zipball/1.0.0' ];
+		$type->branches       = (object) [ 'master' => [] ];
+		return $type;
+	}
+
+	private function seed_cache( array $data ): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$table->add_entry( 'test-plugin', 'repo_headers', '', strtotime( '+12 hours' ) );
+		foreach ( $data as $column => $value ) {
+			if ( 'timeout' === $column ) {
+				continue;
+			}
+			$table->add_entry( 'test-plugin', $column, $value );
+		}
+	}
+
+	private function call_protected( string $method, ...$args ) {
+		$rm = $this->api->get_reflection_method( $this->api, $method );
+		return $rm->invoke( $this->api, ...$args );
+	}
+
+	private function call_protected_on( object $obj, string $method, ...$args ) {
+		$rm = $obj->get_reflection_method( $obj, $method );
+		return $rm->invoke( $obj, ...$args );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_release_asset_url_for_version() — line 477
+	// -------------------------------------------------------------------------
 
 	/**
-	 * get_release_assets() must serve the cached array even when the cache
-	 * timeout is expired: within a fetch cycle the timeout is stale by design,
-	 * and the release-asset entries are invalidated explicitly by
-	 * maybe_extend_repo_cache() when the remote version changes. TTL-gating the
-	 * read here makes every construct_download_link() call in the same cycle
-	 * (per-branch download links, then the repo download link) re-fetch
-	 * /releases.
+	 * When get_release_assets() returns false (e.g. API error cached),
+	 * get_release_asset_url_for_version() returns empty string. Covers line 477.
 	 */
-	public function test_get_release_assets_returns_array_from_cache_with_expired_timeout(): void {
-		add_filter( 'gu_always_fetch_update', '__return_true' );
+	public function test_get_release_asset_url_for_version_returns_empty_when_assets_false(): void {
+		// Seed a message object so validate_response returns true → get_release_assets returns false.
+		$no_assets          = new stdClass();
+		$no_assets->message = 'No release assets found';
+		$this->seed_cache( [ 'release_assets' => $no_assets ] );
 
-		$call = 0;
-		add_filter(
-			'pre_http_request',
-			function () use ( &$call ) {
-				$call++;
-				return $this->mock_http_response( 200, [] );
-			},
-			10,
-			3
-		);
-
-		$cached = [
-			'assets'         => [ '1.0.0' => 'https://example.com/release.zip' ],
-			'created_at'     => [ '1.0.0' => '2024-06-01T12:00:00Z' ],
-			'dev_assets'     => [],
-			'dev_created_at' => [],
-		];
-		// Expired timeout; cache row otherwise intact.
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin' ),
-			[
-				'timeout'        => strtotime( '-1 hour' ),
-				'release_assets' => $cached,
-			]
-		);
-
-		$result = $this->api->get_release_assets();
-		$this->assertIsArray( $result );
-		$this->assertSame( $cached, $result );
-		$this->assertSame( 0, $call, 'No API call expected when cached data is available regardless of timeout' );
+		$result = $this->call_protected( 'get_release_asset_url_for_version', '1.0.0' );
+		$this->assertSame( '', $result );
 	}
 
 	/**
-	 * When the remote version changes while the cache is still in force,
-	 * maybe_extend_repo_cache() drops the stale release-asset entries so the
-	 * lazy get_release_assets() re-fetches them. With gu_dev_release_asset on,
-	 * the new release_asset_download must point at the newest dev asset, not the
-	 * newest stable asset from the stale cache.
+	 * When the API object does not implement get_release_assets() (e.g. a
+	 * Language_Pack_API), get_release_asset_url_for_version() returns empty
+	 * string via the method_exists guard. Covers line 472.
 	 */
-	public function test_get_release_assets_refetches_after_version_change_with_dev_filter(): void {
+	public function test_get_release_asset_url_for_version_returns_empty_when_method_missing(): void {
+		$lp_api = new Language_Pack_API( $this->make_type() );
+
+		$result = $this->call_protected_on( $lp_api, 'get_release_asset_url_for_version', '1.0.0' );
+		$this->assertSame( '', $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_release_asset_url_for_version_from_data() — lines 498-502
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When the version is found in dev_assets but not in stable assets,
+	 * the dev_assets URL is returned. Covers lines 498-499.
+	 */
+	public function test_get_release_asset_url_from_data_returns_dev_asset_url(): void {
+		$data = [
+			'assets'     => [],
+			'dev_assets' => [ '2.0.0-beta1' => 'https://example.com/beta.zip' ],
+		];
+
+		$result = $this->call_protected( 'get_release_asset_url_for_version_from_data', $data, '2.0.0-beta1' );
+		$this->assertSame( 'https://example.com/beta.zip', $result );
+	}
+
+	/**
+	 * When the version is not found in either assets or dev_assets,
+	 * empty string is returned. Covers line 502.
+	 */
+	public function test_get_release_asset_url_from_data_returns_empty_when_version_not_found(): void {
+		$data = [
+			'assets'     => [ '1.0.0' => 'https://example.com/1.0.0.zip' ],
+			'dev_assets' => [ '2.0.0-beta1' => 'https://example.com/beta.zip' ],
+		];
+
+		$result = $this->call_protected( 'get_release_asset_url_for_version_from_data', $data, '3.0.0' );
+		$this->assertSame( '', $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_newest_release_asset_version() — line 516
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When get_release_assets() returns false, get_newest_release_asset_version()
+	 * returns empty string. Covers line 516.
+	 */
+	public function test_get_newest_release_asset_version_returns_empty_when_assets_false(): void {
+		$no_assets          = new stdClass();
+		$no_assets->message = 'No release assets found';
+		$this->seed_cache( [ 'release_assets' => $no_assets ] );
+
+		$result = $this->call_protected( 'get_newest_release_asset_version' );
+		$this->assertSame( '', $result );
+	}
+
+	/**
+	 * When the API object does not implement get_release_assets() (e.g. a
+	 * Language_Pack_API), get_newest_release_asset_version() returns empty
+	 * string via the method_exists guard. Covers line 511.
+	 */
+	public function test_get_newest_release_asset_version_returns_empty_when_method_missing(): void {
+		$lp_api = new Language_Pack_API( $this->make_type() );
+
+		$result = $this->call_protected_on( $lp_api, 'get_newest_release_asset_version' );
+		$this->assertSame( '', $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_newest_release_asset_version_from_data() — lines 538-541
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When gu_dev_release_asset filter is true and the dev asset version is
+	 * newer than the stable asset version, the dev version is returned.
+	 * Covers lines 538-541.
+	 */
+	public function test_get_newest_release_asset_version_from_data_returns_dev_when_newer(): void {
+		$data = [
+			'assets'     => [ '1.0.0' => 'https://example.com/1.0.0.zip' ],
+			'dev_assets' => [ '2.0.0-beta1' => 'https://example.com/beta.zip' ],
+		];
+
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+
+		$result = $this->call_protected( 'get_newest_release_asset_version_from_data', $data );
+		$this->assertSame( '2.0.0-beta1', $result );
+	}
+
+	/**
+	 * When gu_dev_release_asset filter is true but the dev asset version is
+	 * NOT newer than the stable asset version, the stable version is returned.
+	 */
+	public function test_get_newest_release_asset_version_from_data_returns_stable_when_dev_not_newer(): void {
+		$data = [
+			'assets'     => [ '2.0.0' => 'https://example.com/2.0.0.zip' ],
+			'dev_assets' => [ '2.0.0-beta1' => 'https://example.com/beta.zip' ],
+		];
+
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+
+		$result = $this->call_protected( 'get_newest_release_asset_version_from_data', $data );
+		$this->assertSame( '2.0.0', $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_newest_tag_or_remote_version() — lines 557, 564, 568, 577
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When gu_dev_release_asset filter is false, get_newest_tag_or_remote_version()
+	 * returns newest_tag directly. Covers line 557.
+	 */
+	public function test_get_newest_tag_or_remote_version_returns_newest_tag_when_filter_false(): void {
+		$this->type->newest_tag = '1.5.0';
+
+		$result = $this->call_protected( 'get_newest_tag_or_remote_version' );
+		$this->assertSame( '1.5.0', $result );
+	}
+
+	/**
+	 * When gu_dev_release_asset filter is true, release_assets is false (not passed),
+	 * and get_release_assets() returns false, the method returns newest_tag.
+	 * Covers lines 564, 568.
+	 */
+	public function test_get_newest_tag_or_remote_version_returns_newest_tag_when_assets_false(): void {
+		$this->type->newest_tag = '1.5.0';
+
+		$no_assets          = new stdClass();
+		$no_assets->message = 'No release assets found';
+		$this->seed_cache( [ 'release_assets' => $no_assets ] );
+
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+
+		$result = $this->call_protected( 'get_newest_tag_or_remote_version' );
+		$this->assertSame( '1.5.0', $result );
+	}
+
+	/**
+	 * When gu_dev_release_asset filter is true, no release_assets passed, and
+	 * the API object does not implement get_release_assets() (e.g. a
+	 * Language_Pack_API), get_newest_tag_or_remote_version() returns newest_tag
+	 * via the method_exists guard. Covers line 561.
+	 */
+	public function test_get_newest_tag_or_remote_version_returns_newest_tag_when_method_missing(): void {
+		$lp_type            = new stdClass();
+		$lp_type->newest_tag = '1.5.0';
+
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+
+		$lp_api = new Language_Pack_API( $lp_type );
+
+		$result = $this->call_protected_on( $lp_api, 'get_newest_tag_or_remote_version' );
+		$this->assertSame( '1.5.0', $result );
+	}
+
+	/**
+	 * When gu_dev_release_asset filter is true and the dev asset version
+	 * matches remote_version (after ltrim), the dev asset version is returned.
+	 * Covers line 577.
+	 */
+	public function test_get_newest_tag_or_remote_version_returns_dev_version_when_matching_remote(): void {
+		$this->type->newest_tag     = '1.0.0';
+		$this->type->remote_version = '2.0.0';
+
+		$release_assets = [
+			'assets'     => [ '1.0.0' => 'https://example.com/1.0.0.zip' ],
+			'dev_assets' => [ 'v2.0.0' => 'https://example.com/beta.zip' ],
+		];
+
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+
+		$result = $this->call_protected( 'get_newest_tag_or_remote_version', $release_assets );
+		$this->assertSame( 'v2.0.0', $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_api_release_assets() — lines 639-640
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When gu_dev_release_asset filter is true and the dev asset version
+	 * differs from newest_tag, get_api_release_assets() updates newest_tag
+	 * and caches it. Covers lines 639-640.
+	 */
+	public function test_get_api_release_assets_updates_newest_tag_with_dev_filter(): void {
 		add_filter( 'gu_always_fetch_update', '__return_true' );
 		add_filter( 'gu_dev_release_asset', '__return_true' );
 
-		// Seed an expired cache (so the fetch runs) with a complete fetch cycle
-		// and stale release assets from the previous remote version.
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin' ),
-			[
-				'timeout'                => strtotime( '-1 hour' ),
-				'repo'                   => 'test-plugin',
-				'test-plugin'            => [ 'Version' => '1.0.0' ],
-				'ran'                    => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-				'release_assets'         => [
-					'assets'     => [ '1.0.0' => 'https://example.com/stable-1.0.0.zip' ],
-					'dev_assets' => [ '1.1.0-beta' => 'https://example.com/dev-1.1.0-beta.zip' ],
-				],
-				'release_asset'          => true,
-				'release_asset_download' => 'https://example.com/dev-1.1.0-beta.zip',
-			]
-		);
+		$this->type->newest_tag     = '1.0.0';
+		$this->type->remote_version = '2.0.0';
 
-		// Remote now reports Version 2.0.0 with a newer dev asset.
-		$plugin_header = implode(
-			"\n",
-			[
-				'<?php',
-				'/**',
-				' * Plugin Name: Test Plugin',
-				' * Plugin URI: https://example.com',
-				' * Version: 2.0.0',
-				' * Description: A test plugin.',
-				' * Author: Test Author',
-				' * Author URI: https://example.com/author',
-				' * License: GPL-3.0-or-later',
-				' * Text Domain: test-plugin',
-				' */',
-			]
-		);
-		$api_body = wp_json_encode(
-			[
-				'content'  => base64_encode( $plugin_header ),
-				'encoding' => 'base64',
-			]
-		);
-
-		// Call 1: get_remote_info() fetches the bumped header; the version change
-		// (while the cache is valid) drops the stale release-asset entries.
-		$this->intercept_http_with( $this->mock_http_response_raw( 200, $api_body ) );
-		$this->api->get_remote_info( 'test-plugin.php' );
-		remove_all_filters( 'pre_http_request' );
-
-		$cache = $this->api->get_repo_cache( 'test-plugin', false );
-		$this->assertArrayNotHasKey( 'release_assets', $cache );
-		$this->assertArrayNotHasKey( 'release_asset', $cache );
-		$this->assertArrayNotHasKey( 'release_asset_download', $cache );
-
-		// Call 2: the lazy fetch rebuilds release assets from the new remote.
-		$releases = [
-			[
-				'tag_name' => '2.0.0',
-				'assets'   => [
-					[
-						'name'       => 'test-plugin-2.0.0.zip',
-						'url'        => 'https://example.com/stable-2.0.0.zip',
-						'created_at' => '2024-08-01T12:00:00Z',
-					],
-				],
-			],
-			[
-				'tag_name' => '2.1.0-beta',
-				'assets'   => [
-					[
-						'name'       => 'test-plugin-2.1.0-beta.zip',
-						'url'        => 'https://example.com/dev-2.1.0-beta.zip',
-						'created_at' => '2024-09-01T12:00:00Z',
-					],
-				],
-			],
+		// Pre-seed release_assets cache with dev assets so get_api_release_assets
+		// reads from cache and reaches the dev filter block.
+		$cached = [
+			'assets'         => [ '1.0.0' => 'https://example.com/1.0.0.zip' ],
+			'created_at'     => [ '1.0.0' => '2024-01-01T00:00:00Z' ],
+			'dev_assets'     => [ 'v2.0.0' => 'https://example.com/2.0.0.zip' ],
+			'dev_created_at' => [ 'v2.0.0' => '2024-06-01T00:00:00Z' ],
 		];
-		$this->intercept_http_with( $this->mock_http_response( 200, $releases ) );
+		$this->seed_cache( [ 'release_assets' => $cached ] );
 
-		$result = $this->api->get_release_assets();
+		$result = $this->api->get_api_release_assets( 'github', '/repos/test-owner/test-plugin/releases' );
+
 		$this->assertIsArray( $result );
-		$this->assertArrayHasKey( '2.0.0', $result['assets'] );
-		$this->assertArrayHasKey( '2.1.0-beta', $result['dev_assets'] );
-
-		// The dev filter makes the newest dev asset the release_asset_download.
-		$cache = $this->api->get_repo_cache( 'test-plugin', false );
-		$this->assertSame( 'https://example.com/dev-2.1.0-beta.zip', $cache['release_asset_download'] );
-	}
-
-	/**
-	 * Same as the dev-filter test, but without the filter the newest stable
-	 * asset wins after the version-change refresh.
-	 */
-	public function test_get_release_assets_refetches_after_version_change_stable(): void {
-		add_filter( 'gu_always_fetch_update', '__return_true' );
-
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin' ),
-			[
-				'timeout'                => strtotime( '-1 hour' ),
-				'repo'                   => 'test-plugin',
-				'test-plugin'            => [ 'Version' => '1.0.0' ],
-				'ran'                    => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-				'release_assets'         => [
-					'assets'     => [ '1.0.0' => 'https://example.com/stable-1.0.0.zip' ],
-					'dev_assets' => [ '1.1.0-beta' => 'https://example.com/dev-1.1.0-beta.zip' ],
-				],
-				'release_asset'          => true,
-				'release_asset_download' => 'https://example.com/stable-1.0.0.zip',
-			]
-		);
-
-		$plugin_header = implode(
-			"\n",
-			[
-				'<?php',
-				'/**',
-				' * Plugin Name: Test Plugin',
-				' * Plugin URI: https://example.com',
-				' * Version: 2.0.0',
-				' * Description: A test plugin.',
-				' * Author: Test Author',
-				' * Author URI: https://example.com/author',
-				' * License: GPL-3.0-or-later',
-				' * Text Domain: test-plugin',
-				' */',
-			]
-		);
-		$api_body = wp_json_encode(
-			[
-				'content'  => base64_encode( $plugin_header ),
-				'encoding' => 'base64',
-			]
-		);
-
-		$this->intercept_http_with( $this->mock_http_response_raw( 200, $api_body ) );
-		$this->api->get_remote_info( 'test-plugin.php' );
-		remove_all_filters( 'pre_http_request' );
-
-		$releases = [
-			[
-				'tag_name' => '2.0.0',
-				'assets'   => [
-					[
-						'name'       => 'test-plugin-2.0.0.zip',
-						'url'        => 'https://example.com/stable-2.0.0.zip',
-						'created_at' => '2024-08-01T12:00:00Z',
-					],
-				],
-			],
-		];
-		$this->intercept_http_with( $this->mock_http_response( 200, $releases ) );
-
-		$result = $this->api->get_release_assets();
-		$this->assertIsArray( $result );
-		$this->assertArrayHasKey( '2.0.0', $result['assets'] );
-
-		$cache = $this->api->get_repo_cache( 'test-plugin', false );
-		$this->assertSame( 'https://example.com/stable-2.0.0.zip', $cache['release_asset_download'] );
+		// newest_tag should be updated to the dev asset version.
+		$this->assertSame( 'v2.0.0', $this->type->newest_tag );
 	}
 }

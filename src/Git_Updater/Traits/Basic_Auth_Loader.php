@@ -50,6 +50,10 @@ trait Basic_Auth_Loader {
 	/**
 	 * Add authentication header to wp_remote_get().
 	 *
+	 * Credentials are destination-scoped and fail-closed: a request to a host
+	 * that is not authorized for the resolved credential type is sent without
+	 * any Authorization header.
+	 *
 	 * @access public
 	 *
 	 * @param array<string, mixed> $args Args passed to the URL.
@@ -62,6 +66,13 @@ trait Basic_Auth_Loader {
 		if ( ! $credentials['isset'] || $credentials['api.wordpress'] ) {
 			return $args;
 		}
+
+		// Never attach credentials to a host that is not authorized for this
+		// credential type; skip the add-on auth header filter too.
+		if ( ! $this->is_allowed_credential_host( $url, $credentials['type'] ) ) {
+			return $args;
+		}
+
 		if ( null !== $credentials['token'] ) {
 			// Proactive refresh: check expiry before using the token.
 			$provider = $credentials['type'] ?? null;
@@ -127,7 +138,6 @@ trait Basic_Auth_Loader {
 			'isset'         => false,
 			'token'         => null,
 			'type'          => null,
-			'enterprise'    => null,
 			'slug'          => null,
 		];
 
@@ -135,14 +145,10 @@ trait Basic_Auth_Loader {
 			return $credentials;
 		}
 
-		static $cached_repos = null;
-		if ( null === $cached_repos ) {
-			$cached_repos = array_merge(
-				Singleton::get_instance( 'Plugin', $this )->get_plugin_configs(),
-				Singleton::get_instance( 'Theme', $this )->get_theme_configs()
-			);
-		}
-		$repos = $cached_repos;
+		$repos = array_merge(
+			Singleton::get_instance( 'Plugin', $this )->get_plugin_configs(),
+			Singleton::get_instance( 'Theme', $this )->get_theme_configs()
+		);
 		$slug  = $this->get_slug_for_credentials( $headers, $repos, $url, $options );
 		$type  = $this->get_type_for_credentials( $slug, $repos, $url );
 
@@ -157,11 +163,10 @@ trait Basic_Auth_Loader {
 			$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $token;
 			$type  = 'github';
 
-			$credentials['type']       = $type;
-			$credentials['isset']      = true;
-			$credentials['token']      = $token ?? null;
-			$credentials['enterprise'] = ! in_array( $headers['host'], [ 'github.com', 'api.github.com' ], true );
-			$credentials['slug']       = $slug;
+			$credentials['type']  = $type;
+			$credentials['isset'] = true;
+			$credentials['token'] = $token ?? null;
+			$credentials['slug']  = $slug;
 		}
 
 		// Filter hook args.
@@ -204,6 +209,13 @@ trait Basic_Auth_Loader {
 		$slug     = ! $slug && isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : $slug;
 
 		$slug = str_contains( $slug, '/' ) ? dirname( $slug ) : $slug;
+
+		// Only honor a request-supplied slug when it names a known repository.
+		// Otherwise an arbitrary request value (e.g. 'gitlab_access_token') could be
+		// used as an option key to select which stored secret is sent upstream.
+		if ( $slug && ! array_key_exists( $slug, $repos ) ) {
+			$slug = false;
+		}
 
 		// Set for bulk upgrade.
 		if ( ! $slug ) {
@@ -254,7 +266,7 @@ trait Basic_Auth_Loader {
 	 * @param array<string, mixed> $repos Array of repositories.
 	 * @param string               $url   URL being called by API.
 	 *
-	 * @return string
+	 * @return string|null
 	 */
 	private function get_type_for_credentials( $slug, $repos, $url ) {
 		$type = $this->get_class_vars( 'Base', 'caller' );
@@ -273,11 +285,16 @@ trait Basic_Auth_Loader {
 			}
 		}
 
-		// Set for Remote Install.
+		// Set for Remote Install. The posted API can only select a credential
+		// type when it also owns the destination host.
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		$type = isset( $_POST['git_updater_api'], $_POST['git_updater_repo'] )
-			&& str_contains( $url, basename( sanitize_text_field( wp_unslash( $_POST['git_updater_repo'] ) ) ) )
-			? sanitize_text_field( wp_unslash( $_POST['git_updater_api'] ) )
+		$posted_api  = isset( $_POST['git_updater_api'] ) ? sanitize_text_field( wp_unslash( $_POST['git_updater_api'] ) ) : '';
+		$posted_repo = isset( $_POST['git_updater_repo'] ) ? basename( sanitize_text_field( wp_unslash( $_POST['git_updater_repo'] ) ) ) : '';
+		$type        = $posted_api
+			&& '' !== $posted_repo
+			&& str_contains( $url, $posted_repo )
+			&& $this->is_allowed_credential_host( $url, $posted_api )
+			? $posted_api
 			: $type;
 		// phpcs:enable
 
@@ -298,6 +315,10 @@ trait Basic_Auth_Loader {
 	 * @return array<string, array<int, string>>
 	 */
 	final public function get_credential_hosts() {
+		// Minimal bundled floor: GitHub ships with git-updater, so its public
+		// hosts are seeded here. Every other provider — public and
+		// enterprise/self-hosted — is contributed by its active API add-on
+		// through the `gu_credential_hosts` filter below.
 		$hosts = [
 			'github' => [
 				'github.com',
@@ -341,7 +362,7 @@ trait Basic_Auth_Loader {
 		/**
 		 * Filter the hosts authorized to receive credentials per git provider.
 		 *
-		 * @since 14.4.4
+		 * @since 14.4.3
 		 *
 		 * @param array<string, array<int, string>> $hosts          Provider => hostnames.
 		 * @param array<string, bool|string>        $installed_apis Active API add-ons.
@@ -393,7 +414,7 @@ trait Basic_Auth_Loader {
 		foreach ( $hosts[ $type ] as $allowed ) {
 			$allowed = strtolower( (string) $allowed );
 			if ( '' === $allowed ) {
-				continue;
+				continue; // @codeCoverageIgnore
 			}
 			if ( $host === $allowed || str_ends_with( $host, '.' . $allowed ) ) {
 				return true;
@@ -446,8 +467,8 @@ trait Basic_Auth_Loader {
 		}
 		foreach ( $args['headers'] as $key => $value ) {
 			if ( in_array( $key, $this->get_running_git_servers(), true ) ) {
-				$repo_cache = $this->get_repo_cache( $value, false );
-				if ( 'github' === $key && isset( $repo_cache['release_asset_download'] ) && ! empty( $repo_cache['release_asset_download'] ) ) {
+				$repo_cache = $this->get_repo_cache( $value, false, 'release_asset_download' );
+				if ( 'github' === $key && ! empty( $repo_cache ) ) {
 					$octet_stream    = [ 'Accept' => 'application/octet-stream' ];
 					$args['headers'] = array_merge( $args['headers'], $octet_stream );
 				}

@@ -63,7 +63,7 @@ class Test_GitHub_API_Parse extends WP_UnitTestCase {
 	public function tear_down(): void {
 		remove_all_filters( 'pre_http_request' );
 		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		parent::tear_down();
 	}
 
@@ -237,21 +237,20 @@ class Test_GitHub_API_Parse extends WP_UnitTestCase {
 	 * so no API call is expected here.
 	 */
 	public function test_parse_branch_response_seeds_branches_and_only_primary_uses_release_asset(): void {
-		$asset_url          = 'https://github.com/test-owner/test-plugin/releases/download/v1.0.0/plugin.zip';
-		$this->type->release_asset  = true;
-		$this->type->newest_tag     = '1.0.0';
-		$this->type->tags           = [ '1.0.0' => 'https://github.com/test-owner/test-plugin/zipball/1.0.0' ];
-		$this->type->primary_branch = 'master';
-		$this->type->branch         = 'master';
+		$asset_url                 = 'https://github.com/test-owner/test-plugin/releases/download/v1.0.0/plugin.zip';
+		$this->type->release_asset = true;
+		$this->type->newest_tag    = '1.0.0';
+		$this->type->tags          = [ '1.0.0' => 'https://github.com/test-owner/test-plugin/zipball/1.0.0' ];
 
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin' ),
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$table->add_entry( 'test-plugin', 'repo_headers', '', strtotime( '-1 hour' ) );
+		$table->add_entry(
+			'test-plugin',
+			'release_assets',
 			[
-				'timeout'        => strtotime( '-1 hour' ),
-				'release_assets' => [
-					'assets'     => [ '1.0.0' => $asset_url ],
-					'dev_assets' => [],
-				],
+				'assets'     => [ '1.0.0' => $asset_url ],
+				'dev_assets' => [],
 			]
 		);
 
@@ -725,6 +724,27 @@ class Test_GitHub_API_Links extends WP_UnitTestCase {
 		$this->assertSame( $release_url, $result['download_link'] );
 	}
 
+	/**
+	 * A releases/download override on a host that is not authorized for GitHub
+	 * credentials is rejected with a WP_Error instead of being used as-is.
+	 */
+	public function test_remote_install_rejects_release_asset_uri_on_untrusted_host(): void {
+		$headers = [
+			'host'     => 'github.com',
+			'uri'      => 'https://attacker.example.net/releases/download/v1.0.0/plugin.zip',
+			'base_uri' => '',
+		];
+		$install = [
+			'git_updater_repo'   => 'owner/repo',
+			'git_updater_branch' => 'main',
+		];
+
+		$result = $this->api->remote_install( $headers, $install );
+
+		$this->assertInstanceOf( WP_Error::class, $result['error'] );
+		$this->assertSame( 'gu_install_host_not_allowed', $result['error']->get_error_code() );
+	}
+
 	public function test_remote_install_saves_access_token_when_provided(): void {
 		$headers = [
 			'host'     => 'github.com',
@@ -776,7 +796,6 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 		add_filter( 'gu_always_fetch_update', '__return_false' );
 		remove_all_filters( 'gu_always_fetch_update' );
 		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
 		parent::tear_down();
 	}
 
@@ -799,10 +818,15 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 	}
 
 	private function seed_cache( array $data ): void {
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin' ),
-			array_merge( [ 'timeout' => strtotime( '+12 hours' ) ], $data )
-		);
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$table->add_entry( 'test-plugin', 'repo_headers', '', strtotime( '+12 hours' ) );
+		foreach ( $data as $column => $value ) {
+			if ( 'timeout' === $column ) {
+				continue;
+			}
+			$table->add_entry( 'test-plugin', $column, $value );
+		}
 	}
 
 	// -------------------------------------------------------------------------
@@ -925,6 +949,89 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The gu_dev_release_asset filter means "use the dev release asset only when
+	 * its version is greater than the stable release asset version." When the dev
+	 * version is NOT greater (e.g. a pre-release of the same base version), the
+	 * stable release asset must be selected.
+	 */
+	public function test_construct_download_link_uses_stable_asset_when_dev_not_newer(): void {
+		$stable_url = 'https://github.com/test-owner/test-plugin/releases/download/v2.0.0/plugin.zip';
+		$dev_url    = 'https://github.com/test-owner/test-plugin/releases/download/v2.0.0-beta1/plugin-beta.zip';
+
+		$this->seed_cache(
+			[
+				'release_assets' => [
+					'assets'     => [ '2.0.0' => $stable_url ],
+					'dev_assets' => [ '2.0.0-beta1' => $dev_url ],
+				],
+			]
+		);
+
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+
+		$result = $this->api->construct_download_link();
+
+		// version_compare('2.0.0', '2.0.0-beta1', '<') is false — a final release
+		// outranks a pre-release of the same version, so the stable asset wins.
+		$this->assertSame( $stable_url, $result );
+	}
+
+	/**
+	 * A release-asset repo on the primary branch with the dev filter active must
+	 * resolve to the dev release asset, not the primary-branch zipball.
+	 */
+	public function test_construct_download_link_primary_branch_dev_filter_returns_dev_asset(): void {
+		$stable_url = 'https://github.com/test-owner/test-plugin/releases/download/v1.0.0/plugin.zip';
+		$dev_url    = 'https://github.com/test-owner/test-plugin/releases/download/v2.0.0-beta1/plugin-beta.zip';
+
+		$this->seed_cache(
+			[
+				'release_assets' => [
+					'assets'     => [ '1.0.0' => $stable_url ],
+					'dev_assets' => [ '2.0.0-beta1' => $dev_url ],
+				],
+			]
+		);
+
+		// Repo is on the primary branch, as in the reported consumer scenario.
+		$this->type->branch         = 'master';
+		$this->type->primary_branch = 'master';
+		$this->type->branches       = (object) [ 'master' => [], 'develop' => [] ];
+
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+
+		$result = $this->api->construct_download_link();
+
+		$this->assertSame( $dev_url, $result );
+	}
+
+	/**
+	 * A release-asset repo on the primary branch WITHOUT the dev filter must
+	 * resolve to the stable release asset, not the primary-branch zipball.
+	 */
+	public function test_construct_download_link_primary_branch_returns_stable_asset(): void {
+		$stable_url = 'https://github.com/test-owner/test-plugin/releases/download/v1.0.0/plugin.zip';
+		$dev_url    = 'https://github.com/test-owner/test-plugin/releases/download/v2.0.0-beta1/plugin-beta.zip';
+
+		$this->seed_cache(
+			[
+				'release_assets' => [
+					'assets'     => [ '1.0.0' => $stable_url ],
+					'dev_assets' => [ '2.0.0-beta1' => $dev_url ],
+				],
+			]
+		);
+
+		$this->type->branch         = 'master';
+		$this->type->primary_branch = 'master';
+		$this->type->branches       = (object) [ 'master' => [], 'develop' => [] ];
+
+		$result = $this->api->construct_download_link();
+
+		$this->assertSame( $stable_url, $result );
+	}
+
+	/**
 	 * When the target is a specific tag that matches the newest release asset version,
 	 * construct_download_link() returns the release asset URL from cache.
 	 */
@@ -935,7 +1042,7 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 		$this->seed_cache(
 			[
 				'release_assets' => [
-					'assets'     => [ '1.2.3' => $tag_url ],
+					'assets'     => [ '1.2.3' => $tag_url, '1.0.0' => 'https://example.com/1.0.0.zip' ],
 					'dev_assets' => [],
 				],
 			]
@@ -946,7 +1053,35 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 		$result = $this->api->construct_download_link( '1.2.3' );
 
+		// Tag matches newest release asset version, so it gets the release asset URL.
 		$this->assertSame( $tag_url, $result );
+	}
+
+	/**
+	 * When the target is a specific tag that does NOT match the newest release asset version,
+	 * construct_download_link() falls through to zipball URL.
+	 */
+	public function test_construct_download_link_returns_zipball_for_non_matching_tag(): void {
+		$tag_url = 'https://github.com/test-owner/test-plugin/releases/download/v1.2.3/plugin.zip';
+
+		// Seed cache with release assets where 1.2.3 is the newest.
+		$this->seed_cache(
+			[
+				'release_assets' => [
+					'assets'     => [ '1.2.3' => $tag_url, '1.0.0' => 'https://example.com/1.0.0.zip' ],
+					'dev_assets' => [],
+				],
+			]
+		);
+
+		// Update type to have 1.2.3 as newest tag.
+		$this->type->newest_tag = '1.2.3';
+
+		// Request tag 1.0.0 which does NOT match the newest release asset version (1.2.3).
+		$result = $this->api->construct_download_link( '1.0.0' );
+
+		// Tag doesn't match newest release asset version, so it gets zipball URL.
+		$this->assertSame( 'https://api.github.com/repos/test-owner/test-plugin/zipball/1.0.0', $result );
 	}
 
 	/**
@@ -979,6 +1114,35 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 			$this->assertTrue( true ); // No cache row means nothing was cached.
 		}
 	}
+
+	/**
+	 * A tag equal to the newest release asset version resolves to that asset
+	 * URL via the cached data (no HTTP round-trip).
+	 * Covers GitHub_API.php:237-240.
+	 */
+	public function test_resolve_release_asset_returns_asset_url_for_newest_tag(): void {
+		$type         = $this->make_type();
+		$type->branch = '1.0.0';
+
+		// Seed release_assets so get_newest_release_asset_version() returns
+		// '1.0.0' and get_release_asset_url_for_version() finds the URL.
+		$download_url = 'https://example.com/stable-1.0.0.zip';
+		$this->seed_cache(
+			[
+				'release_assets' => [
+					'assets'     => [ '1.0.0' => $download_url ],
+					'dev_assets' => [],
+				],
+			]
+		);
+
+		$rm = new ReflectionMethod( $this->api, 'resolve_release_asset' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+
+		// '1.0.0' is not a branch (branches only holds 'master') → is_tag_target()
+		// is true; it equals the newest release asset version → returns the cached URL.
+		$this->assertSame( $download_url, $rm->invoke( $this->api, '1.0.0' ) );
+	}
 }
 
 /**
@@ -1002,6 +1166,8 @@ class Test_GitHub_API_DownloadLink_CacheTags extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		$this->type = $this->make_stale_type();
 		$this->api  = new GitHub_API( $this->type );
 	}
@@ -1009,7 +1175,7 @@ class Test_GitHub_API_DownloadLink_CacheTags extends WP_UnitTestCase {
 	public function tear_down(): void {
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'gu_dev_release_asset' );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		parent::tear_down();
 	}
 
@@ -1036,10 +1202,12 @@ class Test_GitHub_API_DownloadLink_CacheTags extends WP_UnitTestCase {
 	}
 
 	private function seed_cache( array $data ): void {
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin' ),
-			array_merge( [ 'timeout' => strtotime( '+12 hours' ) ], $data )
-		);
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$table->add_entry( 'test-plugin', 'repo_headers', '', strtotime( '+12 hours' ) );
+		foreach ( $data as $column => $value ) {
+			$table->add_entry( 'test-plugin', $column, $value );
+		}
 	}
 
 	/**
@@ -1180,14 +1348,11 @@ class Test_GitHub_API_DownloadLink_CacheTags extends WP_UnitTestCase {
 	 * tag data to construct_download_link().
 	 */
 	public function test_expired_cache_still_supplies_tag_data(): void {
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin' ),
-			[
-				'timeout'    => strtotime( '-1 hour' ),
-				'tags'       => [ '1.0.0', '1.2.0' ],
-				'newest_tag' => '1.2.0',
-			]
-		);
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$table->add_entry( 'test-plugin', 'repo_headers', '', strtotime( '-1 hour' ) );
+		$table->add_entry( 'test-plugin', 'tags', [ '1.0.0', '1.2.0' ] );
+		$table->add_entry( 'test-plugin', 'newest_tag', '1.2.0' );
 
 		$result = $this->api->construct_download_link();
 
@@ -1439,5 +1604,71 @@ class Test_GitHub_API_Settings extends WP_UnitTestCase {
 		delete_site_option( 'git_updater' );
 		Base::$options = [];
 		API::$options  = [];
+	}
+
+	// -------------------------------------------------------------------------
+	// resolve_release_asset() — branch target never uses a release asset
+	// -------------------------------------------------------------------------
+
+	/**
+	 * A non-primary, non-tag branch target must never resolve to a release asset.
+	 * Covers GitHub_API.php:245-246 — the early `return ''` before any API call.
+	 */
+	public function test_resolve_release_asset_returns_empty_for_branch_target(): void {
+		$type                 = new stdClass();
+		$type->slug           = 'test-plugin';
+		$type->git            = 'github';
+		$type->type           = 'plugin';
+		$type->owner          = 'test-owner';
+		$type->branch         = 'feature';
+		$type->primary_branch = 'master';
+		$type->enterprise     = false;
+		$type->enterprise_api = null;
+		$type->gist_id        = null;
+		$type->branches       = [ 'master' => 'x', 'feature' => 'y' ];
+
+		$api = new GitHub_API( $type );
+		$rm  = new ReflectionMethod( $api, 'resolve_release_asset' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+
+		// 'feature' is a branch (present in $type->branches), so is_tag_target() is
+		// false and the function returns '' without any HTTP/release-asset lookup.
+		$this->assertSame( '', $rm->invoke( $api, 'feature' ) );
+	}
+
+	/**
+	 * A tag that isn't the newest release asset falls through to the zipball
+	 * branch (returns ''). Covers GitHub_API.php:241-242.
+	 */
+	public function test_resolve_release_asset_returns_empty_for_non_newest_tag(): void {
+		$type                 = new stdClass();
+		$type->slug           = 'test-plugin';
+		$type->git            = 'github';
+		$type->type           = 'plugin';
+		$type->owner          = 'test-owner';
+		$type->branch         = '1.0.0';
+		$type->primary_branch = 'master';
+		$type->enterprise     = false;
+		$type->enterprise_api = null;
+		$type->gist_id        = null;
+		$type->branches       = [ 'master' => 'x' ];
+
+		// Force get_release_assets() to return an empty array so
+		// get_newest_release_asset_version() returns '' and the tag never matches.
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$api = new GitHub_API( $type );
+		$rm  = new ReflectionMethod( $api, 'resolve_release_asset' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+
+		// '1.0.0' is not a branch → is_tag_target() is true, but it doesn't match
+		// the (empty) newest release asset version, so it returns '' (zipball).
+		$this->assertSame( '', $rm->invoke( $api, '1.0.0' ) );
 	}
 }

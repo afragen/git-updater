@@ -72,7 +72,7 @@ class Test_GUTrait extends \WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * When $repo is an array (icon/dashicon context), override_dot_org() must
+	 * When $repo is an array (Settings icon context), override_dot_org() must
 	 * cast it to object and treat dot_org_master as true.  With no filter
 	 * overrides registered, the return value is false (do not override
 	 * dot-org updates for the icon rendering path).
@@ -237,15 +237,16 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		$this->type = $this->make_type();
 		$this->api  = new GitHub_API( $this->type );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 	}
 
 	public function tear_down(): void {
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'wp_doing_ajax' );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		wp_clear_scheduled_hook( 'gu_test_cron_hook_xyz' );
 		parent::tear_down();
 	}
@@ -273,48 +274,130 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 		$this->assertFalse( $result );
 	}
 
+	public function test_get_repo_cache_with_column_returns_scalar(): void {
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'current_branch',
+			'develop',
+			strtotime( '+12 hours' )
+		);
+
+		$result = $this->api->get_repo_cache( 'test-plugin', false, 'current_branch' );
+		$this->assertSame( 'develop', $result );
+	}
+
+	public function test_get_repo_cache_with_column_returns_false_when_no_row(): void {
+		$result = $this->api->get_repo_cache( 'test-plugin', false, 'current_branch' );
+		$this->assertFalse( $result );
+	}
+
+	public function test_get_repo_cache_with_column_respects_timeout(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'current_branch', 'develop', strtotime( '-1 hour' ) );
+
+		// With timeout check, the expired row yields false even for a single column.
+		$this->assertFalse( $this->api->get_repo_cache( 'test-plugin', true, 'current_branch' ) );
+		// Without timeout check, the scalar is returned.
+		$this->assertSame( 'develop', $this->api->get_repo_cache( 'test-plugin', false, 'current_branch' ) );
+	}
+
+	public function test_get_repo_cache_with_columns_returns_partial_row(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ], strtotime( '+12 hours' ) );
+		$table->add_entry( 'test-plugin', 'readme', 'body', strtotime( '+12 hours' ) );
+
+		$result = $this->api->get_repo_cache( 'test-plugin', false, [ 'tags', 'readme' ] );
+
+		$this->assertSame( [ 'tags' => [ '1.0.0' ], 'readme' => 'body' ], $result );
+	}
+
+	public function test_get_repo_cache_with_columns_false_when_no_row(): void {
+		$this->assertFalse( $this->api->get_repo_cache( 'test-plugin', false, [ 'tags', 'readme' ] ) );
+	}
+
+	public function test_get_repo_cache_with_columns_respects_timeout(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ], strtotime( '-1 hour' ) );
+
+		$this->assertFalse( $this->api->get_repo_cache( 'test-plugin', true, [ 'tags' ] ) );
+		$this->assertSame( [ 'tags' => [ '1.0.0' ] ], $this->api->get_repo_cache( 'test-plugin', false, [ 'tags' ] ) );
+	}
+
+	public function test_get_repo_cache_with_timeout_served_from_object_cache(): void {
+		// After a write with a valid timeout, a timeout-gated projected read is
+		// served entirely from object cache (no DB query for the timeout gate or
+		// the projection).
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'tags',
+			[ '1.0.0' ],
+			time() + 3600
+		);
+
+		$queries = $this->count_cache_table_queries( function () {
+			$this->assertSame( [ '1.0.0' ], $this->api->get_repo_cache( 'test-plugin', true, 'tags' ) );
+		} );
+
+		$this->assertSame( 0, $queries, 'get_repo_cache(true) should be served from object cache on a warm entry' );
+	}
+
 	public function test_get_repo_cache_returns_false_when_timeout_expired(): void {
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'timeout' => strtotime( '-1 hour' ),
-				'data'    => 'some-value',
-			]
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'repo_headers',
+			'some-value',
+			strtotime( '-1 hour' )
 		);
 
 		$result = $this->api->get_repo_cache( 'test-plugin' );
 		$this->assertFalse( $result );
 	}
 
+	public function test_set_repo_cache_reuses_scalar_cache_no_duplicate_query(): void {
+		// The diff-guard in set_repo_cache must reuse the object-cached scalar value
+		// and row timeout, not issue a separate [$id,'timeout'] projection query.
+		// This is the ['repo_headers','timeout','error_timeout'] duplicate.
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'repo_headers',
+			[ 'Version' => '1.0.0' ],
+			time() + 3600
+		);
+
+		// Warm the scalar cache exactly as get_remote_api_info() does.
+		$this->assertSame( [ 'Version' => '1.0.0' ], $this->api->get_repo_cache( 'test-plugin', false, 'repo_headers' ) );
+
+		$queries = $this->count_cache_table_queries( function () {
+			$this->api->set_repo_cache( 'repo_headers', [ 'Version' => '1.0.0' ], 'test-plugin', '+1 hour' );
+		} );
+
+		$this->assertSame( 0, $queries, 'set_repo_cache must not issue a separate projection query when the scalar is cached' );
+	}
+
 	public function test_get_repo_cache_returns_cache_when_timeout_valid(): void {
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'timeout' => strtotime( '+12 hours' ),
-				'data'    => 'cached-value',
-			]
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'repo_headers',
+			'cached-value',
+			strtotime( '+12 hours' )
 		);
 
 		$result = $this->api->get_repo_cache( 'test-plugin' );
 		$this->assertIsArray( $result );
-		$this->assertSame( 'cached-value', $result['data'] );
+		$this->assertSame( 'cached-value', $result['repo_headers'] );
 	}
 
 	public function test_get_repo_cache_without_timeout_returns_expired_cache(): void {
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'timeout' => strtotime( '-1 hour' ),
-				'data'    => 'stale-value',
-			]
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'repo_headers',
+			'stale-value',
+			strtotime( '-1 hour' )
 		);
 
 		$result = $this->api->get_repo_cache( 'test-plugin', false );
 		$this->assertIsArray( $result );
-		$this->assertSame( 'stale-value', $result['data'] );
+		$this->assertSame( 'stale-value', $result['repo_headers'] );
 	}
 
 	// -------------------------------------------------------------------------
@@ -323,36 +406,212 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 
 	public function test_set_repo_cache_returns_false_for_wp_error(): void {
 		$error  = new WP_Error( 'test', 'test error' );
-		$result = $this->api->set_repo_cache( 'data', $error, 'test-plugin' );
+		$result = $this->api->set_repo_cache( 'repo_headers', $error, 'test-plugin' );
 		$this->assertFalse( $result );
 	}
 
 	public function test_set_repo_cache_stores_value_and_returns_true(): void {
-		$result = $this->api->set_repo_cache( 'my_key', 'my_value', 'test-plugin', '+1 hour' );
+		$result = $this->api->set_repo_cache( 'tags', 'my_value', 'test-plugin', '+1 hour' );
 		$this->assertTrue( $result );
 
 		$cache = $this->api->get_repo_cache( 'test-plugin' );
 		$this->assertIsArray( $cache );
-		$this->assertSame( 'my_value', $cache['my_key'] );
+		$this->assertSame( 'my_value', $cache['tags'] );
 	}
 
 	public function test_set_repo_cache_preserves_existing_timeout_on_second_write(): void {
-		$this->api->set_repo_cache( 'key1', 'val1', 'test-plugin', '+6 hours' );
+		$this->api->set_repo_cache( 'tags', 'val1', 'test-plugin', '+6 hours' );
 		$timeout_after_first = $this->api->get_repo_cache( 'test-plugin' )['timeout'];
 
-		$this->api->set_repo_cache( 'key2', 'val2', 'test-plugin', '+12 hours' );
+		$this->api->set_repo_cache( 'tags', 'val2', 'test-plugin' );
 		$timeout_after_second = $this->api->get_repo_cache( 'test-plugin' )['timeout'];
 
 		$this->assertSame( $timeout_after_first, $timeout_after_second );
 	}
 
+	public function test_set_repo_cache_refreshes_zero_timeout(): void {
+		// Simulate the reset state: a row with timeout 0 (delete_repo_api_data
+		// nulls every column except current_branch, including timeout).
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', 'old', 0 );
+
+		$result = $this->api->set_repo_cache( 'contents', [ 'dirs' => [ 'assets' ] ], 'test-plugin' );
+
+		$this->assertTrue( $result );
+		$timeout = (int) $table->get_repo( 'test-plugin', 'timeout' );
+		$this->assertGreaterThan( time(), $timeout );
+		$this->assertSame( [ 'dirs' => [ 'assets' ] ], $this->api->get_repo_cache( 'test-plugin', true, 'contents' ) );
+	}
+
+	public function test_set_repo_cache_refreshes_expired_timeout(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', 'old', strtotime( '-1 hour' ) );
+
+		$this->api->set_repo_cache( 'contents', [ 'dirs' => [ 'assets' ] ], 'test-plugin' );
+
+		$timeout = (int) $table->get_repo( 'test-plugin', 'timeout' );
+		$this->assertGreaterThan( time(), $timeout );
+		$this->assertSame( [ 'dirs' => [ 'assets' ] ], $this->api->get_repo_cache( 'test-plugin', true, 'contents' ) );
+	}
+
+	public function test_set_repo_cache_creates_fresh_timeout_on_missing_row(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+
+		$this->api->set_repo_cache( 'contents', [ 'dirs' => [ 'assets' ] ], 'test-plugin' );
+
+		$timeout = (int) $table->get_repo( 'test-plugin', 'timeout' );
+		$this->assertGreaterThan( time(), $timeout );
+		$this->assertSame( [ 'dirs' => [ 'assets' ] ], $this->api->get_repo_cache( 'test-plugin', true, 'contents' ) );
+	}
+
+	public function test_set_repo_cache_preserves_valid_timeout(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$valid = strtotime( '+12 hours' );
+		$table->add_entry( 'test-plugin', 'repo_headers', 'old', $valid );
+
+		$this->api->set_repo_cache( 'contents', [ 'dirs' => [ 'assets' ] ], 'test-plugin' );
+
+		$this->assertSame( (string) $valid, (string) $table->get_repo( 'test-plugin', 'timeout' ) );
+	}
+
 	public function test_set_repo_cache_stores_multiple_keys_in_same_cache_entry(): void {
-		$this->api->set_repo_cache( 'alpha', 'a', 'test-plugin', '+1 hour' );
-		$this->api->set_repo_cache( 'beta', 'b', 'test-plugin' );
+		$this->api->set_repo_cache( 'tags', 'a', 'test-plugin', '+1 hour' );
+		$this->api->set_repo_cache( 'branches', 'b', 'test-plugin' );
 
 		$cache = $this->api->get_repo_cache( 'test-plugin' );
-		$this->assertSame( 'a', $cache['alpha'] );
-		$this->assertSame( 'b', $cache['beta'] );
+		$this->assertSame( 'a', $cache['tags'] );
+		$this->assertSame( 'b', $cache['branches'] );
+	}
+
+	/**
+	 * Count write queries (INSERT/UPDATE) against the cache table during $fn.
+	 *
+	 * @param callable $fn Callback to execute.
+	 * @return int Number of INSERT/UPDATE queries against the cache table.
+	 */
+	private function count_cache_table_writes( callable $fn ): int {
+		global $wpdb;
+		$count      = 0;
+		$table_name = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->table_name();
+		$filter     = function ( $query ) use ( &$count, $table_name ) {
+			if ( false === strpos( $query, $table_name ) ) {
+				return $query;
+			}
+			$verb = strtoupper( ltrim( $query ) );
+			if ( str_starts_with( $verb, 'INSERT' ) || str_starts_with( $verb, 'UPDATE' ) ) {
+				++$count;
+			}
+			return $query;
+		};
+		add_filter( 'query', $filter );
+		try {
+			$fn();
+		} finally {
+			remove_filter( 'query', $filter );
+		}
+		return $count;
+	}
+
+	/**
+	 * Count SELECT/query statements against the cache table during the callback.
+	 *
+	 * @param callable $fn Callback to execute.
+	 *
+	 * @return int Number of queries against the cache table during $fn().
+	 */
+	private function count_cache_table_queries( callable $fn ): int {
+		global $wpdb;
+		$count      = 0;
+		$table_name = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->table_name();
+		$filter     = function ( $query ) use ( &$count, $table_name ) {
+			if ( false !== strpos( $query, $table_name ) ) {
+				++$count;
+			}
+			return $query;
+		};
+		add_filter( 'query', $filter );
+		try {
+			$fn();
+		} finally {
+			remove_filter( 'query', $filter );
+		}
+		return $count;
+	}
+
+	public function test_set_repo_cache_skips_write_when_value_unchanged(): void {
+		// First call writes the value. Second call with the same value must
+		// not produce any INSERT/UPDATE against the cache table.
+		$this->api->set_repo_cache( 'tags', [ '1.0.0' ], 'test-plugin', '+1 hour' );
+
+		$writes = $this->count_cache_table_writes( function () {
+			$this->api->set_repo_cache( 'tags', [ '1.0.0' ], 'test-plugin', '+1 hour' );
+		} );
+
+		$this->assertSame( 0, $writes, 'Unchanged value must not produce write queries' );
+	}
+
+	public function test_set_repo_cache_writes_when_value_differs(): void {
+		$this->api->set_repo_cache( 'tags', [ '1.0.0' ], 'test-plugin', '+1 hour' );
+
+		$writes = $this->count_cache_table_writes( function () {
+			$this->api->set_repo_cache( 'tags', [ '2.0.0' ], 'test-plugin', '+1 hour' );
+		} );
+
+		$this->assertSame( 1, $writes, 'Changed value must produce exactly one write' );
+		$cache = $this->api->get_repo_cache( 'test-plugin' );
+		$this->assertSame( [ '2.0.0' ], $cache['tags'] );
+	}
+
+	public function test_set_repo_cache_skips_write_for_null_to_empty_string(): void {
+		// WordPress's maybe_serialize() returns the input unchanged for null
+		// and '' (both are not is_serialized()), and wpdb stores both as
+		// SQL NULL → '' when read back. The diff guard correctly treats
+		// them as semantically equal.
+		$this->api->set_repo_cache( 'meta', null, 'test-plugin', '+1 hour' );
+
+		$writes = $this->count_cache_table_writes( function () {
+			$this->api->set_repo_cache( 'meta', '', 'test-plugin', '+1 hour' );
+		} );
+
+		$this->assertSame( 0, $writes, 'null → "" round-trips to "" and must not produce a write' );
+	}
+
+	public function test_set_repo_cache_writes_when_column_not_yet_present(): void {
+		// Row exists for the slug but the column was never written.
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'repo_headers',
+			'existing',
+			strtotime( '+1 hour' )
+		);
+
+		$writes = $this->count_cache_table_writes( function () {
+			$this->api->set_repo_cache( 'tags', [ '1.0.0' ], 'test-plugin', '+1 hour' );
+		} );
+
+		$this->assertSame( 1, $writes, 'Missing column must produce a write' );
+	}
+
+	public function test_set_repo_cache_writes_when_no_existing_row(): void {
+		// No row for the slug at all → first call must write.
+		$writes = $this->count_cache_table_writes( function () {
+			$this->api->set_repo_cache( 'tags', [ '1.0.0' ], 'test-plugin', '+1 hour' );
+		} );
+
+		$this->assertSame( 1, $writes, 'First write (no existing row) must produce a write' );
+	}
+
+	public function test_set_repo_cache_always_writes_error_cache(): void {
+		// error_cache is excluded from the diff guard so the short retry
+		// window always refreshes.
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->set_error_cache( 'test-plugin', [ 'http_code' => 500 ], 300 );
+
+		$writes = $this->count_cache_table_writes( function () use ( $table ) {
+			$table->set_error_cache( 'test-plugin', [ 'http_code' => 500 ], 300 );
+		} );
+
+		$this->assertGreaterThan( 0, $writes, 'error_cache must always be refreshable' );
 	}
 
 	// -------------------------------------------------------------------------
@@ -360,66 +619,55 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	public function test_set_repo_cache_timeout_sets_fallback_when_ran_missing(): void {
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'test-plugin' => [ 'Version' => '1.0.0' ],
-				'timeout'     => strtotime( '-1 hour' ),
-			]
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'repo_headers',
+			[ 'Version' => '1.0.0' ],
+			strtotime( '-1 hour' )
 		);
 
 		$this->api->set_repo_cache_timeout( 'test-plugin' );
 
-		$cache = get_site_option( $cache_key );
+		$cache = $this->api->get_repo_cache( 'test-plugin' );
 		$this->assertGreaterThan( time(), $cache['timeout'] );
 		$this->assertLessThan( time() + ( 2 * HOUR_IN_SECONDS ), $cache['timeout'] );
 	}
 
 	public function test_set_repo_cache_timeout_sets_fallback_when_ran_incomplete(): void {
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'test-plugin' => [ 'Version' => '1.0.0' ],
-				'ran'         => [ 'contents', 'assets', 'readme', 'changes', 'tags' ],
-				'timeout'     => strtotime( '-1 hour' ),
-			]
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'ran',
+			[ 'contents', 'assets', 'readme', 'changes', 'tags' ],
+			strtotime( '-1 hour' )
 		);
 
 		$this->api->set_repo_cache_timeout( 'test-plugin' );
 
-		$cache = get_site_option( $cache_key );
+		$cache = $this->api->get_repo_cache( 'test-plugin' );
 		$this->assertGreaterThan( time(), $cache['timeout'] );
 		$this->assertLessThan( time() + ( 2 * HOUR_IN_SECONDS ), $cache['timeout'] );
 	}
 
 	public function test_set_repo_cache_timeout_refreshes_expired_timeout_when_ran_complete(): void {
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'test-plugin' => [ 'Version' => '1.0.0' ],
-				'ran'         => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-				'timeout'     => strtotime( '-1 hour' ),
-			]
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'ran',
+			[ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
+			strtotime( '-1 hour' )
 		);
 
 		$this->api->set_repo_cache_timeout( 'test-plugin' );
 
-		$cache = get_site_option( $cache_key );
+		$cache = $this->api->get_repo_cache( 'test-plugin' );
 		$this->assertGreaterThan( time() + ( 11 * HOUR_IN_SECONDS ), $cache['timeout'] );
 	}
 
 	public function test_set_repo_cache_timeout_applies_filter(): void {
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'test-plugin' => [ 'Version' => '1.0.0' ],
-				'ran'         => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-				'timeout'     => strtotime( '-1 hour' ),
-			]
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'ran',
+			[ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
+			strtotime( '-1 hour' )
 		);
 
 		$captured = [];
@@ -442,7 +690,7 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 		$this->assertSame( [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], $captured['response'] );
 		$this->assertSame( 'test-plugin', $captured['repo'] );
 
-		$cache = get_site_option( $cache_key );
+		$cache = $this->api->get_repo_cache( 'test-plugin' );
 		$this->assertLessThan( time() + ( 2 * HOUR_IN_SECONDS ), $cache['timeout'] );
 	}
 
@@ -456,127 +704,91 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 	}
 
 	public function test_maybe_extend_repo_cache_extends_when_version_matches_and_all_calls_ran(): void {
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'repo'        => 'test-plugin',
-				'test-plugin' => [ 'Version' => '1.0.0' ],
-				'ran'         => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-				'timeout'     => strtotime( '-1 hour' ),
-			]
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'repo_headers',
+			[ 'Version' => '1.0.0' ],
+			strtotime( '-1 hour' )
+		);
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'ran',
+			[ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ]
 		);
 
 		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '1.0.0' ], $this->type, '1.0.0' );
 		$this->assertTrue( $result );
 
-		$cache = get_site_option( $cache_key );
+		$cache = $this->api->get_repo_cache( 'test-plugin' );
 		$this->assertGreaterThan( time(), $cache['timeout'] );
 	}
 
 	public function test_maybe_extend_repo_cache_returns_false_when_versions_differ(): void {
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'repo'        => 'test-plugin',
-				'test-plugin' => [ 'Version' => '1.0.0' ],
-				'ran'         => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-				'timeout'     => strtotime( '-1 hour' ),
-			]
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'repo_headers',
+			[ 'Version' => '1.0.0' ],
+			strtotime( '-1 hour' )
+		);
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'ran',
+			[ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ]
 		);
 
 		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '2.0.0' ], $this->type, '1.0.0' );
 		$this->assertFalse( $result );
-	}
-
-	public function test_maybe_extend_repo_cache_clears_release_assets_when_version_changes_and_cache_valid(): void {
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'repo'                   => 'test-plugin',
-				'test-plugin'            => [ 'Version' => '1.0.0' ],
-				'ran'                    => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-				'timeout'                => strtotime( '+1 hour' ),
-				'release_assets'         => [ 'assets' => [ '1.0.0' => 'url-stable' ], 'dev_assets' => [ '1.1.0-beta' => 'url-dev' ] ],
-				'release_asset'          => true,
-				'release_asset_download' => 'url-stale',
-			]
-		);
-
-		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '2.0.0' ], $this->type, '1.0.0' );
-		$this->assertFalse( $result );
-
-		$cache = get_site_option( $cache_key );
-		$this->assertArrayNotHasKey( 'release_assets', $cache );
-		$this->assertArrayNotHasKey( 'release_asset', $cache );
-		$this->assertArrayNotHasKey( 'release_asset_download', $cache );
 	}
 
 	/**
-	 * The version change is only observed when a fetch runs, at which point the
-	 * prior timeout is typically expired — the stale entries must still be
-	 * cleared so the lazy release-asset fetch rebuilds them this cycle.
+	 * When the remote version changes while the cache is still in force, the
+	 * stale release-asset columns are cleared so the lazy get_api_release_assets()
+	 * rebuilds them — while repo_headers, ran, and current_branch are preserved.
 	 */
-	public function test_maybe_extend_repo_cache_clears_release_assets_when_version_changes_and_cache_expired(): void {
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'repo'                   => 'test-plugin',
-				'test-plugin'            => [ 'Version' => '1.0.0' ],
-				'ran'                    => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-				'timeout'                => strtotime( '-1 hour' ),
-				'release_assets'         => [ 'assets' => [ '1.0.0' => 'url-stable' ] ],
-				'release_asset'          => true,
-				'release_asset_download' => 'url-stale',
-			]
-		);
+	public function test_maybe_extend_repo_cache_clears_release_assets_when_version_changes(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', [ 'Version' => '1.0.0' ], strtotime( '+1 hour' ) );
+		$table->add_entry( 'test-plugin', 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ] );
+		$table->add_entry( 'test-plugin', 'current_branch', 'develop' );
+		$table->add_entry( 'test-plugin', 'release_assets', [ 'assets' => [ '1.0.0' => 'url-stable' ] ] );
+		$table->add_entry( 'test-plugin', 'release_asset', true );
+		$table->add_entry( 'test-plugin', 'release_asset_download', 'url-stale' );
 
 		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '2.0.0' ], $this->type, '1.0.0' );
 		$this->assertFalse( $result );
 
-		$cache = get_site_option( $cache_key );
-		$this->assertArrayNotHasKey( 'release_assets', $cache );
-		$this->assertArrayNotHasKey( 'release_asset', $cache );
-		$this->assertArrayNotHasKey( 'release_asset_download', $cache );
+		$this->assertNull( $table->get_repo( 'test-plugin', 'release_assets' ) );
+		$this->assertNull( $table->get_repo( 'test-plugin', 'release_asset' ) );
+		$this->assertNull( $table->get_repo( 'test-plugin', 'release_asset_download' ) );
+		// Non-release-asset columns are preserved.
+		$this->assertSame( [ 'Version' => '1.0.0' ], $table->get_repo( 'test-plugin', 'repo_headers' ) );
+		$this->assertSame( [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], $table->get_repo( 'test-plugin', 'ran' ) );
+		$this->assertSame( 'develop', $table->get_repo( 'test-plugin', 'current_branch' ) );
 	}
 
 	public function test_maybe_extend_repo_cache_does_not_clear_release_assets_when_version_matches(): void {
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'repo'                   => 'test-plugin',
-				'test-plugin'            => [ 'Version' => '1.0.0' ],
-				'ran'                    => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-				'timeout'                => strtotime( '+1 hour' ),
-				'release_assets'         => [ 'assets' => [ '1.0.0' => 'url-stable' ] ],
-				'release_asset'          => true,
-				'release_asset_download' => 'url-stable',
-			]
-		);
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', [ 'Version' => '1.0.0' ], strtotime( '+1 hour' ) );
+		$table->add_entry( 'test-plugin', 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ] );
+		$table->add_entry( 'test-plugin', 'release_assets', [ 'assets' => [ '1.0.0' => 'url-stable' ] ] );
+		$table->add_entry( 'test-plugin', 'release_asset', true );
+		$table->add_entry( 'test-plugin', 'release_asset_download', 'url-stable' );
 
 		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '1.0.0' ], $this->type, '1.0.0' );
 		$this->assertTrue( $result );
 
-		$cache = get_site_option( $cache_key );
-		$this->assertArrayHasKey( 'release_assets', $cache );
-		$this->assertArrayHasKey( 'release_asset', $cache );
-		$this->assertArrayHasKey( 'release_asset_download', $cache );
+		$this->assertSame( [ 'assets' => [ '1.0.0' => 'url-stable' ] ], $table->get_repo( 'test-plugin', 'release_assets' ) );
+		// Production reads the cached release_asset in boolean context.
+		$this->assertTrue( (bool) $table->get_repo( 'test-plugin', 'release_asset' ) );
+		$this->assertSame( 'url-stable', $table->get_repo( 'test-plugin', 'release_asset_download' ) );
 	}
 
 	public function test_maybe_extend_repo_cache_returns_false_when_ran_missing(): void {
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'repo'        => 'test-plugin',
-				'test-plugin' => [ 'Version' => '1.0.0' ],
-				// no 'ran' key — cache data incomplete
-				'timeout'     => strtotime( '-1 hour' ),
-			]
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'repo_headers',
+			[ 'Version' => '1.0.0' ],
+			strtotime( '-1 hour' )
 		);
 
 		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '1.0.0' ], $this->type );
@@ -584,16 +796,17 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 	}
 
 	public function test_maybe_extend_repo_cache_returns_false_when_ran_incomplete(): void {
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'repo'        => 'test-plugin',
-				'test-plugin' => [ 'Version' => '1.0.0' ],
-				// 'ran' exists but missing 'branches' and 'meta' — interrupted mid-sequence
-				'ran'         => [ 'contents', 'assets', 'readme', 'changes', 'tags' ],
-				'timeout'     => strtotime( '-1 hour' ),
-			]
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'repo_headers',
+			[ 'Version' => '1.0.0' ],
+			strtotime( '-1 hour' )
+		);
+		// 'ran' exists but missing 'branches' and 'meta' — interrupted mid-sequence
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			'test-plugin',
+			'ran',
+			[ 'contents', 'assets', 'readme', 'changes', 'tags' ]
 		);
 
 		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '1.0.0' ], $this->type );
@@ -603,47 +816,76 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 	/**
 	 * A version change must drop stale release-asset entries even when the
 	 * prior fetch cycle was incomplete ('ran' missing steps): those entries are
-	 * keyed on the old version's asset names, and get_api_release_assets()
-	 * serves them without TTL gating, so the unset below is the only
+	 * keyed on the old version's asset names, and the non-gated reads in
+	 * get_api_release_assets()/get_api_release_asset() make this unset the only
 	 * invalidation.
 	 */
 	public function test_maybe_extend_repo_cache_clears_release_assets_when_version_changes_and_ran_incomplete(): void {
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option(
-			$cache_key,
-			[
-				'repo'                   => 'test-plugin',
-				'test-plugin'            => [ 'Version' => '1.0.0' ],
-				// Interrupted mid-sequence.
-				'ran'                    => [ 'contents', 'assets', 'readme', 'changes', 'tags' ],
-				'timeout'                => strtotime( '-1 hour' ),
-				'release_assets'         => [ 'assets' => [ '1.0.0' => 'url-stable' ], 'dev_assets' => [] ],
-				'release_asset'          => true,
-				'release_asset_download' => 'url-stale',
-			]
-		);
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', [ 'Version' => '1.0.0' ], strtotime( '-1 hour' ) );
+		// Interrupted mid-sequence.
+		$table->add_entry( 'test-plugin', 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags' ] );
+		$table->add_entry( 'test-plugin', 'release_assets', [ 'assets' => [ '1.0.0' => 'url-stable' ], 'dev_assets' => [] ] );
+		$table->add_entry( 'test-plugin', 'release_asset', true );
+		$table->add_entry( 'test-plugin', 'release_asset_download', 'url-stale' );
 
 		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '2.0.0' ], $this->type, '1.0.0' );
 		$this->assertFalse( $result );
 
-		$cache = get_site_option( $cache_key );
-		$this->assertArrayNotHasKey( 'release_assets', $cache );
-		$this->assertArrayNotHasKey( 'release_asset', $cache );
-		$this->assertArrayNotHasKey( 'release_asset_download', $cache );
+		$this->assertNull( $table->get_repo( 'test-plugin', 'release_assets' ) );
+		$this->assertNull( $table->get_repo( 'test-plugin', 'release_asset' ) );
+		$this->assertNull( $table->get_repo( 'test-plugin', 'release_asset_download' ) );
+	}
+
+	// -------------------------------------------------------------------------
+	// is_fetch_complete()
+	// -------------------------------------------------------------------------
+
+	public function test_is_fetch_complete_true_when_all_calls_ran(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', [ 'Version' => '1.0.0' ] );
+		$table->add_entry(
+			'test-plugin',
+			'ran',
+			[ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ]
+		);
+
+		$this->assertTrue( $this->api->is_fetch_complete( 'test-plugin' ) );
+	}
+
+	public function test_is_fetch_complete_false_when_ran_incomplete(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', [ 'Version' => '1.0.0' ] );
+		// Missing 'branches' and 'meta' — interrupted mid-sequence.
+		$table->add_entry(
+			'test-plugin',
+			'ran',
+			[ 'contents', 'assets', 'readme', 'changes', 'tags' ]
+		);
+
+		$this->assertFalse( $this->api->is_fetch_complete( 'test-plugin' ) );
+	}
+
+	public function test_is_fetch_complete_false_when_row_missing(): void {
+		$this->assertFalse( $this->api->is_fetch_complete( 'no-such-repo' ) );
 	}
 
 	// -------------------------------------------------------------------------
 	// delete_all_cached_data()
 	// -------------------------------------------------------------------------
 
-	public function test_delete_all_cached_data_removes_ghu_prefixed_options(): void {
-		$cache_key = $this->api->get_cache_key( 'test-plugin' );
-		update_site_option( $cache_key, [ 'data' => 'test' ] );
-		$this->assertIsArray( get_site_option( $cache_key ) );
+	public function test_delete_all_cached_data_clears_api_data(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'tags', [ '1.0.0' ] );
+		$table->add_entry( 'test-plugin', 'current_branch', 'develop' );
+		$this->assertNotNull( $table->get_repo( 'test-plugin' ) );
 
 		$this->api->delete_all_cached_data();
 
-		$this->assertFalse( get_site_option( $cache_key, false ) );
+		// API-derived data is cleared...
+		$this->assertNull( $table->get_repo( 'test-plugin', 'tags' ) );
+		// ...but the user's current_branch selection is preserved.
+		$this->assertSame( 'develop', $table->get_repo( 'test-plugin', 'current_branch' ) );
 	}
 
 	public function test_delete_all_cached_data_returns_true(): void {
@@ -876,22 +1118,20 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	public function test_maybe_extend_repo_cache_updates_timeout_when_expired_and_all_calls_ran(): void {
-		$slug      = 'test-plugin';
-		$cache_key = $this->api->get_cache_key( $slug );
-		update_site_option(
-			$cache_key,
-			[
-				'repo'    => $slug,
-				$slug     => [ 'Version' => '1.0.0' ],
-				'ran'     => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-				'timeout' => strtotime( '-1 hour' ),
-			]
+		$slug = 'test-plugin';
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( $slug );
+		$table->add_entry( $slug, 'repo_headers', [ 'Version' => '1.0.0' ], strtotime( '-1 hour' ) );
+		$table->add_entry(
+			$slug,
+			'ran',
+			[ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ]
 		);
 		$repo   = (object) [ 'slug' => $slug ];
 		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '1.0.0' ], $repo, '1.0.0' );
 		$this->assertTrue( $result );
-		$cache = get_site_option( $cache_key );
-		$this->assertGreaterThan( time(), $cache['timeout'] );
+		$row = $table->get_repo( $slug );
+		$this->assertGreaterThan( time(), (int) ( $row['timeout'] ?? 0 ) );
 	}
 
 	// -------------------------------------------------------------------------
@@ -943,7 +1183,7 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 		remove_all_filters( 'gu_remote_is_newer' );
 		remove_all_filters( 'gu_disable_wpcron' );
 		remove_all_filters( 'gu_config_pre_process' );
-		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		delete_site_option( 'git_updater' );
 		unset( $_POST['action'], $_POST['_nonce'] );
 		parent::tear_down();
@@ -963,11 +1203,155 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 		return $type;
 	}
 
-	private function seed_cache( array $data ): void {
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin' ),
-			array_merge( [ 'timeout' => strtotime( '+12 hours' ) ], $data )
+	private function seed_cache( array $data, string $slug = 'test-plugin' ): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( $slug );
+		$table->add_entry( $slug, 'repo_headers', '', strtotime( '+12 hours' ) );
+		foreach ( $data as $column => $value ) {
+			$table->add_entry( $slug, $column, $value );
+		}
+	}
+
+	private const COMPLETE_RAN = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
+
+	/**
+	 * Force the live repo list to a single known repo so the null branch's
+	 * config merge is deterministic (the fixture plugin is not always present
+	 * in the live Plugin/Theme config in this environment).
+	 *
+	 * @return array<int, stdClass>
+	 */
+	private function force_config_with_repo( string $slug ): array {
+		add_filter(
+			'gu_config_pre_process',
+			static function ( $repos ) use ( $slug ) {
+				return [ (object) [ 'slug' => $slug ] ];
+			}
 		);
+		return [];
+	}
+
+	public function test_waiting_for_background_update_with_null_waiting_when_repo_has_no_row(): void {
+		$this->force_config_with_repo( 'test-plugin' );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, null );
+		$this->assertTrue( $result );
+	}
+
+	public function test_waiting_for_background_update_with_null_not_waiting_when_ran_complete(): void {
+		$this->force_config_with_repo( 'test-plugin' );
+		$this->seed_cache( [ 'ran' => self::COMPLETE_RAN ] );
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, null );
+		$this->assertFalse( $result );
+	}
+
+	public function test_waiting_for_background_update_with_null_not_waiting_when_ran_partial_and_no_error(): void {
+		$this->force_config_with_repo( 'test-plugin' );
+		// Legitimately absent optional files: a partial `ran` with no error means done.
+		$this->seed_cache( [ 'ran' => [ 'tags' ] ] );
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, null );
+		$this->assertFalse( $result );
+	}
+
+	public function test_waiting_for_background_update_with_null_waiting_when_error_cache_present(): void {
+		$this->force_config_with_repo( 'test-plugin' );
+		// A step errored and is still pending a retry → must stay waiting.
+		$this->seed_cache( [ 'ran' => self::COMPLETE_RAN ] );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->set_error_cache( 'test-plugin', [ 'http_code' => 500 ], 300 );
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, null );
+		$this->assertTrue( $result );
+	}
+
+	public function test_waiting_for_background_update_with_null_not_waiting_when_all_done(): void {
+		$this->force_config_with_repo( 'test-plugin' );
+		$this->force_config_with_repo( 'test-theme' );
+		// One complete `ran`, one partial `ran`, neither with an error → all done.
+		$this->seed_cache( [ 'ran' => self::COMPLETE_RAN ], 'test-plugin' );
+		$this->seed_cache( [ 'ran' => [ 'tags' ] ], 'test-theme' );
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, null );
+		$this->assertFalse( $result );
+	}
+
+	public function test_waiting_for_background_update_with_repo_true_when_no_ran_row(): void {
+		$this->force_config_with_repo( 'test-plugin' );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+		$rp = new ReflectionProperty( $this->api, 'base' );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
+		$rp->setValue( $this->api, Singleton::get_instance( 'Fragen\Git_Updater\Base', $this->api ) );
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, (object) [ 'slug' => 'test-plugin', 'git' => 'github' ] );
+		$this->assertTrue( $result );
+	}
+
+	public function test_waiting_for_background_update_with_repo_false_when_ran_present_no_error(): void {
+		$this->force_config_with_repo( 'test-plugin' );
+		$this->seed_cache( [ 'ran' => [ 'tags' ] ] );
+		$rp = new ReflectionProperty( $this->api, 'base' );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
+		$rp->setValue( $this->api, Singleton::get_instance( 'Fragen\Git_Updater\Base', $this->api ) );
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, (object) [ 'slug' => 'test-plugin', 'git' => 'github' ] );
+		$this->assertFalse( $result );
+	}
+
+	public function test_waiting_for_background_update_with_repo_true_when_error_cache_present(): void {
+		$this->force_config_with_repo( 'test-plugin' );
+		// Passed repo has a `ran` row but a non-empty `error_cache` → still waiting.
+		$this->seed_cache( [ 'ran' => self::COMPLETE_RAN ] );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->set_error_cache( 'test-plugin', [ 'http_code' => 500 ], 300 );
+		$rp = new ReflectionProperty( $this->api, 'base' );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
+		$rp->setValue( $this->api, Singleton::get_instance( 'Fragen\Git_Updater\Base', $this->api ) );
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, (object) [ 'slug' => 'test-plugin', 'git' => 'github' ] );
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * A 404 from api() (private repo with empty/incorrect auth) writes the
+	 * error cache to the repo's own row, so the waiting/notice path sees it.
+	 * Regression for the `{slug}_error` key mismatch.
+	 */
+	public function test_api_404_error_cache_is_visible_to_waiting_and_flags(): void {
+		$this->force_config_with_repo( 'test-plugin' );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( 'test-plugin' );
+
+		add_filter(
+			'pre_http_request',
+			static function ( $preempt, $args, $url ) {
+				return [
+					'response' => [ 'code' => 404 ],
+					'body'     => wp_json_encode( [ 'message' => 'Not Found' ] ),
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		$rm = $this->api->get_reflection_method( $this->api, 'api' );
+		$rm->invoke( $this->api, 'https://api.github.com/repos/test-owner/test-plugin' );
+
+		$flags = $table->get_cached_error_flags();
+		$this->assertArrayHasKey( 'test-plugin', $flags );
+		$this->assertTrue( $flags['test-plugin'], '404 must be visible via get_cached_error_flags() on the plain slug' );
+
+		$rp = new ReflectionProperty( $this->api, 'base' );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
+		$rp->setValue( $this->api, Singleton::get_instance( 'Fragen\Git_Updater\Base', $this->api ) );
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, (object) [ 'slug' => 'test-plugin', 'git' => 'github' ] );
+		$this->assertTrue( $result, 'Repo with a fresh 404 error cache must still be waiting' );
 	}
 
 	// -------------------------------------------------------------------------
@@ -1070,24 +1454,16 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 		$this->assertTrue( $rm->invoke( $this->api, $repo ) );
 	}
 
-	public function test_waiting_for_background_update_returns_false_when_repo_has_cached_data(): void {
-		// A complete 'ran' list means the background fetch cycle finished.
-		$this->seed_cache( [ 'ran' => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ] ] );
+	public function test_waiting_for_background_update_returns_false_when_repo_has_ran_row(): void {
+		// Any `ran` row (even partial) with no error means the cycle ran → not waiting.
+		$this->seed_cache( [ 'ran' => [ 'tags' ] ] );
 		$rm   = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
 		$repo = (object) [ 'slug' => 'test-plugin' ]; // no 'git' property, skips Singleton
 		$this->assertFalse( $rm->invoke( $this->api, $repo ) );
 	}
 
-	public function test_waiting_for_background_update_returns_true_when_ran_incomplete(): void {
-		// A partial 'ran' list (interrupted/failed fetch) means still waiting.
-		$this->seed_cache( [ 'ran' => [ 'contents', 'assets' ] ] );
-		$rm   = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
-		$repo = (object) [ 'slug' => 'test-plugin' ]; // no 'git' property, skips Singleton
-		$this->assertTrue( $rm->invoke( $this->api, $repo ) );
-	}
-
-	public function test_waiting_for_background_update_returns_true_when_cache_has_data_but_no_ran(): void {
-		// Cached data without a complete 'ran' key is not a finished fetch.
+	public function test_waiting_for_background_update_returns_true_when_repo_has_cache_but_no_ran(): void {
+		// A cache row without a `ran` row means the fetch cycle hasn't completed → waiting.
 		$this->seed_cache( [ 'meta' => [ 'Version' => '1.0.0' ] ] );
 		$rm   = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
 		$repo = (object) [ 'slug' => 'test-plugin' ]; // no 'git' property, skips Singleton
@@ -1103,20 +1479,20 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 	}
 
 	public function test_waiting_for_background_update_with_null_iterates_repos_when_config_not_empty(): void {
-		// No gu_config_pre_process filter — fixture plugin IS in Plugin config with
-		// empty cache, so $waiting is non-empty → returns true. Lines 571 and 576.
+		// Forced config with a repo that has no cache row → waiting → true.
+		$this->force_config_with_repo( 'test-plugin' );
 		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
 		$result = $rm->invoke( $this->api, null );
-		// Result is true (fixture plugin cache empty) or false (config empty in this env).
-		$this->assertIsBool( $result );
+		$this->assertTrue( $result );
 	}
 
 	public function test_waiting_for_background_update_with_null_processes_batch_cache(): void {
-		// Seed a ghu-* option so the batch loading loop executes.
+		// Forced config + seeded data but no complete `ran` → still waiting.
+		$this->force_config_with_repo( 'test-plugin' );
 		$this->seed_cache( [ 'meta' => [ 'Version' => '1.0.0' ] ] );
 		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
 		$result = $rm->invoke( $this->api, null );
-		$this->assertIsBool( $result );
+		$this->assertTrue( $result );
 	}
 
 	// -------------------------------------------------------------------------
@@ -1290,10 +1666,10 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	public function test_set_repo_cache_gu_repo_cache_timeout_filter_overrides_timeout_string(): void {
-		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
 		add_filter( 'gu_repo_cache_timeout', fn() => '+1 minute', 10, 4 );
-		$this->api->set_repo_cache( 'key', 'val', 'test-plugin' );
-		$cache = get_site_option( $this->api->get_cache_key( 'test-plugin' ) );
+		$this->api->set_repo_cache( 'repo_headers', 'val', 'test-plugin', '+12 hours' );
+		$cache = $this->api->get_repo_cache( 'test-plugin' );
 		$this->assertEqualsWithDelta( time() + 60, $cache['timeout'], 5 );
 	}
 
@@ -1321,7 +1697,7 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	public function test_waiting_for_background_update_instantiates_git_api_when_repo_has_git(): void {
-		$this->seed_cache( [ 'ran' => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ] ] );
+		$this->seed_cache( [ 'ran' => self::COMPLETE_RAN ] );
 		// $this->base is not set on GitHub_API; inject via reflection so the
 		// $this->base::$git_servers lookup on line 547 does not throw.
 		$rp = new ReflectionProperty( $this->api, 'base' );
@@ -1348,8 +1724,8 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 	}
 
 	/**
-	 * get_newest_tag_from_cache() returns the cached newest_tag, or '0.0.0'
-	 * when none is stored.
+	 * get_newest_tag_from_cache() returns the cached newest_tag column, or
+	 * '0.0.0' when none is stored.
 	 */
 	public function test_get_newest_tag_from_cache(): void {
 		$this->seed_cache( [ 'newest_tag' => '2.1.0' ] );
@@ -1591,17 +1967,12 @@ class Test_GUTrait_Extended extends WP_UnitTestCase {
 
 	public function test_get_cache_key_uses_type_slug_by_default(): void {
 		$key = $this->get_cache_key();
-		$this->assertSame( 'ghu-' . md5( 'test-plugin' ), $key );
+		$this->assertSame( 'test-plugin', $key );
 	}
 
 	public function test_get_cache_key_uses_provided_repo_name(): void {
 		$key = $this->get_cache_key( 'my-other-plugin' );
-		$this->assertSame( 'ghu-' . md5( 'my-other-plugin' ), $key );
-	}
-
-	public function test_get_cache_key_starts_with_ghu_prefix(): void {
-		$key = $this->get_cache_key( 'anything' );
-		$this->assertStringStartsWith( 'ghu-', $key );
+		$this->assertSame( 'my-other-plugin', $key );
 	}
 
 	public function test_get_cache_key_is_deterministic(): void {

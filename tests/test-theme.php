@@ -188,33 +188,24 @@ class Test_Theme_Load_Pre_Filters extends WP_UnitTestCase {
 class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	use Theme_Mock_Helper;
 
-	private string $cache_key;
-
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
-		$this->cache_key = 'ghu-' . md5( 'test-gu-theme' );
-		delete_site_option( $this->cache_key );
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 	}
 
 	public function tear_down(): void {
-		delete_site_option( $this->cache_key );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme' );
 		parent::tear_down();
 	}
 
-	/**
-	 * Seed a complete 'ran' cache so waiting_for_background_update() returns
-	 * false (background fetch already finished) and themes_api() proceeds.
-	 */
-	private function seed_complete_cache(): void {
-		update_site_option(
-			$this->cache_key,
-			[
-				'timeout' => strtotime( '+12 hours' ),
-				'any'     => 'data',
-				'ran'     => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-			]
-		);
+	private function seed_cache(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-gu-theme', 'repo_headers', '', strtotime( '+12 hours' ) );
+		// A fetched repo has a `ran` row; without it waiting_for_background_update()
+		// treats the repo as still pending and the API response is not populated.
+		$table->add_entry( 'test-gu-theme', 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
 	}
 
 	public function test_returns_result_for_non_theme_information_action(): void {
@@ -237,6 +228,8 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	public function test_returns_result_when_waiting_for_background_update(): void {
 		// Empty cache → waiting_for_background_update = true.
 		$theme    = $this->theme_with_config( [ 'test-gu-theme' => $this->make_theme_obj() ] );
+		// Theme constructor populates the cache; clear it to simulate uncached state.
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme' );
 		$response = new stdClass();
 		$response->slug = 'test-gu-theme';
 		$result = $theme->themes_api( 'original', 'theme_information', $response );
@@ -244,7 +237,7 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_returns_result_for_dot_org_theme(): void {
-		$this->seed_complete_cache();
+		$this->seed_cache();
 		$theme_obj = $this->make_theme_obj( [ 'dot_org' => true ] );
 		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 		$response  = new stdClass();
@@ -254,7 +247,7 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_populates_response_for_git_theme(): void {
-		$this->seed_complete_cache();
+		$this->seed_cache();
 		$theme_obj = $this->make_theme_obj( [ 'dot_org' => false ] );
 		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 		$response  = new stdClass();
@@ -267,7 +260,7 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	}
 
 	public function test_populates_description_as_joined_sections(): void {
-		$this->seed_complete_cache();
+		$this->seed_cache();
 		$theme_obj = $this->make_theme_obj( [
 			'dot_org'  => false,
 			'sections' => [
@@ -284,39 +277,21 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Seed a complete 'ran' cache plus extra cache entries (tags,
-	 * newest_tag, release_assets) for download-link computation tests.
-	 *
-	 * @param array<string, mixed> $data Extra cache entries to include.
-	 */
-	private function seed_cache( array $data = [] ): void {
-		update_site_option(
-			$this->cache_key,
-			array_merge(
-				[
-					'timeout' => strtotime( '+12 hours' ),
-					'any'     => 'data',
-					'ran'     => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-				],
-				$data
-			)
-		);
-	}
-
-	/**
 	 * themes_api() computes the dev release asset download_link from the repo
 	 * cache for a release-asset theme on the primary branch when the dev filter
 	 * is active.
 	 */
 	public function test_themes_api_returns_dev_release_asset_download_link(): void {
-		$this->seed_cache(
+		$this->seed_cache();
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-gu-theme', 'tags', [ '2.0.0' ] );
+		$table->add_entry( 'test-gu-theme', 'newest_tag', '2.0.0' );
+		$table->add_entry(
+			'test-gu-theme',
+			'release_assets',
 			[
-				'tags'       => [ '2.0.0' ],
-				'newest_tag' => '2.0.0',
-				'release_assets' => [
-					'assets'     => [ '2.0.0' => 'https://example.com/releases/download/v2.0.0/theme.zip' ],
-					'dev_assets' => [ '2.1.0-beta1' => 'https://example.com/releases/download/v2.1.0-beta1/theme-beta.zip' ],
-				],
+				'assets'     => [ '2.0.0' => 'https://example.com/releases/download/v2.0.0/theme.zip' ],
+				'dev_assets' => [ '2.1.0-beta1' => 'https://example.com/releases/download/v2.1.0-beta1/theme-beta.zip' ],
 			]
 		);
 		$theme_obj = $this->make_theme_obj( [
@@ -343,12 +318,10 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	 * repo object's download_link is empty (unhydrated object).
 	 */
 	public function test_themes_api_computes_download_link_from_cache_when_object_unhydrated(): void {
-		$this->seed_cache(
-			[
-				'tags'       => [ '1.0.0', '1.2.0' ],
-				'newest_tag' => '1.2.0',
-			]
-		);
+		$this->seed_cache();
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-gu-theme', 'tags', [ '1.0.0', '1.2.0' ] );
+		$table->add_entry( 'test-gu-theme', 'newest_tag', '1.2.0' );
 		$theme_obj = $this->make_theme_obj( [
 			'dot_org'       => false,
 			'download_link' => '',
@@ -368,15 +341,17 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 	 * incorrect download_link on the repo object.
 	 */
 	public function test_themes_api_prefers_computed_release_asset_over_wrong_object_property(): void {
+		$this->seed_cache();
 		$asset_url = 'https://example.com/releases/download/v2.0.0/theme.zip';
-		$this->seed_cache(
+		$table     = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-gu-theme', 'tags', [ '2.0.0' ] );
+		$table->add_entry( 'test-gu-theme', 'newest_tag', '2.0.0' );
+		$table->add_entry(
+			'test-gu-theme',
+			'release_assets',
 			[
-				'tags'       => [ '2.0.0' ],
-				'newest_tag' => '2.0.0',
-				'release_assets' => [
-					'assets'     => [ '2.0.0' => $asset_url ],
-					'dev_assets' => [],
-				],
+				'assets'     => [ '2.0.0' => $asset_url ],
+				'dev_assets' => [],
 			]
 		);
 		$theme_obj = $this->make_theme_obj( [
@@ -699,44 +674,22 @@ class Test_Theme_Customize_Theme_Update_HTML extends WP_UnitTestCase {
 class Test_Theme_Update_Site_Transient_Method extends WP_UnitTestCase {
 	use Theme_Mock_Helper;
 
-	private string $cache_key;
+	private string $slug = 'test-gu-theme';
 
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
-		$this->cache_key = 'ghu-' . md5( 'test-gu-theme' );
-		delete_site_option( $this->cache_key );
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 	}
 
 	public function tear_down(): void {
-		delete_site_option( $this->cache_key );
 		remove_all_filters( 'gu_config_pre_process' );
 		remove_all_filters( 'gu_override_dot_org' );
 		remove_all_filters( 'gu_remote_is_newer' );
 		unset( $_GET['action'], $_GET['theme'], $_GET['_wpnonce'], $_GET['rollback'] );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( $this->slug );
 		parent::tear_down();
-	}
-
-	/**
-	 * Seed tag + release-asset cache entries for download-link computation tests.
-	 *
-	 * @param string $stable_url Stable release asset URL.
-	 * @param string $dev_url    Dev release asset URL, optional.
-	 */
-	private function seed_release_asset_cache( string $stable_url, string $dev_url = '' ): void {
-		update_site_option(
-			$this->cache_key,
-			[
-				'timeout'        => strtotime( '+12 hours' ),
-				'repo'           => '',
-				'tags'           => [ '2.0.0' ],
-				'newest_tag'     => '2.0.0',
-				'release_assets' => [
-					'assets'     => [ '2.0.0' => $stable_url ],
-					'dev_assets' => $dev_url ? [ '2.1.0-beta1' => $dev_url ] : [],
-				],
-			]
-		);
 	}
 
 	public function test_non_object_transient_becomes_stdclass(): void {
@@ -894,9 +847,17 @@ class Test_Theme_Update_Site_Transient_Method extends WP_UnitTestCase {
 	 * gu_dev_release_asset filter is active.
 	 */
 	public function test_release_asset_primary_branch_dev_filter_keeps_dev_release_asset_package(): void {
-		$this->seed_release_asset_cache(
-			'https://example.com/releases/download/v2.0.0/theme.zip',
-			'https://example.com/releases/download/v2.1.0-beta1/theme-beta.zip'
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( $this->slug, 'repo_headers', '', strtotime( '+12 hours' ) );
+		$table->add_entry( $this->slug, 'tags', [ '2.0.0' ] );
+		$table->add_entry( $this->slug, 'newest_tag', '2.0.0' );
+		$table->add_entry(
+			$this->slug,
+			'release_assets',
+			[
+				'assets'     => [ '2.0.0' => 'https://example.com/releases/download/v2.0.0/theme.zip' ],
+				'dev_assets' => [ '2.1.0-beta1' => 'https://example.com/releases/download/v2.1.0-beta1/theme-beta.zip' ],
+			]
 		);
 		$theme_obj = $this->make_theme_obj( [
 			'remote_version' => '2.0.0',
@@ -928,15 +889,10 @@ class Test_Theme_Update_Site_Transient_Method extends WP_UnitTestCase {
 	 * cached tag data.
 	 */
 	public function test_package_computed_from_cache_when_object_download_link_empty(): void {
-		update_site_option(
-			$this->cache_key,
-			[
-				'timeout'    => strtotime( '+12 hours' ),
-				'repo'       => '',
-				'tags'       => [ '1.0.0', '1.2.0' ],
-				'newest_tag' => '1.2.0',
-			]
-		);
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( $this->slug, 'repo_headers', '', strtotime( '+12 hours' ) );
+		$table->add_entry( $this->slug, 'tags', [ '1.0.0', '1.2.0' ] );
+		$table->add_entry( $this->slug, 'newest_tag', '1.2.0' );
 		$theme_obj = $this->make_theme_obj( [
 			'remote_version' => '2.0.0',
 			'local_version'  => '1.0.0',
@@ -1117,17 +1073,16 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 			$this->markTestSkipped( 'Fixture theme test-gu-theme not installed — run `npm run wp-env start`.' );
 		}
 
-		// Simulate a legacy 'master' current_branch entry for the fixture theme whose
-		// style.css declares 'Primary Branch: main'.
-		Base::$options['current_branch_test-gu-theme'] = 'master';
+		// Current branch is resolved from the cache table (not a legacy option key).
+		// Seed the table and confirm make_repo() picks it up.
+		$slug = 'test-gu-theme';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $slug, 'current_branch', 'develop', strtotime( '+12 hours' ) );
 
-		// Theme constructor calls get_theme_meta(), which triggers the migration.
 		new Theme();
 
-		$options_ref = new ReflectionProperty( Theme::class, 'options' );
-		PHP_VERSION_ID < 80100 && $options_ref->setAccessible( true );
-		$options = $options_ref->getValue( null );
-		$this->assertArrayNotHasKey( 'current_branch_test-gu-theme', $options );
+		$configs = ( new Theme() )->get_theme_configs();
+		$this->assertSame( 'develop', $configs[ $slug ]->branch ?? null );
+		$this->assertArrayNotHasKey( 'current_branch_' . $slug, Base::$options );
 	}
 
 	public function test_git_head_file_overrides_branch_value(): void {
@@ -1308,6 +1263,11 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->uninstall_table();
+		$table->install_table();
+		$table->delete_repo( 'test-gu-theme' );
+		$table->delete_repo( 'test-gu-theme_error' );
 	}
 
 	public function tear_down(): void {
@@ -1322,7 +1282,8 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		remove_all_actions( 'after_theme_row_test-gu-theme' );
 		wp_cache_delete( 'cron', 'options' );
 		wp_unschedule_hook( 'gu_get_remote_theme' );
-		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme' );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme_error' );
 		parent::tear_down();
 	}
 
@@ -1352,9 +1313,9 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 
 		$theme_obj = $this->make_theme_obj();
 		// Empty cache → waiting_for_background_update = true → theme queued for background.
-		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
-
 		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		// Theme constructor populates the cache; clear it to simulate uncached state.
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme' );
 		$theme->get_remote_theme_meta();
 
 		// wp_next_scheduled() can't find args-keyed events without passing the exact args,
@@ -1378,13 +1339,13 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		wp_unschedule_hook( 'gu_get_remote_theme' );
 
 		$theme_obj = $this->make_theme_obj();
-		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
 		$args      = [ [ 'test-gu-theme' => $theme_obj ] ];
 
 		// Pre-schedule the exact event the merge would create, at a future timestamp.
 		wp_schedule_single_event( time() + HOUR_IN_SECONDS, 'gu_get_remote_theme', $args );
 
 		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme' );
 		$theme->get_remote_theme_meta();
 
 		// Hook should still exist (not cleared), and exactly one event was scheduled.
@@ -1408,8 +1369,8 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 
 		$this->assertSame( 2, $this->cron_hook_count( 'gu_get_remote_theme' ), 'Pre-condition: two race-left events must exist' );
 
-		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
 		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-gu-theme' );
 		$theme->get_remote_theme_meta();
 
 		// All pre-existing timestamps must be merged and collapsed into one event.
@@ -1423,7 +1384,6 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		add_filter( 'gu_disable_wpcron', '__return_true' );
 
 		$theme_obj = $this->make_theme_obj();
-		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
 
 		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 		$theme->get_remote_theme_meta();
@@ -1445,7 +1405,6 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		wp_unschedule_hook( 'gu_get_remote_theme' );
 
 		$theme_obj = $this->make_theme_obj();
-		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
 
 		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 		$theme->get_remote_theme_meta();
@@ -1466,7 +1425,6 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		wp_unschedule_hook( 'gu_get_remote_theme' );
 
 		$theme_obj = $this->make_theme_obj();
-		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
 
 		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 
@@ -1485,16 +1443,8 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		wp_cache_delete( 'cron', 'options' );
 		wp_unschedule_hook( 'gu_get_remote_theme' );
 
-		// Seed a complete 'ran' cache so waiting_for_background_update($repo) →
-		// is_repo_cache_complete() returns true → not waiting → direct fetch.
-		update_site_option(
-			'ghu-' . md5( 'test-gu-theme' ),
-			[
-				'timeout' => strtotime( '+12 hours' ),
-				'dot_org' => false,
-				'ran'     => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
-			]
-		);
+		// Seed a `ran` row so waiting_for_background_update($repo) returns false.
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( 'test-gu-theme', 'ran', [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], strtotime( '+12 hours' ) );
 
 		// Mock HTTP to prevent outbound calls and error-cache contamination.
 		add_filter(
@@ -1608,6 +1558,9 @@ class Test_Theme_Config_Discovery extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->uninstall_table();
+		$table->install_table();
 		$this->configs = ( new Theme() )->get_theme_configs();
 
 		if ( ! isset( $this->configs[ self::SLUG ] ) ) {
@@ -1639,5 +1592,72 @@ class Test_Theme_Config_Discovery extends WP_UnitTestCase {
 
 	public function test_fixture_theme_primary_branch_is_main(): void {
 		$this->assertSame( 'main', $this->configs[ self::SLUG ]->primary_branch );
+	}
+
+	public function test_parse_meta_persists_primary_branch_to_cache_table(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$this->assertSame( 'main', $table->get_entry( self::SLUG, 'primary_branch' ) );
+	}
+
+	public function test_parse_meta_persists_current_branch_to_cache_table(): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$this->assertSame( 'main', $table->get_entry( self::SLUG, 'current_branch' ) );
+	}
+
+	/**
+	 * Count write queries (INSERT/UPDATE) against the cache table during $fn.
+	 *
+	 * @param callable $fn Callback to execute.
+	 * @return int Number of INSERT/UPDATE queries against the cache table.
+	 */
+	private function count_cache_table_writes( callable $fn ): int {
+		global $wpdb;
+		$count      = 0;
+		$table_name = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->table_name();
+		$filter     = function ( $query ) use ( &$count, $table_name ) {
+			if ( false === strpos( $query, $table_name ) ) {
+				return $query;
+			}
+			$verb = strtoupper( ltrim( $query ) );
+			if ( str_starts_with( $verb, 'INSERT' ) || str_starts_with( $verb, 'UPDATE' ) ) {
+				++$count;
+			}
+			return $query;
+		};
+		add_filter( 'query', $filter );
+		try {
+			$fn();
+		} finally {
+			remove_filter( 'query', $filter );
+		}
+		return $count;
+	}
+
+	public function test_get_theme_meta_skips_unchanged_branch_writes(): void {
+		// First call (setUp) already seeded the cache. Second call should see
+		// matching primary_branch/current_branch and skip both upserts.
+		$writes = $this->count_cache_table_writes( function () {
+			$rm = new ReflectionMethod( new Theme(), 'get_theme_meta' );
+			PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+			$rm->invoke( new Theme() );
+		} );
+
+		$this->assertSame( 0, $writes, 'Unchanged primary_branch/current_branch must not produce write queries' );
+	}
+
+	public function test_get_theme_meta_writes_when_primary_branch_changes(): void {
+		// Mutate the cached primary_branch so the next get_theme_meta() sees
+		// a mismatch against the parsed header and rewrites it.
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->update_entry( self::SLUG, 'primary_branch', 'stale-branch' );
+
+		$writes = $this->count_cache_table_writes( function () {
+			$rm = new ReflectionMethod( new Theme(), 'get_theme_meta' );
+			PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+			$rm->invoke( new Theme() );
+		} );
+
+		$this->assertSame( 1, $writes, 'primary_branch mismatch must produce exactly one upsert' );
+		$this->assertSame( 'main', $table->get_entry( self::SLUG, 'primary_branch' ) );
 	}
 }

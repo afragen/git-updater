@@ -126,6 +126,21 @@ class Test_GU_Upgrade extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'some_token', $stored );
 	}
 
+	public function test_run_drops_legacy_ghu_options(): void {
+		// Seed a legacy `ghu-<md5>` site option and verify it is removed
+		// when the upgrade runs.
+		$legacy_key = 'ghu-' . md5( 'test-plugin' );
+		update_site_option( $legacy_key, [ 'tags' => [ '1.0.0' ] ] );
+		$this->assertNotFalse( get_site_option( $legacy_key ) );
+
+		\Fragen\Git_Updater\Base::$options = [];
+		update_site_option( 'git_updater', \Fragen\Git_Updater\Base::$options );
+
+		$this->upgrade->run();
+
+		$this->assertFalse( get_site_option( $legacy_key ) );
+	}
+
 	public function test_run_hits_default_branch_when_db_version_is_newer(): void {
 		\Fragen\Git_Updater\Base::$options = [ 'db_version' => '99.0.0' ];
 		update_site_option( 'git_updater', \Fragen\Git_Updater\Base::$options );
@@ -163,6 +178,8 @@ class Test_GU_Upgrade extends WP_UnitTestCase {
 			'db_version'                   => '12.24.2',
 			'branch_switch'                => '1',
 			'bypass_background_processing' => '1',
+			// current_branch_* no longer lives in the git_updater option (it is in the
+			// cache table), so a stray key of this shape is not preserved by the upgrade.
 			'current_branch_my-plugin'     => 'main',
 			'github_access_token'          => 'secret',
 			'bitbucket_token'              => 'other',
@@ -175,7 +192,7 @@ class Test_GU_Upgrade extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'db_version', $stored );
 		$this->assertArrayHasKey( 'branch_switch', $stored );
 		$this->assertArrayHasKey( 'bypass_background_processing', $stored );
-		$this->assertArrayHasKey( 'current_branch_my-plugin', $stored );
+		$this->assertArrayNotHasKey( 'current_branch_my-plugin', $stored );
 		$this->assertArrayNotHasKey( 'github_access_token', $stored );
 		$this->assertArrayNotHasKey( 'bitbucket_token', $stored );
 	}

@@ -29,6 +29,23 @@ trait Settings_Test_Helper {
 	/** @var Settings */
 	private Settings $settings;
 
+	/** @var int */
+	private int $gu_admin_id = 0;
+
+	/**
+	 * Create and log in an admin user with the capability to save settings on
+	 * both single-site and multisite (super admin on multisite).
+	 *
+	 * @return int User ID.
+	 */
+	private function set_admin_user(): int {
+		$this->gu_admin_id = $this->factory->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $this->gu_admin_id );
+		grant_super_admin( $this->gu_admin_id );
+
+		return $this->gu_admin_id;
+	}
+
 	private function make_plugin_obj( array $overrides = [] ): stdClass {
 		return (object) array_merge(
 			[
@@ -109,6 +126,12 @@ trait Settings_Test_Helper {
 		remove_all_actions( 'gu_add_settings' );
 		remove_all_actions( 'gu_add_admin_page' );
 		remove_all_actions( 'gu_update_settings' );
+		if ( function_exists( 'wp_unregister_icon_collection' )
+			&& class_exists( 'WP_Icon_Collections_Registry' )
+			&& WP_Icon_Collections_Registry::get_instance()->is_registered( 'git-updater' )
+		) {
+			wp_unregister_icon_collection( 'git-updater' );
+		}
 		unset(
 			$_GET['tab'],
 			$_GET['subtab'],
@@ -124,57 +147,6 @@ trait Settings_Test_Helper {
 			$_REQUEST['_wpnonce'],
 			$_REQUEST['reset']
 		);
-	}
-}
-
-// =============================================================================
-// Test_Settings_Refresh_Caches  lines 80–89
-// =============================================================================
-
-/**
- * Class Test_Settings_Refresh_Caches
- *
- * Tests refresh_caches() — called from constructor.
- */
-class Test_Settings_Refresh_Caches extends GU_Test_Case {
-	use Settings_Test_Helper;
-
-	public function set_up(): void {
-		parent::set_up();
-		new Base();
-		$this->settings = new Settings();
-	}
-
-	public function tear_down(): void {
-		delete_site_transient( 'gu_refresh_cache' );
-		$this->settings_tear_down();
-		parent::tear_down();
-	}
-
-	public function test_refresh_caches_returns_early_without_nonce(): void {
-		unset( $_POST['_wpnonce'] );
-		$new = new Settings();
-		$this->assertFalse( (bool) get_site_transient( 'gu_refresh_cache' ) );
-	}
-
-	public function test_refresh_caches_returns_early_with_invalid_nonce(): void {
-		$_POST['_wpnonce'] = 'bad_nonce';
-		$new               = new Settings();
-		$this->assertFalse( (bool) get_site_transient( 'gu_refresh_cache' ) );
-	}
-
-	public function test_refresh_caches_with_valid_nonce_but_no_gu_refresh_cache_flag(): void {
-		$_POST['_wpnonce'] = wp_create_nonce( 'gu_refresh_cache' );
-		unset( $_POST['gu_refresh_cache'] );
-		$new = new Settings();
-		$this->assertFalse( (bool) get_site_transient( 'gu_refresh_cache' ) );
-	}
-
-	public function test_refresh_caches_sets_transient_when_flag_present(): void {
-		$_POST['_wpnonce']       = wp_create_nonce( 'gu_refresh_cache' );
-		$_POST['gu_refresh_cache'] = '1';
-		$new                     = new Settings();
-		$this->assertTrue( (bool) get_site_transient( 'gu_refresh_cache' ) );
 	}
 }
 
@@ -722,7 +694,7 @@ class Test_Settings_Gu_Tokens extends GU_Test_Case {
 		$this->assertSame( '', $field['title'] );
 	}
 
-	public function test_gu_tokens_uses_appearance_dashicon_for_theme(): void {
+	public function test_gu_tokens_uses_theme_icon(): void {
 		$settings = $this->settings;
 		$theme    = $this->make_theme_obj( [ 'remote_version' => '0.0.0' ] );
 		$this->inject_plugin_config( [] );
@@ -744,6 +716,11 @@ class Test_Settings_Gu_Tokens extends GU_Test_Case {
 		$this->settings->gu_tokens();
 		$this->assertNotNull( $captured_args );
 		$this->assertSame( 'theme', $captured_args->type );
+
+		global $wp_settings_fields;
+		$field = $wp_settings_fields['git_updater_github_install_settings']['github_id']['test-theme'] ?? null;
+		$this->assertNotNull( $field );
+		$this->assertStringContainsString( 'gu-icon-theme', $field['title'] );
 	}
 
 	public function test_gu_tokens_calls_create_error_message_when_waiting(): void {
@@ -845,6 +822,8 @@ class Test_Settings_Unset_Stale_Options extends GU_Test_Case {
 	public function test_unset_stale_options_preserves_current_branch_for_existing_repo(): void {
 		$slug   = 'my-plugin';
 		$plugin = $this->make_plugin_obj( [ 'slug' => $slug ] );
+		// current_branch_<slug> no longer lives in the git_updater option; it is
+		// stored in the cache table, so an option key of this shape is stale and removed.
 		Base::$options = [ "current_branch_{$slug}" => 'develop' ];
 		update_site_option( 'git_updater', Base::$options );
 		$this->settings->unset_stale_options(
@@ -852,7 +831,7 @@ class Test_Settings_Unset_Stale_Options extends GU_Test_Case {
 			[ $slug => $plugin ]
 		);
 		$saved = get_site_option( 'git_updater', [] );
-		$this->assertArrayHasKey( "current_branch_{$slug}", $saved );
+		$this->assertArrayNotHasKey( "current_branch_{$slug}", $saved );
 	}
 
 	public function test_unset_stale_options_removes_current_branch_for_missing_repo(): void {
@@ -921,7 +900,7 @@ class Test_Settings_Print_Section extends GU_Test_Case {
 		$this->settings->print_section_gu_settings();
 		$output = ob_get_clean();
 		$this->assertStringContainsString( 'Test Plugin', $output );
-		$this->assertStringContainsString( 'dashicons-admin-plugins', $output );
+		$this->assertStringContainsString( 'gu-icon-plugin', $output );
 	}
 
 	public function test_display_dot_org_overrides_shows_theme_in_override_list(): void {
@@ -932,7 +911,7 @@ class Test_Settings_Print_Section extends GU_Test_Case {
 		$this->settings->print_section_gu_settings();
 		$output = ob_get_clean();
 		$this->assertStringContainsString( 'Test Theme', $output );
-		$this->assertStringContainsString( 'dashicons-admin-appearance', $output );
+		$this->assertStringContainsString( 'gu-icon-theme', $output );
 	}
 
 	public function test_display_dot_org_overrides_includes_skip_updates_slugs(): void {
@@ -1038,11 +1017,13 @@ class Test_Settings_Update_Settings extends GU_Test_Case {
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
+		$this->set_admin_user();
 		$this->settings = new Settings();
 	}
 
 	public function tear_down(): void {
 		delete_site_option( 'git_updater' );
+		wp_set_current_user( 0 );
 		$this->settings_tear_down();
 		parent::tear_down();
 	}
@@ -1337,7 +1318,7 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		$this->call_private( 'display_gu_repos', [ 'github' ] );
 		$output = ob_get_clean();
 		$this->assertStringContainsString( 'Test Plugin', $output );
-		$this->assertStringContainsString( 'dashicons-admin-plugins', $output );
+		$this->assertStringContainsString( 'gu-icon-plugin', $output );
 	}
 
 	public function test_display_gu_repos_shows_lock_icon_for_private_repo(): void {
@@ -1347,7 +1328,7 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		ob_start();
 		$this->call_private( 'display_gu_repos', [ 'github' ] );
 		$output = ob_get_clean();
-		$this->assertStringContainsString( 'dashicons-lock', $output );
+		$this->assertStringContainsString( 'gu-icon-private', $output );
 	}
 
 	public function test_display_gu_repos_shows_broken_icon_for_zero_version(): void {
@@ -1357,7 +1338,7 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		ob_start();
 		$this->call_private( 'display_gu_repos', [ 'github' ] );
 		$output = ob_get_clean();
-		$this->assertStringContainsString( 'dashicons-warning', $output );
+		$this->assertStringContainsString( 'gu-icon-broken', $output );
 	}
 
 	public function test_display_gu_repos_shows_broken_icon_when_no_remote_version(): void {
@@ -1368,7 +1349,7 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		ob_start();
 		$this->call_private( 'display_gu_repos', [ 'github' ] );
 		$output = ob_get_clean();
-		$this->assertStringContainsString( 'dashicons-warning', $output );
+		$this->assertStringContainsString( 'gu-icon-broken', $output );
 	}
 
 	public function test_display_gu_repos_shows_dot_org_icon_when_not_overridden(): void {
@@ -1378,7 +1359,7 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		ob_start();
 		$this->call_private( 'display_gu_repos', [ 'github' ] );
 		$output = ob_get_clean();
-		$this->assertStringContainsString( 'dashicons-wordpress', $output );
+		$this->assertStringContainsString( 'gu-icon-dot-org', $output );
 	}
 
 	public function test_display_gu_repos_hides_dot_org_icon_when_overridden(): void {
@@ -1389,7 +1370,7 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		ob_start();
 		$this->call_private( 'display_gu_repos', [ 'github' ] );
 		$output = ob_get_clean();
-		$this->assertStringNotContainsString( 'dashicons-wordpress', $output );
+		$this->assertStringNotContainsString( 'gu-icon-dot-org', $output );
 	}
 
 	public function test_display_gu_repos_shows_dismiss_icon(): void {
@@ -1399,17 +1380,17 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		ob_start();
 		$this->call_private( 'display_gu_repos', [ 'github' ] );
 		$output = ob_get_clean();
-		$this->assertStringContainsString( 'dashicons-dismiss', $output );
+		$this->assertStringContainsString( 'gu-icon-dismiss', $output );
 	}
 
-	public function test_display_gu_repos_uses_appearance_dashicon_for_theme(): void {
+	public function test_display_gu_repos_uses_theme_icon(): void {
 		$theme = $this->make_theme_obj();
 		$this->inject_plugin_config( [] );
 		$this->inject_theme_config( [ 'test-theme' => $theme ] );
 		ob_start();
 		$this->call_private( 'display_gu_repos', [ 'github' ] );
 		$output = ob_get_clean();
-		$this->assertStringContainsString( 'dashicons-admin-appearance', $output );
+		$this->assertStringContainsString( 'gu-icon-theme', $output );
 	}
 
 	public function test_display_gu_repos_applies_gu_display_repos_filter(): void {
@@ -1446,6 +1427,32 @@ class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 		// Broken indicator is rendered (hidden) so JS can reveal it after a flush.
 		$this->assertStringContainsString( 'gu-repo-broken', $output );
 		$this->assertStringContainsString( 'display:none', $output );
+		$this->assertStringContainsString( 'gu-icon-plugin', $output );
+	}
+
+	public function test_display_gu_repos_broken_icon_is_red(): void {
+		$plugin = $this->make_plugin_obj( [ 'remote_version' => '0.0.0' ] );
+		$this->inject_plugin_config( [ 'test-plugin' => $plugin ] );
+		$this->inject_theme_config( [] );
+		ob_start();
+		$this->call_private( 'display_gu_repos', [ 'github' ] );
+		$output = ob_get_clean();
+		$this->assertStringContainsString( 'color:#f00', $output );
+		$this->assertStringContainsString( 'gu-icon-broken', $output );
+	}
+
+	public function test_display_gu_repos_renders_svg_survives_kses(): void {
+		if ( ! \Fragen\Git_Updater\Icons::is_available() ) {
+			$this->markTestSkipped( 'WordPress 7.2 core-admin icon set is not available.' );
+		}
+		$plugin = $this->make_plugin_obj();
+		$this->inject_plugin_config( [ 'test-plugin' => $plugin ] );
+		$this->inject_theme_config( [] );
+		ob_start();
+		$this->call_private( 'display_gu_repos', [ 'github' ] );
+		$output = ob_get_clean();
+		$this->assertStringContainsString( '<svg', $output );
+		$this->assertStringContainsString( 'gu-icon-plugin', $output );
 	}
 }
 
@@ -1485,7 +1492,6 @@ class Test_Settings_Subtabs_Gitlabce extends GU_Test_Case {
 		$this->assertArrayHasKey( 'gitlab', $result );
 	}
 }
-
 // =============================================================================
 // Test_Settings_OAuth_Revocation_Notice
 //
@@ -1543,5 +1549,204 @@ class Test_Settings_OAuth_Revocation_Notice extends GU_Test_Case {
 		$output = ob_get_clean();
 
 		$this->assertStringContainsString( 'access was revoked', $output );
+	}
+
+	/**
+	 * When git_updater_skip_oauth_reminder filter returns true, the notice
+	 * shows the suppressed-by-filter message instead of the standard revocation
+	 * message. Covers Settings.php:413.
+	 */
+	public function test_notice_shows_suppressed_message_when_skip_filter_true(): void {
+		update_site_option( 'git_updater', [] );
+
+		add_filter( 'git_updater_skip_oauth_reminder', '__return_true' );
+
+		ob_start();
+		$this->call_private( 'maybe_show_oauth_revocation_notice' );
+		$output = ob_get_clean();
+
+		remove_all_filters( 'git_updater_skip_oauth_reminder' );
+
+		$this->assertStringContainsString( 'OAuth reminder suppressed by filter', $output );
+	}
+}
+
+// =============================================================================
+// Test_Settings_Refresh_Caches  — refresh_caches() and refresh_transients()
+// =============================================================================
+
+class Test_Settings_Refresh_Caches extends GU_Test_Case {
+	use Settings_Test_Helper;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->settings = new Settings();
+	}
+
+	public function tear_down(): void {
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'test-plugin' );
+		unset( $_POST['_wpnonce'], $_POST['gu_refresh_cache'] );
+		$this->settings_tear_down();
+		parent::tear_down();
+	}
+
+	public function test_refresh_caches_returns_early_without_nonce(): void {
+		unset( $_POST['_wpnonce'] );
+		$_POST['gu_refresh_cache'] = '1';
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', 'x', strtotime( '+12 hours' ) );
+		$this->call_private( 'refresh_caches' );
+		$this->assertSame( 'x', $table->get_entry( 'test-plugin', 'repo_headers' ), 'Cache must not be flushed without a valid nonce.' );
+	}
+
+	public function test_refresh_caches_returns_early_with_invalid_nonce(): void {
+		$_POST['_wpnonce']        = 'bad_nonce';
+		$_POST['gu_refresh_cache'] = '1';
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', 'x', strtotime( '+12 hours' ) );
+		$this->call_private( 'refresh_caches' );
+		$this->assertSame( 'x', $table->get_entry( 'test-plugin', 'repo_headers' ), 'Cache must not be flushed with an invalid nonce.' );
+	}
+
+	public function test_refresh_caches_returns_early_without_gu_refresh_cache(): void {
+		$_POST['_wpnonce'] = wp_create_nonce( 'gu_refresh_cache' );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', 'x', strtotime( '+12 hours' ) );
+		$this->call_private( 'refresh_caches' );
+		$this->assertSame( 'x', $table->get_entry( 'test-plugin', 'repo_headers' ), 'Cache must not be flushed without the gu_refresh_cache POST key.' );
+	}
+
+	public function test_refresh_caches_deletes_cache_when_valid(): void {
+		$_POST['_wpnonce']        = wp_create_nonce( 'gu_refresh_cache' );
+		$_POST['gu_refresh_cache'] = '1';
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( 'test-plugin', 'repo_headers', 'x', strtotime( '+12 hours' ) );
+		$this->call_private( 'refresh_caches' );
+		$this->assertNull( $table->get_entry( 'test-plugin', 'repo_headers' ), 'Valid refresh must null the cached data columns.' );
+	}
+
+	public function test_refresh_transients_returns_false_without_nonce(): void {
+		unset( $_POST['_wpnonce'] );
+		$_REQUEST['git_updater_refresh_transients'] = '1';
+		$result = $this->call_private( 'refresh_transients' );
+		$this->assertFalse( $result );
+	}
+
+	public function test_refresh_transients_returns_false_with_invalid_nonce(): void {
+		$_POST['_wpnonce']                        = 'bad_nonce';
+		$_REQUEST['git_updater_refresh_transients'] = '1';
+		$result = $this->call_private( 'refresh_transients' );
+		$this->assertFalse( $result );
+	}
+
+	public function test_refresh_transients_returns_false_without_request_key(): void {
+		$_POST['_wpnonce'] = wp_create_nonce( 'gu_refresh_cache' );
+		unset( $_REQUEST['git_updater_refresh_transients'] );
+		$result = $this->call_private( 'refresh_transients' );
+		$this->assertFalse( $result );
+	}
+
+	public function test_refresh_transients_returns_true_when_valid(): void {
+		$_POST['_wpnonce']                        = wp_create_nonce( 'gu_refresh_cache' );
+		$_REQUEST['git_updater_refresh_transients'] = '1';
+		$result = $this->call_private( 'refresh_transients' );
+		$this->assertTrue( $result );
+	}
+}
+
+
+// =============================================================================
+// Test_Settings_Create_Admin_Page_Refresh_Button  — Refresh Cache button
+// =============================================================================
+
+class Test_Settings_Create_Admin_Page_Refresh_Button extends GU_Test_Case {
+	use Settings_Test_Helper;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->settings = new Settings();
+		$this->settings->run();
+		include_once ABSPATH . 'wp-admin/includes/template.php';
+	}
+
+	public function tear_down(): void {
+		$this->settings_tear_down();
+		parent::tear_down();
+	}
+
+	public function test_create_admin_page_renders_refresh_cache_button_on_settings_tab(): void {
+		$_GET['_wpnonce'] = wp_create_nonce( 'gu_settings' );
+		$_GET['tab']      = 'git_updater_settings';
+		$_GET['subtab']   = 'git_updater';
+		add_filter( 'gu_config_pre_process', '__return_empty_array' );
+		ob_start();
+		$this->settings->create_admin_page();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( 'Refresh Cache', $output );
+		$this->assertStringContainsString( 'gu_refresh_cache', $output );
+	}
+
+	public function test_create_admin_page_does_not_render_refresh_cache_button_on_other_tab(): void {
+		$_GET['_wpnonce'] = wp_create_nonce( 'gu_settings' );
+		$_GET['tab']      = 'git_updater_additions';
+		$_GET['subtab']   = 'git_updater';
+		add_filter( 'gu_config_pre_process', '__return_empty_array' );
+		ob_start();
+		$this->settings->create_admin_page();
+		$output = ob_get_clean();
+		$this->assertStringNotContainsString( 'Refresh Cache', $output );
+	}
+
+	public function test_create_admin_page_does_not_render_refresh_cache_button_on_settings_with_other_subtab(): void {
+		$_GET['_wpnonce'] = wp_create_nonce( 'gu_settings' );
+		$_GET['tab']      = 'git_updater_settings';
+		$_GET['subtab']   = 'github';
+		add_filter( 'gu_config_pre_process', '__return_empty_array' );
+		ob_start();
+		$this->settings->create_admin_page();
+		$output = ob_get_clean();
+		$this->assertStringNotContainsString( 'Refresh Cache', $output );
+	}
+}
+
+
+// =============================================================================
+// Test_Settings_Redirect_Refresh_Transients  — redirect_on_save with refresh
+// =============================================================================
+
+class Test_Settings_Redirect_Refresh_Transients extends GU_Test_Case {
+	use Settings_Test_Helper;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->settings = new Settings();
+	}
+
+	public function tear_down(): void {
+		delete_site_option( 'git_updater' );
+		unset( $_POST['_wpnonce'], $_REQUEST['git_updater_refresh_transients'] );
+		$this->settings_tear_down();
+		parent::tear_down();
+	}
+
+	public function test_redirect_on_save_includes_refresh_transients_in_url(): void {
+		$_POST['_wpnonce']                        = wp_create_nonce( 'gu_refresh_cache' );
+		$_REQUEST['git_updater_refresh_transients'] = '1';
+		add_filter(
+			'wp_redirect',
+			static fn( $url ) => throw new RuntimeException( 'redirect:' . $url ),
+			1
+		);
+		$rm = new ReflectionMethod( Settings::class, 'redirect_on_save' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+		try {
+			$rm->invoke( $this->settings );
+			$this->fail( 'Expected redirect exception' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( 'refresh_transients=1', $e->getMessage() );
+		}
 	}
 }

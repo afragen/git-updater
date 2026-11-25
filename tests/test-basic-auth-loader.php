@@ -25,15 +25,35 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
-		remove_all_filters( 'gu_credential_hosts' );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		$this->api = new GitHub_API( $this->make_type() );
+
+		// Register test-plugin as a known repo so request-derived slugs resolve.
+		$plugin = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this->api );
+		$ref    = new ReflectionClass( $plugin );
+		$prop   = $ref->getProperty( 'config' );
+		PHP_VERSION_ID < 80100 && $prop->setAccessible( true );
+		$repo       = new stdClass();
+		$repo->slug = 'test-plugin';
+		$repo->git  = 'github';
+		$repo->type = 'plugin';
+		$prop->setValue( $plugin, [ 'test-plugin' => $repo ] );
 	}
 
 	public function tear_down(): void {
 		unset( $_REQUEST['slug'], $_REQUEST['plugin'], $_REQUEST['plugins'], $_REQUEST['themes'] );
 		unset( $_POST['git_updater_api'], $_POST['git_updater_repo'] );
 		remove_all_filters( 'gu_credential_hosts' );
+
+		if ( isset( $this->api ) ) {
+			$plugin = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this->api );
+			$prop   = ( new ReflectionClass( $plugin ) )->getProperty( 'config' );
+			PHP_VERSION_ID < 80100 && $prop->setAccessible( true );
+			$prop->setValue( $plugin, [] );
+		}
+
 		parent::tear_down();
 	}
 
@@ -78,7 +98,7 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 	/**
 	 * Invoke the private get_type_for_credentials() method via reflection.
 	 */
-	private function get_type_for_credentials( string $slug, array $repos, string $url ): string {
+	private function get_type_for_credentials( string $slug, array $repos, string $url ): ?string {
 		$rm = new ReflectionMethod( $this->api, 'get_type_for_credentials' );
 		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		return $rm->invoke( $this->api, $slug, $repos, $url );
@@ -144,7 +164,8 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 		$_REQUEST['slug'] = [ 'my-plugin/my-plugin.php' ];
 
 		$headers = [ 'host' => 'api.github.com' ];
-		$slug    = $this->get_slug_for_credentials( $headers, [], 'https://api.github.com/', [] );
+		$repos   = [ 'my-plugin' => new stdClass() ];
+		$slug    = $this->get_slug_for_credentials( $headers, $repos, 'https://api.github.com/', [] );
 
 		$this->assertSame(
 			'my-plugin',
@@ -160,7 +181,8 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 		$_REQUEST['slug'] = 'my-plugin/my-plugin.php';
 
 		$headers = [ 'host' => 'api.github.com' ];
-		$slug    = $this->get_slug_for_credentials( $headers, [], 'https://api.github.com/', [] );
+		$repos   = [ 'my-plugin' => new stdClass() ];
+		$slug    = $this->get_slug_for_credentials( $headers, $repos, 'https://api.github.com/', [] );
 
 		$this->assertSame( 'my-plugin', $slug );
 	}
@@ -174,7 +196,8 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 		$_REQUEST['plugin'] = 'my-plugin/my-plugin.php';
 
 		$headers = [ 'host' => 'api.github.com' ];
-		$slug    = $this->get_slug_for_credentials( $headers, [], 'https://api.github.com/', [] );
+		$repos   = [ 'my-plugin' => new stdClass() ];
+		$slug    = $this->get_slug_for_credentials( $headers, $repos, 'https://api.github.com/', [] );
 
 		$this->assertSame( 'my-plugin', $slug );
 	}
@@ -182,6 +205,18 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 	/**
 	 * When neither slug nor plugin is in the request, slug returns false.
 	 */
+	public function test_slug_extraction_rejects_unknown_request_slug(): void {
+		// An arbitrary request value (e.g. an option key) must not be honored.
+		$_REQUEST['slug'] = 'gitlab_access_token';
+
+		$headers = [ 'host' => 'api.github.com' ];
+		$repos   = [ 'real-repo' => new stdClass() ];
+		$options = [ 'gitlab_access_token' => 'secret' ];
+		$slug    = $this->get_slug_for_credentials( $headers, $repos, 'https://api.github.com/', $options );
+
+		$this->assertFalse( $slug );
+	}
+
 	public function test_slug_extraction_returns_false_when_no_request_keys(): void {
 		unset( $_REQUEST['slug'], $_REQUEST['plugin'], $_REQUEST['plugins'], $_REQUEST['themes'] );
 
@@ -492,6 +527,15 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 	 * (lines 257–260 — Remote Install path).
 	 */
 	public function test_get_type_for_credentials_uses_post_data_for_remote_install(): void {
+		// Public hosts are contributed by the active API add-on.
+		add_filter(
+			'gu_credential_hosts',
+			static function ( $hosts ) {
+				$hosts['gitlab'] = array_merge( $hosts['gitlab'] ?? [], [ 'gitlab.com' ] );
+				return $hosts;
+			}
+		);
+
 		$_POST['git_updater_api']  = 'gitlab';
 		$_POST['git_updater_repo'] = 'my-plugin.zip';
 		$url                       = 'https://gitlab.com/some/path/my-plugin.zip';
@@ -499,6 +543,90 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 		$result = $this->get_type_for_credentials( '', [], $url );
 
 		$this->assertSame( 'gitlab', $result );
+	}
+
+	/**
+	 * The POSTed API cannot select a credential type for a host it does not own.
+	 */
+	public function test_get_type_for_credentials_ignores_post_api_for_foreign_host(): void {
+		$_POST['git_updater_api']  = 'gitlab';
+		$_POST['git_updater_repo'] = 'my-plugin.zip';
+		$url                       = 'https://attacker.example.net/releases/download/x/my-plugin.zip';
+
+		$result = $this->get_type_for_credentials( '', [], $url );
+
+		$this->assertNotSame( 'gitlab', $result );
+	}
+
+	/**
+	 * Credentials must not be attached to a host that is not authorized for the
+	 * credential type, even when the POSTed API would otherwise select it.
+	 */
+	public function test_add_auth_header_omits_token_for_untrusted_host(): void {
+		update_site_option( 'git_updater', [ 'github_access_token' => 'test-token' ] );
+		$_REQUEST['slug']          = 'test-plugin';
+		$_POST['git_updater_api']  = 'github';
+		$_POST['git_updater_repo'] = 'my-plugin.zip';
+
+		$result = $this->api->add_auth_header(
+			[ 'headers' => [] ],
+			'https://attacker.example.net/releases/download/x/my-plugin.zip'
+		);
+
+		$this->assertArrayNotHasKey( 'Authorization', $result['headers'] );
+	}
+
+	/**
+	 * is_allowed_credential_host() matches exact hosts and subdomains, and
+	 * honors add-on contributions via the gu_credential_hosts filter.
+	 */
+	public function test_is_allowed_credential_host_matches_and_denies(): void {
+		$this->assertTrue( $this->api->is_allowed_credential_host( 'https://api.github.com/x', 'github' ) );
+		$this->assertTrue( $this->api->is_allowed_credential_host( 'https://objects.githubusercontent.com/x', 'github' ) );
+		$this->assertFalse( $this->api->is_allowed_credential_host( 'https://evil.example.com/x', 'github' ) );
+		$this->assertFalse( $this->api->is_allowed_credential_host( 'https://api.github.com/x', 'gitlab' ) );
+
+		add_filter(
+			'gu_credential_hosts',
+			static function ( $hosts ) {
+				$hosts['gitlab'] = array_merge( $hosts['gitlab'] ?? [], [ 'gitlab.example.com' ] );
+				return $hosts;
+			}
+		);
+
+		$this->assertTrue( $this->api->is_allowed_credential_host( 'https://gitlab.example.com/x', 'gitlab' ) );
+	}
+
+	/**
+	 * get_credential_hosts() skips a configured repo without a git type rather
+	 * than emitting a provider key for it.
+	 */
+	public function test_get_credential_hosts_skips_repos_without_git_type(): void {
+		$plugin = Singleton::get_instance( Plugin::class, $this->api );
+		$rp     = new ReflectionProperty( Plugin::class, 'config' );
+		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
+		$original = $rp->getValue( $plugin );
+
+		try {
+			$rp->setValue( $plugin, [ 'no-git' => (object) [ 'slug' => 'no-git' ] ] );
+
+			$hosts = $this->api->get_credential_hosts();
+
+			$this->assertArrayNotHasKey( 'no-git', $hosts );
+			$this->assertContains( 'github.com', $hosts['github'] );
+		} finally {
+			$rp->setValue( $plugin, $original );
+		}
+	}
+
+	/**
+	 * is_allowed_credential_host() fails closed for an empty credential type and
+	 * for a URL from which no host can be parsed.
+	 */
+	public function test_is_allowed_credential_host_denies_empty_type_and_host(): void {
+		$this->assertFalse( $this->api->is_allowed_credential_host( 'https://api.github.com/x' ) );
+		$this->assertFalse( $this->api->is_allowed_credential_host( 'https://api.github.com/x', '' ) );
+		$this->assertFalse( $this->api->is_allowed_credential_host( '/relative/no-host', 'github' ) );
 	}
 
 	// -------------------------------------------------------------------------
@@ -529,9 +657,13 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 	 * (lines 308–314).
 	 */
 	public function test_add_accept_header_adds_octet_stream_for_github_release_asset(): void {
-		$slug      = 'test-plugin';
-		$cache_key = $this->api->get_cache_key( $slug );
-		update_site_option( $cache_key, [ 'release_asset_download' => 'https://cdn.example.com/release.zip' ] );
+		$slug = 'test-plugin';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry(
+			$slug,
+			'release_asset_download',
+			'https://cdn.example.com/release.zip',
+			strtotime( '+12 hours' )
+		);
 
 		// On CI no repos are installed, so get_running_git_servers() returns [].
 		// Force 'github' into the list so the foreach body executes.
@@ -540,7 +672,7 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 		$result = $this->api->add_accept_header( [ 'headers' => [ 'github' => $slug ] ] );
 
 		remove_all_filters( 'gu_running_git_servers' );
-		delete_site_option( $cache_key );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( $slug );
 
 		$this->assertSame( 'application/octet-stream', $result['headers']['Accept'] );
 		$this->assertArrayNotHasKey( 'github', $result['headers'] );
@@ -676,62 +808,9 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * is_allowed_credential_host() matches exact hosts and subdomains, and
-	 * honors add-on contributions via the gu_credential_hosts filter.
-	 */
-	public function test_is_allowed_credential_host_matches_and_denies(): void {
-		$this->assertTrue( $this->api->is_allowed_credential_host( 'https://api.github.com/x', 'github' ) );
-		$this->assertTrue( $this->api->is_allowed_credential_host( 'https://objects.githubusercontent.com/x', 'github' ) );
-		$this->assertFalse( $this->api->is_allowed_credential_host( 'https://evil.example.com/x', 'github' ) );
-		$this->assertFalse( $this->api->is_allowed_credential_host( 'https://api.github.com/x', 'gitlab' ) );
-
-		add_filter(
-			'gu_credential_hosts',
-			static function ( $hosts ) {
-				$hosts['gitlab'] = array_merge( $hosts['gitlab'] ?? [], [ 'gitlab.example.com' ] );
-				return $hosts;
-			}
-		);
-
-		$this->assertTrue( $this->api->is_allowed_credential_host( 'https://gitlab.example.com/x', 'gitlab' ) );
-	}
-
-	/**
 	 * Gist authenticates as GitHub and shares the github host set.
 	 */
 	public function test_is_allowed_credential_host_maps_gist_to_github(): void {
 		$this->assertTrue( $this->api->is_allowed_credential_host( 'https://gist.github.com/x', 'gist' ) );
-	}
-
-	/**
-	 * get_credential_hosts() skips a configured repo without a git type rather
-	 * than emitting a provider key for it.
-	 */
-	public function test_get_credential_hosts_skips_repos_without_git_type(): void {
-		$plugin = Singleton::get_instance( Plugin::class, $this->api );
-		$rp     = new ReflectionProperty( Plugin::class, 'config' );
-		PHP_VERSION_ID < 80100 && $rp->setAccessible( true );
-		$original = $rp->getValue( $plugin );
-
-		try {
-			$rp->setValue( $plugin, [ 'no-git' => (object) [ 'slug' => 'no-git' ] ] );
-
-			$hosts = $this->api->get_credential_hosts();
-
-			$this->assertArrayNotHasKey( 'no-git', $hosts );
-			$this->assertContains( 'github.com', $hosts['github'] );
-		} finally {
-			$rp->setValue( $plugin, $original );
-		}
-	}
-
-	/**
-	 * is_allowed_credential_host() fails closed for an empty credential type and
-	 * for a URL from which no host can be parsed.
-	 */
-	public function test_is_allowed_credential_host_denies_empty_type_and_host(): void {
-		$this->assertFalse( $this->api->is_allowed_credential_host( 'https://api.github.com/x' ) );
-		$this->assertFalse( $this->api->is_allowed_credential_host( 'https://api.github.com/x', '' ) );
-		$this->assertFalse( $this->api->is_allowed_credential_host( '/relative/no-host', 'github' ) );
 	}
 }

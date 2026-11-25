@@ -11,6 +11,7 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
+use Fragen\Git_Updater\Additions\Additions;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
 use Fragen\Git_Updater\API\Language_Pack_API;
@@ -169,17 +170,21 @@ class Base {
 			);
 		}
 
-		if ( isset( $_POST['_wpnonce'], $_POST['gu_refresh_cache'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
-			/**
-			 * Fires later in cycle when Refreshing Cache.
-			 *
-			 * @since 10.0.0
-			 */
-			do_action( 'gu_refresh_transients' );
-		}
-
 		$this->get_meta_plugins();
 		$this->get_meta_themes();
+
+		// Prune cached repo rows for repos no longer present (network-wide table:
+		// only safe to run from the main site / network admin).
+		if ( ! is_multisite() || is_main_site() ) {
+			$gu_plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
+			$gu_themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
+			$live_slugs = array_merge( array_keys( $gu_plugins ), array_keys( $gu_themes ) );
+			$additions  = Additions::get_saved_additions();
+			foreach ( $additions as $addition ) {
+				$live_slugs[] = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];
+			}
+			\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->prune_stale( $live_slugs );
+		}
 	}
 
 	/**
@@ -342,6 +347,7 @@ class Base {
 			$ran[] = false !== $repo_api->get_repo_meta()        ? 'meta'     : null;
 			// phpcs:enable
 			$repo_api->set_repo_cache( 'ran', array_filter( $ran ) );
+			// phpcs:enable
 			$repo->download_link = $repo_api->construct_download_link();
 			$repo_api->set_repo_cache_timeout( $repo->slug );
 			$language_pack = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
@@ -373,8 +379,8 @@ class Base {
 	 * blocks until the per-repo fetch cycle has run, so callers that need fresh
 	 * data immediately (webhook updates) never read the stale cache.
 	 *
-	 * The user's tracked `current_branch` is preserved unless this refresh is part
-	 * of a branch switch.
+	 * `delete_repo_api_data()` preserves the tracked `current_branch`; a branch
+	 * switch clears it so the previous branch is not carried forward.
 	 *
 	 * @param stdClass $repo          Repo object.
 	 * @param bool     $branch_switch Whether the refresh accompanies a branch switch.
@@ -386,31 +392,16 @@ class Base {
 			return false;
 		}
 
-		$cache_key = $this->get_cache_key( $repo->slug );
-		$cache     = (array) get_site_option( $cache_key, [] );
-		$keep      = ! $branch_switch && isset( $cache['current_branch'] )
-			? $cache['current_branch']
-			: null;
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo_api_data( $repo->slug );
 
-		delete_site_option( $cache_key );
+		if ( $branch_switch ) {
+			$table->delete_entry( $repo->slug, 'current_branch' );
+		}
 
 		$this->get_remote_repo_meta( $repo );
 
-		// Restore the tracked branch after the fetch so its timeout bookkeeping is
-		// untouched by the invalidation. Merge directly rather than via
-		// set_repo_cache() so a failed fetch doesn't stamp a fresh timeout on an
-		// otherwise empty row. On a switch, process_request() persists the new
-		// branch once the update succeeds.
-		if ( null !== $keep ) {
-			$cache                   = (array) get_site_option( $cache_key, [] );
-			$cache['current_branch'] = $keep;
-			update_site_option( $cache_key, $cache );
-		}
-
-		$cache = $this->get_repo_cache( $repo->slug, false );
-		$ran   = is_array( $cache ) ? (array) ( $cache['ran'] ?? [] ) : [];
-
-		return [] === array_diff( self::expected_ran_steps(), $ran );
+		return $this->is_fetch_complete( $repo->slug );
 	}
 
 	/**
@@ -459,8 +450,8 @@ class Base {
 	 * @return void
 	 */
 	public function add_assets( $repo ) {
-		$cache  = $this->get_repo_cache( $repo->type->slug ?? false, false );
-		$assets = $cache['assets'] ?? false;
+		$cache  = $this->get_repo_cache( $repo->type->slug ?? false, false, 'assets' );
+		$assets = $cache ?? false;
 
 		if ( ! $assets || is_object( $assets ) ) {
 			return;
@@ -525,9 +516,12 @@ class Base {
 			if ( isset( $hook_extra['plugin'] ) ) {
 				$slug       = dirname( $hook_extra['plugin'] );
 				$new_source = trailingslashit( $remote_source ) . $slug;
-			} elseif ( wp_doing_ajax() && check_ajax_referer( 'updates' ) && isset( $_POST['slug'] ) ) {
-				$slug       = sanitize_key( wp_unslash( $_POST['slug'] ) );
-				$new_source = trailingslashit( $remote_source ) . $slug;
+			} elseif ( wp_doing_ajax() ) {
+				check_ajax_referer( 'updates' );
+				if ( isset( $_POST['slug'] ) ) {
+					$slug       = sanitize_key( wp_unslash( $_POST['slug'] ) );
+					$new_source = trailingslashit( $remote_source ) . $slug;
+				}
 			}
 		}
 
@@ -539,9 +533,12 @@ class Base {
 			if ( isset( $hook_extra['theme'] ) ) {
 				$slug       = $hook_extra['theme'];
 				$new_source = trailingslashit( $remote_source ) . $slug;
-			} elseif ( wp_doing_ajax() && check_ajax_referer( 'updates' ) && isset( $_POST['slug'] ) ) {
-				$slug       = sanitize_key( wp_unslash( $_POST['slug'] ) );
-				$new_source = trailingslashit( $remote_source ) . $slug;
+			} elseif ( wp_doing_ajax() ) {
+				check_ajax_referer( 'updates' );
+				if ( isset( $_POST['slug'] ) ) {
+					$slug       = sanitize_key( wp_unslash( $_POST['slug'] ) );
+					$new_source = trailingslashit( $remote_source ) . $slug;
+				}
 			}
 		}
 

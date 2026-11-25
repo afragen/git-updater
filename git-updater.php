@@ -13,7 +13,7 @@
  * Plugin ID:         did:plc:afjf7gsjzsqmgc7dlhb553mv
  * Plugin URI:        https://git-updater.com
  * Description:       A plugin to automatically update GitHub hosted plugins, themes, and language packs. Additional API plugins available for Bitbucket, GitLab, Gitea, and Gist.
- * Version:           14.5.0
+ * Version:           15.0.0
  * Author:            Andy Fragen
  * Author URI:        https://thefragens.com
  * Security:          andy+security@git-updater.com
@@ -74,7 +74,7 @@ add_action(
 add_filter(
 	'gu_additions',
 	static function ( $listing, $repos, $type ) {
-		$config    = get_site_option( 'git_updater_additions', [] );
+		$config    = Additions::get_saved_additions();
 		$additions = new Additions();
 		$additions->register( $config, $repos, $type );
 		$additions->add_to_git_updater = array_merge( (array) $additions->add_to_git_updater, (array) $listing );

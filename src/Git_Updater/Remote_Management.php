@@ -40,7 +40,12 @@ class Remote_Management {
 	 */
 	public function ensure_api_key_is_set() {
 		if ( ! self::$api_key ) {
-			update_site_option( 'git_updater_api_key', bin2hex( random_bytes( 32 ) ) );
+			$key = bin2hex( random_bytes( 32 ) );
+			update_site_option( 'git_updater_api_key', $key );
+			// Assign back to the static: callers read the key through the class
+			// property, and leaving it empty lets hash_equals( '', '' ) pass on the
+			// first request after install or after the option is deleted.
+			self::$api_key = $key;
 		}
 	}
 
@@ -95,6 +100,9 @@ class Remote_Management {
 			</form>
 			<?php $reset_api_action = add_query_arg( [ 'git_updater_reset_api_key' => true ], $action ); ?>
 			<form class="settings no-sub-tabs" method="post" action="<?php echo esc_attr( $reset_api_action ); ?>">
+				<?php wp_nonce_field( 'git_updater_reset_api_key' ); ?>
+				<input type="hidden" name="tab" value="<?php echo esc_attr( $tab ); ?>" />
+				<input type="hidden" name="git_updater_reset_api_key" value="1" />
 				<?php submit_button( esc_html__( 'Reset REST API key', 'git-updater' ) ); ?>
 			</form>
 			<?php
@@ -142,9 +150,6 @@ class Remote_Management {
 	 * @return void
 	 */
 	public function print_section_remote_management() {
-		if ( empty( self::$api_key ) ) {
-			$this->load_options();
-		}
 		$update_endpoint       = add_query_arg(
 			[ 'key' => self::$api_key ],
 			home_url( 'wp-json/' . $this->get_class_vars( 'REST\REST_API', 'namespace' ) . '/update/' )
@@ -217,11 +222,22 @@ class Remote_Management {
 	 * @return bool
 	 */
 	public function reset_api_key() {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if ( isset( $_REQUEST['tab'], $_REQUEST['git_updater_reset_api_key'] )
-			&& 'git_updater_remote_management' === sanitize_title_with_dashes( wp_unslash( $_REQUEST['tab'] ) )
+		// POST only: rotating the shared key is a state change, and accepting the
+		// trigger from a GET would let a crafted link rotate it.
+		$request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
+		if ( 'POST' !== $request_method ) {
+			return false;
+		}
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		if ( isset( $_POST['tab'], $_POST['git_updater_reset_api_key'] )
+			&& 'git_updater_remote_management' === sanitize_title_with_dashes( wp_unslash( $_POST['tab'] ) )
+			// Verify the nonce and capability: a minted nonce alone must not let a
+			// low-privilege user rotate the shared REST API key (availability DoS).
+			&& isset( $_POST['_wpnonce'] )
+			&& wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater_reset_api_key' )
+			&& current_user_can( is_multisite() ? 'manage_network_options' : 'manage_options' )
 		) {
-			$_POST = $_REQUEST;
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$_POST['_wp_http_referer'] = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : null;
 			// phpcs:enable

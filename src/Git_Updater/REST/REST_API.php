@@ -47,6 +47,7 @@ class REST_API {
 	 */
 	public function load_hooks() {
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_filter( 'rest_post_dispatch', [ $this, 'add_nocache_headers' ], 10, 3 );
 
 		/*
 		 * Deprecated AJAX request. The `nopriv` variant is intentional — external CI / webhook
@@ -58,6 +59,58 @@ class REST_API {
 		 */
 		add_action( 'wp_ajax_git-updater-update', [ Singleton::get_instance( 'REST\Rest_Update', $this ), 'process_request' ] );
 		add_action( 'wp_ajax_nopriv_git-updater-update', [ Singleton::get_instance( 'REST\Rest_Update', $this ), 'process_request' ] );
+	}
+
+	/**
+	 * Mark client-facing update responses as uncacheable.
+	 *
+	 * Core only sends nocache headers to authenticated requests
+	 * (rest_send_nocache_headers defaults to is_user_logged_in()), so an
+	 * anonymous Lite client's response — including a 60-second signed download
+	 * token — is cacheable by any page cache in front of the site. A cached
+	 * token outlives its signature and every download then fails with
+	 * `403 gu_invalid_signature` until the entry expires.
+	 *
+	 * @param mixed            $response Response to send.
+	 * @param \WP_REST_Server  $server   Server instance.
+	 * @param \WP_REST_Request $request  Request used to generate the response.
+	 *
+	 * @return mixed
+	 */
+	public function add_nocache_headers( $response, $server, $request ) {
+		if ( ! $response instanceof \WP_HTTP_Response ) {
+			return $response;
+		}
+
+		if ( ! $this->is_uncacheable_route( (string) $request->get_route() ) ) {
+			return $response;
+		}
+
+		foreach ( wp_get_nocache_headers() as $name => $value ) {
+			if ( ! empty( $value ) ) {
+				$response->header( $name, $value );
+			}
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Whether a REST route must never be cached by a page cache.
+	 *
+	 * The `download` route is deliberately absent: its `expires` and `signature`
+	 * are query arguments, so the cache key already differs per signature and a
+	 * cache hit can only replay the identical URL.
+	 *
+	 * @param string $route The route being served.
+	 *
+	 * @return bool
+	 */
+	private function is_uncacheable_route( string $route ): bool {
+		return (bool) preg_match(
+			'#^/git-updater/v1/(update-api|plugins-api|themes-api|download-token/)#',
+			$route
+		);
 	}
 
 	/**
@@ -122,6 +175,10 @@ class REST_API {
 								'required'          => true,
 								'validate_callback' => 'sanitize_title_with_dashes',
 							],
+							'key'  => [
+								'default'           => null,
+								'validate_callback' => 'sanitize_text_field',
+							],
 						],
 					],
 					[
@@ -134,6 +191,10 @@ class REST_API {
 								'default'           => false,
 								'required'          => true,
 								'validate_callback' => 'sanitize_title_with_dashes',
+							],
+							'key'  => [
+								'default'           => null,
+								'validate_callback' => 'sanitize_text_field',
 							],
 						],
 					],
@@ -194,6 +255,10 @@ class REST_API {
 						'slug' => [
 							'required'          => true,
 							'sanitize_callback' => 'sanitize_title_with_dashes',
+						],
+						'key'  => [
+							'default'           => null,
+							'validate_callback' => 'sanitize_text_field',
 						],
 					],
 				],
@@ -440,7 +505,8 @@ class REST_API {
 	 */
 	public function get_remote_repo_data( WP_REST_Request $request ) {
 		// Test for API key and exit if incorrect.
-		if ( ! hash_equals( (string) $this->get_class_vars( 'Remote_Management', 'api_key' ), (string) $request->get_param( 'key' ) ) ) {
+		$key = (string) $request->get_param( 'key' );
+		if ( ! $key || ! hash_equals( (string) get_site_option( 'git_updater_api_key' ), $key ) ) {
 			return [ 'error' => 'Bad API key. No repo data for you.' ];
 		}
 		$slugs      = [];
@@ -494,11 +560,12 @@ class REST_API {
 	 *
 	 * Returns data consistent with `plugins_api()` or `themes_api()` request.
 	 *
-	 * @param WP_REST_Request $request REST API response.
+	 * @param WP_REST_Request                       $request REST API response.
+	 * @param array<int, array<string, mixed>>|null $additions Pre-read Additions option; null reads the option.
 	 *
 	 * @return array<string, mixed>|WP_Error
 	 */
-	public function get_api_data( WP_REST_Request $request ) {
+	public function get_api_data( WP_REST_Request $request, ?array $additions = null ) {
 		$slug = $request->get_param( 'slug' );
 		if ( ! $slug ) {
 			return [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
@@ -509,15 +576,9 @@ class REST_API {
 		$gu_repos   = array_merge( $gu_plugins, $gu_themes );
 
 		// Don't allow non-shared repos via this API. Set via Additions tab.
-		$additions = get_site_option( 'git_updater_additions', [] );
-		foreach ( $additions as $addition ) {
-			$addition_slug = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];
-
-			if ( $addition_slug === $slug ) {
-				if ( isset( $addition['private_package'] ) && true === (bool) $addition['private_package'] ) {
-					return [ 'error' => 'Specified repo is not shared.' ];
-				}
-			}
+		$additions ??= Additions::get_saved_additions();
+		if ( $this->is_hard_blocked( $slug, $additions ) ) {
+			return [ 'error' => 'Specified repo is not shared.' ];
 		}
 
 		if ( ! array_key_exists( $slug, $gu_repos ) ) {
@@ -612,12 +673,34 @@ class REST_API {
 		];
 		uksort( $repo_api_data['versions'], fn ( $a, $b ) => version_compare( $b, $a ) );
 
-		$repo_cache = $this->get_repo_cache( $slug, false );
+		// Private repos are withheld from unauthenticated callers on every route,
+		// including `update-api`. Placed here because `is_private` only exists
+		// once $repo_api_data is built above; denying before the release-asset
+		// block also skips that remote call.
+		//
+		// A presented X-GU-Lite-Key is recorded as pending before the gate so a
+		// shimmed legacy client or a proactive Lite client can be approved even
+		// though its first request is denied. The `private_package` hard block
+		// above still applies to every caller and is not filterable.
+		if ( ! empty( $repo_api_data['is_private'] ) ) {
+			$this->maybe_record_pending_client( $request, $slug );
+		}
+
+		if ( $this->requires_auth( (bool) $repo_api_data['is_private'] )
+			&& ! $this->request_is_authorized( $request, $slug ) ) {
+			return new WP_Error(
+				'gu_private_package',
+				'Specified repo is not shared.',
+				[ 'status' => 403 ]
+			);
+		}
+
+		$repo_cache = $this->get_repo_cache( $slug, false, [ 'release_asset_download', 'release_asset' ] );
 		$api        = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this );
 
 		// Update release asset download link.
 		if ( $repo_data->release_asset ) {
-			if ( isset( $repo_cache['release_asset_download'] )
+			if ( ! empty( $repo_cache['release_asset_download'] )
 				&& 'bitbucket' !== $repo_api_data['git']
 			) {
 				$repo_api_data['download_link'] = $channel && $use_channel && ! empty( $versions )
@@ -634,7 +717,7 @@ class REST_API {
 		$needs_proxy = $repo_api_data['is_private']
 			|| ! empty( $this->get_class_vars( 'API\API', 'options' )[ $slug ] )
 			|| in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true )
-			|| $this->has_uses_lite( $slug );
+			|| $this->has_uses_lite( $slug, $additions );
 
 		if ( $needs_proxy && ! empty( $repo_api_data['download_link'] ) ) {
 			// Strictly isolate the token URL to the git-updater-lite update-api route.
@@ -661,19 +744,19 @@ class REST_API {
 		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
 		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
 		$gu_tokens  = array_merge( $gu_plugins, $gu_themes );
-		$additions  = (array) get_site_option( 'git_updater_additions', [] );
+		$additions  = Additions::get_saved_additions();
 
 		foreach ( $additions as $addition ) {
-			$slug = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];
+			$slug = $this->get_addition_slug( (array) $addition );
 
-			if ( isset( $addition['private_package'] ) && true === (bool) $addition['private_package'] ) {
+			if ( ! empty( $addition['private_package'] ) ) {
 				continue;
 			}
 
 			if ( array_key_exists( $slug, $gu_tokens ) ) {
 				$file = $gu_tokens[ $slug ]->file;
 				$request->set_param( 'slug', $slug );
-				$api_data[ $slug ] = $this->get_api_data( $request );
+				$api_data[ $slug ] = $this->get_api_data( $request, $additions );
 			}
 		}
 
@@ -686,8 +769,7 @@ class REST_API {
 	 * @return array<int, array<string, mixed>>
 	 */
 	public function get_additions_data() {
-		$additions = get_site_option( 'git_updater_additions', [] );
-		$additions = ( new Additions() )->deduplicate( $additions );
+		$additions = Additions::get_saved_additions();
 		$additions = array_filter(
 			$additions,
 			function ( $addition ) {
@@ -707,7 +789,8 @@ class REST_API {
 	 */
 	public function flush_repo_cache( $request ) {
 		// Test for API key and exit if incorrect.
-		if ( ! hash_equals( (string) $this->get_class_vars( 'Remote_Management', 'api_key' ), (string) $request->get_param( 'key' ) ) ) {
+		$key = (string) $request->get_param( 'key' );
+		if ( ! $key || ! hash_equals( (string) get_site_option( 'git_updater_api_key' ), $key ) ) {
 			return (object) [ 'error' => 'Bad API key. No flush for you.' ];
 		}
 
@@ -715,39 +798,133 @@ class REST_API {
 		if ( ! $slug ) {
 			return (object) [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
 		}
-		$cache_key = $this->get_cache_key( $slug );
-		$flush     = delete_site_option( $cache_key );
-		$message   = $flush
-			? [
-				'success' => true,
-				$slug     => "Repository cache for $slug has been flushed.",
-			]
-			: [
-				'success' => false,
-				$slug     => 'Repository cache flush failed.',
-			];
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo_api_data( $slug );
 
-		return (object) $message;
+		return (object) [
+			'success' => true,
+			$slug     => "Repository cache for $slug has been flushed.",
+		];
 	}
 
 	/**
 	 * Check if a slug is flagged as using git-updater-lite in Additions.
 	 *
-	 * @param string $slug The package slug (folder name for plugins, theme slug for themes).
+	 * @param string                                $slug The package slug (folder name for plugins, theme slug for themes).
+	 * @param array<int, array<string, mixed>>|null $additions Pre-read Additions option; null reads the option.
 	 *
 	 * @return bool
 	 */
-	private function has_uses_lite( string $slug ): bool {
-		$additions = get_site_option( 'git_updater_additions', [] );
+	private function has_uses_lite( string $slug, ?array $additions = null ): bool {
+		$additions ??= Additions::get_saved_additions();
 		foreach ( $additions as $addition ) {
-			$addition_slug = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];
-
-			if ( $addition_slug === $slug && ! empty( $addition['uses_lite'] ) ) {
+			if ( $this->get_addition_slug( (array) $addition ) === $slug && ! empty( $addition['uses_lite'] ) ) {
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	/**
+	 * Derive an Additions entry's package slug.
+	 *
+	 * @param array<string, mixed> $addition An entry from `git_updater_additions`.
+	 *
+	 * @return string
+	 */
+	private function get_addition_slug( array $addition ): string {
+		$type = $addition['type'] ?? '';
+		$slug = $addition['slug'] ?? '';
+
+		return str_contains( $type, 'plugin' ) ? dirname( $slug ) : $slug;
+	}
+
+	/**
+	 * Check if a slug is hard-blocked from the public API.
+	 *
+	 * The `private_package` flag on the Additions tab means "do not share": the
+	 * repo is never served, to anyone, regardless of API key or lite domain.
+	 *
+	 * @param string                                $slug      The package slug.
+	 * @param array<int, array<string, mixed>>|null $additions Pre-read Additions option; null reads the option.
+	 *
+	 * @return bool
+	 */
+	private function is_hard_blocked( string $slug, ?array $additions = null ): bool {
+		$additions ??= Additions::get_saved_additions();
+		foreach ( $additions as $addition ) {
+			if ( $this->get_addition_slug( (array) $addition ) === $slug ) {
+				return ! empty( $addition['private_package'] );
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Whether a repo requires an authorized caller to be served.
+	 *
+	 * Public/non-public is the only gate: a genuinely private repo is withheld
+	 * unless the caller presents the REST API key or a configured lite domain.
+	 *
+	 * @param bool $is_private Whether the remote repo is non-public.
+	 *
+	 * @return bool
+	 */
+	private function requires_auth( bool $is_private ): bool {
+		return $is_private;
+	}
+
+	/**
+	 * Whether the request presents a valid credential for the slug.
+	 *
+	 * Two independent credentials are accepted: the shared REST API key, or an
+	 * approved git-updater-lite client key for that slug.
+	 *
+	 * @param WP_REST_Request $request REST API response.
+	 * @param string          $slug    The package slug.
+	 *
+	 * @return bool
+	 */
+	private function request_is_authorized( WP_REST_Request $request, string $slug ): bool {
+		$key = $request->get_param( 'key' );
+		if ( ! empty( $key ) && hash_equals( (string) get_site_option( 'git_updater_api_key' ), (string) $key ) ) {
+			return true;
+		}
+
+		$provided = sanitize_text_field( $request->get_header( 'X-GU-Lite-Key' ) );
+		if ( '' === $provided ) {
+			return false;
+		}
+
+		return \Fragen\Git_Updater\Lite_Clients::is_approved_client_key( $slug, hash( 'sha256', $provided ) );
+	}
+
+	/**
+	 * Record an unapproved lite client key as pending for a slug.
+	 *
+	 * Runs before the enforcement gate so shimmed legacy clients and proactive
+	 * Lite clients can be approved even though their first request is denied.
+	 * Only called for private packages.
+	 *
+	 * @param WP_REST_Request $request REST API response.
+	 * @param string          $slug    The package slug.
+	 *
+	 * @return void
+	 */
+	private function maybe_record_pending_client( WP_REST_Request $request, string $slug ): void {
+		$provided = sanitize_text_field( $request->get_header( 'X-GU-Lite-Key' ) );
+		if ( '' === $provided ) {
+			return;
+		}
+
+		$hash = hash( 'sha256', $provided );
+		if ( \Fragen\Git_Updater\Lite_Clients::is_approved_client_key( $slug, $hash ) ) {
+			return;
+		}
+
+		$label = sanitize_text_field( $request->get_header( 'X-GU-Client-Label' ) );
+		\Fragen\Git_Updater\Lite_Clients::record_pending_client( $slug, $hash, $label );
 	}
 
 	/**
@@ -793,15 +970,21 @@ class REST_API {
 		$valid = hash_equals( $expected, $signature );
 
 		if ( ! $valid ) {
+			/*
+			 * Log the slug and expiry only. The expected signature and the secret
+			 * length are a working credential for this payload, so never write
+			 * them to the log unless explicitly debugging.
+			 */
+			$detail = apply_filters( 'gu_debug_download_signature', false )
+				? sprintf( ', sig=%s, expected=%s, secret_len=%d', $signature, $expected, strlen( $secret ) )
+				: '';
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			error_log(
 				sprintf(
-					'git-updater verify_signature: slug=%s, expires=%d, sig=%s, expected=%s, secret_len=%d',
+					'git-updater verify_signature: slug=%s, expires=%d%s',
 					$slug,
 					$expires,
-					$signature,
-					$expected,
-					strlen( $secret )
+					$detail
 				)
 			);
 		}
@@ -819,37 +1002,30 @@ class REST_API {
 	public function get_download_token( WP_REST_Request $request ) {
 		$slug = $request->get_param( 'slug' );
 
-		// 1. Optional Server-Centric Domain Validation
-		$incoming_domain    = sanitize_text_field( $request->get_header( 'X-GU-Site-Domain' ) );
-		$authorized_domains = (array) apply_filters( 'git_updater_lite_authorized_domains', [], $slug );
-
-		if ( ! empty( $authorized_domains ) ) {
-			$domain_valid = false;
-			foreach ( $authorized_domains as $base_domain ) {
-				$base_domain = strtolower( trim( $base_domain ) );
-				// Matches exact domain OR any subdomain (e.g., staging.example.com, www.example.com).
-				if ( $incoming_domain === $base_domain || str_ends_with( $incoming_domain, '.' . $base_domain ) ) {
-					$domain_valid = true;
-					break;
-				}
-			}
-
-			if ( ! $domain_valid ) {
-				return new WP_Error(
-					'gu_unauthorized_domain',
-					'Domain not authorized for this package. Please contact the plugin developer.',
-					[ 'status' => 403 ]
-				);
-			}
-		}
-
-		// 2. Standard Repo Validation (handles private_package checks, etc.)
+		// Standard repo validation (hard block, repo existence, upstream resolution).
+		// Runs first because the privacy decision below needs `is_private`.
 		$repo_api_data = $this->build_download_metadata( $slug );
 		if ( is_wp_error( $repo_api_data ) ) {
 			return $repo_api_data;
 		}
 
-		// 3. Generate and return short-lived signed URL (60 seconds for lite)
+		// Private repos are withheld unless the caller presents the REST API key
+		// or an approved lite client key for this slug. Record a presented key
+		// before the gate so it can be approved after the denial.
+		if ( ! empty( $repo_api_data['is_private'] ) ) {
+			$this->maybe_record_pending_client( $request, $slug );
+		}
+
+		if ( $this->requires_auth( (bool) $repo_api_data['is_private'] )
+			&& ! $this->request_is_authorized( $request, $slug ) ) {
+			return new WP_Error(
+				'gu_unauthorized_domain',
+				'Domain not authorized for this package. Please contact the plugin developer.',
+				[ 'status' => 403 ]
+			);
+		}
+
+		// Generate and return short-lived signed URL (60 seconds for lite).
 		$signed_url = $this->sign_download_url( $slug, 60 );
 		return rest_ensure_response( [ 'download_link' => $signed_url ] );
 	}
@@ -1049,19 +1225,13 @@ class REST_API {
 		$gu_repos   = array_merge( $gu_plugins, $gu_themes );
 
 		// Don't allow non-shared repos via this API. Set via Additions tab.
-		$additions = get_site_option( 'git_updater_additions', [] );
-		foreach ( $additions as $addition ) {
-			$addition_slug = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];
-
-			if ( $addition_slug === $slug ) {
-				if ( isset( $addition['private_package'] ) && true === (bool) $addition['private_package'] ) {
-					return new WP_Error(
-						'gu_private_package',
-						'Specified repo is not shared.',
-						[ 'status' => 403 ]
-					);
-				}
-			}
+		$additions = Additions::get_saved_additions();
+		if ( $this->is_hard_blocked( $slug, $additions ) ) {
+			return new WP_Error(
+				'gu_private_package',
+				'Specified repo is not shared.',
+				[ 'status' => 403 ]
+			);
 		}
 
 		if ( ! array_key_exists( $slug, $gu_repos ) ) {
@@ -1098,7 +1268,7 @@ class REST_API {
 		// singleton being reset between tests while still respecting the
 		// redirect-following branch used when an AWS S3 redirect URL has
 		// expired in cache.
-		$repo_cache = $this->get_repo_cache( $slug, false );
+		$repo_cache = $this->get_repo_cache( $slug, false, [ 'release_asset_download', 'release_asset_redirect', 'release_asset' ] );
 
 		$build_auth = true;
 
@@ -1129,6 +1299,9 @@ class REST_API {
 
 		$result = [
 			'download_link' => $download_link,
+			// Surface privacy so callers with request context can gate on it
+			// without a second remote fetch.
+			'is_private'    => ! empty( $repo_data->is_private ),
 		];
 
 		if ( ! empty( $auth_header['headers'] ) ) {
@@ -1156,7 +1329,8 @@ class REST_API {
 
 		try {
 			// Test for API key and exit if incorrect.
-			if ( ! hash_equals( (string) $this->get_class_vars( 'Remote_Management', 'api_key' ), (string) $request->get_param( 'key' ) ) ) {
+			$key = (string) $request->get_param( 'key' );
+			if ( ! $key || ! hash_equals( (string) get_site_option( 'git_updater_api_key' ), $key ) ) {
 				throw new UnexpectedValueException( 'Bad API key. No branch reset for you.' );
 			}
 
@@ -1170,8 +1344,6 @@ class REST_API {
 			}
 
 			$this->set_repo_cache( 'current_branch', '', $slug );
-			unset( $options[ "current_branch_$slug" ] );
-			update_site_option( 'git_updater', $options );
 
 			$response = [
 				'success'      => true,

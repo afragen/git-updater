@@ -66,10 +66,9 @@ class Branch {
 	 * @return mixed
 	 */
 	public function get_current_branch( $repo ) {
-		$cache          = $this->get_repo_cache( $repo->slug, false );
-		$current_branch = ! empty( $cache['current_branch'] )
-			? $cache['current_branch']
-			: $repo->branch;
+		$cache          = $this->get_repo_cache( $repo->slug, false, 'current_branch' );
+		$cache_primary  = $this->get_repo_cache( $repo->slug, false, 'primary_branch' );
+		$current_branch = ! empty( $cache ) ? $cache : ( ! empty( $cache_primary ) ? $cache_primary : $repo->branch );
 
 		return $current_branch;
 	}
@@ -130,7 +129,7 @@ class Branch {
 	 * @return void
 	 */
 	public function set_branch_on_switch( $repo ) {
-		$cache = $this->get_repo_cache( $repo, false );
+		$cache = $this->get_repo_cache( $repo, false, [ 'tags', 'repo_headers', 'branches' ] );
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -143,7 +142,7 @@ class Branch {
 		$tag_array    = isset( $cache['tags'] ) && is_array( $cache['tags'] );
 		$in_tag_array = $tag_array && in_array( $rollback, $cache['tags'], true );
 		if ( $in_tag_array ) {
-			$current_branch = $cache[ $repo ]['PrimaryBranch'] ?? 'master';
+			$current_branch = $cache['repo_headers']['PrimaryBranch'] ?? 'master';
 		}
 
 		if ( ! $in_tag_array && isset( $_GET['action'], $cache['branches'] )
@@ -156,8 +155,6 @@ class Branch {
 		}
 		if ( isset( $current_branch ) ) {
 			$this->set_repo_cache( 'current_branch', $current_branch, $repo );
-			self::$options[ 'current_branch_' . $repo ] = $current_branch;
-			update_site_option( 'git_updater', self::$options );
 		}
 	}
 
@@ -171,7 +168,6 @@ class Branch {
 	 */
 	public function set_branch_on_install( $install ) {
 		$this->set_repo_cache( 'current_branch', $install['git_updater_branch'], $install['repo'] );
-		self::$options[ 'current_branch_' . $install['repo'] ] = $install['git_updater_branch'];
 		self::$options = isset( $install['options'] ) && is_array( $install['options'] )
 			? array_merge( self::$options, $install['options'] )
 			: self::$options;
@@ -193,7 +189,7 @@ class Branch {
 		$config     = $this->get_class_vars( 'Fragen\Git_Updater\Plugin', 'config' );
 		$plugin     = $this->get_repo_slugs( dirname( $plugin_file ), $plugin_obj );
 
-		$cache = $this->get_repo_cache( $plugin['slug'] );
+		$cache = $this->get_repo_cache( $plugin['slug'], false, 'ran' );
 		if ( ! $cache ) {
 			$this->base->get_remote_repo_meta( $config[ $plugin['slug'] ] );
 		}
@@ -306,7 +302,7 @@ class Branch {
 			);
 			?>
 			<div id="gu_versions" style="display:none; width: 100%;">
-				<label><select style="width: 60%;" onchange="if(jQuery(this).val() != '') { jQuery(this).parent().next().show(); jQuery(this).parent().next().attr('href','<?php echo esc_url( $rollback_url ); ?>'+jQuery(this).val()); } else jQuery(this).parent().next().hide();">
+				<label><select style="width: 60%;" onchange="if(jQuery(this).val() != '') { jQuery(this).parent().next().show(); jQuery(this).parent().next().attr('href','<?php echo esc_url( $rollback_url ); ?>'+encodeURIComponent(jQuery(this).val())); } else jQuery(this).parent().next().hide();">
 				<option value=""><?php esc_html_e( 'Choose a Version', 'git-updater' ); ?>&#8230;</option>
 			<?php
 

@@ -13,21 +13,29 @@ class Test_Remote_Management extends GU_Test_Case {
 	private array $saved_request;
 	private array $saved_post;
 	private array $saved_get;
+	private $saved_request_method;
 
 	public function set_up(): void {
 		parent::set_up();
 		if ( ! function_exists( 'submit_button' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/template.php';
 		}
-		$this->saved_request = $_REQUEST;
-		$this->saved_post    = $_POST;
-		$this->saved_get     = $_GET;
+		$this->saved_request        = $_REQUEST;
+		$this->saved_post           = $_POST;
+		$this->saved_get            = $_GET;
+		$this->saved_request_method = $_SERVER['REQUEST_METHOD'] ?? null;
 	}
 
 	public function tear_down(): void {
 		$_REQUEST = $this->saved_request;
 		$_POST    = $this->saved_post;
 		$_GET     = $this->saved_get;
+		if ( null === $this->saved_request_method ) {
+			unset( $_SERVER['REQUEST_METHOD'] );
+		} else {
+			$_SERVER['REQUEST_METHOD'] = $this->saved_request_method;
+		}
+		wp_set_current_user( 0 );
 		delete_site_option( 'git_updater_api_key' );
 		remove_all_filters( 'gu_add_settings_tabs' );
 		remove_all_actions( 'gu_add_admin_page' );
@@ -60,6 +68,25 @@ class Test_Remote_Management extends GU_Test_Case {
 		$this->assertNotEmpty( $key );
 	}
 
+	public function test_ensure_api_key_is_set_populates_static_property(): void {
+		delete_site_option( 'git_updater_api_key' );
+
+		// Clear the static so ensure_api_key_is_set() must generate a key.
+		$prop = ( new ReflectionClass( Remote_Management::class ) )->getProperty( 'api_key' );
+		PHP_VERSION_ID < 80100 && $prop->setAccessible( true );
+		$prop->setValue( null, null );
+
+		$rm = new Remote_Management();
+		$rm->ensure_api_key_is_set();
+
+		$static = $prop->getValue();
+
+		// The generated key must be assigned back to the static, otherwise
+		// hash_equals( '', '' ) lets an empty key authenticate.
+		$this->assertNotEmpty( $static );
+		$this->assertSame( get_site_option( 'git_updater_api_key' ), $static );
+	}
+
 	public function test_reset_api_key_returns_false_without_request_params(): void {
 		$rm     = new Remote_Management();
 		$result = $rm->reset_api_key();
@@ -67,11 +94,17 @@ class Test_Remote_Management extends GU_Test_Case {
 	}
 
 	public function test_reset_api_key_returns_true_and_deletes_option_with_valid_request(): void {
+		$admin_id = $this->factory->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $admin_id );
+		grant_super_admin( $admin_id );
+
 		update_site_option( 'git_updater_api_key', 'key-to-delete' );
 		$rm = new Remote_Management();
 
-		$_REQUEST['tab']                      = 'git_updater_remote_management';
-		$_REQUEST['git_updater_reset_api_key'] = '1';
+		$_SERVER['REQUEST_METHOD']        = 'POST';
+		$_POST['tab']                     = 'git_updater_remote_management';
+		$_POST['git_updater_reset_api_key'] = '1';
+		$_POST['_wpnonce']                = wp_create_nonce( 'git_updater_reset_api_key' );
 
 		$result = $rm->reset_api_key();
 
@@ -79,6 +112,63 @@ class Test_Remote_Management extends GU_Test_Case {
 		$new_key = get_site_option( 'git_updater_api_key', false );
 		$this->assertIsString( $new_key );
 		$this->assertSame( 64, strlen( $new_key ) );
+	}
+
+	public function test_reset_api_key_returns_false_for_get_request(): void {
+		$admin_id = $this->factory->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $admin_id );
+		grant_super_admin( $admin_id );
+
+		update_site_option( 'git_updater_api_key', 'key-to-keep' );
+		$rm = new Remote_Management();
+
+		// Same params as a valid reset, but delivered via GET — must not rotate.
+		$_SERVER['REQUEST_METHOD']          = 'GET';
+		$_POST['tab']                       = 'git_updater_remote_management';
+		$_POST['git_updater_reset_api_key'] = '1';
+		$_POST['_wpnonce']                  = wp_create_nonce( 'git_updater_reset_api_key' );
+
+		$result = $rm->reset_api_key();
+
+		$this->assertFalse( $result );
+		$this->assertSame( 'key-to-keep', get_site_option( 'git_updater_api_key' ) );
+	}
+
+	public function test_reset_api_key_returns_false_without_nonce(): void {
+		$admin_id = $this->factory->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $admin_id );
+		grant_super_admin( $admin_id );
+
+		update_site_option( 'git_updater_api_key', 'key-to-keep' );
+		$rm = new Remote_Management();
+
+		$_SERVER['REQUEST_METHOD']          = 'POST';
+		$_POST['tab']                       = 'git_updater_remote_management';
+		$_POST['git_updater_reset_api_key'] = '1';
+		unset( $_POST['_wpnonce'] );
+
+		$result = $rm->reset_api_key();
+
+		$this->assertFalse( $result );
+		$this->assertSame( 'key-to-keep', get_site_option( 'git_updater_api_key' ) );
+	}
+
+	public function test_reset_api_key_returns_false_without_capability(): void {
+		$subscriber = $this->factory->user->create( [ 'role' => 'subscriber' ] );
+		wp_set_current_user( $subscriber );
+
+		update_site_option( 'git_updater_api_key', 'key-to-keep' );
+		$rm = new Remote_Management();
+
+		$_SERVER['REQUEST_METHOD']          = 'POST';
+		$_POST['tab']                       = 'git_updater_remote_management';
+		$_POST['git_updater_reset_api_key'] = '1';
+		$_POST['_wpnonce']                  = wp_create_nonce( 'git_updater_reset_api_key' );
+
+		$result = $rm->reset_api_key();
+
+		$this->assertFalse( $result );
+		$this->assertSame( 'key-to-keep', get_site_option( 'git_updater_api_key' ) );
 	}
 
 	public function test_add_settings_tabs_registers_remote_management_tab(): void {
@@ -151,18 +241,26 @@ class Test_Remote_Management extends GU_Test_Case {
 		$this->assertStringContainsString( 'no-sub-tabs', $output );
 	}
 
-	public function test_print_section_remote_management_with_empty_api_key(): void {
+	public function test_print_section_remote_management_generates_key_when_option_absent(): void {
 		delete_site_option( 'git_updater_api_key' );
 		$rm = new Remote_Management();
+
+		// The constructor generates a key and assigns it to the static, so the
+		// section always renders a usable key rather than an empty one.
+		$prop = ( new ReflectionClass( Remote_Management::class ) )->getProperty( 'api_key' );
+		PHP_VERSION_ID < 80100 && $prop->setAccessible( true );
+		$generated = (string) $prop->getValue();
 
 		ob_start();
 		$rm->print_section_remote_management();
 		$output = ob_get_clean();
 
+		$this->assertNotEmpty( $generated );
 		$this->assertStringContainsString( 'wp-json', $output );
 		$this->assertStringContainsString( 'git-updater/v1', $output );
 		$this->assertStringContainsString( 'update/', $output );
 		$this->assertStringContainsString( 'reset-branch/', $output );
+		$this->assertStringContainsString( $generated, $output );
 	}
 
 	public function test_print_section_remote_management_embeds_api_key_in_endpoints(): void {

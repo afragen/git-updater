@@ -15,6 +15,8 @@ class Test_REST_API extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		// build_download_metadata()/proxy_download() look up the slug in the
 		// Plugin/Theme singletons. Tests in earlier classes reset the Plugin
 		// singleton via GU_Test_Case::tear_down(); re-instantiate it here so
@@ -90,6 +92,89 @@ class Test_REST_API_Load_Hooks extends WP_UnitTestCase {
 }
 
 // ---------------------------------------------------------------------------
+// Nocache headers on client-facing update responses (#1198)
+// ---------------------------------------------------------------------------
+
+/**
+ * Tests that the routes exposing signed download URLs are marked uncacheable.
+ *
+ * Core only sends nocache headers to authenticated requests, so an anonymous
+ * Lite client's response would otherwise be stored by any page cache and replay
+ * a token that has already expired.
+ */
+class Test_REST_API_Nocache_Headers extends WP_UnitTestCase {
+
+	private REST_API $rest;
+
+	public function set_up(): void {
+		parent::set_up();
+		$this->rest = new REST_API();
+	}
+
+	/**
+	 * @dataProvider data_routes
+	 *
+	 * @param string $route    The REST route being served.
+	 * @param bool   $expected Whether nocache headers are expected.
+	 */
+	public function test_add_nocache_headers( $route, $expected ) {
+		$response = new WP_REST_Response( [ 'download_link' => 'https://example.com/x.zip' ] );
+		$request  = new WP_REST_Request( 'GET', $route );
+
+		$result  = $this->rest->add_nocache_headers( $response, rest_get_server(), $request );
+		$headers = $result->get_headers();
+
+		if ( ! $expected ) {
+			$this->assertArrayNotHasKey( 'Cache-Control', $headers );
+			$this->assertArrayNotHasKey( 'Expires', $headers );
+			return;
+		}
+
+		$this->assertSame(
+			'no-cache, must-revalidate, max-age=0, no-store, private',
+			$headers['Cache-Control']
+		);
+		$this->assertSame( 'Wed, 11 Jan 1984 05:00:00 GMT', $headers['Expires'] );
+	}
+
+	public function data_routes() {
+		return [
+			'update-api'       => [ '/git-updater/v1/update-api', true ],
+			'plugins-api'      => [ '/git-updater/v1/plugins-api', true ],
+			'themes-api'       => [ '/git-updater/v1/themes-api', true ],
+			'download-token'   => [ '/git-updater/v1/download-token/my-plugin', true ],
+			'download'         => [ '/git-updater/v1/download/my-plugin', false ],
+			'repos'            => [ '/git-updater/v1/repos', false ],
+			'test'             => [ '/git-updater/v1/test', false ],
+			'reset-branch'     => [ '/git-updater/v1/reset-branch', false ],
+			'deprecated-update' => [ '/github-updater/v1/update', false ],
+		];
+	}
+
+	public function test_add_nocache_headers_returns_non_response_unchanged(): void {
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/my-plugin' );
+
+		$this->assertSame( [], $this->rest->add_nocache_headers( [], rest_get_server(), $request ) );
+	}
+
+	public function test_add_nocache_headers_skips_empty_header_values(): void {
+		$response = new WP_REST_Response();
+		$request  = new WP_REST_Request( 'GET', '/git-updater/v1/update-api' );
+
+		$result = $this->rest->add_nocache_headers( $response, rest_get_server(), $request );
+
+		$this->assertArrayNotHasKey( 'Last-Modified', $result->get_headers() );
+	}
+
+	public function test_load_hooks_registers_nocache_filter(): void {
+		$api = new REST_API();
+		$api->load_hooks();
+
+		$this->assertSame( 10, has_filter( 'rest_post_dispatch', [ $api, 'add_nocache_headers' ] ) );
+	}
+}
+
+// ---------------------------------------------------------------------------
 // Test_REST_API_Dispatch
 // ---------------------------------------------------------------------------
 
@@ -104,9 +189,9 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
-
-		// Initialise Base so extra_headers and git_servers are populated.
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 
 		// Reset the global server so rest_get_server() creates a fresh one and
 		// re-fires rest_api_init — which triggers register_endpoints() via the
@@ -222,6 +307,32 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'Bad API key', $data['error'] );
 	}
 
+	public function test_repos_endpoint_rejects_empty_key(): void {
+		// An empty key must not satisfy hash_equals( '', '' ).
+		delete_site_option( 'git_updater_api_key' );
+
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/repos' );
+		$request->set_param( 'key', '' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertArrayHasKey( 'error', $data );
+		$this->assertStringContainsString( 'Bad API key', $data['error'] );
+	}
+
+	public function test_flush_endpoint_rejects_empty_key(): void {
+		delete_site_option( 'git_updater_api_key' );
+
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/flush-repo-cache' );
+		$request->set_param( 'key', '' );
+		$request->set_param( 'slug', 'any-slug' );
+		$response = $this->server->dispatch( $request );
+		$data     = (array) $response->get_data();
+
+		$this->assertArrayHasKey( 'error', $data );
+		$this->assertStringContainsString( 'Bad API key', $data['error'] );
+	}
+
 	// -------------------------------------------------------------------------
 	// /git-updater/v1/flush-repo-cache
 	// -------------------------------------------------------------------------
@@ -249,7 +360,7 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'slug', $data['error'] );
 	}
 
-	public function test_flush_endpoint_returns_success_false_when_no_cache_exists(): void {
+	public function test_flush_endpoint_returns_success_for_missing_cache(): void {
 		$slug     = 'nonexistent-test-slug-xyzzy';
 		$request  = new WP_REST_Request( 'GET', '/git-updater/v1/flush-repo-cache' );
 		$request->set_param( 'key', $this->api_key );
@@ -257,13 +368,15 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 		$response = $this->server->dispatch( $request );
 		$data     = (array) $response->get_data();
 
-		$this->assertFalse( $data['success'] );
+		// A no-op clear (no cached row) reports success, consistent with the
+		// idempotent clear semantics.
+		$this->assertTrue( $data['success'] );
 	}
 
-	public function test_flush_endpoint_returns_success_true_and_clears_cache(): void {
-		$slug      = 'test-flush-slug-xyzzy';
-		$cache_key = 'ghu-' . md5( $slug );
-		update_site_option( $cache_key, [ 'some' => 'data' ] );
+	public function test_flush_endpoint_returns_success_true_and_clears_api_data(): void {
+		$slug = 'test-flush-slug-xyzzy';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $slug, 'repo_headers', 'data', strtotime( '+12 hours' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( $slug, 'current_branch', 'develop' );
 
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/flush-repo-cache' );
 		$request->set_param( 'key', $this->api_key );
@@ -272,9 +385,10 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
 		$data     = (array) $response->get_data();
 
 		$this->assertTrue( $data['success'] );
-		$this->assertFalse( get_site_option( $cache_key, false ) );
-
-		delete_site_option( $cache_key );
+		// API-derived data is cleared...
+		$this->assertNull( \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $slug, 'repo_headers' ) );
+		// ...but the user's current_branch survives.
+		$this->assertSame( 'develop', \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $slug, 'current_branch' ) );
 	}
 
 	// -------------------------------------------------------------------------
@@ -368,7 +482,9 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		new Base();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 
 		// Pre-seed update transients so wp_update_plugins/themes() return early
 		// without making real HTTP calls to api.wordpress.org.
@@ -394,6 +510,18 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 
 		// Install the HTTP mock for GitHub and wordpress.org calls.
 		add_filter( 'pre_http_request', [ $this, 'mock_http' ], 10, 3 );
+	}
+
+	private function seed_cache( array $data ): void {
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( self::SLUG );
+		$table->add_entry( self::SLUG, 'repo_headers', '', strtotime( '+12 hours' ) );
+		foreach ( $data as $column => $value ) {
+			if ( 'timeout' === $column ) {
+				continue;
+			}
+			$table->add_entry( self::SLUG, $column, $value );
+		}
 	}
 
 	public function tear_down(): void {
@@ -873,15 +1001,16 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 
 		// Pre-seed the release_assets cache with stable + dev versions.
 		// populate_api_data() reads $cache['release_assets']['assets'] → $repo->release_assets.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_assets'] = [
-			'assets'     => [ '2.0.0' => 'https://example.com/stable.zip' ],
-			'created_at' => [ '2.0.0' => '2024-01-01T00:00:00Z' ],
-			'dev_assets'     => [ '3.0.0-beta1' => 'https://example.com/dev.zip' ],
-			'dev_created_at' => [ '3.0.0-beta1' => '2024-02-01T00:00:00Z' ],
-		];
-		update_site_option( $cache_key, $existing );
+		$this->seed_cache(
+			[
+				'release_assets' => [
+					'assets'     => [ '2.0.0' => 'https://example.com/stable.zip' ],
+					'created_at' => [ '2.0.0' => '2024-01-01T00:00:00Z' ],
+					'dev_assets'     => [ '3.0.0-beta1' => 'https://example.com/dev.zip' ],
+					'dev_created_at' => [ '3.0.0-beta1' => '2024-02-01T00:00:00Z' ],
+				],
+			]
+		);
 
 		// channel param non-null → $channel=true; '2.0.0' < '3.0.0-beta1' → $use_channel=true.
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
@@ -889,8 +1018,6 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 		$request->set_param( 'channel', 'dev' );
 		$response = $this->server->dispatch( $request );
 		$data     = (array) $response->get_data();
-
-		delete_site_option( $cache_key );
 
 		$this->assertArrayNotHasKey( 'error', $data );
 		// The dev asset version ('3.0.0-beta1') differs from the actual remote
@@ -907,15 +1034,18 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 
 		// Pre-seed release_assets so the dev asset key matches the fixture's
 		// remote version (2.0.0).
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_assets'] = [
-			'assets'     => [ '1.9.0' => 'https://example.com/stable.zip' ],
-			'created_at' => [ '1.9.0' => '2024-01-01T00:00:00Z' ],
-			'dev_assets'     => [ '2.0.0' => 'https://example.com/dev.zip' ],
-			'dev_created_at' => [ '2.0.0' => '2024-02-01T00:00:00Z' ],
-		];
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry(
+			self::SLUG,
+			'release_assets',
+			[
+				'assets'     => [ '1.9.0' => 'https://example.com/stable.zip' ],
+				'created_at' => [ '1.9.0' => '2024-01-01T00:00:00Z' ],
+				'dev_assets'     => [ '2.0.0' => 'https://example.com/dev.zip' ],
+				'dev_created_at' => [ '2.0.0' => '2024-02-01T00:00:00Z' ],
+			],
+			strtotime( '+12 hours' )
+		);
 
 		// '1.9.0' < '2.0.0' → $use_channel=true; dev asset version === remote version.
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
@@ -924,7 +1054,7 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 		$response = $this->server->dispatch( $request );
 		$data     = (array) $response->get_data();
 
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		$this->assertArrayNotHasKey( 'error', $data );
 		$this->assertSame( '2.0.0', $data['version'] );
@@ -958,25 +1088,22 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 	public function test_get_api_data_covers_release_asset_download_path(): void {
 		$this->skip_if_fixture_absent();
 
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-
 		// Seed release_assets with a valid structure so construct_download_link()
 		// finds release assets in cache (no HTTP request needed) and writes
 		// the asset URL into release_asset_download. Also seed a valid timeout
 		// so get_repo_cache($slug, true) returns the cached data.
 		$download_url = 'https://example.com/stable-download.zip';
-		$existing['timeout']            = time() + 86400;
-		$existing['release_assets']     = [ 'assets' => [ '1.0.0' => $download_url ], 'dev_assets' => [] ];
-		$existing['release_asset_download'] = $download_url;
-		update_site_option( $cache_key, $existing );
+		$this->seed_cache(
+			[
+				'release_assets'         => [ 'assets' => [ '1.0.0' => $download_url ], 'dev_assets' => [] ],
+				'release_asset_download' => $download_url,
+			]
+		);
 
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
 		$request->set_param( 'slug', self::SLUG );
 		$response = $this->server->dispatch( $request );
 		$data     = (array) $response->get_data();
-
-		delete_site_option( $cache_key );
 
 		$this->assertArrayNotHasKey( 'error', $data );
 		$this->assertSame( $download_url, $data['download_link'] );
@@ -989,8 +1116,7 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 	public function test_get_api_data_completes_repo_metadata(): void {
 		$this->skip_if_fixture_absent();
 
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		delete_site_option( $cache_key );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG );
 
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
 		$request->set_param( 'slug', self::SLUG );
@@ -998,6 +1124,221 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 		$data     = (array) $response->get_data();
 
 		$this->assertArrayNotHasKey( 'error', $data );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_api_data() — privacy gate
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Re-declare the mocked repo meta as private.
+	 *
+	 * @param mixed  $preempt Short-circuit value from an earlier filter.
+	 * @param mixed  $args    Request args.
+	 * @param string $url     Request URL.
+	 *
+	 * @return mixed
+	 */
+	public function mock_private_meta( $preempt, $args, $url ) {
+		$path = (string) parse_url( $url, PHP_URL_PATH );
+		if ( '/repos/afragen/test-gu-plugin' !== $path ) {
+			return $preempt;
+		}
+
+		$body = json_decode( (string) ( $preempt['body'] ?? '' ), true );
+		if ( is_array( $body ) && array_key_exists( 'private', $body ) ) {
+			$body['private']   = true;
+			$preempt['body']   = json_encode( $body );
+		}
+
+		return $preempt;
+	}
+
+	private function make_private_repo(): void {
+		/*
+		 * Other test classes mutate the shared Plugin/Theme singletons (see
+		 * test-lite-domains.php, which sets `config` and restores it to `[]`),
+		 * leaving the fixture slug undiscoverable. Reset the singleton cache so
+		 * get_api_data() rebuilds its config from the installed fixture instead
+		 * of inheriting whatever ran before and failing on execution order.
+		 */
+		Singleton::reset();
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG );
+		add_filter( 'pre_http_request', [ $this, 'mock_private_meta' ], 20, 3 );
+	}
+
+	public function test_get_api_data_returns_403_for_private_repo_without_key(): void {
+		$this->skip_if_fixture_absent();
+		$this->make_private_repo();
+
+		foreach ( [ 'plugins-api', 'themes-api', 'update-api' ] as $route ) {
+			$request = new WP_REST_Request( 'GET', '/git-updater/v1/' . $route );
+			$request->set_param( 'slug', self::SLUG );
+			$response = $this->server->dispatch( $request );
+
+			$this->assertSame( 403, $response->get_status(), "Expected 403 for {$route}" );
+			$this->assertSame( 'gu_private_package', $response->get_data()['code'] );
+		}
+
+		remove_filter( 'pre_http_request', [ $this, 'mock_private_meta' ], 20 );
+	}
+
+	public function test_get_api_data_allows_private_repo_with_approved_client_key(): void {
+		$this->skip_if_fixture_absent();
+		$this->make_private_repo();
+
+		// A pre-approved client key satisfies the gate on every route.
+		add_filter( 'git_updater_lite_client_key', fn() => 'approved-client-key' );
+
+		foreach ( [ 'plugins-api', 'themes-api', 'update-api' ] as $route ) {
+			$request = new WP_REST_Request( 'GET', '/git-updater/v1/' . $route );
+			$request->set_param( 'slug', self::SLUG );
+			$request->set_header( 'X-GU-Lite-Key', 'approved-client-key' );
+			$response = $this->server->dispatch( $request );
+
+			$this->assertSame( 200, $response->get_status(), "Expected 200 for {$route}" );
+			$this->assertArrayNotHasKey( 'error', (array) $response->get_data() );
+		}
+
+		remove_all_filters( 'git_updater_lite_client_key' );
+		remove_filter( 'pre_http_request', [ $this, 'mock_private_meta' ], 20 );
+	}
+
+	public function test_get_api_data_denies_private_repo_with_unapproved_client_key(): void {
+		$this->skip_if_fixture_absent();
+		$this->make_private_repo();
+
+		add_filter( 'git_updater_lite_client_key', fn() => 'approved-client-key' );
+
+		foreach ( [ 'plugins-api', 'themes-api', 'update-api' ] as $route ) {
+			$request = new WP_REST_Request( 'GET', '/git-updater/v1/' . $route );
+			$request->set_param( 'slug', self::SLUG );
+			$request->set_header( 'X-GU-Lite-Key', 'someone-elses-key' );
+			$response = $this->server->dispatch( $request );
+
+			$this->assertSame( 403, $response->get_status(), "Expected 403 for {$route}" );
+		}
+
+		$pending = (array) get_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
+
+		remove_all_filters( 'git_updater_lite_client_key' );
+		remove_filter( 'pre_http_request', [ $this, 'mock_private_meta' ], 20 );
+		delete_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
+
+		$this->assertArrayHasKey( hash( 'sha256', 'someone-elses-key' ), $pending );
+	}
+
+	public function test_get_api_data_does_not_record_pending_for_approved_client_key(): void {
+		$this->skip_if_fixture_absent();
+		$this->make_private_repo();
+		delete_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
+
+		add_filter( 'git_updater_lite_client_key', fn() => 'approved-client-key' );
+
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
+		$request->set_param( 'slug', self::SLUG );
+		$request->set_header( 'X-GU-Lite-Key', 'approved-client-key' );
+		$response = $this->server->dispatch( $request );
+
+		$pending = (array) get_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
+
+		remove_all_filters( 'git_updater_lite_client_key' );
+		remove_filter( 'pre_http_request', [ $this, 'mock_private_meta' ], 20 );
+		delete_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertArrayNotHasKey( hash( 'sha256', 'approved-client-key' ), $pending );
+	}
+
+	public function test_get_api_data_does_not_record_pending_for_public_repo(): void {
+		$this->skip_if_fixture_absent();
+		delete_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG );
+
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
+		$request->set_param( 'slug', self::SLUG );
+		$request->set_header( 'X-GU-Lite-Key', 'some-key' );
+		$response = $this->server->dispatch( $request );
+
+		$pending = get_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
+		delete_site_transient( 'git_updater_lite_pending_' . md5( self::SLUG ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertFalse( $pending );
+	}
+
+	public function test_get_api_data_gate_cannot_be_disabled_by_filter(): void {
+		$this->skip_if_fixture_absent();
+		$this->make_private_repo();
+
+		// The former rollout escape hatch is gone; a leftover filter is inert.
+		add_filter( 'gu_enforce_private_package_gate', '__return_false' );
+
+		foreach ( [ 'plugins-api', 'themes-api', 'update-api' ] as $route ) {
+			$request = new WP_REST_Request( 'GET', '/git-updater/v1/' . $route );
+			$request->set_param( 'slug', self::SLUG );
+			$response = $this->server->dispatch( $request );
+
+			$this->assertSame( 403, $response->get_status(), "Expected 403 for {$route}" );
+		}
+
+		remove_all_filters( 'gu_enforce_private_package_gate' );
+		remove_filter( 'pre_http_request', [ $this, 'mock_private_meta' ], 20 );
+	}
+
+	public function test_get_api_data_returns_data_for_private_repo_with_key(): void {
+		$this->skip_if_fixture_absent();
+		$this->make_private_repo();
+
+		foreach ( [ 'plugins-api', 'themes-api', 'update-api' ] as $route ) {
+			$request = new WP_REST_Request( 'GET', '/git-updater/v1/' . $route );
+			$request->set_param( 'slug', self::SLUG );
+			$request->set_param( 'key', self::API_KEY );
+			$response = $this->server->dispatch( $request );
+
+			$this->assertSame( 200, $response->get_status(), "Expected 200 for {$route}" );
+			$this->assertArrayNotHasKey( 'error', (array) $response->get_data() );
+		}
+
+		remove_filter( 'pre_http_request', [ $this, 'mock_private_meta' ], 20 );
+	}
+
+	public function test_get_api_data_stays_open_for_public_repo_without_key(): void {
+		$this->skip_if_fixture_absent();
+
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG );
+
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
+		$request->set_param( 'slug', self::SLUG );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+	}
+
+	public function test_get_api_data_returns_error_for_hard_blocked_repo(): void {
+		$this->skip_if_fixture_absent();
+
+		update_site_option(
+			'git_updater_additions',
+			[
+				[
+					'type'            => 'github_plugin',
+					'slug'            => self::SLUG . '/' . self::SLUG . '.php',
+					'private_package' => true,
+				],
+			]
+		);
+
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
+		$request->set_param( 'slug', self::SLUG );
+		$request->set_param( 'key', self::API_KEY );
+		$response = $this->server->dispatch( $request );
+		$data     = (array) $response->get_data();
+
+		delete_site_option( 'git_updater_additions' );
+
+		// Hard block wins even for a key holder.
+		$this->assertSame( 'Specified repo is not shared.', $data['error'] );
 	}
 }
 
@@ -1019,7 +1360,7 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
  * get_additions_data():
  * - no additions → empty array
  * - private addition → filtered out
- * - public addition → included after deduplicate() normalisation
+ * - public addition → included
  */
 
 class Test_REST_API_Additions extends WP_UnitTestCase {
@@ -1030,12 +1371,6 @@ class Test_REST_API_Additions extends WP_UnitTestCase {
 		parent::set_up();
 		new Base();
 
-		// Seed addon caches so deduplicate() doesn't access false['key'].
-		$plugin_cache_key = 'ghu-' . md5( 'git_updater_repository_add_plugin' );
-		$theme_cache_key  = 'ghu-' . md5( 'git_updater_repository_add_theme' );
-		update_site_option( $plugin_cache_key, [ 'git_updater_repository_add_plugin' => [], 'timeout' => strtotime( '+12 hours' ) ] );
-		update_site_option( $theme_cache_key, [ 'git_updater_repository_add_theme' => [], 'timeout' => strtotime( '+12 hours' ) ] );
-
 		$GLOBALS['wp_rest_server'] = null;
 		$this->server              = rest_get_server();
 	}
@@ -1043,8 +1378,6 @@ class Test_REST_API_Additions extends WP_UnitTestCase {
 	public function tear_down(): void {
 		$GLOBALS['wp_rest_server'] = null;
 		delete_site_option( 'git_updater_additions' );
-		delete_site_option( 'ghu-' . md5( 'git_updater_repository_add_plugin' ) );
-		delete_site_option( 'ghu-' . md5( 'git_updater_repository_add_theme' ) );
 		parent::tear_down();
 	}
 
@@ -1228,6 +1561,30 @@ class Test_REST_API_Additions extends WP_UnitTestCase {
 
 		$this->assertNotEmpty( $data );
 	}
+
+	public function test_get_additions_data_skips_malformed_rows(): void {
+		update_site_option(
+			'git_updater_additions',
+			[
+				'garbage',
+				[
+					'slug'            => 'my-public-addon/my-public-addon.php',
+					'type'            => 'plugin',
+					'private_package' => false,
+					'release_asset'   => false,
+					'ID'              => 'did:test:pub1',
+					'source'          => 'manual',
+				],
+			]
+		);
+
+		$request  = new WP_REST_Request( 'GET', '/git-updater/v1/get-additions-data' );
+		$response = $this->server->dispatch( $request );
+		$data     = array_values( (array) $response->get_data() );
+
+		$this->assertCount( 1, $data );
+		$this->assertSame( 'my-public-addon/my-public-addon.php', $data[0]['slug'] );
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -1284,7 +1641,7 @@ class Test_REST_API_Reset_Branch extends WP_UnitTestCase {
 		remove_all_filters( 'wp_die_ajax_handler' );
 		delete_site_option( 'git_updater_api_key' );
 		delete_site_option( 'git_updater' );
-		delete_site_option( 'ghu-' . md5( self::SLUG ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG );
 		remove_all_actions( 'gu_post_rest_process_request' );
 		parent::tear_down();
 	}
@@ -1329,6 +1686,15 @@ class Test_REST_API_Reset_Branch extends WP_UnitTestCase {
 		$this->assert_wp_die_thrown( fn() => $this->api->reset_branch( $request ) );
 	}
 
+	public function test_reset_branch_empty_key_triggers_wp_die(): void {
+		// An empty key must not satisfy hash_equals( '', '' ).
+		delete_site_option( 'git_updater_api_key' );
+		$this->force_api_key_static( '' );
+
+		$request = $this->make_request( [ 'key' => '', 'plugin' => self::SLUG ] );
+		$this->assert_wp_die_thrown( fn() => $this->api->reset_branch( $request ) );
+	}
+
 	public function test_reset_branch_no_plugin_or_theme_triggers_wp_die(): void {
 		$request = $this->make_request( [ 'key' => self::API_KEY ] );
 		$this->assert_wp_die_thrown( fn() => $this->api->reset_branch( $request ) );
@@ -1340,15 +1706,14 @@ class Test_REST_API_Reset_Branch extends WP_UnitTestCase {
 	}
 
 	public function test_reset_branch_success_clears_cache_and_triggers_wp_die(): void {
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		update_site_option( $cache_key, [ 'current_branch' => 'develop', 'timeout' => strtotime( '+12 hours' ) ] );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( self::SLUG, 'current_branch', 'develop', strtotime( '+12 hours' ) );
 
 		$request = $this->make_request( [ 'key' => self::API_KEY, 'plugin' => self::SLUG ] );
 		$this->assert_wp_die_thrown( fn() => $this->api->reset_branch( $request ) );
 
 		// After reset, current_branch should be '' (cleared) in the cache.
-		$cache = get_site_option( $cache_key, [] );
-		$this->assertSame( '', $cache['current_branch'] ?? 'NOT_SET' );
+		$cache = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_entry( self::SLUG, 'current_branch' );
+		$this->assertSame( '', $cache ?? 'NOT_SET' );
 	}
 }
 
@@ -1382,8 +1747,14 @@ class Test_REST_API_Zero_Version extends WP_UnitTestCase {
 		new Base();
 
 		// Clear all caches for the fixture plugin so no cached version pollutes the test.
-		delete_site_option( 'ghu-' . md5( self::SLUG ) );
-		delete_site_option( 'ghu-' . md5( self::SLUG . '_error' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG . '_error' );
+		// The per-request row cache on Repo_Cache_Table lives on the singleton
+		// and survives DB transaction rollbacks, so an earlier test in this
+		// process can leave stale repo_headers behind. Flush so the mock_http_zero
+		// [] response actually drives the flow (instead of being short-circuited
+		// by a cached repo_headers with Version=2.0.0).
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->reset_row_cache();
 
 		// Pre-seed update transients to avoid api.wordpress.org calls.
 		$empty_transient = (object) [
@@ -1413,8 +1784,8 @@ class Test_REST_API_Zero_Version extends WP_UnitTestCase {
 		delete_site_transient( 'update_themes' );
 		$GLOBALS['wp_rest_server'] = null;
 		delete_site_option( 'git_updater_api_key' );
-		delete_site_option( 'ghu-' . md5( self::SLUG ) );
-		delete_site_option( 'ghu-' . md5( self::SLUG . '_error' ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::SLUG . '_error' );
 		parent::tear_down();
 	}
 
@@ -2074,11 +2445,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
 
 		// Seed a release_asset_download so the download_link is populated.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset_download'] = 'https://github.com/afragen/test-gu-plugin/archive/refs/tags/2.0.0.zip';
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://github.com/afragen/test-gu-plugin/archive/refs/tags/2.0.0.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_redirect' );
 
 		$method = new ReflectionMethod( REST_API::class, 'build_download_metadata' );
 		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
@@ -2087,7 +2456,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$result = $method->invoke( $this->rest, self::SLUG );
 
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		if ( is_wp_error( $result ) ) {
 			$this->markTestSkipped( 'Fixture plugin metadata unavailable.' );
@@ -2096,6 +2465,8 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'download_link', $result );
 		$this->assertNotEmpty( $result['download_link'], 'download_link should not be empty' );
+		$this->assertArrayHasKey( 'is_private', $result );
+		$this->assertFalse( $result['is_private'] );
 		$this->assertArrayHasKey( 'auth_header', $result );
 		$this->assertArrayHasKey( 'headers', $result['auth_header'] );
 	}
@@ -2106,11 +2477,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
 
 		// Seed release_asset_download in cache.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset_download'] = 'https://example.com/release-download.zip';
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://example.com/release-download.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_redirect' );
 
 		$method = new ReflectionMethod( REST_API::class, 'build_download_metadata' );
 		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
@@ -2119,7 +2488,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$result = $method->invoke( $this->rest, self::SLUG );
 
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		if ( is_wp_error( $result ) ) {
 			$this->markTestSkipped( 'Fixture plugin metadata unavailable.' );
@@ -2135,12 +2504,10 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
 
 		// Seed release_asset + release_asset_download + release_asset_redirect.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset']          = 'https://api.github.com/repos/afragen/test-gu-plugin/releases/assets/1234';
-		$existing['release_asset_download'] = 'https://example.com/release-asset-download.zip';
-		$existing['release_asset_redirect'] = 'https://example.com/release-asset-redirect';
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset', 'https://api.github.com/repos/afragen/test-gu-plugin/releases/assets/1234', strtotime( '+12 hours' ) );
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://example.com/release-asset-download.zip', strtotime( '+12 hours' ) );
+		$table->add_entry( self::SLUG, 'release_asset_redirect', 'https://example.com/release-asset-redirect', strtotime( '+12 hours' ) );
 
 		// Set the type slug on the API singleton so get_repo_cache() works.
 		$api_singleton  = Singleton::get_instance( 'Fragen\Git_Updater\API\API', new REST_API() );
@@ -2159,7 +2526,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 		$rp->setValue( $api_singleton, $saved_type );
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		if ( is_wp_error( $result ) ) {
 			$this->markTestSkipped( 'Fixture plugin metadata unavailable.' );
@@ -2204,11 +2571,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
 
 		// Seed a release_asset_download so the download_link is populated.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset_download'] = 'https://github.com/afragen/test-gu-plugin/archive/refs/tags/2.0.0.zip';
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://github.com/afragen/test-gu-plugin/archive/refs/tags/2.0.0.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_redirect' );
 
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/update-api' );
 		$request->set_param( 'slug', self::SLUG );
@@ -2221,7 +2586,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
 		delete_site_transient( 'update_plugins' );
 		delete_site_transient( 'update_themes' );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 		$GLOBALS['wp_rest_server'] = null;
 
 		if ( isset( $data['error'] ) ) {
@@ -2272,12 +2637,10 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 		// Seed release_asset + release_asset_redirect, but NOT release_asset_download,
 		// so get_api_data() takes the elseif branch (lines 627-628).
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset']          = 'https://api.github.com/repos/afragen/test-gu-plugin/releases/assets/1234';
-		$existing['release_asset_redirect'] = 'https://example.com/cached-redirect.zip';
-		unset( $existing['release_asset_download'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset', 'https://api.github.com/repos/afragen/test-gu-plugin/releases/assets/1234', strtotime( '+12 hours' ) );
+		$table->add_entry( self::SLUG, 'release_asset_redirect', 'https://example.com/cached-redirect.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_download' );
 
 		// Set the type slug on the API singleton so get_repo_cache() works
 		// inside get_release_asset_redirect().
@@ -2300,7 +2663,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
 		delete_site_transient( 'update_plugins' );
 		delete_site_transient( 'update_themes' );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 		$GLOBALS['wp_rest_server'] = null;
 
 		if ( isset( $data['error'] ) ) {
@@ -2377,11 +2740,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		new Base();
 
 		// Seed a release_asset_download so build_download_metadata returns a download link.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset_download'] = 'https://example.com/release.zip';
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://example.com/release.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_redirect' );
 
 		// Use a subclass that captures the file path instead of calling exit.
 		$rest = new class() extends REST_API {
@@ -2415,7 +2776,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$result = $rest->proxy_download( $request );
 
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_for_streaming' ], 10 );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		if ( ! $rest->send_file_called && is_wp_error( $result ) ) {
 			$this->markTestSkipped( 'Fixture metadata unavailable: ' . $result->get_error_message() );
@@ -2445,11 +2806,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		new Base();
 
 		// Seed cache with a download link so build_download_metadata returns it.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset_download'] = 'https://example.com/download.zip';
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://example.com/download.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_redirect' );
 
 		$sign = new ReflectionMethod( REST_API::class, 'sign_download_url' );
 		PHP_VERSION_ID < 80100 && $sign->setAccessible( true );
@@ -2466,7 +2825,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$result = $this->rest->proxy_download( $request );
 
 		remove_all_filters( 'pre_http_request' );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		if ( ! is_wp_error( $result ) ) {
 			$this->markTestSkipped( 'Fixture metadata unavailable or download link not set.' );
@@ -2499,11 +2858,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 		new Base();
 
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset_download'] = 'https://example.com/forbidden.zip';
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://example.com/forbidden.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_redirect' );
 
 		$sign = new ReflectionMethod( REST_API::class, 'sign_download_url' );
 		PHP_VERSION_ID < 80100 && $sign->setAccessible( true );
@@ -2520,7 +2877,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$result = $this->rest->proxy_download( $request );
 
 		remove_all_filters( 'pre_http_request' );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		if ( ! is_wp_error( $result ) ) {
 			$this->markTestSkipped( 'Fixture metadata unavailable or download link not set.' );
@@ -2538,11 +2895,8 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		new Base();
 
 		// Clear any cached download link.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		unset( $existing['release_asset_download'] );
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( self::SLUG );
 
 		$sign = new ReflectionMethod( REST_API::class, 'sign_download_url' );
 		PHP_VERSION_ID < 80100 && $sign->setAccessible( true );
@@ -2559,7 +2913,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$result = $this->rest->proxy_download( $request );
 
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		// If metadata resolved successfully but download_link is empty, we get 404.
 		if ( is_wp_error( $result ) && 'gu_no_download_link' === $result->get_error_code() ) {
@@ -2613,11 +2967,8 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
 
 		// Clear any cached download link.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		unset( $existing['release_asset_download'] );
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( self::SLUG );
 
 		$method = new ReflectionMethod( REST_API::class, 'build_download_metadata' );
 		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
@@ -2626,7 +2977,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$result = $method->invoke( $this->rest, self::SLUG );
 
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		if ( is_wp_error( $result ) ) {
 			$this->markTestSkipped( 'Fixture plugin metadata unavailable.' );
@@ -2720,11 +3071,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
 
 		// Seed a release_asset_download so the download_link is populated.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset_download'] = 'https://github.com/afragen/test-gu-plugin/archive/refs/tags/2.0.0.zip';
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://github.com/afragen/test-gu-plugin/archive/refs/tags/2.0.0.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_redirect' );
 
 		// Hit plugins-api (not update-api) with the private repo.
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
@@ -2736,7 +3085,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		unset( $options[ self::SLUG ] );
 		update_site_option( 'git_updater', $options );
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		if ( isset( $data['error'] ) ) {
 			$this->markTestSkipped( 'Fixture metadata unavailable: ' . $data['error'] );
@@ -2750,6 +3099,59 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 				'Expected direct signed URL but got: ' . $data['download_link']
 			);
 		}
+	}
+
+	// -------------------------------------------------------------------------
+	// get_api_data() — dev-channel + cached release_asset_download (line 624)
+	// -------------------------------------------------------------------------
+
+	/**
+	 * With a release-asset plugin, a cached release_asset_download, and the dev
+	 * channel active, the download link resolves from the (non-empty) versions
+	 * array. Covers REST_API.php:623-625 (the `? reset( $versions )` branch).
+	 */
+	public function test_get_api_data_dev_channel_download_link_from_versions(): void {
+		$this->skip_if_fixture_absent();
+
+		new Base();
+		$GLOBALS['wp_rest_server'] = null;
+		$server                    = rest_get_server();
+
+		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
+
+		// Seed release_assets (stable + dev, dev newer) so $use_channel is true,
+		// and a release_asset_download so line 620's guard is satisfied.
+		$dev_url = 'https://example.com/dev-newest.zip';
+		$table   = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry(
+			self::SLUG,
+			'release_assets',
+			[
+				'assets'     => [ '2.0.0' => 'https://example.com/stable.zip' ],
+				'dev_assets' => [ '3.0.0-beta1' => $dev_url ],
+			],
+			strtotime( '+12 hours' )
+		);
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://example.com/cached-download.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_redirect' );
+
+		// channel param non-null → $channel=true; '2.0.0' < '3.0.0-beta1' → $use_channel=true.
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/plugins-api' );
+		$request->set_param( 'slug', self::SLUG );
+		$request->set_param( 'channel', 'dev' );
+		$response = $server->dispatch( $request );
+		$data     = (array) $response->get_data();
+
+		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
+		$table->delete_repo( self::SLUG );
+
+		if ( isset( $data['error'] ) ) {
+			$this->markTestSkipped( 'Fixture metadata unavailable: ' . $data['error'] );
+		}
+
+		// $versions is the dev array; reset() yields the newest dev asset URL.
+		$this->assertArrayNotHasKey( 'error', $data );
+		$this->assertSame( $dev_url, $data['download_link'] );
 	}
 
 	// -------------------------------------------------------------------------
@@ -2774,11 +3176,9 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
 
 		// Seed a release_asset_download so build_download_metadata succeeds.
-		$cache_key = 'ghu-' . md5( self::SLUG );
-		$existing  = get_site_option( $cache_key, [] );
-		$existing['release_asset_download'] = 'https://github.com/afragen/test-gu-plugin/archive/refs/tags/2.0.0.zip';
-		unset( $existing['release_asset_redirect'] );
-		update_site_option( $cache_key, $existing );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->add_entry( self::SLUG, 'release_asset_download', 'https://github.com/afragen/test-gu-plugin/archive/refs/tags/2.0.0.zip', strtotime( '+12 hours' ) );
+		$table->delete_entry( self::SLUG, 'release_asset_redirect' );
 
 		$rest    = new REST_API();
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/' . self::SLUG );
@@ -2787,7 +3187,7 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 		// Clean up.
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
-		delete_site_option( $cache_key );
+		$table->delete_repo( self::SLUG );
 
 		if ( is_wp_error( $response ) ) {
 			$this->markTestSkipped( 'Fixture metadata unavailable: ' . $response->get_error_message() );
@@ -2824,73 +3224,63 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'signature=', $data['download_link'] );
 	}
 
-	public function test_get_download_token_returns_403_for_unauthorized_domain(): void {
+	public function test_get_download_token_does_not_gate_public_repo_with_client_key(): void {
 		$this->skip_if_fixture_absent();
 
-		// Set up authorized domain filter
-		add_filter( 'git_updater_lite_authorized_domains', function () {
-			return [ 'authorized-domain.com' ];
-		} );
+		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
+		add_filter( 'git_updater_lite_client_key', fn() => 'some-key' );
 
 		$GLOBALS['wp_rest_server'] = null;
 		$server = rest_get_server();
 
-		$request  = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/' . self::SLUG );
-		$request->set_header( 'X-GU-Site-Domain', 'unauthorized-domain.com' );
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/' . self::SLUG );
+		$request->set_header( 'X-GU-Lite-Key', 'an-unrelated-key' );
 		$response = $server->dispatch( $request );
 
-		remove_all_filters( 'git_updater_lite_authorized_domains' );
+		remove_all_filters( 'git_updater_lite_client_key' );
+		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
 
-		$this->assertSame( 403, $response->get_status() );
-		$data = $response->get_data();
-		$this->assertSame( 'gu_unauthorized_domain', $data['code'] );
+		// The fixture repo is public, so the privacy gate does not apply.
+		$this->assertSame( 200, $response->get_status() );
 	}
 
-	public function test_get_download_token_returns_200_for_authorized_domain(): void {
+	public function test_get_download_token_returns_200_for_approved_client_key(): void {
 		$this->skip_if_fixture_absent();
 
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
-
-		// Set up authorized domain filter
-		add_filter( 'git_updater_lite_authorized_domains', function () {
-			return [ 'authorized-domain.com' ];
-		} );
+		add_filter( 'git_updater_lite_client_key', fn() => 'approved-client-key' );
 
 		new Base();
 		$GLOBALS['wp_rest_server'] = null;
 		$server = rest_get_server();
 
-		$request  = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/' . self::SLUG );
-		$request->set_header( 'X-GU-Site-Domain', 'authorized-domain.com' );
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/' . self::SLUG );
+		$request->set_header( 'X-GU-Lite-Key', 'approved-client-key' );
 		$response = $server->dispatch( $request );
 
-		remove_all_filters( 'git_updater_lite_authorized_domains' );
+		remove_all_filters( 'git_updater_lite_client_key' );
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
 
 		$this->assertSame( 200, $response->get_status() );
 	}
 
-	public function test_get_download_token_returns_200_for_subdomain(): void {
+	public function test_get_download_token_public_repo_with_client_label(): void {
 		$this->skip_if_fixture_absent();
 
 		add_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10, 3 );
-
-		// Set up authorized domain filter
-		add_filter( 'git_updater_lite_authorized_domains', function () {
-			return [ 'authorized-domain.com' ];
-		} );
 
 		new Base();
 		$GLOBALS['wp_rest_server'] = null;
 		$server = rest_get_server();
 
-		$request  = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/' . self::SLUG );
-		$request->set_header( 'X-GU-Site-Domain', 'staging.authorized-domain.com' );
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/download-token/' . self::SLUG );
+		$request->set_header( 'X-GU-Lite-Key', 'any-key' );
+		$request->set_header( 'X-GU-Client-Label', 'a.example.com (Acme)' );
 		$response = $server->dispatch( $request );
 
-		remove_all_filters( 'git_updater_lite_authorized_domains' );
 		remove_filter( 'pre_http_request', [ $this, 'mock_http_build' ], 10 );
 
+		// Public repo: client key/label are ignored and it is served.
 		$this->assertSame( 200, $response->get_status() );
 	}
 
@@ -2965,6 +3355,26 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 		$result = $method->invoke( $this->rest, 'my-theme' );
 
 		update_site_option( 'git_updater_additions', [] );
+
+		$this->assertTrue( $result );
+	}
+
+	public function test_has_uses_lite_uses_provided_additions_array(): void {
+		$method = new ReflectionMethod( REST_API::class, 'has_uses_lite' );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
+
+		// Option is empty; a true result can only come from the passed array.
+		update_site_option( 'git_updater_additions', [] );
+
+		$additions = [
+			[
+				'slug'      => 'my-plugin/my-plugin.php',
+				'type'      => 'plugin',
+				'uses_lite' => true,
+			],
+		];
+
+		$result = $method->invoke( $this->rest, 'my-plugin', $additions );
 
 		$this->assertTrue( $result );
 	}

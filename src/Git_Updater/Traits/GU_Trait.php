@@ -128,7 +128,10 @@ trait GU_Trait {
 	}
 
 	/**
-	 * Get cache key.
+	 * Get cache key (slug normalizer).
+	 *
+	 * The repository cache now lives in a dedicated table indexed on `slug`, so
+	 * the `ghu-` + md5 prefix is no longer used. This returns the repo slug.
 	 *
 	 * @param  string|bool $repo Repo name or false.
 	 *
@@ -138,7 +141,7 @@ trait GU_Trait {
 		if ( ! $repo ) {
 			$repo = $this->type->slug ?? 'ghu';
 		}
-		return 'ghu-' . md5( $repo );
+		return (string) $repo;
 	}
 
 	/**
@@ -146,28 +149,58 @@ trait GU_Trait {
 	 *
 	 * @access protected
 	 *
-	 * @param string|bool $repo Repo name or false.
-	 * @param bool        $timeout false to always return cache, true to use timeout.
+	 * @param string|bool               $repo Repo name or false.
+	 * @param bool                      $timeout false to always return cache, true to use timeout.
+	 * @param array<string>|string|null $column  Columns to project. null = full row.
 	 *
-	 * @return array<string, mixed>|false The repo cache. False if expired.
+	 * @return array<string, mixed>|mixed|false The repo cache (full or partial row),
+	 *                                          or a single unserialized value, or false
+	 *                                          if expired/missing.
 	 */
-	final public function get_repo_cache( $repo = false, $timeout = true ) {
-		$cache_key = $this->get_cache_key( $repo );
-		$cache     = get_site_option( $cache_key, [] );
+	final public function get_repo_cache( $repo = false, $timeout = true, $column = null ) {
+		$slug  = $this->get_cache_key( $repo );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 
-		if ( $timeout && ! $this->is_cache_timeout_valid( $cache['timeout'] ?? 0 ) ) {
+		if ( null !== $column ) {
+			// A projected read has no timeout of its own; honor the row timeout
+			// unless the caller opted out. The timeout is surfaced in object cache
+			// so a warm entry avoids a DB query for the freshness gate.
+			if ( $timeout ) {
+				$row_timeout = $table->get_repo_timeout( $slug );
+				if ( ! $this->is_cache_timeout_valid( $row_timeout ) ) {
+					return false;
+				}
+			}
+			$value = $table->get_repo( $slug, $column );
+			if ( null === $value ) {
+				return false;
+			}
+
+			return $value;
+		}
+
+		$row = $table->get_repo( $slug );
+
+		if ( null === $row ) {
 			return false;
 		}
 
-		return $cache;
+		if ( $timeout && ! $this->is_cache_timeout_valid( (int) ( $row['timeout'] ?? 0 ) ) ) {
+			return false;
+		}
+
+		// Expose the row timeout for callers that gate on it.
+		$row['timeout'] = (int) ( $row['timeout'] ?? 0 );
+
+		return $row;
 	}
 
 	/**
-	 * Sets repo data for cache in site option.
+	 * Sets repo data for cache in the cache table.
 	 *
 	 * @access protected
 	 *
-	 * @param string      $id       Data Identifier.
+	 * @param string      $id       Column name / data identifier.
 	 * @param mixed       $response Data to be stored.
 	 * @param string|bool $repo     Repo name or false.
 	 * @param string|bool $timeout  Timeout for cache.
@@ -179,30 +212,75 @@ trait GU_Trait {
 		if ( is_wp_error( $response ) ) {
 			return false;
 		}
-		$cache_key = $this->get_cache_key( $repo );
-		$cache     = get_site_option( $cache_key, [] );
+		$slug  = $this->get_cache_key( $repo );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 
-		$hours   = $this->get_class_vars( 'API\API', 'hours' );
-		$timeout = $timeout ? $timeout : '+' . $hours . ' hours';
+		// Read the target column and the row timeout for the diff guard. The
+		// scalar read and the object-cached timeout are both served from the
+		// object cache (the timeout is surfaced via the repo_timeout: key), so
+		// no separate [$id, 'timeout'] projection query is needed.
+		$existing_value   = $table->get_repo( $slug, $id );
+		$existing_timeout = $table->get_repo_timeout( $slug );
+		// Normalize a SQL-NULL column to '' so the skip-write comparison agrees
+		// with the projection read (null and '' are stored as SQL NULL → '').
+		$existing = ( null === $existing_value && 0 === $existing_timeout )
+			? null
+			: [
+				$id       => null === $existing_value ? '' : $existing_value,
+				'timeout' => $existing_timeout,
+			];
 
-		/**
-		 * Allow filtering of cache timeout for repo information.
-		 *
-		 * @since 10.0.0
-		 *
-		 * @param string      $timeout  Timeout value used with strtotime().
-		 * @param string      $id       Data Identifier.
-		 * @param mixed       $response Data to be stored.
-		 * @param string|bool $repo     Repo name or false.
-		 */
-		$timeout = apply_filters( 'gu_repo_cache_timeout', $timeout, $id, $response, $repo );
+		// Skip the write when the new value matches the cached value for this
+		// column. Serialized comparison is robust against null vs '', array
+		// key reordering, and float precision edge cases. error_cache is
+		// excluded because it manages its own short timeout and must refresh
+		// on every retry.
+		if ( null !== $existing
+			&& 'error_cache' !== $id
+			&& array_key_exists( $id, $existing )
+			&& maybe_serialize( $existing[ $id ] ) === maybe_serialize( $response )
+		) {
+			return true;
+		}
 
-		$cache['timeout'] = $cache['timeout'] ?? strtotime( $timeout );
-		$cache[ $id ]     = $response;
+		$int_timeout = 0;
+		if ( $timeout ) {
+			$hours = $this->get_class_vars( 'API\API', 'hours' );
 
-		update_site_option( $cache_key, $cache );
+			/**
+			 * Allow filtering of cache timeout for repo information.
+			 *
+			 * @since 10.0.0
+			 *
+			 * @param string      $timeout  Timeout value used with strtotime().
+			 * @param string      $id       Data Identifier.
+			 * @param mixed       $response Data to be stored.
+			 * @param string|bool $repo     Repo name or false.
+			 */
+			$timeout = apply_filters( 'gu_repo_cache_timeout', $timeout, $id, $response, $repo );
 
-		return true;
+			$int_timeout = strtotime( $timeout );
+		}
+
+		if ( 'error_cache' === $id ) {
+			$error_timeout = $int_timeout > 0 ? $int_timeout - time() : 0;
+
+			return $table->set_error_cache( $slug, $response, max( $error_timeout, 0 ) );
+		}
+
+		// When $timeout is false, preserve an existing still-valid row timeout so
+		// repeated per-step writes don't bump the expiry. But refresh a dead one
+		// (0 after a reset via delete_repo_api_data/delete_all_api_data, or naturally
+		// expired): otherwise the row stays unreadable via get_repo_cache($timeout=true).
+		if ( 0 === $int_timeout ) {
+			if ( null === $existing || ! $this->is_cache_timeout_valid( (int) ( $existing['timeout'] ?? 0 ) ) ) {
+				$int_timeout = (int) ( $this->get_class_vars( 'API\API', 'hours' ) * HOUR_IN_SECONDS + time() );
+			} else {
+				$int_timeout = (int) ( $existing['timeout'] ?? 0 );
+			}
+		}
+
+		return $table->add_entry( $slug, $id, $response, $int_timeout );
 	}
 
 	/**
@@ -221,10 +299,9 @@ trait GU_Trait {
 	 * @return void
 	 */
 	final public function set_repo_cache_timeout( string $slug ): void {
-		$cache_key = $this->get_cache_key( $slug );
-		$cache     = get_site_option( $cache_key, [] );
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
 
-		if ( ! isset( $cache['ran'] ) || array_diff( self::expected_ran_steps(), $cache['ran'] ) ) {
+		if ( ! $this->is_fetch_complete( $slug ) ) {
 			/**
 			 * Filter the fallback cache timeout duration (in hours) for an
 			 * incomplete fetch cycle.  Prevents infinite re-fetching by setting
@@ -236,15 +313,17 @@ trait GU_Trait {
 			 * @param int    $hours Number of hours. Default 1.
 			 * @param string $slug  Repository slug.
 			 */
-			$fallback_hours   = (int) apply_filters( 'gu_repo_cache_timeout_fallback', 1, $slug );
-			$cache['timeout'] = strtotime( "+{$fallback_hours} hours" );
-			update_site_option( $cache_key, $cache );
+			$fallback_hours = (int) apply_filters( 'gu_repo_cache_timeout_fallback', 1, $slug );
+			$table->set_repo_timeout( $slug, strtotime( "+{$fallback_hours} hours" ) );
 			return;
 		}
 
-		$hours            = $this->get_class_vars( 'API\\API', 'hours' );
-		$cache['timeout'] = strtotime( apply_filters( 'gu_repo_cache_timeout', '+' . $hours . ' hours', 'ran', $cache['ran'], $slug ) );
-		update_site_option( $cache_key, $cache );
+		$ran   = $table->get_repo( $slug, 'ran' );
+		$hours = $this->get_class_vars( 'API\\API', 'hours' );
+		$table->set_repo_timeout(
+			$slug,
+			strtotime( apply_filters( 'gu_repo_cache_timeout', '+' . $hours . ' hours', 'ran', $ran, $slug ) )
+		);
 	}
 
 	/**
@@ -259,12 +338,32 @@ trait GU_Trait {
 	}
 
 	/**
+	 * Determine if a repo's full fetch cycle has completed by inspecting the
+	 * `ran` column in the cache table.
+	 *
+	 * Each fetch step appends its key to `ran` only when it returns successfully,
+	 * so a complete `ran` set means all API calls executed. A missing row, a
+	 * missing `ran` column, or a partial `ran` set all indicate an incomplete cycle.
+	 *
+	 * @param string $slug Repository slug.
+	 *
+	 * @return bool
+	 */
+	final public function is_fetch_complete( string $slug ): bool {
+		$ran = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $slug, 'ran' );
+
+		return null !== $ran
+			&& [] === array_diff( self::expected_ran_steps(), (array) $ran );
+	}
+
+	/**
 	 * Maybe extend API cached data and set new timeout if remote version
 	 * is same as cached remote version?
 	 *
-	 * Use presence of 'ran' in cache to determine if all API calls have executed and are complete.
-	 * Each key is appended to 'ran' after its specific call returns, so a partial list indicates
-	 * interrupted execution. If not present or incomplete, do not extend or set timeout.
+	 * Uses is_fetch_complete() (which inspects the `ran` column) to determine if
+	 * all API calls have executed. If not complete, the timeout is not extended;
+	 * a remote version change still drops the stale release-asset columns so the
+	 * lazy fetch rebuilds them from the new remote.
 	 *
 	 * @param array<string, string> $remote_headers Remote headers data array.
 	 * @param stdClass              $repo           Repo data object.
@@ -273,16 +372,16 @@ trait GU_Trait {
 	 * @return bool
 	 */
 	final public function maybe_extend_repo_cache( $remote_headers, $repo, string $old_version = '' ): bool {
-		$return    = false;
-		$cache_key = $this->get_cache_key( $repo->slug ?? false );
-		$cache     = get_site_option( $cache_key, [] );
+		$return  = false;
+		$slug    = $this->get_cache_key( $repo->slug ?? false );
+		$table   = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$timeout = (int) ( $table->get_repo( $slug, 'timeout' ) ?? 0 );
 
 		if ( version_compare( $remote_headers['Version'], $old_version, '==' ) ) {
 			// Only extend the timeout when the prior fetch cycle completed.
-			if ( isset( $cache['ran'] ) && ! array_diff( self::expected_ran_steps(), $cache['ran'] ) ) {
-				if ( ! $this->is_cache_timeout_valid( $cache['timeout'] ?? 0 ) ) {
-					$cache['timeout'] = strtotime( '+6 hours' );
-					update_site_option( $cache_key, $cache );
+			if ( $this->is_fetch_complete( $slug ) ) {
+				if ( ! $this->is_cache_timeout_valid( $timeout ) ) {
+					$table->set_repo_timeout( $slug, strtotime( '+6 hours' ) );
 				}
 				$return = true;
 			}
@@ -290,22 +389,22 @@ trait GU_Trait {
 			/*
 			 * Remote version changed. Release-asset data is only fetched lazily
 			 * and keyed on the cached asset versions, so drop the stale
-			 * release-asset entries now; get_api_release_assets() rebuilds them
+			 * release-asset columns now; get_api_release_assets() rebuilds them
 			 * from the new remote during this same fetch cycle.
 			 *
-			 * Deliberately not gated on 'ran' completeness: get_api_release_assets()
-			 * reads the cache without TTL gating, so this unset is the only
-			 * invalidation. An interrupted prior cycle can leave entries keyed to
-			 * the old version, and serving them for the new version is wrong.
+			 * Deliberately not gated on is_fetch_complete(): the non-gated reads
+			 * in get_api_release_assets()/get_api_release_asset() make this
+			 * unset the only invalidation. An interrupted prior cycle can leave
+			 * columns keyed to the old version, and serving them for the new
+			 * version is wrong.
 			 *
 			 * Guarded on a non-empty $old_version: with no baseline version
 			 * (first fetch) there is nothing stale to invalidate for a version
 			 * comparison that has no meaning.
 			 */
-			unset( $cache['release_assets'] );
-			unset( $cache['release_asset'] );
-			unset( $cache['release_asset_download'] );
-			update_site_option( $cache_key, $cache );
+			$table->delete_entry( $slug, 'release_assets' );
+			$table->delete_entry( $slug, 'release_asset' );
+			$table->delete_entry( $slug, 'release_asset_download' );
 		}
 
 		return $return;
@@ -322,7 +421,11 @@ trait GU_Trait {
 	 * @return stdClass
 	 */
 	final public function populate_api_data( $repo, $repo_api ) {
-		$cache             = $this->get_repo_cache( $repo->slug, false );
+		$cache             = $this->get_repo_cache(
+			$repo->slug,
+			false,
+			[ 'tags', 'changes', 'readme', 'meta', 'branches', 'release_asset', 'release_assets' ]
+		);
 		$validate_response = $this->get_reflection_method( $repo_api, 'validate_response' );
 		$cached_data       = [
 			'tags'           => $cache['tags'] ?? false,
@@ -401,20 +504,17 @@ trait GU_Trait {
 	/**
 	 * Get the newest tag from the repo cache.
 	 *
-	 * On master the cache is a `ghu-<md5>` site option holding a keyed array;
-	 * `get_repo_cache()` returns the whole array. `newest_tag` is stored as a
-	 * named entry by `get_remote_api_tag()` at fetch time.
+	 * On develop the cache is the `git_updater_cache` DB table; `newest_tag` is
+	 * stored as a named column by `get_remote_api_tag()` at fetch time.
 	 *
 	 * @param string $slug Repo slug.
 	 *
 	 * @return string
 	 */
 	final protected function get_newest_tag_from_cache( $slug ): string {
-		$cache = $this->get_repo_cache( $slug, false );
+		$value = $this->get_repo_cache( $slug, false, 'newest_tag' );
 
-		return isset( $cache['newest_tag'] ) && '' !== $cache['newest_tag']
-			? (string) $cache['newest_tag']
-			: '0.0.0';
+		return ! empty( $value ) ? (string) $value : '0.0.0';
 	}
 
 	/**
@@ -505,22 +605,16 @@ trait GU_Trait {
 	}
 
 	/**
-	 * Delete all `ghu-` prefixed data from options table.
+	 * Delete all cached repository API data from the cache table.
+	 *
+	 * Preserves each repo's `current_branch` selection so a refresh or upgrade
+	 * re-collects API data without resetting the user's active branch.
 	 *
 	 * @return bool
 	 */
 	final public function delete_all_cached_data() {
-		global $wpdb;
-
-		$table              = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
-		$column             = is_multisite() ? 'meta_key' : 'option_name';
-		$get_options_string = 'SELECT * FROM ' . $table . ' WHERE ' . $column . ' LIKE %s';
-
-		$ghu_options = $wpdb->get_results( $wpdb->prepare( $get_options_string, [ '%ghu-%' ] ) ); // phpcs:ignore
-		foreach ( $ghu_options as $option ) {
-			$option_name = is_multisite() ? $option->meta_key : $option->option_name;
-			delete_site_option( $option_name );
-		}
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_all_api_data();
 
 		if ( ! is_multisite() || is_main_site() ) {
 			wp_cron();
@@ -558,7 +652,7 @@ trait GU_Trait {
 	 * @return bool
 	 */
 	final public function override_dot_org( $type, $repo ) {
-		// Correctly account for dashicon in Settings page.
+		// Correctly account for icon in Settings page.
 		$icon           = is_array( $repo );
 		$repo           = is_array( $repo ) ? (object) $repo : $repo;
 		$dot_org_master = ! $icon ? property_exists( $repo, 'dot_org' ) && $repo->dot_org && $repo->primary_branch === $repo->branch : true;
@@ -645,18 +739,30 @@ trait GU_Trait {
 	 * @return bool true when waiting for background job to finish.
 	 */
 	final protected function waiting_for_background_update( $repo = null ) {
-		$caches = [];
 		if ( null !== $repo ) {
-
 			// Getting class instance also runs API::settings_hook().
 			if ( isset( $repo->git ) ) {
 				$git_class = 'Fragen\\Git_Updater\\API\\' . $this->base::$git_servers[ $repo->git ] . '_API';
 				Singleton::get_instance( $git_class, $this );
 			}
 
-			$cache = isset( $repo->slug ) ? $this->get_repo_cache( $repo->slug, false ) : [];
+			// Probably not managed by Git Updater if we can't identify the repo.
+			if ( ! isset( $repo->slug ) ) {
+				return true;
+			}
 
-			return ! $this->is_repo_cache_complete( $cache );
+			$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+			$ran   = $table->get_entry( $repo->slug, 'ran' );
+
+			// No `ran` row yet, OR a pending error → still waiting on an API response.
+			if ( null === $ran ) {
+				return true;
+			}
+
+			$error_timeout = (int) $table->get_entry( $repo->slug, 'error_timeout' );
+			return ! empty( $table->get_error_cache( $repo->slug ) )
+				&& $error_timeout > 0
+				&& time() < $error_timeout;
 		}
 
 		$repos = array_merge(
@@ -672,43 +778,24 @@ trait GU_Trait {
 		 */
 		$repos = apply_filters( 'gu_config_pre_process', $repos );
 
-		// Batch-load all ghu-* cache options in a single query.
-		global $wpdb;
-		$table        = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
-		$column       = is_multisite() ? 'meta_key' : 'option_name';
-		$value_column = is_multisite() ? 'meta_value' : 'option_value';
-		$all_ghu       = $wpdb->get_results( $wpdb->prepare( "SELECT {$column}, {$value_column} FROM {$table} WHERE {$column} LIKE %s", [ '%ghu-%' ] ), OBJECT_K ); // phpcs:ignore
-		$ghu_lookup   = [];
-		foreach ( (array) $all_ghu as $row ) {
-			$key                = is_multisite() ? $row->meta_key : $row->option_name;
-			$val                = is_multisite() ? $row->meta_value : $row->option_value;
-			$ghu_lookup[ $key ] = maybe_unserialize( $val );
-		}
+		// A repo is "waiting" if its fetch cycle hasn't run yet (no `ran` row) or a
+		// step errored and is still pending a retry (non-empty `error_cache`). Uses a
+		// slug+ran / slug+error_cache projection (no LONGTEXT read / unserialize of
+		// payloads) so the full per-repo data is never materialized into memory.
+		$table       = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$ran_map     = $table->get_cached_ran();
+		$error_flags = $table->get_cached_error_flags();
 
+		$waiting = false;
 		foreach ( $repos as $git_repo ) {
-			$cache_key                 = $this->get_cache_key( $git_repo->slug );
-			$caches[ $git_repo->slug ] = $ghu_lookup[ $cache_key ] ?? [];
-		}
-		$waiting = array_filter(
-			$caches,
-			function ( $e ) {
-				return ! $this->is_repo_cache_complete( $e );
+			$slug = $git_repo->slug;
+			if ( ! isset( $ran_map[ $slug ] ) || ! empty( $error_flags[ $slug ] ) ) {
+				$waiting = true;
+				break;
 			}
-		);
+		}
 
-		return ! empty( $waiting );
-	}
-
-	/**
-	 * Is this repo's background fetch cycle complete?
-	 *
-	 * @param array<string, mixed> $cache Repo cache data.
-	 *
-	 * @return bool true when the 'ran' list contains all expected keys.
-	 */
-	final protected function is_repo_cache_complete( array $cache ): bool {
-		return isset( $cache['ran'] )
-			&& ! array_diff( self::expected_ran_steps(), (array) $cache['ran'] );
+		return $waiting;
 	}
 
 	/**
@@ -793,9 +880,8 @@ trait GU_Trait {
 		$arr = [];
 
 		// For AJAX install, not from Install tab, slug is correct. Refer to Add-Ons.
-		if ( ( ! isset( $_POST['git_updater_repo'] ) && isset( $_POST['action'] ) )
-			&& ( wp_doing_ajax() && check_ajax_referer( 'updates' ) )
-		) {
+		if ( ! isset( $_POST['git_updater_repo'] ) && isset( $_POST['action'] ) && wp_doing_ajax() ) {
+			check_ajax_referer( 'updates' );
 			if ( str_contains( sanitize_key( wp_unslash( $_POST['action'] ) ), 'install' ) ) {
 				$arr['slug'] = $slug;
 			}
@@ -1088,19 +1174,12 @@ trait GU_Trait {
 	 * @return bool
 	 */
 	final public function use_release_asset( $branch_switch = false ): bool {
-		// The effective target is either the explicit branch/tag being switched to
-		// or the repo's current tracking branch. The config's `branch` field is
-		// already resolved from the cached `current_branch`, so it represents the
-		// branch the user is actually on.
 		$target = false !== $branch_switch ? $branch_switch : $this->type->branch;
 
-		// A tag is any string target not present in the branches list. In contexts
-		// without a populated branches list (some non-fetch callers), we fall back
-		// to treating non-empty string targets as tags only when they cannot be the
-		// primary branch.
+		// Check if target is a tag (not in branches list).
 		$is_tag = is_string( $target ) && ! array_key_exists( $target, (array) ( $this->type->branches ?? [] ) );
 
-		// Release assets are only used for the primary branch or a specific tag.
+		// Use release asset for primary branch or any tag (if release_asset is true).
 		$use_release_asset = $this->type->primary_branch === $target || $is_tag;
 
 		return (bool) ( $this->type->release_asset ?? false )
@@ -1213,8 +1292,8 @@ trait GU_Trait {
 	 * @return string
 	 */
 	final public function get_file_without_did_hash( $did, $plugin ): string {
-		list( $slug, $file ) = explode( '/', $plugin, 2 );
-		$slug                = str_replace( '-' . $this->get_did_hash( $did ), '', $slug );
+		[ $slug, $file ] = explode( '/', $plugin, 2 );
+		$slug            = str_replace( '-' . $this->get_did_hash( $did ), '', $slug );
 
 		return $slug . '/' . $file;
 	}

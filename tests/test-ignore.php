@@ -17,10 +17,22 @@ class Test_Ignore extends WP_UnitTestCase {
 
 	public function tear_down(): void {
 		Ignore::$repos = [];
+		\Fragen\Singleton::reset();
 		remove_all_filters( 'gu_config_pre_process' );
 		remove_all_filters( 'gu_display_repos' );
 		remove_all_filters( 'gu_add_repo_setting_field' );
 		parent::tear_down();
+	}
+
+	public function test_no_arg_construction_registers_empty_string_slug(): void {
+		new Ignore();
+		$this->assertArrayHasKey( '', Ignore::$repos );
+	}
+
+	public function test_singleton_construction_with_null_option_uses_empty_string_slug(): void {
+		// Singleton::get_instance() instantiates with an explicit null option.
+		\Fragen\Singleton::get_instance( Ignore::class, $this );
+		$this->assertArrayHasKey( '', Ignore::$repos );
 	}
 
 	public function test_config_pre_process_removes_ignored_slug_from_config(): void {

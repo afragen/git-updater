@@ -103,6 +103,8 @@ class Test_Rest_Update_Process extends GU_Test_Case {
 		);
 
 		update_site_option( 'git_updater_api_key', 'test-process-key' );
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		$_REQUEST   = [];
 		$_GET       = [];
 		$this->rest = new Rest_Update();
@@ -271,9 +273,10 @@ class Test_Rest_Update_Process extends GU_Test_Case {
 	// -------------------------------------------------------------------------
 
 	public function test_get_primary_branch_returns_value_from_cache(): void {
-		$slug      = 'primary-branch-test-slug-xyz';
-		$cache_key = 'ghu-' . md5( $slug );
-		update_site_option( $cache_key, [ $slug => [ 'PrimaryBranch' => 'main' ] ] );
+		$slug = 'primary-branch-test-slug-xyz';
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( $slug );
+		$table->add_entry( $slug, 'primary_branch', 'main', strtotime( '+12 hours' ) );
 
 		$request = new WP_REST_Request( 'GET', '/git-updater/v1/update' );
 		$request->set_param( 'plugin', $slug );
@@ -286,7 +289,6 @@ class Test_Rest_Update_Process extends GU_Test_Case {
 
 		$result = $this->rest->process_request_data( $request );
 
-		delete_site_option( $cache_key );
 		$this->assertSame( 'main', $result['tag'] );
 	}
 }
@@ -376,8 +378,9 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 		remove_all_filters( 'wp_doing_ajax' );
 		remove_all_filters( 'wp_die_ajax_handler' );
 		delete_site_option( 'git_updater_api_key' );
-		delete_site_option( 'ghu-' . md5( self::PLUGIN_SLUG ) );
-		delete_site_option( 'ghu-' . md5( self::THEME_SLUG ) );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::PLUGIN_SLUG );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( self::THEME_SLUG );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->delete_repo( 'another-gu-repo' );
 
 		foreach ( [ $this->zip_path, $this->theme_zip_path ] as $path ) {
 			if ( $path && file_exists( $path ) ) {
@@ -678,6 +681,20 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 		add_filter( 'pre_http_request', [ $this, 'mock_http_full' ], 10, 3 );
 	}
 
+	private function install_cache_table(): void {
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
+	}
+
+	private function seed_repo_cache( string $slug, array $entries ): void {
+		$this->install_cache_table();
+		$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$table->delete_repo( $slug );
+		foreach ( $entries as $column => $value ) {
+			$table->add_entry( $slug, (string) $column, $value, strtotime( '+12 hours' ) );
+		}
+	}
+
 	/**
 	 * Invoke the private flush_repo_cache() method.
 	 *
@@ -692,13 +709,6 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		return (bool) $method->invoke( $rest, $slug, $type, $branch_switch );
-	}
-
-	private function seed_repo_option( string $slug, array $data ): void {
-		update_site_option(
-			'ghu-' . md5( $slug ),
-			array_merge( [ 'timeout' => time() + HOUR_IN_SECONDS ], $data )
-		);
 	}
 
 	// -------------------------------------------------------------------------
@@ -957,28 +967,24 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 	public function test_flush_repo_cache_refreshes_target_repo(): void {
 		$this->skip_if_plugin_absent();
 		$this->use_full_http_mock();
-		$this->seed_repo_option(
-			self::PLUGIN_SLUG,
-			[
-				self::PLUGIN_SLUG => [ 'Version' => '1.0.0' ],
-				'ran'             => [],
-			]
-		);
+		$this->seed_repo_cache( self::PLUGIN_SLUG, [ 'repo_headers' => [ 'Version' => '1.0.0' ], 'ran' => [] ] );
 
 		$rest = new Rest_Update();
 		$this->invoke_flush_repo_cache( $rest, self::PLUGIN_SLUG );
 
-		$cache = get_site_option( 'ghu-' . md5( self::PLUGIN_SLUG ) );
-		$this->assertSame( '2.0.0', $cache[ self::PLUGIN_SLUG ]['Version'] );
-		$this->assertContains( 'contents', $cache['ran'] );
-		$this->assertContains( 'tags', $cache['ran'] );
-		$this->assertContains( 'branches', $cache['ran'] );
+		$table   = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+		$headers = $table->get_entry( self::PLUGIN_SLUG, 'repo_headers' );
+		$ran     = $table->get_entry( self::PLUGIN_SLUG, 'ran' );
+		$this->assertSame( '2.0.0', $headers['Version'] );
+		$this->assertContains( 'contents', $ran );
+		$this->assertContains( 'tags', $ran );
+		$this->assertContains( 'branches', $ran );
 	}
 
 	public function test_flush_repo_cache_makes_no_rest_loopback_request(): void {
 		$this->skip_if_plugin_absent();
 		$this->use_full_http_mock();
-		$this->seed_repo_option( self::PLUGIN_SLUG, [ self::PLUGIN_SLUG => [ 'Version' => '1.0.0' ] ] );
+		$this->seed_repo_cache( self::PLUGIN_SLUG, [ 'repo_headers' => [ 'Version' => '1.0.0' ] ] );
 
 		$rest = new Rest_Update();
 		$this->invoke_flush_repo_cache( $rest, self::PLUGIN_SLUG );
@@ -999,64 +1005,61 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 	public function test_flush_repo_cache_leaves_other_repo_cache_untouched(): void {
 		$this->skip_if_plugin_absent();
 		$this->use_full_http_mock();
-		$this->seed_repo_option( self::PLUGIN_SLUG, [ self::PLUGIN_SLUG => [ 'Version' => '1.0.0' ] ] );
-
-		$other_slug = 'another-gu-repo';
-		update_site_option( 'ghu-' . md5( $other_slug ), [ 'marker' => 'keep' ] );
+		$this->seed_repo_cache( self::PLUGIN_SLUG, [ 'repo_headers' => [ 'Version' => '1.0.0' ] ] );
+		$this->seed_repo_cache( 'another-gu-repo', [ 'readme' => 'keep' ] );
 
 		$rest = new Rest_Update();
 		$this->invoke_flush_repo_cache( $rest, self::PLUGIN_SLUG );
 
-		$other = get_site_option( 'ghu-' . md5( $other_slug ) );
-		$this->assertSame( 'keep', $other['marker'] );
-		delete_site_option( 'ghu-' . md5( $other_slug ) );
+		$readme = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_entry( 'another-gu-repo', 'readme' );
+		$this->assertSame( 'keep', $readme );
 	}
 
 	public function test_flush_repo_cache_preserves_current_branch(): void {
 		$this->skip_if_plugin_absent();
 		$this->use_full_http_mock();
-		$this->seed_repo_option(
+		$this->seed_repo_cache(
 			self::PLUGIN_SLUG,
 			[
-				self::PLUGIN_SLUG => [ 'Version' => '1.0.0' ],
-				'current_branch'  => 'main',
+				'repo_headers'   => [ 'Version' => '1.0.0' ],
+				'current_branch' => 'main',
 			]
 		);
 
 		$rest = new Rest_Update();
 		$this->invoke_flush_repo_cache( $rest, self::PLUGIN_SLUG, 'plugin', false );
 
-		$cache = get_site_option( 'ghu-' . md5( self::PLUGIN_SLUG ) );
-		$this->assertSame( 'main', $cache['current_branch'] );
+		$current_branch = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_entry( self::PLUGIN_SLUG, 'current_branch' );
+		$this->assertSame( 'main', $current_branch );
 	}
 
 	public function test_flush_repo_cache_drops_current_branch_on_branch_switch(): void {
 		$this->skip_if_plugin_absent();
 		$this->use_full_http_mock();
-		$this->seed_repo_option(
+		$this->seed_repo_cache(
 			self::PLUGIN_SLUG,
 			[
-				self::PLUGIN_SLUG => [ 'Version' => '1.0.0' ],
-				'current_branch'  => 'main',
+				'repo_headers'   => [ 'Version' => '1.0.0' ],
+				'current_branch' => 'main',
 			]
 		);
 
 		$rest = new Rest_Update();
 		$this->invoke_flush_repo_cache( $rest, self::PLUGIN_SLUG, 'plugin', true );
 
-		$cache = (array) get_site_option( 'ghu-' . md5( self::PLUGIN_SLUG ) );
-		$this->assertArrayNotHasKey( 'current_branch', $cache );
+		$current_branch = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_entry( self::PLUGIN_SLUG, 'current_branch' );
+		$this->assertEmpty( $current_branch );
 	}
 
 	public function test_process_request_refreshes_cache_before_updating(): void {
 		$this->skip_if_plugin_absent();
 		$this->use_full_http_mock();
-		$this->seed_repo_option(
+		$this->seed_repo_cache(
 			self::PLUGIN_SLUG,
 			[
-				self::PLUGIN_SLUG => [ 'Version' => '1.0.0' ],
-				'ran'             => [],
-				'current_branch'  => 'main',
+				'repo_headers'   => [ 'Version' => '1.0.0' ],
+				'ran'            => [],
+				'current_branch' => 'main',
 			]
 		);
 
@@ -1067,18 +1070,18 @@ class Test_Rest_Update_Full_Path extends GU_Test_Case {
 		];
 
 		$spy = new class extends Rest_Update {
-			public $cache_at_update = null;
+			public $row_at_update = null;
 			public function update_plugin( $slug, $tag = 'master' ) {
-				$this->cache_at_update = get_site_option( 'ghu-' . md5( $slug ) );
+				$this->row_at_update = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->get_repo( $slug );
 			}
 			public function update_theme( $slug, $tag = 'master' ) {}
 		};
 
 		$this->assert_wp_die_thrown( fn() => $spy->process_request( null ) );
 
-		$this->assertSame( '2.0.0', $spy->cache_at_update[ self::PLUGIN_SLUG ]['Version'] );
-		$this->assertArrayHasKey( 'ran', $spy->cache_at_update );
-		$this->assertSame( 'main', $spy->cache_at_update['current_branch'] );
+		$this->assertSame( '2.0.0', $spy->row_at_update['repo_headers']['Version'] );
+		$this->assertNotEmpty( $spy->row_at_update['ran'] );
+		$this->assertSame( 'main', $spy->row_at_update['current_branch'] );
 	}
 }
 

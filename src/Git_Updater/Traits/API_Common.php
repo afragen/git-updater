@@ -128,13 +128,13 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_info( $git, $request ): bool {
-		$cache    = $this->get_repo_cache( $this->type->slug );
-		$response = is_array( $cache ) ? ( $cache[ $this->type->slug ] ?? false ) : false;
+		$cache    = $this->get_repo_cache( $this->type->slug, true, 'repo_headers' );
+		$response = false !== $cache ? $cache : false;
 
 		// Capture old version before overwriting: use valid cache if available, else raw option.
-		$prior       = is_array( $cache ) ? $cache : $this->get_repo_cache( $this->type->slug, false );
-		$old_version = is_array( $prior ) && isset( $prior[ $this->type->slug ]['Version'] )
-			? (string) $prior[ $this->type->slug ]['Version']
+		$prior       = false !== $cache ? [ 'repo_headers' => $cache ] : $this->get_repo_cache( $this->type->slug, false, [ 'repo_headers' ] );
+		$old_version = is_array( $prior ) && isset( $prior['repo_headers']['Version'] )
+			? (string) $prior['repo_headers']['Version']
 			: '';
 
 		if ( ! $response ) {
@@ -153,8 +153,7 @@ trait API_Common {
 
 		$response['dot_org'] = $this->get_dot_org_data();
 		$this->set_file_info( $response );
-		$this->set_repo_cache( $this->type->slug, $response, false, false );
-		$this->set_repo_cache( 'repo', $this->type->slug, false, false );
+		$this->set_repo_cache( 'repo_headers', $response, false, false );
 
 		// Check remote version against the pre-fetch cached version; extend cache if unchanged.
 		if ( $this->maybe_extend_repo_cache( $response, $this->type, $old_version ) ) {
@@ -216,7 +215,7 @@ trait API_Common {
 	 */
 	final public function get_remote_api_changes( $git, $changes, $request ) {
 		$changelogs = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md', 'changelog.txt' ];
-		$cache      = $this->get_repo_cache( $this->type->slug ) ?: [];
+		$cache      = $this->get_repo_cache( $this->type->slug, true, [ 'contents' ] ) ?: [];
 		$changelogs = ! empty( $cache['contents'] ) ? array_intersect( $cache['contents']['files'], $changelogs ) : $changelogs;
 
 		$response     = false;
@@ -243,8 +242,11 @@ trait API_Common {
 			return null;
 		}
 
-		$parser   = new Parsedown();
-		$response = $parser->text( $response );
+		$parser = new Parsedown();
+		$parser->setSafeMode( true );
+		// Remote markdown is untrusted; kses the rendered HTML before caching
+		// so every consumer gets safe markup regardless of where it is echoed.
+		$response = wp_kses_post( $parser->text( $response ) );
 		$this->set_repo_cache( 'changes', $response );
 
 		return true;
@@ -260,7 +262,7 @@ trait API_Common {
 	 */
 	final public function get_remote_api_readme( $git, $request ) {
 		$readmes = [ 'readme.txt', 'README.md', 'readme.md' ];
-		$cache   = $this->get_repo_cache( $this->type->slug ) ?: [];
+		$cache   = $this->get_repo_cache( $this->type->slug, true, [ 'contents' ] ) ?: [];
 		$readmes = ! empty( $cache['contents'] ) ? array_intersect( $cache['contents']['files'], $readmes ) : $readmes;
 
 		// Use readme.txt if it exists.
@@ -301,6 +303,11 @@ trait API_Common {
 
 		$parser   = new Readme_Parser( $response, $this->type->slug );
 		$response = $parser->parse_data();
+		if ( isset( $response['sections'] ) && is_array( $response['sections'] ) ) {
+			foreach ( $response['sections'] as $key => $section ) {
+				$response['sections'][ $key ] = wp_kses_post( $section );
+			}
+		}
 		$this->set_repo_cache( 'readme', $response );
 
 		return true;
@@ -346,8 +353,8 @@ trait API_Common {
 	 */
 	final public function get_remote_api_assets( $git, $request ) {
 		$assets       = [ '.wordpress-org', 'assets' ];
-		$cache        = $this->get_repo_cache( $this->type->slug ) ?: [];
-		$assets       = ! empty( $cache['contents'] ) ? array_intersect( (array) $cache['contents']['dirs'], $assets ) : $assets;
+		$contents     = $this->get_repo_cache( $this->type->slug, true, 'contents' );
+		$assets       = ! empty( $contents ) ? array_intersect( (array) $contents['dirs'], $assets ) : $assets;
 		$response     = false;
 		self::$method = 'assets';
 
@@ -425,6 +432,42 @@ trait API_Common {
 		$this->set_repo_cache( 'branches', (array) $branches );
 
 		return true;
+	}
+
+	/**
+	 * Get API release asset download link.
+	 *
+	 * Read without TTL gating; see get_api_release_assets() for rationale.
+	 *
+	 * @param  string $git     Name of API, eg 'github'.
+	 * @param  string $request Query for API->api().
+	 * @return string|array<string, mixed>|false $response Release asset URI.
+	 */
+	final public function get_api_release_asset( $git, $request ) {
+		$cache    = $this->get_repo_cache( $this->type->slug, false, [ 'release_asset' ] );
+		$response = is_array( $cache ) ? ( $cache['release_asset'] ?? false ) : false;
+
+		if ( ! $response ) {
+			self::$method = 'release_asset';
+			$response     = $this->api( $request );
+			$response     = $this->parse_release_asset( $git, $request, $response );
+
+			if ( ! $response ) {
+				$response          = new stdClass();
+				$response->message = 'No release asset found';
+			}
+		}
+
+		if ( $response && ! isset( $cache['release_asset'] ) ) {
+			$this->set_repo_cache( 'release_asset', $response );
+			$this->set_repo_cache( 'release_asset_download', $response );
+		}
+
+		if ( $this->validate_response( $response ) ) {
+			return false;
+		}
+
+		return $response;
 	}
 
 	/**
@@ -557,42 +600,6 @@ trait API_Common {
 	}
 
 	/**
-	 * Get API release asset download link.
-	 *
-	 * Read without TTL gating; see get_api_release_assets() for rationale.
-	 *
-	 * @param  string $git     Name of API, eg 'github'.
-	 * @param  string $request Query for API->api().
-	 * @return string|array<string, mixed>|false $response Release asset URI.
-	 */
-	final public function get_api_release_asset( $git, $request ) {
-		$cache    = $this->get_repo_cache( $this->type->slug, false );
-		$response = $cache['release_asset'] ?? false;
-
-		if ( ! $response ) {
-			self::$method = 'release_asset';
-			$response     = $this->api( $request );
-			$response     = $this->parse_release_asset( $git, $request, $response );
-
-			if ( ! $response ) {
-				$response          = new stdClass();
-				$response->message = 'No release asset found';
-			}
-		}
-
-		if ( $response && ! isset( $cache['release_asset'] ) ) {
-			$this->set_repo_cache( 'release_asset', $response );
-			$this->set_repo_cache( 'release_asset_download', $response );
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		return $response;
-	}
-
-	/**
 	 * Get API release assets.
 	 *
 	 * @param  string $git     Name of API, eg 'github'.
@@ -607,8 +614,8 @@ trait API_Common {
 		 * construct_download_link() call in the same fetch cycle (per-branch
 		 * download links, then the repo download link) re-fetch /releases.
 		 */
-		$cache    = $this->get_repo_cache( $this->type->slug, false );
-		$response = $cache['release_assets'] ?? false;
+		$cache    = $this->get_repo_cache( $this->type->slug, false, 'release_assets' );
+		$response = false !== $cache ? $cache : false;
 
 		if ( ! $response ) {
 			self::$method = 'release_asset';
@@ -621,7 +628,7 @@ trait API_Common {
 			}
 		}
 
-		if ( $response && ! isset( $cache['release_assets'] ) ) {
+		if ( $response && false === $cache ) {
 			$this->set_repo_cache( 'release_assets', $response );
 
 			// Set release_asset (boolean) and release_asset_download (URL) to the newest release asset.

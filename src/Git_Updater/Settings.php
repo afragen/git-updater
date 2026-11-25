@@ -85,7 +85,6 @@ class Settings {
 
 		if ( isset( $_POST['gu_refresh_cache'] ) ) {
 			$this->delete_all_cached_data();
-			set_site_transient( 'gu_refresh_cache', true, 90 );
 		}
 	}
 
@@ -327,11 +326,13 @@ class Settings {
 					submit_button();
 					?>
 				</form>
-				<?php $refresh_transients = add_query_arg( [ 'git_updater_refresh_transients' => true ], $action ); ?>
-				<form class="settings" method="post" action="<?php echo esc_attr( $refresh_transients ); ?>">
-					<?php wp_nonce_field( 'gu_refresh_cache' ); ?>
-					<?php submit_button( esc_html__( 'Refresh Cache', 'git-updater' ), 'primary', 'gu_refresh_cache' ); ?>
-				</form>
+				<?php if ( 'git_updater' === $subtab ) : ?>
+					<?php $refresh_transients = add_query_arg( [ 'git_updater_refresh_transients' => true ], $action ); ?>
+					<form class="settings" method="post" action="<?php echo esc_attr( $refresh_transients ); ?>">
+						<?php wp_nonce_field( 'gu_refresh_cache' ); ?>
+						<?php submit_button( esc_html__( 'Refresh Cache', 'git-updater' ), 'primary', 'gu_refresh_cache' ); ?>
+					</form>
+				<?php endif; ?>
 			<?php endif; ?>
 
 			<?php
@@ -497,7 +498,7 @@ class Settings {
 		$gu_tokens       = array_merge( $gu_plugins, $gu_themes );
 
 		foreach ( $gu_tokens as $token ) {
-			$type                            = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;';
+			$type                            = Icons::get( 'plugin' ) . '&nbsp;';
 			$setting_field                   = [];
 			$gu_options_keys[ $token->slug ] = null;
 
@@ -509,7 +510,7 @@ class Settings {
 			}
 
 			if ( 'theme' === $token->type ) {
-				$type = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;';
+				$type = Icons::get( 'theme' ) . '&nbsp;';
 			}
 
 			$setting_field['id']    = $token->slug;
@@ -551,7 +552,7 @@ class Settings {
 		}
 
 		if ( ! $this->waiting_for_background_update() ) {
-			$this->unset_stale_options( $gu_options_keys, $gu_tokens );
+			$this->unset_stale_options( $gu_options_keys );
 		} else {
 			Singleton::get_instance( 'Messages', $this )->create_error_message( 'waiting' );
 		}
@@ -560,14 +561,12 @@ class Settings {
 	/**
 	 * Check current saved options and unset if repos not present.
 	 *
-	 * @param array<string, mixed>    $gu_options_keys Array of options keys.
-	 * @param array<string, stdClass> $gu_tokens       Array of Git Updater repos.
+	 * @param array<string, mixed> $gu_options_keys Array of options keys.
 	 * @return void
 	 */
-	public function unset_stale_options( $gu_options_keys, $gu_tokens ) {
+	public function unset_stale_options( $gu_options_keys ) {
 		self::$options   = $this->get_class_vars( 'Base', 'options' );
 		$running_servers = $this->get_running_git_servers();
-		$reset_keys      = [];
 		$gu_unset_keys   = array_diff_key( self::$options, $gu_options_keys );
 		$always_unset    = [
 			'db_version',
@@ -598,24 +597,6 @@ class Settings {
 			$always_unset
 		);
 
-		// Unset if current_branch AND if associated with repo.
-		array_map(
-			function ( $e ) use ( &$gu_unset_keys, $gu_tokens, &$reset_keys ) {
-				$key  = array_search( $e, $gu_unset_keys, true );
-				$repo = str_replace( 'current_branch_', '', $key );
-				if ( array_key_exists( $key, $gu_unset_keys )
-					&& str_contains( $key, 'current_branch' )
-				) {
-					unset( $gu_unset_keys[ $key ] );
-				}
-				if ( ! array_key_exists( $repo, $gu_tokens ) ) {
-					$reset_keys[ $key ] = $e;
-				}
-			},
-			$gu_unset_keys
-		);
-		$gu_unset_keys = array_merge( $gu_unset_keys, (array) $reset_keys );
-
 		if ( ! empty( $gu_unset_keys ) ) {
 			foreach ( $gu_unset_keys as $key => $value ) {
 				unset( self::$options[ $key ] );
@@ -641,10 +622,10 @@ class Settings {
 	 * @return void
 	 */
 	private function display_dot_org_overrides() {
-		$plugins         = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
-		$themes          = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
-		$dashicon_plugin = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
-		$dashicon_theme  = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;';
+		$plugins     = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
+		$themes      = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
+		$icon_plugin = Icons::get( 'plugin' ) . '&nbsp;&nbsp;';
+		$icon_theme  = Icons::get( 'theme' ) . '&nbsp;&nbsp;';
 
 		/**
 		 * Filter to return array of overrides to dot org.
@@ -667,12 +648,12 @@ class Settings {
 
 			foreach ( $plugins as $plugin ) {
 				if ( in_array( $plugin->file, $overrides, true ) && isset( $plugin->name ) ) {
-					echo '<p>' . wp_kses_post( $dashicon_plugin . $plugin->name ) . '</p>';
+					echo '<p>' . wp_kses( $icon_plugin . esc_html( $plugin->name ), Icons::allowed_html() ) . '</p>';
 				}
 			}
 			foreach ( $themes as $theme ) {
 				if ( in_array( $theme->slug, $overrides, true ) && isset( $theme->name ) ) {
-					echo '<p>' . wp_kses_post( $dashicon_theme . $theme->name ) . '</p>';
+					echo '<p>' . wp_kses( $icon_theme . esc_html( $theme->name ), Icons::allowed_html() ) . '</p>';
 				}
 			}
 			echo '<br>';
@@ -721,7 +702,10 @@ class Settings {
 	 * @return void
 	 */
 	public function update_settings() {
-		if ( isset( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater-options' ) ) {
+		if ( isset( $_POST['_wpnonce'] )
+			&& wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater-options' )
+			&& current_user_can( is_multisite() ? 'manage_network_options' : 'manage_options' )
+		) {
 			if ( ( isset( $_POST['option_page'] )
 			&& 'git_updater' === $_POST['option_page'] )
 			) {
@@ -801,17 +785,23 @@ class Settings {
 			$arr['tab']    = ! empty( $arr['tab'] ) ? $arr['tab'] : 'git_updater_settings';
 			$arr['subtab'] = ! empty( $arr['subtab'] ) ? $arr['subtab'] : 'git_updater';
 
-			$location = add_query_arg(
-				[
-					'page'               => 'git-updater',
-					'tab'                => $arr['tab'],
-					'subtab'             => $arr['subtab'],
-					'refresh_transients' => $refresh_transients,
-					'reset'              => $reset_api_key,
-					'updated'            => $update,
-				],
-				$redirect_url
-			);
+			$args = [
+				'page'               => 'git-updater',
+				'tab'                => $arr['tab'],
+				'subtab'             => $arr['subtab'],
+				'refresh_transients' => $refresh_transients,
+				'reset'              => $reset_api_key,
+				'updated'            => $update,
+			];
+
+			/**
+			 * Filter the query args of the redirect after saving settings.
+			 *
+			 * @since 14.4.3
+			 * @param array<string, mixed> $args Query args.
+			 */
+			$args     = (array) apply_filters( 'gu_save_redirect_args', $args );
+			$location = add_query_arg( $args, $redirect_url );
 			$location = add_query_arg( '_wpnonce', wp_create_nonce( 'gu_settings' ), $location );
 			wp_safe_redirect( $location );
 			exit; // @codeCoverageIgnore
@@ -877,8 +867,8 @@ class Settings {
 
 	/**
 	 * Write out listing of installed plugins and themes using Git Updater.
-	 * Places a lock dashicon after the repo name if it's a private repo.
-	 * Places a WordPress dashicon after the repo name if it's in dot org.
+	 * Places a lock icon after the repo name if it's a private repo.
+	 * Places a WordPress icon after the repo name if it's in dot org.
 	 *
 	 * @param string $git Name of API, eg 'github'.
 	 * @return void
@@ -928,17 +918,23 @@ class Settings {
 			$type_repos
 		);
 
-		$lock    = '&nbsp;<span title="' . $lock_title . '" class="dashicons dashicons-lock"></span>';
-		$dot_org = '&nbsp;<span title="' . $dot_org_title . '" class="dashicons dashicons-wordpress"></span></span>';
-		$dismiss = '&nbsp;<span title="' . $dismiss_title . '" class="dashicons dashicons-dismiss"></span></span>';
+		$lock    = '&nbsp;<span title="' . $lock_title . '">' . Icons::get( 'private', [ 'label' => $lock_title ] ) . '</span>';
+		$dot_org = '&nbsp;<span title="' . $dot_org_title . '">' . Icons::get( 'dot-org', [ 'label' => $dot_org_title ] ) . '</span>';
+		$dismiss = '&nbsp;<span title="' . $dismiss_title . '">' . Icons::get( 'dismiss', [ 'label' => $dismiss_title ] ) . '</span>';
+
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'git-updater' ) . '</h2>' );
+		printf(     /* translators: %s is plugin or theme icon. */
+			'<p>' . esc_html__( 'Flush individual repository caches by clicking the %1$s or %2$s icons.', 'git-updater' ) . '</p>',
+			wp_kses( Icons::get( 'plugin' ), Icons::allowed_html() ),
+			wp_kses( Icons::get( 'theme' ), Icons::allowed_html() )
+		);
+
 		foreach ( $display_data as $data ) {
-			$dashicon      = str_contains( $data['type'], 'theme' )
-			? '<span class="dashicons dashicons-admin-appearance dashicons-no-decoration"></span>&nbsp;&nbsp;'
-			: '<span class="dashicons dashicons-admin-plugins dashicons-no-decoration"></span>&nbsp;&nbsp;';
+			$type_key      = str_contains( $data['type'], 'theme' ) ? 'theme' : 'plugin';
+			$dashicon      = Icons::get( $type_key ) . '&nbsp;&nbsp;';
 			$is_private    = $data['private'] ? $lock : null;
 			$broken_hidden = $data['broken'] ? '' : 'display:none;';
-			$is_broken     = '&nbsp;<span title="' . $broken_title . '" class="dashicons dashicons-warning gu-repo-broken" style="color:#f00;' . $broken_hidden . '"></span>';
+			$is_broken     = '&nbsp;<span title="' . $broken_title . '" class="gu-repo-broken" style="color:#f00;' . $broken_hidden . '">' . Icons::get( 'broken' ) . '</span>';
 			$override      = $this->override_dot_org( $data['type'], $data );
 			$is_dot_org    = $data['dot_org'] && ! $override ? $dot_org : null;
 			$is_dismissed  = $data['dismiss'] ? $dismiss : null;
@@ -951,9 +947,10 @@ class Settings {
 				home_url( 'wp-json/' . $this->get_class_vars( 'REST\REST_API', 'namespace' ) . '/flush-repo-cache/' )
 			);
 			/* translators: %s is the name of the plugin or theme. */
-			$tooltip        = __( sprintf( 'Flush %s cache', $data['name'] ), 'git-updater' );
-			$dashicon_flush = '<button type="button" class="button-link gu-flush-repo dashicons-no-decoration" data-flush-url="' . esc_url( $flush_endpoint ) . '" title="' . esc_attr__( $tooltip ) . '">' . $dashicon . '</button>';
-			printf( '<p>' . wp_kses_post( $dashicon_flush . $data['name'] . $is_private . $is_dot_org . $is_broken . $is_dismissed ) . '</p>' );
+			$tooltip        = sprintf( __( 'Flush %s cache', 'git-updater' ), $data['name'] );
+			$dashicon_flush = '<button type="button" class="button-link gu-flush-repo dashicons-no-decoration" data-flush-url="' . esc_url( $flush_endpoint ) . '" title="' . esc_attr( $tooltip ) . '">' . $dashicon . '</button>';
+			$row            = $dashicon_flush . esc_html( $data['name'] ) . $is_private . $is_dot_org . $is_broken . $is_dismissed;
+			printf( '<p>%s</p>', wp_kses( $row, Icons::allowed_html() ) );
 		}
 	}
 }

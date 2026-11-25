@@ -208,13 +208,20 @@ class Test_Additions_Settings_Methods extends WP_UnitTestCase {
 
 class Test_Additions_Settings_Load_Hooks extends WP_UnitTestCase {
 
-	private array $pre_registered_bindings = [];
+	private array $pre_registered_bindings       = [];
+	private array $pre_registered_icon_collections = [];
 
 	public function set_up(): void {
 		parent::set_up();
 		if ( class_exists( 'WP_Block_Bindings_Registry' ) ) {
 			$this->pre_registered_bindings = array_keys(
 				WP_Block_Bindings_Registry::get_instance()->get_all_registered()
+			);
+		}
+		if ( class_exists( 'WP_Icon_Collections_Registry' ) ) {
+			$this->pre_registered_icon_collections = wp_list_pluck(
+				WP_Icon_Collections_Registry::get_instance()->get_all_registered(),
+				'slug'
 			);
 		}
 	}
@@ -230,6 +237,13 @@ class Test_Additions_Settings_Load_Hooks extends WP_UnitTestCase {
 			foreach ( array_keys( WP_Block_Bindings_Registry::get_instance()->get_all_registered() ) as $name ) {
 				if ( ! in_array( $name, $this->pre_registered_bindings, true ) ) {
 					unregister_block_bindings_source( $name );
+				}
+			}
+		}
+		if ( class_exists( 'WP_Icon_Collections_Registry' ) ) {
+			foreach ( wp_list_pluck( WP_Icon_Collections_Registry::get_instance()->get_all_registered(), 'slug' ) as $slug ) {
+				if ( ! in_array( $slug, $this->pre_registered_icon_collections, true ) ) {
+					wp_unregister_icon_collection( $slug );
 				}
 			}
 		}
@@ -265,16 +279,11 @@ class Test_Additions_Settings_Load_Hooks extends WP_UnitTestCase {
 				unregister_block_bindings_source( $name );
 			}
 		}
-		/*
-		 * WP 7.1 registers the default icon collections/icons on `init`
-		 * (default-filters.php:818-819). They are already registered by the
-		 * time the test suite boots, so re-firing `init` below would make the
-		 * singleton registries emit "already registered" _doing_it_wrong
-		 * notices — mirror core's _unhook_font_registration() approach for
-		 * fonts. The collection hook runs at priority 0.
-		 */
-		remove_action( 'init', '_wp_register_default_icon_collections', 0 );
-		remove_action( 'init', '_wp_register_default_icons' );
+		if ( class_exists( 'WP_Icon_Collections_Registry' ) ) {
+			foreach ( wp_list_pluck( WP_Icon_Collections_Registry::get_instance()->get_all_registered(), 'slug' ) as $slug ) {
+				wp_unregister_icon_collection( $slug );
+			}
+		}
 		do_action( 'init' );
 		$tabs = apply_filters( 'gu_add_settings_tabs', [] );
 		$this->assertArrayHasKey( 'git_updater_additions', $tabs );
@@ -301,16 +310,25 @@ class Test_Additions_Settings_Save_Settings extends WP_UnitTestCase {
 
 	private Additions_Settings $settings;
 
+	/** @var int */
+	private int $admin_id = 0;
+
 	public function set_up(): void {
 		parent::set_up();
 		Additions_Settings::$options_additions = [];
+		$this->admin_id = $this->factory->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $this->admin_id );
+		grant_super_admin( $this->admin_id );
 		$this->settings = new Additions_Settings();
 	}
 
 	public function tear_down(): void {
 		unset( $_POST['_wpnonce'], $_POST['action'] );
 		delete_site_option( 'git_updater_additions' );
+		delete_site_transient( 'gu_additions_notice_' . $this->admin_id );
+		wp_set_current_user( 0 );
 		remove_all_filters( 'gu_save_redirect' );
+		remove_all_filters( 'gu_save_redirect_args' );
 		parent::tear_down();
 	}
 
@@ -453,6 +471,44 @@ class Test_Additions_Settings_Save_Settings extends WP_UnitTestCase {
 		$_POST['_wpnonce'] = wp_create_nonce( 'git_updater_additions-options' );
 		$this->settings->save_settings( $this->make_post_data() );
 		$this->assertCount( 1, get_site_option( 'git_updater_additions' ) );
+	}
+
+	public function test_save_settings_ignores_malformed_existing_rows(): void {
+		update_site_option( 'git_updater_additions', [ 'garbage' ] );
+		$_POST['_wpnonce'] = wp_create_nonce( 'git_updater_additions-options' );
+
+		$this->settings->save_settings( $this->make_post_data() );
+
+		$saved = get_site_option( 'git_updater_additions' );
+		$this->assertCount( 1, $saved );
+		$this->assertSame( 'owner/plugin.php', $saved[0]['slug'] );
+	}
+
+	public function test_save_settings_treats_missing_additions_field_as_empty_input(): void {
+		$_POST['_wpnonce'] = wp_create_nonce( 'git_updater_additions-options' );
+
+		$this->settings->save_settings( [ 'option_page' => 'git_updater_additions' ] );
+
+		$notice = get_site_transient( 'gu_additions_notice_' . $this->admin_id );
+		$this->assertSame( 'error', $notice['type'] );
+		$this->assertSame( [], $notice['values'] );
+		$this->assertFalse( get_site_option( 'git_updater_additions' ) );
+	}
+
+	public function test_save_settings_treats_non_array_additions_field_as_empty_input(): void {
+		$_POST['_wpnonce'] = wp_create_nonce( 'git_updater_additions-options' );
+
+		$this->settings->save_settings(
+			[
+				'option_page'           => 'git_updater_additions',
+				'git_updater_additions' => 'not-an-array',
+			]
+		);
+
+		$notice = get_site_transient( 'gu_additions_notice_' . $this->admin_id );
+		$this->assertSame( 'error', $notice['type'] );
+		$this->assertSame( [], $notice['values'] );
+		$this->assertFalse( get_site_option( 'git_updater_additions' ) );
 	}
 
 	public function test_save_settings_saves_option_when_valid_and_existing_options_present(): void {

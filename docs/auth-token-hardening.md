@@ -95,7 +95,14 @@ For `plugins-api`/`themes-api`: existing behavior unchanged.
 
 ## Signed URL TTL
 
-Proxy URLs expire in 5 minutes. Lite caches API responses for 6 hours. Stale downloads fail with 403; WordPress re-checks on next cycle. This is acceptable — a brief delay for stale-cache scenarios. The 5-minute TTL is the secure default.
+Two TTLs are in use, and both must stay at least as long as the cache that stores the link:
+
+- **Proxy URLs** (`/download/{slug}`) default to **12 hours** (`sign_download_url()`, matching the `API::$hours` repo-cache window). The link is persisted inside the `update_plugins` / `update_themes` transients and reused whenever the admin acts, so a shorter TTL would hand the upgrader an expired signature — e.g. metadata fetched now, "Update" clicked six hours later.
+- **Token URLs** (`/download-token/{slug}`, the lite 2-step flow) use **60 seconds**, because the client mints and redeems them immediately.
+
+Earlier revisions of this document said 5 minutes; that was never the implemented default and is not the current behaviour.
+
+> Historical note: the pre-fix shape described at the top of this document (cleartext `auth_header` in the `update-api` response) no longer exists. `auth_header` is built only in `build_download_metadata()` and is consumed server-side by `proxy_download()`; it is never returned to a client on any route.
 
 ## Verification
 
@@ -108,3 +115,48 @@ Proxy URLs expire in 5 minutes. Lite caches API responses for 6 hours. Stale dow
 7. git-updater-lite integration: install lite on separate site, confirm updates work
 8. `npm test` / `npm run test:multisite` — all existing tests pass
 9. `composer lint` — PHPCS clean
+
+## Accepted residuals
+
+Five low-severity residuals are accepted by design:
+
+1. **Token-backed metadata fetch before the private-package 403.** In `get_api_data()` the
+   private-package gate runs *after* `get_remote_repo_meta()`, and `gu_disable_wpcron` is forced
+   false, so an anonymous caller of a private slug can still trigger one upstream call using the
+   site's stored token before the 403 is returned. The package bytes are never served. An early
+   deny would require trusting a cached `is_private`, which conflicts with the chosen
+   fail-open-on-missing-signal trade-off. Accepted.
+
+2. **Authorization forwarded across cross-host redirects.** The credential is attached only when
+   the resolved host is in the provider's `gu_credential_hosts` set (destination-scoped
+   fail-closed), but WordPress' bundled Requests re-sends the original `Authorization` header on a
+   3xx to a different host. No `requests-requests.before_redirect` strip is installed: the initial
+   request is already host-scoped and the marginal risk is a host the site already trusts for code.
+   Accepted.
+
+3. **No replay protection on the Lite client key.** `X-GU-Lite-Key` is a static bearer key; a
+   captured key is replayable until its grant is revoked. Accepted over TLS on a short-lived
+   download URL.
+
+4. **Nocache headers are advisory, not enforceable.** Core sends nocache headers only to
+   authenticated requests (`rest_send_nocache_headers` defaults to `is_user_logged_in()`), so
+   `REST_API::add_nocache_headers()` marks `update-api`, `plugins-api`, `themes-api` and
+   `download-token/{slug}` uncacheable on `rest_post_dispatch` for anonymous callers. A page cache
+   that ignores `Cache-Control` can still replay a token — Batcache, for example, sizes its own TTL
+   from the `max-age` digit and may serve a stale entry via `use_stale` while regenerating. The
+   blunt instrument (`DONOTCACHEPAGE` / `batcache_cancel()`) is deliberately not used; revisit if
+   the Atomic failure recurs. The `download/{slug}` route is intentionally not marked: its
+   `expires` and `signature` are query arguments, so the cache key already differs per signature
+   and a hit can only replay the identical URL. Accepted.
+
+5. **Route-matched, not blanket, suppression.** `is_uncacheable_route()` enumerates the four
+   routes rather than suppressing caching for the whole namespace, so a new client-facing route
+   that returns a signed URL must be added to that list. Accepted.
+
+## Lite client key (private packages)
+
+Private packages are gated on an approved Lite client key, not the removed `X-GU-Site-Domain`
+header. Each `git-updater-lite` site generates its own 256-bit key lazily (only when it meets a
+private package) and sends it as `X-GU-Lite-Key`; the server stores only its SHA-256 hash and
+serves the package once an administrator approves the client. See
+[lite-update-flow.md](./lite-update-flow.md) and [private-package-rollout.md](./private-package-rollout.md).

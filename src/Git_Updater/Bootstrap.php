@@ -11,7 +11,8 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Git_Updater\Additions\Bootstrap as Additions_Bootstrap;
-use Fragen\Git_Updater\Lite_Domains;
+use Fragen\Git_Updater\DB\Repo_Cache_Table;
+use Fragen\Git_Updater\Lite_Clients;
 use Fragen\Git_Updater\REST\REST_API;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use WP_Dismiss_Notice;
@@ -57,12 +58,13 @@ class Bootstrap {
 		register_deactivation_hook( PLUGIN_FILE, [ $this, 'remove_cron_events' ] );
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		deactivate_plugins( [ 'git-updater-pro/git-updater-pro.php', 'git-updater-additions/git-updater-additions.php' ] );
+		$this->cache_table_setup();
 
 		require_once __DIR__ . '/Shim.php';
 		( new GU_Freemius() )->init();
 		( new REST_API() )->load_hooks();
 		( new Additions_Bootstrap() )->run();
-		( new Lite_Domains() )->load_hooks();
+		( new Lite_Clients() )->load_hooks();
 		( new Init() )->run();
 		( new Messages() )->create_error_message( 'get_license' );
 
@@ -118,8 +120,7 @@ class Bootstrap {
 		$exploded = explode( '-', dirname( $slug ) );
 
 		if ( in_array( 'develop', $exploded, true ) ) {
-			$options = $this->get_class_vars( 'Base', 'options' );
-			update_site_option( 'git_updater', array_merge( $options, [ 'current_branch_git-updater' => 'develop' ] ) );
+			\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->add_entry( 'git-updater', 'current_branch', 'develop' );
 		}
 
 		// Strip hash from slug and re-make file.
@@ -135,6 +136,35 @@ class Bootstrap {
 				return $result;
 			}
 			// @codeCoverageIgnoreEnd
+		}
+	}
+
+	/**
+	 * Setup the cache table.
+	 *
+	 * @return void
+	 */
+	public function cache_table_setup() {
+		$cache_table = Repo_Cache_Table::instance();
+		$cache_key   = 'git_updater_cache_table_exists';
+
+		if ( false !== wp_cache_get( $cache_key, 'git-updater' ) ) {
+			return;
+		}
+
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		$table_exists = $wpdb->get_var(
+			$wpdb->prepare(
+				'SHOW TABLES LIKE %s',
+				$cache_table->table_name()
+			)
+		);
+
+		if ( ! $table_exists ) {
+			$cache_table->install_table();
+		} else {
+			wp_cache_set( $cache_key, true, 'git-updater', DAY_IN_SECONDS );
 		}
 	}
 

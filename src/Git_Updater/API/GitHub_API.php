@@ -13,6 +13,7 @@
 namespace Fragen\Git_Updater\API;
 
 use Fragen\Singleton;
+use WP_Error;
 use stdClass;
 
 /*
@@ -156,22 +157,20 @@ class GitHub_API extends API implements API_Interface {
 		 * branch switch, REST update, branch listings) resolve the correct
 		 * endpoint even when $this->type has not been hydrated by a fetch.
 		 */
-		$cache      = $this->get_repo_cache( $this->type->slug, false );
+		$cache      = $this->get_repo_cache( $this->type->slug, false, [ 'tags', 'newest_tag' ] ) ?: [];
 		$tags       = $this->type->tags ?? [];
 		$newest_tag = $this->type->newest_tag ?? '0.0.0';
-		if ( is_array( $cache ) ) {
-			if ( is_array( $cache['tags'] ?? null ) && ! empty( $cache['tags'] ) ) {
-				$tags = $cache['tags'];
-			}
-			if ( ! empty( $cache['newest_tag'] ) ) {
-				$newest_tag = (string) $cache['newest_tag'];
-			} elseif ( is_array( $cache['tags'] ?? null ) && ! empty( $cache['tags'] ) ) {
-				// Missing newest_tag entry: derive newest from the cached tag list
-				// (a flat list of names; sort_tags() semantics).
-				$sorted = $cache['tags'];
-				usort( $sorted, fn ( $a, $b ) => version_compare( trim( $b, 'v' ), trim( $a, 'v' ) ) );
-				$newest_tag = (string) reset( $sorted );
-			}
+		if ( is_array( $cache['tags'] ?? null ) && ! empty( $cache['tags'] ) ) {
+			$tags = $cache['tags'];
+		}
+		if ( ! empty( $cache['newest_tag'] ) ) {
+			$newest_tag = (string) $cache['newest_tag'];
+		} elseif ( is_array( $cache['tags'] ?? null ) && ! empty( $cache['tags'] ) ) {
+			// Missing newest_tag entry: derive newest from the cached tag list
+			// (a flat list of names; sort_tags() semantics).
+			$sorted = $cache['tags'];
+			usort( $sorted, fn ( $a, $b ) => version_compare( trim( $b, 'v' ), trim( $a, 'v' ) ) );
+			$newest_tag = (string) reset( $sorted );
 		}
 
 		$target = false !== $branch_switch ? $branch_switch : $this->type->branch;
@@ -204,7 +203,6 @@ class GitHub_API extends API implements API_Interface {
 		 * If a branch has been given, use branch.
 		 * If branch is primary branch (default) and tags are used, use newest tag.
 		 */
-		$target = false !== $branch_switch ? $branch_switch : $this->type->branch;
 		if ( $this->type->primary_branch !== $target || empty( $tags ) ) {
 			$endpoint .= $target;
 		} else {
@@ -725,16 +723,28 @@ class GitHub_API extends API implements API_Interface {
 
 		$install['download_link'] = "{$base}/repos/{$install['git_updater_repo']}/zipball/{$install['git_updater_branch']}";
 
-		// If asset is entered install it.
+		// If asset is entered install it, but only from an authorized host so a
+		// posted URI cannot redirect the download to an arbitrary server.
 		if ( false !== stripos( $headers['uri'], 'releases/download' ) ) {
-			$install['download_link'] = $headers['uri'];
+			if ( $this->is_allowed_credential_host( (string) $headers['uri'], 'github' ) ) {
+				$install['download_link'] = $headers['uri'];
+			} else {
+				$install['error'] = new WP_Error(
+					'gu_install_host_not_allowed',
+					sprintf(
+						/* translators: %s: hostname of the install source. */
+						esc_html__( 'The install source %s is not an allowed host.', 'git-updater' ),
+						(string) wp_parse_url( (string) $headers['uri'], PHP_URL_HOST )
+					)
+				);
+			}
 		}
 
 		/*
 		 * Add/Save access token if present.
 		 */
 		if ( ! empty( $install['github_access_token'] ) ) {
-			$install['options'][ $install['repo'] ] = $install['github_access_token'];
+			$install['options'][ (string) $install['repo'] ] = $install['github_access_token'];
 		}
 
 		return $install;

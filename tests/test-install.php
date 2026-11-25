@@ -644,11 +644,18 @@ class Test_Install_Install extends WP_UnitTestCase {
 	/** @var array<string, mixed> */
 	private array $saved_post = [];
 
+	/** @var int */
+	private int $admin_id = 0;
+
 	/**
 	 * @return void
 	 */
 	public function set_up(): void {
 		parent::set_up();
+		$this->admin_id = $this->factory->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $this->admin_id );
+		// grant_super_admin() is a no-op on single-site; on multisite it grants install_plugins/themes.
+		grant_super_admin( $this->admin_id );
 		$this->install       = new Install();
 		$this->saved_install = $this->read_install_static();
 		$this->saved_post    = $_POST;
@@ -662,6 +669,7 @@ class Test_Install_Install extends WP_UnitTestCase {
 	public function tear_down(): void {
 		$this->inject_install_static( $this->saved_install );
 		$_POST = $this->saved_post;
+		wp_set_current_user( 0 );
 		remove_all_filters( 'gu_get_upgrader_skin' );
 		remove_all_filters( 'upgrader_pre_download' );
 		remove_all_filters( 'http_request_args' );
@@ -682,6 +690,45 @@ class Test_Install_Install extends WP_UnitTestCase {
 	}
 
 	/**
+	 * An invalid or missing nonce aborts the install with wp_die().
+	 *
+	 * @return void
+	 */
+	public function test_invalid_nonce_aborts_install(): void {
+		$_POST = [
+			'option_page'        => 'git_updater_install',
+			'_wpnonce'           => 'bad_nonce',
+			'git_updater_repo'   => 'https://github.com/owner/test-repo',
+			'git_updater_branch' => 'main',
+			'git_updater_api'    => 'github',
+		];
+
+		$this->expectException( WPDieException::class );
+		$this->install->install( 'plugin' );
+	}
+
+	/**
+	 * A user without install_plugins capability cannot install plugins.
+	 *
+	 * @return void
+	 */
+	public function test_insufficient_capability_aborts_install(): void {
+		$subscriber = $this->factory->user->create( [ 'role' => 'subscriber' ] );
+		wp_set_current_user( $subscriber );
+
+		$_POST = [
+			'option_page'        => 'git_updater_install',
+			'_wpnonce'           => wp_create_nonce( 'git_updater_install-options' ),
+			'git_updater_repo'   => 'https://github.com/owner/test-repo',
+			'git_updater_branch' => 'main',
+			'git_updater_api'    => 'github',
+		];
+
+		$this->expectException( WPDieException::class );
+		$this->install->install( 'plugin' );
+	}
+
+	/**
 	 * POST with empty branch defaults to 'master' and empty repo returns false.
 	 *
 	 * @return void
@@ -689,6 +736,7 @@ class Test_Install_Install extends WP_UnitTestCase {
 	public function test_empty_branch_defaults_to_master_and_empty_repo_returns_false(): void {
 		$_POST = [
 			'option_page'        => 'git_updater_install',
+			'_wpnonce'           => wp_create_nonce( 'git_updater_install-options' ),
 			'git_updater_repo'   => '',
 			'git_updater_branch' => '',
 			'git_updater_api'    => 'github',
@@ -710,6 +758,7 @@ class Test_Install_Install extends WP_UnitTestCase {
 	public function test_empty_repo_outputs_error_and_returns_false(): void {
 		$_POST = [
 			'option_page'        => 'git_updater_install',
+			'_wpnonce'           => wp_create_nonce( 'git_updater_install-options' ),
 			'git_updater_repo'   => '',
 			'git_updater_branch' => 'main',
 			'git_updater_api'    => 'github',
@@ -736,6 +785,7 @@ class Test_Install_Install extends WP_UnitTestCase {
 	public function test_github_api_path_and_save_options_on_install(): void {
 		$_POST = [
 			'option_page'        => 'git_updater_install',
+			'_wpnonce'           => wp_create_nonce( 'git_updater_install-options' ),
 			'git_updater_repo'   => 'https://github.com/owner/test-repo',
 			'git_updater_branch' => 'main',
 			'git_updater_api'    => 'github',
@@ -774,6 +824,7 @@ class Test_Install_Install extends WP_UnitTestCase {
 	public function test_theme_upgrader_failure_covers_theme_get_upgrader(): void {
 		$_POST = [
 			'option_page'        => 'git_updater_install',
+			'_wpnonce'           => wp_create_nonce( 'git_updater_install-options' ),
 			'git_updater_repo'   => 'https://github.com/owner/test-theme',
 			'git_updater_branch' => 'main',
 			'git_updater_api'    => 'github',
@@ -789,6 +840,90 @@ class Test_Install_Install extends WP_UnitTestCase {
 
 		// The install_theme_complete_actions filter was registered inside get_upgrader('theme').
 		$this->assertGreaterThan( 0, has_filter( 'install_theme_complete_actions', [ $this->install, 'install_theme_complete_actions' ] ) );
+	}
+
+	/**
+	 * A rejected zipfile install URL must bail before the upgrader runs.
+	 *
+	 * @return void
+	 */
+	public function test_install_returns_false_when_zipfile_url_is_rejected(): void {
+		$_POST = [
+			'option_page'        => 'git_updater_install',
+			'_wpnonce'           => wp_create_nonce( 'git_updater_install-options' ),
+			'git_updater_repo'   => 'http://evil.example.com/test-repo',
+			'git_updater_branch' => 'main',
+			'git_updater_api'    => 'zipfile',
+			'zipfile_slug'       => 'test-repo',
+		];
+
+		ob_start();
+		$result = $this->install->install( 'plugin' );
+		$output = ob_get_clean();
+
+		$this->assertFalse( $result );
+		$this->assertStringContainsString( 'allowed git host', $output );
+	}
+
+	/**
+	 * A resolved download_link on a host that is not authorized for the selected
+	 * API must be rejected with a readable WP_Error before the upgrader runs.
+	 *
+	 * @return void
+	 */
+	public function test_install_rejects_untrusted_download_host(): void {
+		add_filter(
+			'gu_install_remote_install',
+			function ( $install ) {
+				$install['download_link'] = 'https://attacker.example.net/releases/download/x/test-repo.zip';
+				return $install;
+			},
+			10,
+			2
+		);
+
+		$_POST = [
+			'option_page'        => 'git_updater_install',
+			'_wpnonce'           => wp_create_nonce( 'git_updater_install-options' ),
+			'git_updater_repo'   => 'https://github.com/owner/test-repo',
+			'git_updater_branch' => 'main',
+			'git_updater_api'    => 'github',
+		];
+
+		try {
+			ob_start();
+			$result = $this->install->install( 'plugin' );
+			$output = ob_get_clean();
+
+			$this->assertFalse( $result );
+			$this->assertStringContainsString( 'is not an allowed host', $output );
+		} finally {
+			remove_all_filters( 'gu_install_remote_install' );
+		}
+	}
+
+	/**
+	 * validate_install_host() short-circuits to true when there is no API, no
+	 * download link, or the install is handled by Zipfile_API (which validates
+	 * its own host before this point).
+	 *
+	 * @return void
+	 */
+	public function test_validate_install_host_allows_missing_api_and_zipfile(): void {
+		$method = new ReflectionMethod( Install::class, 'validate_install_host' );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
+
+		$this->assertTrue( $method->invoke( $this->install, [] ) );
+		$this->assertTrue( $method->invoke( $this->install, [ 'git_updater_api' => 'github' ] ) );
+		$this->assertTrue(
+			$method->invoke(
+				$this->install,
+				[
+					'git_updater_api' => 'zipfile',
+					'download_link'   => 'https://attacker.example.net/plugin.zip',
+				]
+			)
+		);
 	}
 
 	/**
@@ -812,6 +947,15 @@ class Test_Install_Install extends WP_UnitTestCase {
 		// Priority-15: override Install's priority-10 false return with the zip path.
 		add_filter( 'upgrader_pre_download', fn() => $zip_path, 15, 3 );
 
+		// Authorize the placeholder download host via the add-on host filter.
+		add_filter(
+			'gu_credential_hosts',
+			static function ( $hosts ) {
+				$hosts['gitea'] = array_merge( $hosts['gitea'] ?? [], [ 'example.com' ] );
+				return $hosts;
+			}
+		);
+
 		// Provide download_link via filter (gitea → no GitHub API block runs).
 		add_filter(
 			'gu_install_remote_install',
@@ -825,6 +969,7 @@ class Test_Install_Install extends WP_UnitTestCase {
 
 		$_POST = [
 			'option_page'        => 'git_updater_install',
+			'_wpnonce'           => wp_create_nonce( 'git_updater_install-options' ),
 			'git_updater_repo'   => 'https://github.com/owner/' . $slug,
 			'git_updater_branch' => 'main',
 			'git_updater_api'    => 'gitea',
@@ -839,6 +984,7 @@ class Test_Install_Install extends WP_UnitTestCase {
 		} finally {
 			remove_all_filters( 'upgrader_pre_download' );
 			remove_all_filters( 'gu_install_remote_install' );
+			remove_all_filters( 'gu_credential_hosts' );
 			if ( file_exists( $zip_path ) ) {
 				unlink( $zip_path );
 			}

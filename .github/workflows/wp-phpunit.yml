@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ["8.0", "8.1", "8.2", "8.3", "8.4", "8.5"]
+        php-versions: ["8.0", "8.1", "8.2", "8.3", "8.4", "8.5", "8.6"]
         include:
           - php-versions: "8.0"
             composer-flags: "--ignore-platform-reqs"
@@ -75,6 +75,21 @@ jobs:
         run: |
           WP_MULTISITE=1 phpunit --config=phpunit.xml
 
+  deprecations:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: ["8.5", "8.6"]
+    name: PHP ${{ matrix.php-versions }} deprecation check
+    steps:
+      - uses: actions/checkout@master
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          coverage: none
+      - run: bash bin/check-php-deprecations.sh
+
   phpstan:
     runs-on: ubuntu-latest
     name: PHPStan Static Analysis
@@ -86,7 +101,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.1"
+          php-version: "8.3"
           coverage: none
           tools: composer
         env:

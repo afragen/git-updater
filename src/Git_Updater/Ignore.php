@@ -22,7 +22,7 @@ class Ignore {
 	 *
 	 * @var array<string, string|null>
 	 */
-	public static $repos;
+	public static $repos = [];
 
 	/**
 	 * Constructor.
@@ -30,8 +30,9 @@ class Ignore {
 	 * @param string $slug Repository slug.
 	 * @param string $file Repository file, 'test-plugin/plugin.php' or 'test-child/style.css'.
 	 */
-	public function __construct( $slug = null, $file = null ) {
-		self::$repos[ $slug ] = $file;
+	public function __construct( $slug = '', $file = null ) {
+		// Singleton::get_instance() instantiates with an explicit null option.
+		self::$repos[ (string) $slug ] = $file;
 		$this->load_hooks();
 	}
 

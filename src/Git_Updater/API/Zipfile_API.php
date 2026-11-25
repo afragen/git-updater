@@ -12,6 +12,9 @@
 
 namespace Fragen\Git_Updater\API;
 
+use Fragen\Singleton;
+use WP_Error;
+
 /*
  * Exit if called directly.
  */
@@ -119,9 +122,74 @@ class Zipfile_API {
 	 * @return array<string, mixed>
 	 */
 	public function remote_install( $headers, $install ) {
-		$install['download_link']            = ! empty( $headers['uri'] ) ? $headers['uri'] : $headers['original'];
+		$url = ! empty( $headers['uri'] ) ? $headers['uri'] : $headers['original'];
+
+		// The posted URI becomes the upgrader's download_link, so it must not be
+		// able to point at an arbitrary host.
+		if ( ! $this->is_allowed_install_url( (string) $url ) ) {
+			$install['error']         = new WP_Error(
+				'gu_install_host_not_allowed',
+				esc_html__( 'Zipfile install requires an https URL from an allowed git host.', 'git-updater' )
+			);
+			$install['download_link'] = '';
+
+			return $install;
+		}
+
+		$install['download_link']            = $url;
 		$install['git_updater_install_repo'] = $install['zipfile_slug'];
 
 		return $install;
+	}
+
+	/**
+	 * Whether a zipfile install URL is https and on an allowed host.
+	 *
+	 * @param string $url The posted repository URI.
+	 *
+	 * @return bool
+	 */
+	private function is_allowed_install_url( string $url ): bool {
+		$parts = wp_parse_url( $url );
+		if ( empty( $parts['scheme'] ) || 'https' !== strtolower( $parts['scheme'] ) || empty( $parts['host'] ) ) {
+			return false;
+		}
+
+		$host = strtolower( $parts['host'] );
+		foreach ( $this->get_allowed_install_hosts() as $allowed ) {
+			if ( $host === $allowed || str_ends_with( $host, '.' . $allowed ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Hosts allowed as a zipfile install source.
+	 *
+	 * Derived from the credential-host map contributed by the active API
+	 * add-ons (which already covers public, enterprise, and self-hosted
+	 * domains), plus the site's own host. Still filterable for back-compat.
+	 *
+	 * @return array<int, string>
+	 */
+	private function get_allowed_install_hosts(): array {
+		$api   = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this );
+		$hosts = [];
+		foreach ( $api->get_credential_hosts() as $provider_hosts ) {
+			$hosts = array_merge( $hosts, (array) $provider_hosts );
+		}
+
+		$hosts[] = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+
+		/**
+		 * Filter the hosts allowed as a zipfile remote install source.
+		 *
+		 * @since 14.4.3
+		 *
+		 * @param array<int, string> $hosts Allowed hostnames.
+		 */
+		return array_values( array_unique( array_filter( array_map( 'strtolower', (array) apply_filters( 'gu_install_allowed_hosts', $hosts ) ) ) ) );
 	}
 }

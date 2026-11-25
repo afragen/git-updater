@@ -157,7 +157,6 @@ class Theme {
 		$themes    = array_merge( $themes, (array) $additions );
 		ksort( $themes );
 
-		$options_modified = false;
 		foreach ( (array) $themes as $slug => $theme ) {
 			$git_theme = [];
 			$header    = null;
@@ -182,16 +181,12 @@ class Theme {
 				$header = $this->parse_header_uri( $theme[ $key ] );
 			}
 
-			$header         = $this->parse_extra_headers( $header, $theme, $header_parts );
-			$current_branch = isset( $header['repo'] ) ? "current_branch_{$header['repo']}" : null;
+			$header = $this->parse_extra_headers( $header, $theme, $header_parts );
 
-			if ( isset( self::$options[ $current_branch ] )
-			&& ( 'master' === self::$options[ $current_branch ] && 'master' !== $header['primary_branch'] )
-			) {
-				unset( self::$options[ $current_branch ] );
-				$options_modified = true;
-			}
-			$branch = self::$options[ $current_branch ] ?? $header['primary_branch'];
+			// Resolve the active branch from the cache table, falling back to the header's primary branch.
+			$cache_branch  = $this->get_repo_cache( $header['repo'] ?? '', false, 'current_branch' );
+			$cache_primary = $this->get_repo_cache( $header['repo'] ?? '', false, 'primary_branch' );
+			$branch        = $cache_branch ?: $header['primary_branch'];
 
 			$git_theme['type']           = 'theme';
 			$git_theme['git']            = $repo_parts['git_server'];
@@ -236,11 +231,17 @@ class Theme {
 				}
 			}
 
-			$git_themes[ $git_theme['slug'] ] = (object) $git_theme;
-		}
+			// Only write when the resolved value differs from the cached one.
+			// Empty/missing cache row already seeded both columns above, so a
+			// `null !== $value` first-run still triggers both writes here.
+			if ( $cache_primary !== $header['primary_branch'] ) {
+				$this->set_repo_cache( 'primary_branch', $header['primary_branch'], $git_theme['slug'] );
+			}
+			if ( $cache_branch !== $git_theme['branch'] ) {
+				$this->set_repo_cache( 'current_branch', $git_theme['branch'], $git_theme['slug'] );
+			}
 
-		if ( $options_modified ) {
-			update_site_option( 'git_updater', self::$options );
+			$git_themes[ $git_theme['slug'] ] = (object) $git_theme;
 		}
 
 		return $git_themes;

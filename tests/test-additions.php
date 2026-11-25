@@ -42,6 +42,59 @@ class Test_Additions extends WP_UnitTestCase {
 		$this->assertTrue( $result );
 	}
 
+	public function test_get_saved_additions_returns_only_array_rows(): void {
+		$valid = [
+			'type' => 'github_plugin',
+			'slug' => 'owner/plugin.php',
+			'uri'  => 'https://github.com/owner/plugin',
+		];
+		update_site_option( 'git_updater_additions', [ $valid, 'garbage', null, 42 ] );
+
+		$rows = Additions::get_saved_additions();
+
+		$this->assertCount( 1, $rows );
+		$this->assertSame( $valid, $rows[0] );
+		$this->assertSame( [ 0 ], array_keys( $rows ) );
+	}
+
+	public function test_get_saved_additions_returns_empty_for_scalar_option(): void {
+		update_site_option( 'git_updater_additions', 'garbage' );
+
+		$this->assertSame( [], Additions::get_saved_additions() );
+	}
+
+	public function test_get_saved_additions_returns_empty_when_option_missing(): void {
+		$this->assertSame( [], Additions::get_saved_additions() );
+	}
+
+	public function test_get_addition_id_prefers_saved_id(): void {
+		$addition = [
+			'ID'   => 'saved-id',
+			'slug' => 'owner/plugin.php',
+		];
+
+		$this->assertSame( 'saved-id', Additions::get_addition_id( $addition ) );
+	}
+
+	public function test_get_addition_id_falls_back_to_slug_hash(): void {
+		$this->assertSame( md5( 'owner/plugin.php' ), Additions::get_addition_id( [ 'slug' => 'owner/plugin.php' ] ) );
+		$this->assertSame( md5( '' ), Additions::get_addition_id( [] ) );
+	}
+
+	public function test_get_repo_cache_slug_matches_parsed_header_uri(): void {
+		$cases = [
+			'https://github.com/owner/repo'      => 'repo',
+			'https://github.com/owner/repo.git'  => 'repo',
+			'https://github.com/owner/repo/?x=1' => 'repo',
+			'https://gitlab.com/group/sub/repo'  => 'repo',
+			''                                   => '',
+		];
+
+		foreach ( $cases as $uri => $expected ) {
+			$this->assertSame( $expected, Additions::get_repo_cache_slug( $uri ), $uri );
+		}
+	}
+
 	public function test_add_source_stamps_missing_source_with_home_url_hash(): void {
 		$config = [ [ 'slug' => 'my-plugin' ] ];
 
@@ -276,126 +329,6 @@ class Test_Additions_Add_Headers extends WP_UnitTestCase {
 		];
 		$this->additions->add_headers( $config, [], 'plugin' );
 		$this->assertArrayHasKey( 'git-updater/git-updater.php', $this->additions->add_to_git_updater );
-	}
-}
-
-// ---------------------------------------------------------------------------
-// Additions — deduplicate
-// ---------------------------------------------------------------------------
-
-/**
- * Class Test_Additions_Deduplicate
- */
-
-class Test_Additions_Deduplicate extends WP_UnitTestCase {
-
-	private Additions $additions;
-	private string    $plugin_cache_key;
-	private string    $theme_cache_key;
-
-	public function set_up(): void {
-		parent::set_up();
-		new Base();
-		$this->additions        = new Additions();
-		$this->plugin_cache_key = 'ghu-' . md5( 'git_updater_repository_add_plugin' );
-		$this->theme_cache_key  = 'ghu-' . md5( 'git_updater_repository_add_theme' );
-	}
-
-	public function tear_down(): void {
-		delete_site_option( $this->plugin_cache_key );
-		delete_site_option( $this->theme_cache_key );
-		delete_site_option( 'git_updater_collections' );
-		parent::tear_down();
-	}
-
-	public function test_deduplicate_returns_empty_array_immediately_for_empty_options(): void {
-		$this->assertSame( [], $this->additions->deduplicate( [] ) );
-	}
-
-	public function test_deduplicate_normalizes_release_asset_to_false_when_absent(): void {
-		$options = [ [ 'ID' => md5( 'my-plugin' ), 'source' => 'src1' ] ];
-		$result  = $this->additions->deduplicate( $options );
-		$this->assertFalse( $result[0]['release_asset'] );
-	}
-
-	public function test_deduplicate_normalizes_private_package_to_false_when_absent(): void {
-		$options = [ [ 'ID' => md5( 'my-plugin' ), 'source' => 'src1' ] ];
-		$result  = $this->additions->deduplicate( $options );
-		$this->assertFalse( $result[0]['private_package'] );
-	}
-
-	public function test_deduplicate_normalizes_release_asset_to_true_when_truthy(): void {
-		$options = [ [ 'ID' => md5( 'my-plugin' ), 'source' => 'src1', 'release_asset' => '1' ] ];
-		$result  = $this->additions->deduplicate( $options );
-		$this->assertTrue( $result[0]['release_asset'] );
-	}
-
-	public function test_deduplicate_removes_identical_duplicate_entries(): void {
-		$item    = [ 'ID' => md5( 'my-plugin' ), 'source' => 'src1' ];
-		$options = [ $item, $item ];
-		$result  = $this->additions->deduplicate( $options );
-		$this->assertCount( 1, $result );
-	}
-
-	public function test_deduplicate_removes_cached_package_when_same_id_different_source(): void {
-		$shared_id = md5( 'shared-plugin' );
-		$options   = [ [ 'ID' => $shared_id, 'source' => 'local-source' ] ];
-
-		update_site_option( $this->plugin_cache_key, [
-			'git_updater_repository_add_plugin' => [ [ 'ID' => $shared_id, 'source' => 'remote-source' ] ],
-			'timeout'                            => strtotime( '+12 hours' ),
-		] );
-
-		$result  = $this->additions->deduplicate( $options );
-		$sources = array_column( $result, 'source' );
-		$this->assertNotContains( 'remote-source', $sources );
-	}
-
-	public function test_deduplicate_keeps_cached_package_when_ids_differ(): void {
-		$options  = [ [ 'ID' => md5( 'plugin-a' ), 'source' => 'src1' ] ];
-		$packages = [ [ 'ID' => md5( 'plugin-b' ), 'source' => 'src2' ] ];
-
-		update_site_option( $this->plugin_cache_key, [
-			'git_updater_repository_add_plugin' => $packages,
-			'timeout'                            => strtotime( '+12 hours' ),
-		] );
-
-		$result = $this->additions->deduplicate( $options );
-		$ids    = array_column( $result, 'ID' );
-		$this->assertContains( md5( 'plugin-b' ), $ids );
-	}
-
-	public function test_deduplicate_merges_theme_cache_packages(): void {
-		$options  = [ [ 'ID' => md5( 'my-plugin' ), 'source' => 'src1' ] ];
-		$packages = [ [ 'ID' => md5( 'my-theme' ), 'source' => 'src2' ] ];
-
-		update_site_option( $this->theme_cache_key, [
-			'git_updater_repository_add_theme' => $packages,
-			'timeout'                          => strtotime( '+12 hours' ),
-		] );
-
-		$result = $this->additions->deduplicate( $options );
-		$ids    = array_column( $result, 'ID' );
-		$this->assertContains( md5( 'my-theme' ), $ids );
-	}
-
-	public function test_deduplicate_removes_option_whose_source_matches_a_collection(): void {
-		$collection_id = md5( 'collection-home' );
-		$options       = [ [ 'ID' => md5( 'remote-plugin' ), 'source' => $collection_id ] ];
-		update_site_option( 'git_updater_collections', [ [ 'ID' => $collection_id ] ] );
-
-		$result = $this->additions->deduplicate( $options );
-
-		$this->assertEmpty( $result );
-	}
-
-	public function test_deduplicate_keeps_option_whose_source_does_not_match_any_collection(): void {
-		$options = [ [ 'ID' => md5( 'local-plugin' ), 'source' => 'local-source' ] ];
-		update_site_option( 'git_updater_collections', [ [ 'ID' => 'other-collection' ] ] );
-
-		$result = $this->additions->deduplicate( $options );
-
-		$this->assertCount( 1, $result );
 	}
 }
 

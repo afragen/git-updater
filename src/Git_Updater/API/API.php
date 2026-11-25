@@ -186,8 +186,11 @@ class API {
 		$auth_header = $this->add_auth_header( [], $url );
 
 		// Use cached API failure data to avoid hammering the API.
-		$error_cache = $this->get_repo_cache( $this->type->slug . '_error' );
-		$cached      = isset( $error_cache['error_cache'] );
+		// The error cache has its own expiry in the `error_timeout` column.
+		$error_cache = $this->get_repo_cache( $this->type->slug, false, [ 'error_cache', 'error_timeout' ] );
+		$cached      = isset( $error_cache['error_cache'] )
+			&& ! empty( $error_cache['error_timeout'] )
+			&& time() < (int) $error_cache['error_timeout'];
 		$response    = false;
 		$code        = 0;
 		if ( ! $cached ) {
@@ -207,7 +210,7 @@ class API {
 
 			// Determine if we should attempt token refresh.
 			if ( $this->should_attempt_token_refresh( $code, $response ) ) {
-				list( $response, $code ) = $this->maybe_refresh_token_and_retry( $url, $response, $code );
+				[ $response, $code ] = $this->maybe_refresh_token_and_retry( $url, $response, $code );
 				if ( is_wp_error( $response ) ) {
 					Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
 
@@ -223,10 +226,17 @@ class API {
 					[
 						'timeout'   => $timeout,
 						'http_code' => $code,
+						'url'       => $url,
 					],
-					$this->type->slug . '_error',
+					$this->type->slug,
 					"+{$timeout} minutes"
 				);
+			} else {
+				// Clear stale error cache on success so the repo is no longer
+				// flagged as "waiting" by get_cached_error_flags().
+				$table = \Fragen\Git_Updater\DB\Repo_Cache_Table::instance();
+				$table->delete_entry( $this->type->slug, 'error_cache' );
+				$table->delete_entry( $this->type->slug, 'error_timeout' );
 			}
 
 			$response = [
@@ -426,8 +436,8 @@ class API {
 	 * @return bool|int|mixed|string|WP_Error
 	 */
 	protected function get_dot_org_data() {
-		$cache    = $this->get_repo_cache( $this->type->slug, false );
-		$response = $cache['dot_org'] ?? false;
+		$cache    = $this->get_repo_cache( $this->type->slug, false, 'dot_org' );
+		$response = $cache ?? false;
 
 		/**
 		 * Filter hook to set an API domain for updating.
@@ -456,8 +466,11 @@ class API {
 
 			$body             = json_decode( wp_remote_retrieve_body( $response ) );
 			$invalid_response = ! $body || ! property_exists( $body, 'name' ) || property_exists( $body, 'error' );
-			$added_to_mirror  = isset( $body->ac_origin ) && 'wp_org' === $body->ac_origin;
-			$response         = $invalid_response || ! $added_to_mirror ? 'not in dot org' : 'in dot org';
+			// ac_origin is a mirror-side origin marker only; the public
+			// api.wordpress.org JSON never sets it, so its absence must NOT
+			// disqualify a valid plugin/theme response.
+			$is_dot_org = ! isset( $body->ac_origin ) || 'wp_org' === $body->ac_origin;
+			$response   = $invalid_response || ! $is_dot_org ? 'not in dot org' : 'in dot org';
 
 			$this->set_repo_cache( 'dot_org', $response );
 		}
@@ -490,9 +503,7 @@ class API {
 			return empty( static::$options['branch_switch'] );
 		}
 
-		$refresh = get_site_transient( 'gu_refresh_cache' );
-
-		return ! $refresh && ! $response && ! $this->can_update_repo( $this->type );
+		return ! $response && ! $this->can_update_repo( $this->type );
 	}
 
 	/**
@@ -554,10 +565,6 @@ class API {
 	public function get_local_info( $repo, $file ) {
 		$response = null;
 
-		if ( get_site_transient( 'gu_refresh_cache' ) ) {
-			return $response;
-		}
-
 		if ( is_dir( $repo->local_path )
 			&& file_exists( $repo->local_path . $file )
 		) {
@@ -608,7 +615,7 @@ class API {
 	protected function add_meta_repo_object() {
 		$this->type->last_updated = $this->type->repo_meta['last_updated'];
 		$this->type->added        = $this->type->repo_meta['added'] ?? '';
-		$this->type->is_private   = $this->type->repo_meta['private'];
+		$this->type->is_private   = $this->type->repo_meta['private'] ?? false;
 	}
 
 	/**
@@ -638,9 +645,9 @@ class API {
 
 		// Normalize 'tested' version.
 		if ( ! empty( $readme['tested'] ) ) {
-			list( $version ) = explode( '-', get_bloginfo( 'version' ) );
-			$version_arr     = explode( '.', $version );
-			$tested_arr      = explode( '.', $readme['tested'] );
+			[ $version ] = explode( '-', get_bloginfo( 'version' ) );
+			$version_arr = explode( '.', $version );
+			$tested_arr  = explode( '.', $readme['tested'] );
 			if ( isset( $version_arr[2] ) ) {
 				$tested_arr[2] = $version_arr[2];
 			}
@@ -685,7 +692,7 @@ class API {
 		if ( ! $asset ) {
 			return false;
 		}
-		$cache = $this->get_repo_cache( $this->type->slug ?? false, false );
+		$cache = $this->get_repo_cache( $this->type->slug ?? false, false, [ 'timeout', 'release_asset', 'release_asset_redirect' ] ) ?: [];
 
 		// Unset release asset url if older than 5 min to account for AWS expiration.
 		if ( $aws && ( time() - strtotime( "-{$this->hours} hours", $cache['timeout'] ) ) >= 300 ) {
@@ -699,7 +706,7 @@ class API {
 		if ( isset( $_REQUEST['key'] ) ) {
 			$slug = isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : false;
 			$slug = ! $slug && isset( $_REQUEST['theme'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['theme'] ) ) : $slug;
-			$rest = $slug === $cache['repo'];
+			$rest = $slug === $this->type->slug;
 		}
 		$override = $override || isset( $_REQUEST['override'] );
 		// phpcs:enable
