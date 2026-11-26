@@ -153,6 +153,8 @@ class Test_Bootstrap_Rename_On_Activation extends WP_UnitTestCase {
 			WP_Filesystem();
 		}
 		new Base();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		Repo_Cache_Table::instance()->install_table();
 		Repo_Cache_Table::instance()->delete_repo( 'git-updater' );
 		$this->bootstrap = new Bootstrap();
 	}
@@ -237,22 +239,26 @@ class Test_Bootstrap_Cache_Table_Setup extends WP_UnitTestCase {
 	}
 
 	public function test_setup_installs_table_when_missing(): void {
-		$table = Repo_Cache_Table::instance()->table_name();
+		$table = Repo_Cache_Table::instance();
+		$name  = $table->table_name();
 
 		// Simulate a missing table: rewrite the SHOW TABLES target to a
-		// nonexistent name so get_var() returns null and install_table() runs.
+		// nonexistent name so the existence probe fails and the table is built.
 		// (The WP test transaction rolls back DDL, so we can't truly drop it.)
-		$missing = $table . '_missing';
-		add_filter( 'query', static function ( $sql ) use ( $table, $missing ) {
-			return str_replace( "LIKE '{$table}'", "LIKE '{$missing}'", $sql );
+		$missing = $name . '_missing';
+		add_filter( 'query', static function ( $sql ) use ( $name, $missing ) {
+			return str_replace( "LIKE '{$name}'", "LIKE '{$missing}'", $sql );
 		} );
 
 		$this->bootstrap->cache_table_setup();
 
 		remove_all_filters( 'query' );
 
-		// The install branch does NOT set the cache key (only the exists branch does).
-		$this->assertFalse( wp_cache_get( self::CACHE_KEY, self::CACHE_GROUP ) );
+		// The table was created and is now complete, so the healthy verdict is
+		// cached — the next request skips the schema probes instead of repeating them.
+		$this->assertTrue( $table->table_exists() );
+		$this->assertTrue( $table->schema_is_current() );
+		$this->assertNotFalse( wp_cache_get( self::CACHE_KEY, self::CACHE_GROUP ) );
 	}
 
 	public function test_setup_skips_query_when_cache_key_present(): void {
@@ -290,6 +296,49 @@ class Test_Bootstrap_Cache_Table_Setup extends WP_UnitTestCase {
 		$before_second = get_num_queries();
 		$this->bootstrap->cache_table_setup();
 		$this->assertSame( $before_second, get_num_queries() );
+	}
+
+	public function test_setup_reinstalls_when_existing_table_is_incomplete(): void {
+		global $wpdb;
+		$table = Repo_Cache_Table::instance();
+		$table->install_table();
+		$table->add_entry( 'survivor', 'readme', 'keep me' );
+
+		// An existing table missing a column — e.g. a schema bump that never
+		// applied — must not be trusted just because SHOW TABLES finds it.
+		$wpdb->query( "ALTER TABLE {$table->table_name()} DROP COLUMN `readme`" );
+		$this->assertFalse( $table->schema_is_current() );
+
+		$this->bootstrap->cache_table_setup();
+
+		$this->assertTrue( $table->schema_is_current(), 'cache_table_setup() must repair an incomplete table' );
+		// Repaired in place: the existing (now-cleared) row's other data and the
+		// table itself must survive, not be dropped and recreated.
+		$this->assertNotNull( $table->get_repo( 'survivor' ) );
+		// The repair caches the healthy verdict for the next request.
+		$this->assertNotFalse( wp_cache_get( self::CACHE_KEY, self::CACHE_GROUP ) );
+	}
+
+	public function test_setup_does_not_cache_when_repair_fails(): void {
+		global $wpdb;
+		$table = Repo_Cache_Table::instance();
+		$table->install_table();
+		$wpdb->query( "ALTER TABLE {$table->table_name()} DROP COLUMN `readme`" );
+
+		// DDL denied: neither ALTER nor the rebuild can fix it, so the repair
+		// reports failure. The cache key must stay unset so the next request
+		// retries instead of trusting a broken table for a day.
+		$fail_ddl = static function ( $sql ) {
+			return preg_match( '/^(ALTER TABLE|CREATE TEMPORARY TABLE|CREATE TABLE)/i', trim( $sql ) ) ? 'SELECT 1' : $sql;
+		};
+		add_filter( 'query', $fail_ddl );
+		try {
+			$this->bootstrap->cache_table_setup();
+		} finally {
+			remove_filter( 'query', $fail_ddl );
+		}
+
+		$this->assertFalse( wp_cache_get( self::CACHE_KEY, self::CACHE_GROUP ) );
 	}
 }
 

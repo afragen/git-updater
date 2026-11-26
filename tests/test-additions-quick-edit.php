@@ -16,6 +16,8 @@ class Test_Additions_Quick_Edit extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		Repo_Cache_Table::instance()->install_table();
 		Additions_Settings::$options_additions = [];
 		$this->settings = new Additions_Settings();
 	}

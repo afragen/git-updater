@@ -238,11 +238,96 @@ class Test_Cache_Table extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'error_timeout', $schema );
 	}
 
-	public function test_uninstall_table_runs_without_error_and_table_remains_usable(): void {
-		// The DROP may be a no-op in test environments that restrict DDL
-		// privileges, but the call must succeed and the table must remain
-		// in a usable state.
+	public function test_expected_columns_matches_installed_schema(): void {
+		// The expected-column check is parsed from schema(), so it must agree
+		// with the real table on a fresh install.
+		$this->assertNotEmpty( $this->table->expected_columns() );
+		$this->assertTrue( $this->table->schema_is_current() );
+	}
+
+	public function test_schema_is_current_reports_missing_column(): void {
+		global $wpdb;
+		$wpdb->query( "ALTER TABLE {$this->table->table_name()} DROP COLUMN `readme`" );
+
+		$this->assertFalse( $this->table->schema_is_current() );
+	}
+
+	public function test_modify_table_restores_a_missing_column(): void {
+		global $wpdb;
+		$table_name = $this->table->table_name();
+		$wpdb->query( "ALTER TABLE {$table_name} DROP COLUMN `readme`" );
+		$this->assertFalse( $this->table->schema_is_current() );
+
+		// dbDelta alone cannot re-add the column (it is defeated by
+		// `IF NOT EXISTS`), so modify_table() must verify and repair.
+		$this->assertTrue( $this->table->modify_table() );
+
+		$this->assertTrue( $this->table->schema_is_current(), 'modify_table() must restore every column declared in schema()' );
+		$this->assertTrue( $this->table->add_entry( 'after-repair', 'readme', 'body' ) );
+		$this->assertSame( 'body', $this->table->get_entry( 'after-repair', 'readme' ) );
+	}
+
+	public function test_modify_table_repairs_in_place_without_discarding_rows(): void {
+		global $wpdb;
+		$table_name = $this->table->table_name();
+		$this->table->add_entry( 'existing-repo', 'current_branch', 'develop' );
+
+		$wpdb->query( "ALTER TABLE {$table_name} DROP COLUMN `readme`" );
+		$this->assertTrue( $this->table->modify_table() );
+
+		// The repair must ADD the column, not drop-and-recreate the table: a
+		// user's existing cache rows survive a schema fix.
+		$this->assertSame( 'develop', $this->table->get_entry( 'existing-repo', 'current_branch' ) );
+	}
+
+	public function test_modify_table_installs_when_table_is_absent(): void {
 		$this->table->uninstall_table();
+		$this->assertFalse( $this->table->table_exists() );
+
+		$this->assertTrue( $this->table->modify_table() );
+
+		$this->assertTrue( $this->table->schema_is_current() );
+	}
+
+	public function test_modify_table_rebuilds_when_column_repair_fails(): void {
+		global $wpdb;
+		$wpdb->query( "ALTER TABLE {$this->table->table_name()} DROP COLUMN `readme`" );
+
+		// Simulate DDL denied for ALTER (a host may allow CREATE but not ALTER):
+		// the in-place repair cannot fix the table, so modify_table() must fall
+		// back to a clean rebuild rather than leaving the column missing.
+		$fail_alter = static function ( $sql ) {
+			return 0 === stripos( trim( $sql ), 'ALTER TABLE' ) ? 'SELECT 1' : $sql;
+		};
+		add_filter( 'query', $fail_alter );
+		try {
+			$result = $this->table->modify_table();
+		} finally {
+			remove_filter( 'query', $fail_alter );
+		}
+
+		$this->assertTrue( $result );
+		$this->assertTrue( $this->table->schema_is_current() );
+	}
+
+	public function test_install_table_creates_every_expected_column(): void {
+		global $wpdb;
+		$actual = array_map(
+			static fn( $row ) => strtolower( (string) $row->Field ),
+			(array) $wpdb->get_results( $wpdb->prepare( 'SHOW COLUMNS FROM %i', $this->table->table_name() ) )
+		);
+
+		$this->assertSame( $this->table->expected_columns(), $actual );
+	}
+
+	public function test_uninstall_table_drops_it_and_install_recreates_it(): void {
+		// uninstall_table() genuinely drops the table now that dbDelta is no
+		// longer blinded by `IF NOT EXISTS`, so it must be reinstalled before use.
+		$this->table->uninstall_table();
+		$this->assertFalse( $this->table->schema_is_current() );
+
+		$this->table->install_table();
+
 		$this->assertTrue( $this->table->add_entry( 'after-uninstall', 'tags', [ '1.0.0' ] ) );
 		$this->assertSame( [ '1.0.0' ], $this->table->get_entry( 'after-uninstall', 'tags' ) );
 	}
@@ -764,7 +849,7 @@ class Test_Cache_Table extends WP_UnitTestCase {
 	public function test_abstract_constructor_initializes_object_cache(): void {
 		$instance = new class() extends Abstract_Cache_Table {
 			protected function schema(): string {
-				return 'CREATE TABLE IF NOT EXISTS test_ct ()';
+				return 'CREATE TABLE test_ct ()';
 			}
 
 			public function add_entry( string $slug, string $column, $value, int $timeout = 0, int $error_timeout = 0 ): bool {

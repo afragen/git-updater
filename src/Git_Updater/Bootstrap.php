@@ -152,20 +152,18 @@ class Bootstrap {
 			return;
 		}
 
-		global $wpdb;
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-		$table_exists = $wpdb->get_var(
-			$wpdb->prepare(
-				'SHOW TABLES LIKE %s',
-				$cache_table->table_name()
-			)
-		);
-
-		if ( ! $table_exists ) {
-			$cache_table->install_table();
-		} else {
-			wp_cache_set( $cache_key, true, 'git-updater', DAY_IN_SECONDS );
+		// modify_table() creates the table when it is absent, adds any column a
+		// schema bump failed to apply (in place, so a live cache is never
+		// discarded), and is a no-op when the schema already matches. It checks
+		// existence itself, so a separate SHOW TABLES here would just duplicate
+		// that query on every request.
+		if ( ! $cache_table->modify_table() ) {
+			// Repair failed (e.g. DDL is not permitted); leave the cache key
+			// unset so the next request retries instead of caching the failure.
+			return;
 		}
+
+		wp_cache_set( $cache_key, true, 'git-updater', DAY_IN_SECONDS );
 	}
 
 	/**

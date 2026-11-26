@@ -396,6 +396,8 @@ class Test_Theme_Wp_Theme_Update_Row extends WP_UnitTestCase {
 		if ( ! function_exists( '_get_list_table' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/template.php';
 		}
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 	}
 
 	public function tear_down(): void {
@@ -992,6 +994,8 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 	}
 
 	public function tear_down(): void {

@@ -50,5 +50,17 @@ if ( ! defined( 'WP_LANG_DIR' ) ) {
 // Start up the WP testing environment.
 require "{$_tests_dir}/includes/bootstrap.php";
 
+// The plugin creates the network-wide cache table at `plugins_loaded`, before
+// any test transaction starts, so it is committed. WP_UnitTestCase's query
+// filters rewrite `CREATE TABLE`/`DROP TABLE` to their TEMPORARY forms, so a
+// committed table can never be dropped from within a test and its rows leak
+// between classes (a stale row made the `prune_stale` tests count rows they never
+// inserted). Remove it here so each class that needs the table gets its own
+// throwaway shadow from `install_table()` in `set_up()`.
+global $wpdb;
+if ( $wpdb instanceof wpdb ) {
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->base_prefix}git_updater_cache" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+}
+
 // Load base test case.
 require_once __DIR__ . '/class-gu-test-case.php';
