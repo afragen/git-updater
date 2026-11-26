@@ -239,16 +239,26 @@ class Test_Bootstrap_Cache_Table_Setup extends WP_UnitTestCase {
 	}
 
 	public function test_setup_installs_table_when_missing(): void {
-		$table = Repo_Cache_Table::instance();
-		$name  = $table->table_name();
-
-		// Simulate a missing table: rewrite the SHOW TABLES target to a
-		// nonexistent name so the existence probe fails and the table is built.
-		// (The WP test transaction rolls back DDL, so we can't truly drop it.)
+		$table   = Repo_Cache_Table::instance();
+		$name    = $table->table_name();
 		$missing = $name . '_missing';
-		add_filter( 'query', static function ( $sql ) use ( $name, $missing ) {
-			return str_replace( "LIKE '{$name}'", "LIKE '{$missing}'", $sql );
-		} );
+
+		// Simulate a missing table for the existence probe only: make the first
+		// SHOW COLUMNS fail so cache_table_setup() takes the install path. DDL is
+		// rolled back by the WP test transaction, so the table cannot simply be
+		// dropped here. Only the first probe is rewritten — later ones must see
+		// the table that gets created, or the repair would be re-run forever.
+		$rewrite_probe = true;
+		add_filter(
+			'query',
+			static function ( $sql ) use ( $name, $missing, &$rewrite_probe ) {
+				if ( $rewrite_probe && 0 === stripos( ltrim( $sql ), "SHOW COLUMNS FROM `{$name}`" ) ) {
+					$rewrite_probe = false;
+					return str_replace( $name, $missing, $sql );
+				}
+				return $sql;
+			}
+		);
 
 		$this->bootstrap->cache_table_setup();
 

@@ -129,10 +129,10 @@ abstract class Abstract_Cache_Table {
 		// Only enumerate slugs when the table exists; a fresh install (or test
 		// setUp) may call this before the table is created, so SELECT slug on a
 		// missing table must not error.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$slugs = $exists ? (array) $wpdb->get_col( $wpdb->prepare( 'SELECT slug FROM %i', $table ) ) : [];
+		$slugs = $this->table_exists()
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			? (array) $wpdb->get_col( $wpdb->prepare( 'SELECT slug FROM %i', $table ) )
+			: [];
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
 		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $table ) );
@@ -155,16 +155,21 @@ abstract class Abstract_Cache_Table {
 	 * @return bool True when the table now matches `schema()`.
 	 */
 	public function modify_table(): bool {
-		if ( ! $this->table_exists() ) {
+		// One column probe answers both "does the table exist?" and "which columns
+		// are missing?", so the healthy path costs a single SHOW COLUMNS.
+		$existing = $this->existing_columns();
+
+		if ( [] === $existing ) {
 			$this->install_table();
 			return $this->schema_is_current();
 		}
 
-		if ( $this->schema_is_current() ) {
+		$missing = array_diff( $this->expected_columns(), $existing );
+		if ( [] === $missing ) {
 			return true;
 		}
 
-		$this->add_missing_columns();
+		$this->add_missing_columns( $missing );
 		if ( $this->schema_is_current() ) {
 			return true;
 		}
@@ -177,40 +182,33 @@ abstract class Abstract_Cache_Table {
 	}
 
 	/**
-	 * Add any column declared in `schema()` that the table is missing.
+	 * Add the given columns to the table.
+	 *
+	 * @param string[] $missing Column names to add (must exist in `schema()`).
 	 *
 	 * @return void
 	 */
-	protected function add_missing_columns(): void {
+	protected function add_missing_columns( array $missing ): void {
 		global $wpdb;
 
 		$definitions = $this->column_definitions();
-		foreach ( $this->missing_columns() as $column ) {
+		foreach ( $missing as $column ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->query( $wpdb->prepare( "ALTER TABLE %i ADD COLUMN {$definitions[ $column ]}", $this->table_name() ) ); // phpcs:ignore
 		}
 	}
 
 	/**
-	 * Columns declared in `schema()` that the table does not have.
-	 *
-	 * @return string[]
-	 */
-	protected function missing_columns(): array {
-		return array_values( array_diff( $this->expected_columns(), $this->existing_columns() ) );
-	}
-
-	/**
 	 * Whether the table currently exists.
+	 *
+	 * Probes columns rather than `SHOW TABLES`: MySQL's `SHOW TABLES` lists only
+	 * non-TEMPORARY tables, so it cannot see the temporary table that
+	 * `WP_UnitTestCase` substitutes inside each test. `SHOW COLUMNS` sees both.
 	 *
 	 * @return bool
 	 */
 	public function table_exists(): bool {
-		global $wpdb;
-
-		// get_var() returns null (not false) when no row matches.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		return null !== $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $this->table_name() ) );
+		return [] !== $this->existing_columns();
 	}
 
 	/**

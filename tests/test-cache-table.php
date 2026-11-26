@@ -289,6 +289,28 @@ class Test_Cache_Table extends WP_UnitTestCase {
 		$this->assertTrue( $this->table->schema_is_current() );
 	}
 
+	public function test_table_exists_does_not_depend_on_show_tables(): void {
+		// MySQL 8.0's SHOW TABLES lists only non-TEMPORARY tables, and
+		// WP_UnitTestCase turns CREATE TABLE into CREATE TEMPORARY TABLE, so an
+		// existence probe built on SHOW TABLES reports "missing" on MySQL 8.0
+		// while working on MariaDB. Blind SHOW TABLES to reproduce MySQL 8.0's
+		// behaviour on any server.
+		$blind = static function ( $sql ) {
+			return 0 === stripos( ltrim( $sql ), 'SHOW TABLES' ) ? 'SELECT NULL' : $sql;
+		};
+		add_filter( 'query', $blind );
+		try {
+			$this->assertTrue( $this->table->table_exists(), 'table_exists() must see TEMPORARY tables' );
+			// Any path gated on existence (uninstall/repair) must therefore still
+			// treat the populated table as present.
+			$this->assertTrue( $this->table->modify_table() );
+		} finally {
+			remove_filter( 'query', $blind );
+		}
+
+		$this->assertTrue( $this->table->schema_is_current() );
+	}
+
 	public function test_modify_table_rebuilds_when_column_repair_fails(): void {
 		global $wpdb;
 		$wpdb->query( "ALTER TABLE {$this->table->table_name()} DROP COLUMN `readme`" );
