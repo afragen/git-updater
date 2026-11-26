@@ -16,12 +16,36 @@ class Test_Cache_Table extends WP_UnitTestCase {
 		parent::set_up();
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		$this->table = Repo_Cache_Table::instance();
-		$this->table->install_table();
+		// Start every test from a pristine real table. Several tests here mutate the
+		// shape (DROP COLUMN) or drop the table outright, and those changes would
+		// otherwise persist into the rest of the run.
+		$this->reset_table_for_real();
 	}
 
 	public function tear_down(): void {
-		$this->table->uninstall_table();
+		$this->reset_table_for_real();
 		parent::tear_down();
+	}
+
+	/**
+	 * Rebuild the table with real DDL.
+	 *
+	 * `WP_UnitTestCase` rewrites `CREATE TABLE`/`DROP TABLE` to their TEMPORARY
+	 * forms for the duration of a test, which cannot alter the committed table.
+	 * Remove those filters so this class works on the real table — its tests
+	 * uninstall it, drop columns and expect those changes to take effect. Each test
+	 * rebuilds from `schema()`, so nothing leaks between tests; the harness re-adds
+	 * its filters for every other class at the start of that class's test.
+	 */
+	private function reset_table_for_real(): void {
+		global $wpdb;
+
+		remove_filter( 'query', [ $this, '_create_temporary_tables' ] );
+		remove_filter( 'query', [ $this, '_drop_temporary_tables' ] );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "DROP TABLE IF EXISTS {$this->table->table_name()}" );
+		$this->table->install_table();
 	}
 
 	public function test_instance_returns_same_object(): void {

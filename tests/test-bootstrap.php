@@ -234,7 +234,11 @@ class Test_Bootstrap_Cache_Table_Setup extends WP_UnitTestCase {
 
 	public function tear_down(): void {
 		wp_cache_delete( self::CACHE_KEY, self::CACHE_GROUP );
-		Repo_Cache_Table::instance()->uninstall_table();
+		// Restore rather than leave it dropped: this class uninstalls the committed
+		// table created at `plugins_loaded` (outside any test transaction), so the
+		// DROP is permanent. Without this, every later class writes to a missing
+		// table and WordPress prints database errors into the test output.
+		Repo_Cache_Table::instance()->install_table();
 		parent::tear_down();
 	}
 
