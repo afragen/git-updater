@@ -72,6 +72,9 @@
 * fix PHP 8.5 deprecations — `Ignore::__construct()` keys `$repos` with a string-cast slug (so `Singleton::get_instance()`, which instantiates with an explicit `null` option, no longer triggers a null array offset) and the remote-install options key is cast to string
 * ci: add a PHP 8.5/8.6 deprecation check (`bin/check-php-deprecations.sh`) that fails on parse errors or compile-time `Deprecated:` output
 
+#### 14.5.0 / 2026-11-04
+* add `get_credential_hosts()` and `is_allowed_credential_host()` to `Basic_Auth_Loader` so the API add-ons' `develop` branches can guard remote installs without a fatal on `master`; honors the `gu_credential_hosts` filter each add-on registers
+* fix webhook updates using stale repo data — the REST update path now flushes and synchronously refetches that repository's cached API data (`Base::refresh_repo()`) before running the upgrader, replacing the fire-and-forget loopback request to `flush-repo-cache`; newly pushed tags/release assets are now resolved by the update, and the tracked `current_branch` is preserved unless the webhook switches branches (`override`)
 
 #### 14.4.2 / 2026-09-03
 * oauth: correctly detect a connector `wp_send_json_error()` response (wrapped under `data.error`) as a grant failure so an invalid/revoked refresh token triggers token deletion, the revoked-flag, and the admin email rather than an endless "No access token received" retry loop
