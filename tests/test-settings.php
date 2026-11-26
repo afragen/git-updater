@@ -1581,6 +1581,8 @@ class Test_Settings_Refresh_Caches extends GU_Test_Case {
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		$this->settings = new Settings();
 	}
 

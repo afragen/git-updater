@@ -62,12 +62,15 @@ final class GU_Upgrade {
 	}
 
 	/**
-	 * Install the repository cache table.
+	 * Install or repair the repository cache table.
 	 *
 	 * @return void
 	 */
 	private function install_cache_table() {
-		Repo_Cache_Table::instance()->install_table();
+		// Repair in place: a missing column is added without discarding the
+		// table, so an upgrade can never leave the schema incomplete or drop a
+		// user's cache.
+		Repo_Cache_Table::instance()->modify_table();
 	}
 
 	/**

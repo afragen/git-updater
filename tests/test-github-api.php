@@ -56,8 +56,10 @@ class Test_GitHub_API_Parse extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		$this->type = $this->make_type();
 		$this->api  = new GitHub_API( $this->type );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 	}
 
 	public function tear_down(): void {
@@ -785,8 +787,10 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		$this->type = $this->make_type();
 		$this->api  = new GitHub_API( $this->type );
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 	}
 
 	public function tear_down(): void {

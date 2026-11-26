@@ -101,15 +101,18 @@ abstract class Abstract_Cache_Table {
 	}
 
 	/**
-	 * Install (create if needed) the cache table.
+	 * (Re)create the cache table from scratch.
+	 *
+	 * Discards existing rows; prefer `modify_table()` for upgrades and repairs,
+	 * which adds missing columns without dropping the table.
 	 *
 	 * @return void
 	 */
 	public function install_table(): void {
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-		// Drop first to guarantee a clean schema: dbDelta is unreliable for
-		// adding new columns to an existing table, and production callers
-		// (GU_Upgrade::run) flush the cache immediately after install.
+		// Drop first so the table is built with the exact current schema rather
+		// than diffed onto whatever exists. Callers that must preserve rows use
+		// modify_table(), which adds missing columns instead.
 		$this->uninstall_table();
 		dbDelta( $this->schema() ); // @codeCoverageIgnore
 	}
@@ -126,10 +129,10 @@ abstract class Abstract_Cache_Table {
 		// Only enumerate slugs when the table exists; a fresh install (or test
 		// setUp) may call this before the table is created, so SELECT slug on a
 		// missing table must not error.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$slugs = $exists ? (array) $wpdb->get_col( $wpdb->prepare( 'SELECT slug FROM %i', $table ) ) : [];
+		$slugs = $this->table_exists()
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			? (array) $wpdb->get_col( $wpdb->prepare( 'SELECT slug FROM %i', $table ) )
+			: [];
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
 		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $table ) );
@@ -142,13 +145,153 @@ abstract class Abstract_Cache_Table {
 	}
 
 	/**
-	 * Modify the cache table (future schema bumps).
+	 * Modify the cache table so it matches `schema()`, repairing in place.
+	 *
+	 * Safe on a live table: an existing table only gains the columns it is
+	 * missing, so a failed upgrade can never discard a user's cache. A full
+	 * rebuild happens only when column-by-column repair cannot fix it (or when
+	 * no table exists yet).
+	 *
+	 * @return bool True when the table now matches `schema()`.
+	 */
+	public function modify_table(): bool {
+		// One column probe answers both "does the table exist?" and "which columns
+		// are missing?", so the healthy path costs a single SHOW COLUMNS.
+		$existing = $this->existing_columns();
+
+		if ( [] === $existing ) {
+			$this->install_table();
+			return $this->schema_is_current();
+		}
+
+		$missing = array_diff( $this->expected_columns(), $existing );
+		if ( [] === $missing ) {
+			return true;
+		}
+
+		$this->add_missing_columns( $missing );
+		if ( $this->schema_is_current() ) {
+			return true;
+		}
+
+		// Column-by-column repair could not fix it (e.g. the table is corrupt);
+		// rebuild as a last resort.
+		$this->install_table();
+
+		return $this->schema_is_current();
+	}
+
+	/**
+	 * Add the given columns to the table.
+	 *
+	 * @param string[] $missing Column names to add (must exist in `schema()`).
 	 *
 	 * @return void
 	 */
-	public function modify_table(): void {
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-		dbDelta( $this->schema() ); // @codeCoverageIgnore
+	protected function add_missing_columns( array $missing ): void {
+		global $wpdb;
+
+		$definitions = $this->column_definitions();
+		foreach ( $missing as $column ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->query( $wpdb->prepare( "ALTER TABLE %i ADD COLUMN {$definitions[ $column ]}", $this->table_name() ) ); // phpcs:ignore
+		}
+	}
+
+	/**
+	 * Whether the table currently exists.
+	 *
+	 * Probes columns rather than `SHOW TABLES`: MySQL's `SHOW TABLES` lists only
+	 * non-TEMPORARY tables, so it cannot see the temporary table that
+	 * `WP_UnitTestCase` substitutes inside each test. `SHOW COLUMNS` sees both.
+	 *
+	 * @return bool
+	 */
+	public function table_exists(): bool {
+		return [] !== $this->existing_columns();
+	}
+
+	/**
+	 * Whether every column declared in `schema()` is present in the table.
+	 *
+	 * @return bool
+	 */
+	public function schema_is_current(): bool {
+		$existing = $this->existing_columns();
+		if ( [] === $existing ) {
+			return false;
+		}
+
+		return [] === array_diff( $this->expected_columns(), $existing );
+	}
+
+	/**
+	 * Column names currently present in the table.
+	 *
+	 * @return string[]
+	 */
+	protected function existing_columns(): array {
+		global $wpdb;
+
+		$suppress = $wpdb->suppress_errors();
+		// A missing table is a normal state (fresh install), not an error worth
+		// printing — `dbDelta()` probes the same way.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = $wpdb->get_results( $wpdb->prepare( 'SHOW COLUMNS FROM %i', $this->table_name() ) );
+		$wpdb->suppress_errors( $suppress );
+
+		return array_map( static fn( $row ) => strtolower( (string) $row->Field ), (array) $rows );
+	}
+
+	/**
+	 * Column names declared in `schema()`.
+	 *
+	 * @return string[]
+	 */
+	public function expected_columns(): array {
+		return array_keys( $this->column_definitions() );
+	}
+
+	/**
+	 * Column definitions (name => `name type ...`) declared in `schema()`.
+	 *
+	 * Parsed from the CREATE TABLE statement (the single source of truth) using
+	 * the same field/key split `dbDelta` applies, so a column can never be added
+	 * to the schema without being verified.
+	 *
+	 * @return array<string, string>
+	 */
+	protected function column_definitions(): array {
+		$definitions = [];
+		$in_columns  = false;
+
+		foreach ( explode( "\n", $this->schema() ) as $line ) {
+			$line = trim( $line );
+
+			if ( ! $in_columns ) {
+				// The column list opens on the `CREATE TABLE ... (` line.
+				if ( str_contains( $line, '(' ) ) {
+					$in_columns = true;
+				}
+				continue;
+			}
+
+			// The column list closes on the line that starts with `)` (the
+			// `$charset ENGINE=...` suffix sits on that same line).
+			if ( str_starts_with( $line, ')' ) ) {
+				break;
+			}
+
+			$line = trim( $line, " \t\n\r\0\x0B," );
+			if ( '' === $line || preg_match( '/^(PRIMARY|UNIQUE|KEY|INDEX|FULLTEXT|SPATIAL)\b/i', $line ) ) {
+				continue;
+			}
+			if ( preg_match( '/^([^ ]*)/', $line, $field ) ) {
+				$definitions[ strtolower( trim( $field[1], '`' ) ) ] = $line;
+			}
+		}
+
+		return $definitions;
 	}
 
 	/**

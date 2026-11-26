@@ -157,6 +157,8 @@ class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 	}
 
 	public function tear_down(): void {
@@ -1172,6 +1174,8 @@ class Test_Plugin_Get_Remote_Plugin_Meta extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		// The plugin bootstrap hooks Base::load() to 'init', which calls get_meta_plugins()
 		// and may schedule gu_get_remote_plugin for the fixture plugin. Bust the cache
 		// before clearing so the unschedule reads fresh state from DB even when the object

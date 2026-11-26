@@ -69,7 +69,22 @@ jobs:
       - name: PHPUnit tests (single site)
         run: |
           echo "define('WP_TESTS_PHPUNIT_POLYFILLS_PATH', '$HOME/.composer/vendor/yoast/phpunit-polyfills');" >> /tmp/wordpress-tests-lib/wp-tests-config.php
-          phpunit --config=phpunit.xml
+          phpunit --config=phpunit.xml 2>&1 | tee /tmp/phpunit.log
+          exit "${PIPESTATUS[0]}"
+
+      # A rendered database error is printed as HTML in the suite output, which
+      # PHPUnit does not treat as a failure — a whole run can pass while these
+      # scroll past. They usually mean a test reached a table that does not exist,
+      # so fail the job instead of letting them accumulate unnoticed.
+      - name: Fail on leaked database errors
+        if: always()
+        run: |
+          count=$(grep -c 'id="error"' /tmp/phpunit.log || true)
+          if [ "${count:-0}" -gt 0 ]; then
+            echo "::error::${count} database error(s) leaked into the test output"
+            grep -o 'WordPress database error:</strong> \[[^]]*\]' /tmp/phpunit.log | sort | uniq -c | head
+            exit 1
+          fi
 
       - name: PHPUnit tests (multisite)
         run: |

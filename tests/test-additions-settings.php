@@ -370,6 +370,23 @@ class Test_Additions_Settings_Save_Settings extends WP_UnitTestCase {
 		$this->assertFalse( get_site_option( 'git_updater_additions' ) );
 	}
 
+	public function test_save_settings_handles_missing_or_non_array_additions_payload(): void {
+		$_POST['_wpnonce'] = wp_create_nonce( 'git_updater_additions-options' );
+
+		// The correct option_page with no usable payload must not fatal or save:
+		// both a missing key and a non-array value fall back to an empty array.
+		$this->settings->save_settings( [ 'option_page' => 'git_updater_additions' ] );
+		$this->assertFalse( get_site_option( 'git_updater_additions' ) );
+
+		$this->settings->save_settings(
+			[
+				'option_page'           => 'git_updater_additions',
+				'git_updater_additions' => 'not-an-array',
+			]
+		);
+		$this->assertFalse( get_site_option( 'git_updater_additions' ) );
+	}
+
 	public function test_save_settings_skips_save_when_slug_empty(): void {
 		$_POST['_wpnonce'] = wp_create_nonce( 'git_updater_additions-options' );
 		$post_data         = $this->make_post_data(

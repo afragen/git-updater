@@ -9,6 +9,16 @@ Initialize the class.
 
 `new \WP_Dismiss_Notice();` in your project.
 
+### Capability
+
+By default only users with the `manage_options` capability can dismiss a notice. Use the `wp_dismiss_notice_capability` filter to change the capability for notices that are shown to other roles.
+
+```php
+add_filter( 'wp_dismiss_notice_capability', function () {
+	return 'edit_posts';
+} );
+```
+
 ### Admin notice format.
 
 You must add `data-dismissible='<admin notice identifier>-<timeout>'` to the admin notice div class. `<timeout>` values are from one day '1' to 'forever'. Default timeout is 14 days. The `<admin notice identifier>` should be some unique value based upon the admin notice that you wish to dismiss.

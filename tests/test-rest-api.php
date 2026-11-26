@@ -1612,6 +1612,8 @@ class Test_REST_API_Reset_Branch extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 
 		// reset_branch() calls log_exit() → wp_send_json_success/error() → wp_die().
 		// In AJAX context wp_die() uses wp_die_ajax_handler; override it to throw
@@ -1897,6 +1899,8 @@ class Test_REST_API_Download_Proxy extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		\Fragen\Git_Updater\DB\Repo_Cache_Table::instance()->install_table();
 		// build_download_metadata()/proxy_download() look up the slug in the
 		// Plugin/Theme singletons. Tests in earlier classes reset the Plugin
 		// singleton via GU_Test_Case::tear_down(); re-instantiate it here so

@@ -20,11 +20,29 @@ class WP_Dismiss_Notice {
 	}
 
 	/**
+	 * Get the capability required to dismiss an admin notice.
+	 *
+	 * @return string Capability name.
+	 */
+	public static function get_capability() {
+		/**
+		 * Filter the capability required to dismiss an admin notice.
+		 *
+		 * @param string $capability Capability name. Default 'manage_options'.
+		 */
+		return apply_filters( 'wp_dismiss_notice_capability', 'manage_options' );
+	}
+
+	/**
 	 * Enqueue javascript and variables.
 	 */
 	public static function load_script() {
 
 		if ( is_customize_preview() ) {
+			return;
+		}
+
+		if ( ! current_user_can( self::get_capability() ) ) {
 			return;
 		}
 
@@ -74,6 +92,12 @@ class WP_Dismiss_Notice {
 	 * Uses check_ajax_referer to verify nonce.
 	 */
 	public static function dismiss_admin_notice() {
+		check_ajax_referer( 'wp-dismiss-notice', 'nonce' );
+
+		if ( ! current_user_can( self::get_capability() ) ) {
+			wp_die();
+		}
+
 		$option_name        = isset( $_POST['option_name'] ) ? sanitize_text_field( wp_unslash( $_POST['option_name'] ) ) : false;
 		$dismissible_length = isset( $_POST['dismissible_length'] ) ? sanitize_text_field( wp_unslash( $_POST['dismissible_length'] ) ) : 14;
 
@@ -83,7 +107,6 @@ class WP_Dismiss_Notice {
 			$dismissible_length = strtotime( absint( $dismissible_length ) . ' days' );
 		}
 
-		check_ajax_referer( 'wp-dismiss-notice', 'nonce' );
 		self::set_admin_notice_cache( $option_name, $dismissible_length );
 		wp_die();
 	}
